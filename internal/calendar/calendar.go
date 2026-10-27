@@ -38,10 +38,10 @@ const daySecs = 86400
 // new one. Dates are written to the minute, so they wobble by up to a minute.
 const jump = 600
 
-// maxClock is the largest reading taken as the game clock: over 31 years of
+// MaxClock is the largest reading taken as the game clock: over 31 years of
 // game time. Larger values are real times (Unix seconds), which SkyrimNet
 // stores in game_time for some world knowledge.
-const maxClock = 1e9
+const MaxClock = 1e9
 
 // usualStart is the date at clock 0 in a new game, assumed when no event
 // says otherwise.
@@ -121,7 +121,7 @@ func (c *Calendar) add(t float64, text string) {
 // Date is the date the game showed at clock t. A clock of 0 or less, or one
 // too large to be the game clock, means there's no in-game date.
 func (c *Calendar) Date(t float64) (GameDate, bool) {
-	if !(t > 0 && t <= maxClock) {
+	if !(t > 0 && t <= MaxClock) {
 		return GameDate{}, false
 	}
 	st := c.stretches[0]

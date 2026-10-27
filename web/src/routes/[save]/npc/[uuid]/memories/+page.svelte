@@ -5,4 +5,9 @@
 	let { data }: PageProps = $props();
 </script>
 
-<MemoryList memories={data.memories} />
+<MemoryList
+	save={data.playthrough.id}
+	uuid={data.character.uuid}
+	memories={data.memories}
+	readOnly={data.status.gameRunning}
+/>

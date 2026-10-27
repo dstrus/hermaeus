@@ -22,7 +22,7 @@ function token(): string {
 // request sends a request to the API. Pass the fetch a load function
 // receives when there is one, so SvelteKit can track the request.
 export async function request<T>(
-	method: 'GET' | 'PUT' | 'POST' | 'DELETE',
+	method: 'GET' | 'PUT' | 'POST' | 'PATCH' | 'DELETE',
 	path: string,
 	body?: unknown,
 	fetchFn: Fetch = fetch

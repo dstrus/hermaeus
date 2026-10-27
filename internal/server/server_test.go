@@ -20,15 +20,16 @@ const token = "test-token"
 
 type harness struct {
 	*testenv.Folder
-	t     *testing.T
-	prefs *prefs.Prefs
-	srv   *Server
+	t       *testing.T
+	running bool
+	prefs   *prefs.Prefs
+	srv     *Server
 }
 
 func newHarness(t *testing.T) *harness {
 	t.Helper()
 	h := &harness{Folder: testenv.NewFolder(t), t: t}
-	st := store.New("", func() bool { return false })
+	st := store.New("", func() bool { return h.running })
 	if _, err := st.SetDir(h.Dir); err != nil {
 		t.Fatal(err)
 	}
@@ -182,6 +183,24 @@ func TestPinsOverHTTP(t *testing.T) {
 	}
 	h.call(400, "PUT", base+"/0", "", nil)
 	h.call(404, "GET", "/api/playthroughs/gone/pins", "", nil)
+}
+
+// TestEditsOverHTTP checks the memory routes are mounted, that requests
+// are decoded strictly, and that saves go through the store's safety checks.
+func TestEditsOverHTTP(t *testing.T) {
+	h := newHarness(t)
+	h.Exec(`insert into memories (id, actor_uuid, content, tags) values (1, ` + testenv.SeranaUUID + `, 'Met the Dragonborn.', '[]')`)
+	path := "/api/playthroughs/" + testenv.SaveID + "/memories/1"
+	var r struct{ Reembed bool }
+	h.call(200, "PATCH", path, `{"content": "Met the Dragonborn at Dimhollow."}`, &r)
+	if !r.Reembed {
+		t.Error("changing the text didn't clear the search vector")
+	}
+	h.call(400, "PATCH", path, `{"actor_uuid": "1"}`, nil) // not a field that can be changed
+	h.call(400, "PATCH", path, `{"importance": "high"}`, nil)
+	h.call(400, "PATCH", "/api/playthroughs/"+testenv.SaveID+"/memories/one", `{}`, nil)
+	h.running = true
+	h.call(409, "PATCH", path, `{"emotion": "wary"}`, nil)
 }
 
 func TestListenSkipsBusyPorts(t *testing.T) {

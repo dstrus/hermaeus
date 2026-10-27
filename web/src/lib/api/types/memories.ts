@@ -21,6 +21,75 @@ export interface DiaryResponse {
 }
 
 //////////
+// source: diary_edit.go
+
+/**
+ * DiaryChanges are the fields to change in a diary entry. Fields left out
+ * stay as they are.
+ */
+export interface DiaryChanges {
+  content?: string;
+  location?: string;
+  emotion?: string;
+  importance?: number /* float64 */; // 0 to 1
+  tags?: string[];
+}
+export interface DeleteDiary {
+  ids: number /* int64 */[];
+  keepMemory: boolean; // leave each entry's memory copy, so the character still remembers it
+}
+export interface DeletedDiary {
+  n: number /* int64 */;
+  memories: number /* int64 */; // memory copies deleted with them
+}
+
+//////////
+// source: edit.go
+
+/**
+ * MemoryChanges are the fields to change in a memory. Fields left out stay
+ * as they are.
+ */
+export interface MemoryChanges {
+  type?: string;
+  title?: string; // "" removes it
+  content?: string;
+  location?: string;
+  emotion?: string;
+  importance?: number /* float64 */; // 0 to 1
+  tags?: string[];
+  active?: boolean;
+  alwaysInject?: boolean;
+  condition?: string;
+}
+/**
+ * SaveResult says what a save did besides the change asked for.
+ */
+export interface SaveResult {
+  id: number /* int64 */;
+  reembed: boolean; // the text changed, so SkyrimNet rebuilds the search vector when it starts
+  diary?: number /* int64 */; // the diary entry also updated to match a memory
+  memory?: number /* int64 */; // the memory also updated to match a diary entry
+  warning?: string; // something the user should know about what wasn't done
+}
+/**
+ * IDs lists the memories or diary entries an action applies to.
+ */
+export interface IDs {
+  ids: number /* int64 */[];
+}
+export interface BulkChanges {
+  ids: number /* int64 */[];
+  changes: MemoryChanges;
+}
+/**
+ * Count says how many things an action changed.
+ */
+export interface Count {
+  n: number /* int64 */;
+}
+
+//////////
 // source: memories.go
 /*
 Package memories is about what SkyrimNet remembers for each character:
