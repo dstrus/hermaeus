@@ -1,6 +1,9 @@
+// Package characters is about the player and the NPCs SkyrimNet knows:
+// who they are, and which of them the player has pinned.
 package characters
 
 import (
+	"hermaeus/internal/identity"
 	"sort"
 	"strings"
 
@@ -48,7 +51,7 @@ type CharactersResponse struct {
 // their retired ones counted.
 func List(db store.DB) (CharactersResponse, error) {
 	out := CharactersResponse{Characters: []Character{}}
-	a, err := loadAliases(db)
+	a, err := identity.Load(db)
 	if err != nil {
 		return out, err
 	}
@@ -77,14 +80,14 @@ func List(db store.DB) (CharactersResponse, error) {
 		return out, err
 	}
 	for _, n := range counts {
-		c, err := get(a.resolve(n.uuid))
+		c, err := get(a.Resolve(n.uuid))
 		if err != nil {
 			return out, err
 		}
 		c.Memories += n.memories
 		c.Diaries += n.diaries
-		if a.resolve(n.uuid) != n.uuid {
-			c.FormerNames = append(c.FormerNames, a.oldName[n.uuid])
+		if name, retired := a.Retired(n.uuid); retired {
+			c.FormerNames = append(c.FormerNames, name)
 		}
 	}
 	for _, p := range pins.Pins {
@@ -162,7 +165,7 @@ func countStored(db store.DB) ([]stored, error) {
 // if it knows nothing.
 func lookup(db store.DB, uuid string) (*Character, error) {
 	c := &Character{UUID: uuid, FormerNames: []string{}}
-	n, _ := parseUUID(uuid)
+	n, _ := identity.ParseUUID(uuid)
 	var name, bio, mod *string
 	var formID int64
 	err := db.QueryRow(`select actor_name, bio_template_name, mod_file, form_id from uuid_mappings where uuid = ?`, n).Scan(&name, &bio, &mod, &formID)

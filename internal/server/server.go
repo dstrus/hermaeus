@@ -16,6 +16,7 @@ import (
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/characters"
 	"hermaeus/internal/httpapi"
+	"hermaeus/internal/memories"
 	"hermaeus/internal/prefs"
 	"hermaeus/internal/store"
 )
@@ -64,6 +65,7 @@ func (s *Server) routes() {
 	}))
 
 	characters.Routes(m, s.Store)
+	memories.Routes(m, s.Store)
 
 	m.Handle("/api/", httpapi.JSON(func(r *http.Request, _ httpapi.None) (httpapi.None, error) {
 		return httpapi.None{}, apperr.New(apperr.NotFound, "Unknown endpoint: %s %s", r.Method, r.URL.Path)

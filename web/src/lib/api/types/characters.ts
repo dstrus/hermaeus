@@ -2,6 +2,10 @@
 
 //////////
 // source: list.go
+/*
+Package characters is about the player and the NPCs SkyrimNet knows:
+who they are, and which of them the player has pinned.
+*/
 
 /**
  * Group is where a character is listed. The player comes first, then pinned

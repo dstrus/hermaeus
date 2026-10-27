@@ -63,13 +63,6 @@ type stretch struct {
 	epoch float64
 }
 
-// GameDate is a moment on the game clock, as the game shows it.
-type GameDate struct {
-	Clock float64 `json:"clock"` // seconds on the game clock
-	Day   string  `json:"day"`   // "Sundas, 17th of Last Seed, 4E 201"
-	Time  string  `json:"time"`  // "7:54 AM"
-}
-
 // Load reads the dates SkyrimNet wrote for events, in clock order, into
 // stretches. Without any, it assumes the usual start: clock 0 is midnight on
 // Sundas, 17th of Last Seed, 4E 201.

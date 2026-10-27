@@ -2,6 +2,7 @@ package characters
 
 import (
 	"hermaeus/internal/apperr"
+	"hermaeus/internal/identity"
 	"hermaeus/internal/store"
 )
 
@@ -30,7 +31,7 @@ func Pins(db store.DB) (PinsResponse, error) {
 	if ok, err := store.HasTable(db, "npc_group_members"); err != nil || !ok {
 		return out, err // older databases don't have groups
 	}
-	a, err := loadAliases(db)
+	a, err := identity.Load(db)
 	if err != nil {
 		return out, err
 	}
@@ -47,7 +48,7 @@ func Pins(db store.DB) (PinsResponse, error) {
 			rows.Close()
 			return out, err
 		}
-		if u = a.resolve(u); !seen[u] {
+		if u = a.Resolve(u); !seen[u] {
 			seen[u] = true
 			uuids = append(uuids, u)
 		}
@@ -69,7 +70,7 @@ func Pins(db store.DB) (PinsResponse, error) {
 // SetPinned pins or unpins an NPC. Unpinning also removes pins left on
 // their retired identities.
 func SetPinned(tx store.DB, uuid string, pinned bool) error {
-	actor, ok := parseUUID(uuid)
+	actor, ok := identity.ParseUUID(uuid)
 	if !ok {
 		return apperr.New(apperr.Invalid, "Invalid NPC %q", uuid)
 	}
@@ -102,12 +103,12 @@ func SetPinned(tx store.DB, uuid string, pinned bool) error {
 		_, err = tx.Exec(`insert or ignore into npc_group_members (group_id, actor_uuid) values (?, ?)`, group, actor)
 		return err
 	}
-	a, err := loadAliases(tx)
+	a, err := identity.Load(tx)
 	if err != nil {
 		return err
 	}
-	for _, u := range a.all(uuid) {
-		n, _ := parseUUID(u)
+	for _, u := range a.All(uuid) {
+		n, _ := identity.ParseUUID(u)
 		if _, err := tx.Exec(`delete from npc_group_members where group_id = ? and actor_uuid = ?`, group, n); err != nil {
 			return err
 		}

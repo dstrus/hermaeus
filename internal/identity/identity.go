@@ -1,6 +1,12 @@
-// Package characters is about the player and the NPCs SkyrimNet knows:
-// who they are, and which of them the player has pinned.
-package characters
+// Package identity resolves actor UUIDs to the people they belong to.
+//
+// When SkyrimNet re-identifies an NPC, for example when "Mysterious Woman"
+// turns out to be Serana, it gives them a new actor UUID and records the old
+// one in identity_aliases. Data stored under the old UUID stays there, and
+// SkyrimNet doesn't appear to recall it any more. So Hermaeus treats each
+// such NPC as one person, under their newest UUID, and flags what's still
+// stored under a retired one.
+package identity
 
 import (
 	"strconv"
@@ -8,18 +14,13 @@ import (
 	"hermaeus/internal/store"
 )
 
-// When SkyrimNet re-identifies an NPC, for example when "Mysterious Woman"
-// turns out to be Serana, it gives them a new actor UUID and records the old
-// one in identity_aliases. Data stored under the old UUID stays there, so
-// Hermaeus treats each such NPC as one person, under their newest UUID.
-
-type aliases struct {
+type Aliases struct {
 	to      map[string]string // retired UUID -> newest UUID, following chains
 	oldName map[string]string // retired UUID -> the name it had
 }
 
-func loadAliases(db store.DB) (*aliases, error) {
-	a := &aliases{to: map[string]string{}, oldName: map[string]string{}}
+func Load(db store.DB) (*Aliases, error) {
+	a := &Aliases{to: map[string]string{}, oldName: map[string]string{}}
 	if ok, err := store.HasTable(db, "identity_aliases"); err != nil || !ok {
 		return a, err // older databases don't have the table
 	}
@@ -55,15 +56,25 @@ func loadAliases(db store.DB) (*aliases, error) {
 	return a, nil
 }
 
-func (a *aliases) resolve(uuid string) string {
+// Resolve returns the newest UUID of the person uuid belongs to.
+func (a *Aliases) Resolve(uuid string) string {
 	if to, ok := a.to[uuid]; ok {
 		return to
 	}
 	return uuid
 }
 
-// all returns uuid and every retired UUID that now resolves to it.
-func (a *aliases) all(uuid string) []string {
+// Retired reports whether uuid is a retired identity, and the name it had
+// ("" if SkyrimNet didn't record one).
+func (a *Aliases) Retired(uuid string) (name string, retired bool) {
+	if _, ok := a.to[uuid]; !ok {
+		return "", false
+	}
+	return a.oldName[uuid], true
+}
+
+// All returns uuid and every retired UUID that now resolves to it, uuid first.
+func (a *Aliases) All(uuid string) []string {
 	out := []string{uuid}
 	for old, to := range a.to {
 		if to == uuid {
@@ -73,9 +84,9 @@ func (a *aliases) all(uuid string) []string {
 	return out
 }
 
-// parseUUID reads an actor UUID. They're sent as strings, because they're
+// ParseUUID reads an actor UUID. They're sent as strings, because they're
 // larger than JavaScript can hold exactly as numbers.
-func parseUUID(s string) (int64, bool) {
+func ParseUUID(s string) (int64, bool) {
 	n, err := strconv.ParseInt(s, 10, 64)
 	return n, err == nil
 }

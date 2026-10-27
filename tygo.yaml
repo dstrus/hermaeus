@@ -27,3 +27,15 @@ packages:
     output_path: web/src/lib/api/types/characters.ts
     fallback_type: unknown
     enum_style: union
+  - path: hermaeus/internal/calendar
+    include_files: [gamedate.go]
+    output_path: web/src/lib/api/types/calendar.ts
+    fallback_type: unknown
+  - path: hermaeus/internal/memories
+    include_files: [memories.go, diary.go]
+    output_path: web/src/lib/api/types/memories.ts
+    fallback_type: unknown
+    frontmatter: |
+      import type * as calendar from './calendar.ts';
+    type_mappings:
+      calendar.GameDate: calendar.GameDate
