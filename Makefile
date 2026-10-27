@@ -31,13 +31,14 @@ test: web/node_modules types
 # page as the frontend changes. Hermaeus gets its own port, so a copy already
 # running on the usual 8765 doesn't take its place. Both get the same token,
 # since the page Vite serves can't carry it. Pass a SkyrimNet folder with DIR=…
+# If either one stops (including Hermaeus failing to start), both do.
 DEV_PORT ?= 8775
 
 dev: web/node_modules
 	@test -d web/build || npm --prefix web run build
 	@export HERMAEUS_DEV_TOKEN=$$(openssl rand -hex 16) HERMAEUS_DEV_PORT=$(DEV_PORT); \
 	trap 'kill 0' EXIT; \
-	go run ./cmd/hermaeus -no-browser -port $(DEV_PORT) $(if $(DIR),-dir "$(DIR)") & \
+	(go run ./cmd/hermaeus -no-browser -port $(DEV_PORT) $(if $(DIR),-dir "$(DIR)"); kill 0) & \
 	npm --prefix web run dev
 
 clean:
