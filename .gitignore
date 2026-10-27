@@ -11,6 +11,8 @@ coverage.*
 /vendor/
 
 # Frontend
+/web/build/
+/web/.svelte-kit/
 node_modules/
 .vite/
 *.tsbuildinfo

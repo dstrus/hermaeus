@@ -1,0 +1,257 @@
+package server
+
+import (
+	"encoding/json"
+	"fmt"
+	"net"
+	"net/http"
+	"net/http/httptest"
+	"path/filepath"
+	"strings"
+	"testing"
+	"testing/fstest"
+
+	"hermaeus/internal/prefs"
+	"hermaeus/internal/store"
+	"hermaeus/internal/testenv"
+)
+
+const token = "test-token"
+
+type harness struct {
+	*testenv.Folder
+	t     *testing.T
+	prefs *prefs.Prefs
+	srv   *Server
+}
+
+func newHarness(t *testing.T) *harness {
+	t.Helper()
+	h := &harness{Folder: testenv.NewFolder(t), t: t}
+	st := store.New("", func() bool { return false })
+	if _, err := st.SetDir(h.Dir); err != nil {
+		t.Fatal(err)
+	}
+	h.prefs = prefs.Load(filepath.Join(t.TempDir(), "settings.json"))
+	files := fstest.MapFS{
+		"index.html":            {Data: []byte(`<meta name="hermaeus-token" content="__HERMAEUS_TOKEN__">`)},
+		"_app/immutable/app.js": {Data: []byte(`console.log("hi")`)},
+		"favicon.svg":           {Data: []byte(`<svg/>`)},
+	}
+	srv, err := New(Options{Store: st, Prefs: h.prefs, Token: token, Port: 8765, Files: files, Version: "test"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	h.srv = srv
+	return h
+}
+
+// request sends a request as the page would, from 127.0.0.1 with the token.
+func (h *harness) request(method, path, body string) *httptest.ResponseRecorder {
+	h.t.Helper()
+	r := httptest.NewRequest(method, path, strings.NewReader(body))
+	r.Host = "127.0.0.1:8765"
+	r.Header.Set(TokenHeader, token)
+	w := httptest.NewRecorder()
+	h.srv.ServeHTTP(w, r)
+	return w
+}
+
+// call makes an API request and decodes the reply into out, failing unless
+// the status matches.
+func (h *harness) call(wantStatus int, method, path, body string, out any) {
+	h.t.Helper()
+	w := h.request(method, path, body)
+	if w.Code != wantStatus {
+		h.t.Fatalf("%s %s: status %d, want %d: %s", method, path, w.Code, wantStatus, w.Body)
+	}
+	if out != nil {
+		if err := json.Unmarshal(w.Body.Bytes(), out); err != nil {
+			h.t.Fatalf("%s %s: %v", method, path, err)
+		}
+	}
+}
+
+func TestRequestsNeedLocalHostAndToken(t *testing.T) {
+	h := newHarness(t)
+	send := func(host, tok string) int {
+		r := httptest.NewRequest("GET", "/api/status", nil)
+		r.Host = host
+		if tok != "" {
+			r.Header.Set(TokenHeader, tok)
+		}
+		w := httptest.NewRecorder()
+		h.srv.ServeHTTP(w, r)
+		return w.Code
+	}
+	for _, c := range []struct {
+		host, token string
+		want        int
+	}{
+		{"evil.example:8765", token, 403},
+		{"127.0.0.1:9999", token, 403},
+		{"127.0.0.1:8765", "", 403},
+		{"127.0.0.1:8765", "wrong", 403},
+		{"127.0.0.1:8765", token, 200},
+		{"localhost:8765", token, 200},
+	} {
+		if got := send(c.host, c.token); got != c.want {
+			t.Errorf("host %s, token %q: status %d, want %d", c.host, c.token, got, c.want)
+		}
+	}
+
+	// A second copy of Hermaeus asks without a token.
+	r := httptest.NewRequest("GET", "/api/ping", nil)
+	r.Host = "127.0.0.1:8765"
+	w := httptest.NewRecorder()
+	h.srv.ServeHTTP(w, r)
+	if w.Code != 200 || !strings.Contains(w.Body.String(), AppID) {
+		t.Errorf("ping: %d %s", w.Code, w.Body)
+	}
+}
+
+func TestDeepLinksServeThePage(t *testing.T) {
+	h := newHarness(t)
+	for _, path := range []string{"/", "/index.html", "/1791685096394-371331/npc/561512192010693353/memories/687", "/_app/missing.js"} {
+		w := h.request("GET", path, "")
+		if !strings.Contains(w.Body.String(), `content="`+token+`"`) {
+			t.Errorf("GET %s didn't serve the page with its token: %q", path, w.Body)
+		}
+		if w.Header().Get("Cache-Control") != "no-store" {
+			t.Errorf("GET %s: the page may be cached", path)
+		}
+	}
+	if w := h.request("POST", "/test/npc/1", ""); w.Code != 404 {
+		t.Errorf("POST to an app path: status %d, want 404", w.Code)
+	}
+	if w := h.request("GET", "/api/nothing", ""); w.Code != 404 || strings.Contains(w.Body.String(), token) {
+		t.Errorf("unknown API path served %d %q", w.Code, w.Body)
+	}
+}
+
+func TestFrontendFiles(t *testing.T) {
+	h := newHarness(t)
+	w := h.request("GET", "/_app/immutable/app.js", "")
+	if w.Code != 200 || w.Body.String() != `console.log("hi")` || !strings.Contains(w.Header().Get("Cache-Control"), "immutable") {
+		t.Errorf("app.js: %d %q, cache %q", w.Code, w.Body, w.Header().Get("Cache-Control"))
+	}
+	if w := h.request("GET", "/favicon.svg", ""); w.Code != 200 || w.Header().Get("Cache-Control") != "" {
+		t.Errorf("favicon: %d, cache %q", w.Code, w.Header().Get("Cache-Control"))
+	}
+}
+
+func TestStatusAndFolder(t *testing.T) {
+	h := newHarness(t)
+	var st Status
+	h.call(200, "GET", "/api/status", "", &st)
+	if st.SkyrimNetDir != h.Dir || len(st.Playthroughs) != 1 || st.Playthroughs[0].ID != testenv.SaveID || st.Version != "test" {
+		t.Errorf("status = %+v", st)
+	}
+
+	h.call(400, "PUT", "/api/folder", `{"path": "`+filepath.ToSlash(t.TempDir())+`"}`, nil)
+	h.call(400, "PUT", "/api/folder", `{"folder": "typo"}`, nil)
+	other := testenv.NewFolder(t)
+	body, _ := json.Marshal(FolderRequest{Path: filepath.Join(other.Dir, "data")})
+	h.call(200, "PUT", "/api/folder", string(body), &st)
+	if st.SkyrimNetDir != other.Dir {
+		t.Errorf("folder = %q, want %q", st.SkyrimNetDir, other.Dir)
+	}
+	if got := h.prefs.Get().SkyrimNetDir; got != other.Dir {
+		t.Errorf("remembered folder = %q", got)
+	}
+}
+
+// TestPinsOverHTTP checks the characters routes are mounted, and that actor
+// UUIDs too large for JavaScript numbers travel as exact strings.
+func TestPinsOverHTTP(t *testing.T) {
+	h := newHarness(t)
+	base := "/api/playthroughs/" + testenv.SaveID + "/pins"
+	var pins struct {
+		Pins []struct{ UUID, Name string }
+	}
+	h.call(200, "PUT", base+"/"+testenv.SeranaUUID, "", &pins)
+	if len(pins.Pins) != 1 || pins.Pins[0].UUID != testenv.SeranaUUID || pins.Pins[0].Name != "Serana" {
+		t.Errorf("after pinning: %+v", pins)
+	}
+	if w := h.request("GET", base, ""); !strings.Contains(w.Body.String(), `"uuid":"`+testenv.SeranaUUID+`"`) {
+		t.Errorf("UUID isn't sent as a string: %s", w.Body)
+	}
+	h.call(200, "DELETE", base+"/"+testenv.SeranaUUID, "", &pins)
+	if len(pins.Pins) != 0 {
+		t.Errorf("after unpinning: %+v", pins)
+	}
+	h.call(400, "PUT", base+"/0", "", nil)
+	h.call(404, "GET", "/api/playthroughs/gone/pins", "", nil)
+}
+
+func TestListenSkipsBusyPorts(t *testing.T) {
+	other := busyPort(t, http.NotFoundHandler()) // some other web server
+	closed := busyPort(t, nil)                   // something that isn't HTTP at all
+	want := freePort(t)
+	ln, running, err := Listen([]int{other, closed, want})
+	if err != nil || running != "" {
+		t.Fatalf("Listen = %v, %q, %v", ln, running, err)
+	}
+	defer ln.Close()
+	if got := ln.Addr().(*net.TCPAddr).Port; got != want {
+		t.Errorf("listening on %d, want %d", got, want)
+	}
+}
+
+func TestListenFallsBackToAnyPort(t *testing.T) {
+	busy := []int{busyPort(t, nil), busyPort(t, nil)}
+	ln, running, err := Listen(busy)
+	if err != nil || running != "" {
+		t.Fatalf("Listen = %v, %q, %v", ln, running, err)
+	}
+	defer ln.Close()
+	if got := ln.Addr().(*net.TCPAddr).Port; got == busy[0] || got == busy[1] {
+		t.Errorf("listening on busy port %d", got)
+	}
+}
+
+func TestListenFindsRunningCopy(t *testing.T) {
+	h := newHarness(t)
+	// The running copy's host check needs its real port, so serve through a
+	// handler that rewrites the Host header the test client sends.
+	port := busyPort(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.Host = "127.0.0.1:8765"
+		h.srv.ServeHTTP(w, r)
+	}))
+	ln, running, err := Listen([]int{busyPort(t, nil), port})
+	if ln != nil {
+		ln.Close()
+		t.Fatal("started a second copy")
+	}
+	if want := fmt.Sprintf("http://127.0.0.1:%d/", port); err != nil || running != want {
+		t.Errorf("Listen = %q, %v; want %q", running, err, want)
+	}
+}
+
+// busyPort occupies a port until the test ends, serving handler on it, or
+// accepting connections and saying nothing if handler is nil.
+func busyPort(t *testing.T, handler http.Handler) int {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if handler != nil {
+		srv := &http.Server{Handler: handler}
+		go srv.Serve(ln)
+		t.Cleanup(func() { srv.Close() })
+	} else {
+		t.Cleanup(func() { ln.Close() })
+	}
+	return ln.Addr().(*net.TCPAddr).Port
+}
+
+func freePort(t *testing.T) int {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ln.Close()
+	return ln.Addr().(*net.TCPAddr).Port
+}
