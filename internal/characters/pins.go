@@ -57,17 +57,11 @@ func Pins(db store.DB) (PinsResponse, error) {
 		return out, err
 	}
 	for _, u := range uuids {
-		var name *string
-		n, _ := parseUUID(u)
-		err := db.QueryRow(`select actor_name from uuid_mappings where uuid = ?`, n).Scan(&name)
-		if err != nil && !store.IsNoRows(err) {
+		c, err := lookup(db, u)
+		if err != nil {
 			return out, err
 		}
-		npc := PinnedNPC{UUID: u}
-		if name != nil {
-			npc.Name = *name
-		}
-		out.Pins = append(out.Pins, npc)
+		out.Pins = append(out.Pins, PinnedNPC{UUID: u, Name: c.Name})
 	}
 	return out, nil
 }

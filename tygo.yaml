@@ -23,6 +23,7 @@ packages:
     type_mappings:
       store.Playthrough: store.Playthrough
   - path: hermaeus/internal/characters
-    include_files: [pins.go]
+    include_files: [pins.go, list.go]
     output_path: web/src/lib/api/types/characters.ts
     fallback_type: unknown
+    enum_style: union

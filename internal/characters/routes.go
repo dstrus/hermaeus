@@ -8,6 +8,9 @@ import (
 )
 
 func Routes(mux *http.ServeMux, st *store.Store) {
+	mux.Handle("GET /api/playthroughs/{save}/characters", httpapi.JSON(func(r *http.Request, _ httpapi.None) (CharactersResponse, error) {
+		return store.Read(st, r.PathValue("save"), List)
+	}))
 	mux.Handle("GET /api/playthroughs/{save}/pins", httpapi.JSON(func(r *http.Request, _ httpapi.None) (PinsResponse, error) {
 		return store.Read(st, r.PathValue("save"), Pins)
 	}))

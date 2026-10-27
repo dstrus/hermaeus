@@ -14,27 +14,29 @@ import (
 // Hermaeus treats each such NPC as one person, under their newest UUID.
 
 type aliases struct {
-	to map[string]string // retired UUID -> newest UUID, following chains
+	to      map[string]string // retired UUID -> newest UUID, following chains
+	oldName map[string]string // retired UUID -> the name it had
 }
 
 func loadAliases(db store.DB) (*aliases, error) {
-	a := &aliases{to: map[string]string{}}
+	a := &aliases{to: map[string]string{}, oldName: map[string]string{}}
 	if ok, err := store.HasTable(db, "identity_aliases"); err != nil || !ok {
 		return a, err // older databases don't have the table
 	}
-	rows, err := db.Query(`select cast(old_uuid as text), cast(new_uuid as text) from identity_aliases order by id`)
+	rows, err := db.Query(`select cast(old_uuid as text), cast(new_uuid as text), coalesce(old_name, '') from identity_aliases order by id`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	next := map[string]string{}
 	for rows.Next() {
-		var old, nu string
-		if err := rows.Scan(&old, &nu); err != nil {
+		var old, nu, name string
+		if err := rows.Scan(&old, &nu, &name); err != nil {
 			return nil, err
 		}
 		if old != nu {
 			next[old] = nu
+			a.oldName[old] = name
 		}
 	}
 	if err := rows.Err(); err != nil {
