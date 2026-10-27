@@ -38,7 +38,7 @@ SkyrimNet's own dashboard requires the game to be running. Hermaeus works with t
 
 ## Capabilities and Constraints
 
-Candidate capabilities: characters (overview, stats, memories, diaries, events, re-identified NPCs, pins, Universal Translator speech patterns), save-specific bios with history and restore, events, knowledge and knowledge packs, OmniSight screenshot descriptions, bard songs with playback, quick toggles, settings compared with defaults, models and an OpenRouter model picker, AI provider keys, prompts, plugins (enable and reorder), YAML content records with forms, and overrides.
+Capabilities: characters (overview, stats, memories, diaries, events, re-identified NPCs, pins, Universal Translator speech patterns), save-specific bios with history and restore, events, knowledge and knowledge packs, OmniSight screenshot descriptions, bard songs with playback, quick toggles, settings compared with defaults, models and an OpenRouter model picker, AI provider keys, prompts, plugins (enable and reorder), YAML content records with forms, and overrides.
 
 Constraints:
 
@@ -46,9 +46,7 @@ Constraints:
 - **Unofficial:** not part of SkyrimNet and not affiliated with or endorsed by Fateless.Ai. It ships none of SkyrimNet's files and reads only the player's own installation.
 - **Safety:** writes are refused while Skyrim is running (browsing still works); backups precede changes; secrets (API keys, tokens, passwords) are never sent to the browser, only whether they are set; requests carry a per-session token.
 
-Open decisions:
-
-- **Scope:** how much of the candidate capabilities Hermaeus covers, and what it adds beyond them. Not decided yet.
+Scope: all of these. The author has used each of them offline in a real playthrough. Characters and bios are used broadly; settings and content (prompts, plugins, records) only in a small subset. The full feature set stays, but the interface should lead with the commonly used parts and keep the rest reachable without cluttering everyday use. Which settings and content make up that common subset isn't recorded yet; settle it before designing those areas.
 
 Terminology: SkyrimNet, playthrough/save ID, NPC, memory, diary entry, event, save bio vs default bio, dynamic vs baseline bio, knowledge pack, dashboard edits, layer, override, plugin, trigger, action, filter, voice effect, quick toggle.
 
