@@ -64,13 +64,7 @@ func loadPerson(db store.DB, uuid string) (*person, error) {
 }
 
 // in is the SQL list and arguments for "actor_uuid in (…)".
-func (p *person) in() (string, []any) {
-	args := make([]any, len(p.uuids))
-	for i, u := range p.uuids {
-		args[i], _ = identity.ParseUUID(u)
-	}
-	return strings.TrimSuffix(strings.Repeat("?,", len(args)), ","), args
-}
+func (p *person) in() (string, []any) { return identity.SQLIn(p.uuids) }
 
 // retired is the name of the retired identity a record is stored under, or
 // nil if it's under the character's current one.
@@ -106,7 +100,8 @@ func ForCharacter(db store.DB, uuid string) (MemoriesResponse, error) {
 		var m Memory
 		var actor string
 		var tags sql.NullString
-		var gameTime, written sql.NullFloat64
+		var gameTime sql.NullFloat64
+		var written any
 		if err := rows.Scan(&m.ID, &actor, &m.Type, &m.Title, &m.Content, &m.Location, &m.Emotion, &m.Importance, &tags,
 			&m.Active, &m.AlwaysInject, &m.Condition, &gameTime, &written, &m.Embedded); err != nil {
 			return out, err
@@ -115,7 +110,7 @@ func ForCharacter(db store.DB, uuid string) (MemoriesResponse, error) {
 		m.DiaryEntry = diaryEntryOf(m.Tags)
 		m.Retired = p.retired(actor)
 		m.Date = p.calendar.DatePtr(gameTime.Float64)
-		m.Written = unixMillis(written)
+		m.Written = store.Timestamp(written)
 		out.Memories = append(out.Memories, m)
 	}
 	return out, rows.Err()
@@ -146,19 +141,4 @@ func diaryEntryOf(tags []string) *int64 {
 		}
 	}
 	return nil
-}
-
-// unixMillis reads when SkyrimNet wrote something. It stores Unix seconds,
-// though the column's default would be a Julian day, so both are read.
-func unixMillis(v sql.NullFloat64) *int64 {
-	var ms int64
-	switch t := v.Float64; {
-	case !v.Valid || t <= 0:
-		return nil
-	case t > 1e8: // Unix seconds
-		ms = int64(t * 1000)
-	default: // a Julian day
-		ms = int64((t - 2440587.5) * 86400000)
-	}
-	return &ms
 }

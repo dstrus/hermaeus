@@ -48,7 +48,8 @@ make types              # regenerate the API's TypeScript types after changing t
 | `internal/gamecheck/` | Whether Skyrim is running, per OS |
 | `internal/identity/` | NPCs SkyrimNet re-identified: resolving retired UUIDs to current ones |
 | `internal/calendar/` | The game clock as the game's own dates, following mods that move the date |
-| `internal/characters/` | The player and NPCs: who's listed, and pins |
+| `internal/characters/` | The player and NPCs: who's listed, pins, each one's overview and stats |
+| `internal/events/` | What SkyrimNet records happening in the game |
 | `internal/memories/` | Each character's memories and diary entries |
 | `internal/testenv/` | SkyrimNet folders with a real schema, for tests |
 | `web/src/routes/` | The app's pages; each folder is a URL |

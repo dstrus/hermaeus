@@ -8,6 +8,7 @@
 	let base = $derived(`/${encodeURIComponent(data.playthrough.id)}/npc/${c.uuid}`);
 	let tabs = $derived([
 		{ href: base, label: 'Overview' },
+		{ href: `${base}/stats`, label: 'Stats' },
 		{ href: `${base}/memories`, label: `Memories (${c.memories})` },
 		{ href: `${base}/diary`, label: `Diary (${c.diaries})` }
 	]);

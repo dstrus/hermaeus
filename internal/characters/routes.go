@@ -14,6 +14,12 @@ func Routes(mux *http.ServeMux, st *store.Store) {
 	mux.Handle("GET /api/playthroughs/{save}/pins", httpapi.JSON(func(r *http.Request, _ httpapi.None) (PinsResponse, error) {
 		return store.Read(st, r.PathValue("save"), Pins)
 	}))
+	mux.Handle("GET /api/playthroughs/{save}/characters/{uuid}/overview", httpapi.JSON(func(r *http.Request, _ httpapi.None) (Overview, error) {
+		return store.Read(st, r.PathValue("save"), func(db store.DB) (Overview, error) { return OverviewOf(db, r.PathValue("uuid")) })
+	}))
+	mux.Handle("GET /api/playthroughs/{save}/characters/{uuid}/stats", httpapi.JSON(func(r *http.Request, _ httpapi.None) (Stats, error) {
+		return store.Read(st, r.PathValue("save"), func(db store.DB) (Stats, error) { return StatsOf(db, r.PathValue("uuid")) })
+	}))
 	mux.Handle("PUT /api/playthroughs/{save}/pins/{uuid}", setPinned(st, true))
 	mux.Handle("DELETE /api/playthroughs/{save}/pins/{uuid}", setPinned(st, false))
 }

@@ -10,6 +10,7 @@ package identity
 
 import (
 	"strconv"
+	"strings"
 
 	"hermaeus/internal/store"
 )
@@ -89,4 +90,14 @@ func (a *Aliases) All(uuid string) []string {
 func ParseUUID(s string) (int64, bool) {
 	n, err := strconv.ParseInt(s, 10, 64)
 	return n, err == nil
+}
+
+// SQLIn returns placeholders and arguments for "actor_uuid in (…)" over
+// uuids, such as All returns.
+func SQLIn(uuids []string) (string, []any) {
+	args := make([]any, len(uuids))
+	for i, u := range uuids {
+		args[i], _ = ParseUUID(u)
+	}
+	return strings.TrimSuffix(strings.Repeat("?,", len(args)), ","), args
 }

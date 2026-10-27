@@ -1,7 +1,6 @@
 package memories
 
 import (
-	"database/sql"
 	"fmt"
 	"testing"
 
@@ -137,15 +136,4 @@ func show[T any](p *T) string {
 		return "<nil>"
 	}
 	return fmt.Sprint(*p)
-}
-
-func TestUnixMillis(t *testing.T) {
-	for v, want := range map[float64]string{0: "<nil>", -1: "<nil>", 1791685096: "1791685096000", 2440587.5: "0"} {
-		if got := show(unixMillis(sql.NullFloat64{Float64: v, Valid: true})); got != want {
-			t.Errorf("unixMillis(%v) = %s, want %s", v, got, want)
-		}
-	}
-	if unixMillis(sql.NullFloat64{}) != nil {
-		t.Error("NULL has a time")
-	}
 }

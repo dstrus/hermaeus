@@ -47,7 +47,8 @@ func Diary(db store.DB, uuid string) (DiaryResponse, error) {
 		var d DiaryEntry
 		var actor string
 		var tags sql.NullString
-		var date, written sql.NullFloat64
+		var date sql.NullFloat64
+		var written any
 		var memory sql.NullInt64
 		if err := rows.Scan(&d.ID, &actor, &d.Content, &d.Location, &d.Emotion, &d.Importance, &tags, &date, &written, &memory); err != nil {
 			return out, err
@@ -58,7 +59,7 @@ func Diary(db store.DB, uuid string) (DiaryResponse, error) {
 		}
 		d.Retired = p.retired(actor)
 		d.Date = p.calendar.DatePtr(date.Float64)
-		d.Written = unixMillis(written)
+		d.Written = store.Timestamp(written)
 		out.Entries = append(out.Entries, d)
 	}
 	return out, rows.Err()
