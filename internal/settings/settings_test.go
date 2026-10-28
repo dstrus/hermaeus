@@ -115,6 +115,9 @@ func TestComparedWithDefaults(t *testing.T) {
 	if files["Memory"]["extra"].HasDefault {
 		t.Error("extra has a default")
 	}
+	if d := files["Memory"]["scoring.semantic"].Default; d != 0.45 {
+		t.Errorf("scoring.semantic default sent as %v, want 0.45 (single-precision rounding undone)", d)
+	}
 
 	secret := func(file, key string) bool {
 		v, _ := files[file][key].Value.(SecretValue)

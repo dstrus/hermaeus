@@ -244,6 +244,9 @@ func read(configDir, name string, defs defaults) (FileValues, error) {
 		def, hasDef := fileDefs[key]
 		st.HasDefault = hasDef
 		st.Changed = hasDef && st.Set && !sameValue(value, def)
+		// SkyrimNet records defaults at single precision (0.699999988 for
+		// 0.7); the page gets the number the player would write.
+		def = cleanDefault(def)
 		mask := func(v any) any {
 			if st.Secret {
 				return SecretValue{Secret: true, Filled: v != nil && fmt.Sprint(v) != ""}
