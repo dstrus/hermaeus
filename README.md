@@ -53,6 +53,7 @@ make types              # regenerate the API's TypeScript types after changing t
 | `internal/memories/` | Each character's memories and diary entries |
 | `internal/bios/` | Each character's bios: the save's dynamic and baseline bios, the default, history, and restore |
 | `internal/layers/` | SkyrimNet's content layers: dashboard edits, enabled plugins in order, shipped defaults; the MO2 mod folder |
+| `internal/settings/` | SkyrimNet's settings files compared with their defaults, changed in place, and the quick toggles |
 | `internal/templates/` | Checking the markup of SkyrimNet's prompt and bio templates |
 | `internal/textfile/` | How files SkyrimNet reads are changed: atomic writes, backups, line endings kept |
 | `internal/testenv/` | SkyrimNet folders with a real schema, for tests |

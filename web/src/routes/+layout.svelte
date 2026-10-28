@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { live, watchGame } from '#lib/api/live.svelte.ts';
 	import FolderForm from '#lib/folders/FolderForm.svelte';
+	import ToggleBar from '#lib/settings/ToggleBar.svelte';
 	import HintBar from '#lib/ui/HintBar.svelte';
 	import ThemeSwitch from '#lib/ui/ThemeSwitch.svelte';
 	import { handleKey } from '#lib/ui/shortcuts.svelte.ts';
@@ -58,6 +59,9 @@
 			</span>
 			<ThemeSwitch theme={data.status.theme} />
 		</div>
+		{#if data.status.skyrimNetDir}
+			<div class="quick"><ToggleBar toggles={data.toggles} error={data.togglesError} /></div>
+		{/if}
 	</header>
 
 	{#if !data.status.skyrimNetDir}
@@ -98,10 +102,18 @@
 	.top {
 		grid-column: 1 / -1;
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-6);
 		padding: var(--space-3) var(--space-6);
 		border-bottom: 1px solid var(--rule);
+	}
+	/* The quick toggles take a line of their own under the name and state. */
+	.quick {
+		flex-basis: 100%;
+		margin-top: calc(-1 * var(--space-3));
+		padding-top: var(--space-2);
+		border-top: 1px solid var(--rule);
 	}
 	.name {
 		font-size: var(--step-2);
