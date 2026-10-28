@@ -6,6 +6,7 @@
 	import type { FileValues } from '#lib/api/types/settings.ts';
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
+	import PinButton from '#lib/ui/PinButton.svelte';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -83,12 +84,13 @@
 					<SortHeader label="File" key="group" bind:sort />
 					<SortHeader label="Settings" key="settings" bind:sort descendingFirst align="end" />
 					<SortHeader label="Changed" key="changed" bind:sort descendingFirst align="end" />
+					<th class="pin" aria-label="Pinned"></th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each shown as f, i (f.file.name)}
 					{#if grouped && (i === 0 || f.file.pinned !== shown[i - 1]!.file.pinned)}
-						<tr class="group"><th colspan="4" class="caps" scope="rowgroup">{groupName(f)}</th></tr>
+						<tr class="group"><th colspan="5" class="caps" scope="rowgroup">{groupName(f)}</th></tr>
 					{/if}
 					<tr aria-selected={selection.is(f)} onclick={() => selection.select(f)} ondblclick={() => goto(href(f))}>
 						<td class="mark">{#if selection.is(f)}<Diamond />{/if}</td>
@@ -98,6 +100,7 @@
 						</td>
 						<td class="n">{count(f.file.settings)}</td>
 						<td class="n">{#if f.file.changed}<span class="changed">{count(f.file.changed)}</span>{/if}</td>
+						<td class="pin"><PinButton pinned={f.file.pinned} name={fileLabel(f.file)} onclick={() => togglePin(f)} /></td>
 					</tr>
 				{/each}
 			</tbody>
@@ -242,6 +245,15 @@
 		border-bottom: 1px solid var(--rule-strong);
 	}
 	tbody .mark {
+		border-bottom-color: var(--rule);
+	}
+	.pin {
+		width: 2.5rem;
+		padding: 0 var(--space-2);
+		text-align: right;
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	tbody .pin {
 		border-bottom-color: var(--rule);
 	}
 	.name a {

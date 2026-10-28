@@ -4,6 +4,7 @@
 	import { live } from '#lib/api/live.svelte.ts';
 	import { BusyMemories, type Character, type Group } from '#lib/api/types/characters.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
+	import PinButton from '#lib/ui/PinButton.svelte';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -83,12 +84,13 @@
 				<SortHeader label="Memories" key="memories" bind:sort descendingFirst align="end" />
 				<SortHeader label="Diary" key="diaries" bind:sort descendingFirst align="end" />
 				<th class="plugin caps">Plugin</th>
+				<th class="pin" aria-label="Pinned"></th>
 			</tr>
 		</thead>
 		<tbody>
 			{#each shown as c, i (c.uuid)}
 				{#if grouped && c.group !== shown[i - 1]?.group}
-					<tr class="group"><th colspan="5" class="caps" scope="rowgroup">{groupNames[c.group]}</th></tr>
+					<tr class="group"><th colspan="6" class="caps" scope="rowgroup">{groupNames[c.group]}</th></tr>
 				{/if}
 				<tr aria-selected={selection.is(c)} onclick={() => selection.select(c)} ondblclick={() => goto(href(c))}>
 					<td class="mark">{#if selection.is(c)}<Diamond />{/if}</td>
@@ -99,6 +101,11 @@
 					<td class="n">{count(c.memories)}</td>
 					<td class="n">{c.diaries ? count(c.diaries) : ''}</td>
 					<td class="plugin muted">{c.modFile}</td>
+					<td class="pin">
+						{#if c.group !== 'player'}
+							<PinButton pinned={c.pinned} name={characterName(c)} disabled={live.gameRunning} onclick={() => togglePin(c)} />
+						{/if}
+					</td>
 				</tr>
 			{/each}
 		</tbody>
@@ -235,6 +242,15 @@
 		width: 1.5rem;
 		padding-right: 0;
 		border-bottom: 1px solid var(--rule-strong);
+	}
+	.pin {
+		width: 2.5rem;
+		padding: 0 var(--space-2);
+		text-align: right;
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	tbody .pin {
+		border-bottom-color: var(--rule);
 	}
 	tbody .mark {
 		border-bottom-color: var(--rule);
