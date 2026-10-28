@@ -35,7 +35,23 @@
 	let readOnly = $derived(live.gameRunning);
 
 	// The group a row sits under: its file, or the part of its key before the first dot.
-	const groupOf = (r: Row) => (byFile ? fileLabel(r.file) : r.setting.key.includes('.') ? r.setting.key.slice(0, r.setting.key.indexOf('.')) : '');
+	// A file's settings sit under a heading per group: everything before the
+	// key's last part, so openrouter.variants.vision.timeout is the field
+	// "timeout" under "Openrouter › Variants › Vision". A root every key
+	// shares is left out of the headings. The changed page groups by file.
+	const parentOf = (key: string) => (key.includes('.') ? key.slice(0, key.lastIndexOf('.')) : '');
+	const lastOf = (key: string) => key.slice(key.lastIndexOf('.') + 1);
+	const groupOf = (r: Row) => (byFile ? fileLabel(r.file) : parentOf(r.setting.key));
+	let root = $derived.by(() => {
+		const first = rows[0]?.setting.key.split('.')[0] ?? '';
+		return !byFile && first && rows.every((r) => r.setting.key.startsWith(first + '.')) ? first : '';
+	});
+	function heading(group: string): string {
+		if (byFile) return group;
+		let parts = group.split('.').filter(Boolean);
+		if (root && parts[0] === root) parts = parts.slice(1);
+		return parts.length ? parts.map(words).join(' › ') : words(root);
+	}
 	const rowKey = (r: Row) => `${r.file.name}\u0000${r.setting.key}`;
 	// Hotkey.yaml holds key codes; they're shown and edited as keys.
 	const valueOf = (r: Row) => (r.setting.set ? r.setting.value : r.setting.default);
@@ -44,7 +60,12 @@
 
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
-		return rows.filter((r) => !q || r.setting.key.toLowerCase().includes(q) || showValue(r, valueOf(r)).toLowerCase().includes(q));
+		const found = rows.filter((r) => !q || r.setting.key.toLowerCase().includes(q) || showValue(r, valueOf(r)).toLowerCase().includes(q));
+		// Settings the file doesn't set come last from the server; each
+		// goes under its group's heading instead, where the group first appears.
+		const order = new Map<string, number>();
+		for (const r of found) if (!order.has(groupOf(r))) order.set(groupOf(r), order.size);
+		return found.toSorted((a, b) => order.get(groupOf(a))! - order.get(groupOf(b))!);
 	});
 	const selection = new Selection(() => shown, rowKey);
 	let current = $derived(selection.current);
@@ -192,12 +213,12 @@
 			</thead>
 			<tbody>
 				{#each shown as r, i (rowKey(r))}
-					{#if groupOf(r) && (i === 0 || groupOf(r) !== groupOf(shown[i - 1]!))}
-						<tr class="group"><th colspan="4" class="caps" scope="rowgroup">{byFile ? groupOf(r) : words(groupOf(r))}</th></tr>
+					{#if (groupOf(r) || root) && (i === 0 || groupOf(r) !== groupOf(shown[i - 1]!))}
+						<tr class="group"><th colspan="4" class="caps" scope="rowgroup">{heading(groupOf(r))}</th></tr>
 					{/if}
 					<tr aria-selected={selection.is(r)} onclick={() => selection.select(r)} ondblclick={startEdit}>
 						<td class="mark">{#if selection.is(r)}<Diamond />{/if}</td>
-						<td class="key">{byFile ? r.setting.key : r.setting.key.slice(groupOf(r) ? groupOf(r).length + 1 : 0)}</td>
+						<td class="key">{byFile ? r.setting.key : lastOf(r.setting.key)}</td>
 						<td class="value" class:changed={r.setting.changed} class:muted={!r.setting.set}>{showValue(r, valueOf(r))}</td>
 						<td class="default muted">{r.setting.hasDefault ? showValue(r, r.setting.default) : ''}</td>
 					</tr>
