@@ -61,6 +61,11 @@ typography:
     fontSize: "0.9375rem"
     fontWeight: 500
     letterSpacing: "0.12em"
+  file:
+    fontFamily: "DM Mono, ui-monospace, monospace"
+    fontSize: "0.8125rem"
+    fontWeight: 400
+    lineHeight: 1.55
 rounded:
   base: "3px"
 spacing:
@@ -177,8 +182,9 @@ A near-monochrome palette, off-white on near-black (or near-black on pale smoke)
 
 **Display Font:** Barlow Condensed 500 and 600 (with Jost, sans-serif), self-hosted via @fontsource
 **Body Font:** Jost 400 and 500 (with system-ui, sans-serif), self-hosted via @fontsource
+**File Font:** DM Mono 400 (with ui-monospace, monospace), self-hosted via @fontsource
 
-**Character:** Barlow Condensed in tracked capitals is the game's menu voice, crisp and narrow; Jost is a calm geometric text face that stays legible at small sizes. The scale is short (five steps) because the interface is a menu, not a document.
+**Character:** Barlow Condensed in tracked capitals is the game's menu voice, crisp and narrow; Jost is a calm geometric text face that stays legible at small sizes. DM Mono, geometric like Jost, is for a file shown or edited as SkyrimNet stores it, where markup and Markdown must be seen character for character. The scale is short (five steps) because the interface is a menu, not a document.
 
 ### Hierarchy
 - **Display** (Barlow Condensed 600, 2.5rem, line-height 1, uppercase): the page title only (Characters, Playthroughs, a character's name).
@@ -187,6 +193,7 @@ A near-monochrome palette, off-white on near-black (or near-black on pale smoke)
 - **Body** (Jost 400, 0.9375rem, line-height 1.5, tabular figures): table cells, values, prose. Long text in the pane runs at line-height 1.6 with a 65ch measure.
 - **Label** (Barlow Condensed 500, 0.8125rem, 0.12em tracking, uppercase): column heads, group headings, definition terms in caps, the playthrough and game-state labels, and the theme switch.
 - **Button** (Barlow Condensed 500, 0.9375rem, 0.12em tracking, uppercase): buttons and the hint strip.
+- **File** (DM Mono 400, 0.8125rem, line-height 1.55): a whole file as stored, in the raw bio editor and earlier versions.
 
 ### Named Rules
 **The Label Versus Read Rule.** Anything that labels is tracked condensed caps; anything that is read is Jost in sentence case. Counts beside a label switch back to Jost with no tracking.

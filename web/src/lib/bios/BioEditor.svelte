@@ -185,9 +185,9 @@
 {#if !version}
 	<p class="muted">{name} has no bio: nothing in this playthrough, and nothing in SkyrimNet’s content for the template <span class="id">{template}</span>.</p>
 {:else if mode === 'raw'}
-	<div class="raw">
+	<div class="raw" use:fitToViewport>
 		<p class="muted small">The whole file, with SkyrimNet’s own markup. Broken markup is refused; a removed section only warns.</p>
-		<textarea bind:value={draft} spellcheck="false" use:fitToViewport></textarea>
+		<textarea bind:value={draft} spellcheck="false"></textarea>
 		<div class="buttons">
 			<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
 			<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
@@ -425,13 +425,26 @@
 		margin-top: var(--space-3);
 	}
 
-	/* The whole file. */
+	/* The whole file fills the window down to the hint strip, with Save in
+	   view beneath it; the text scrolls inside, not the page. */
 	.raw {
-		max-width: 64rem;
+		position: sticky;
+		top: 0;
+		display: flex;
+		flex-direction: column;
+		max-width: 64rem; /* fitToViewport sets its height */
 	}
 	.raw textarea {
 		display: block;
+		flex: 1;
+		min-height: 8rem;
 		margin-top: var(--space-3);
+		resize: none;
+		font-family: var(--font-mono);
+		font-size: var(--step--1);
+	}
+	.raw .buttons {
+		padding-bottom: var(--space-4);
 	}
 
 	/* Earlier versions: the item table and the pane. */
@@ -487,9 +500,8 @@
 	}
 	.file {
 		margin: var(--space-3) 0;
-		font: inherit;
+		font: 400 var(--step--1) / 1.55 var(--font-mono);
 		white-space: pre-wrap;
-		line-height: 1.55;
 	}
 	.pane .buttons {
 		position: sticky;

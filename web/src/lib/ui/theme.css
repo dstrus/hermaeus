@@ -10,10 +10,12 @@
 @import '@fontsource/jost/500.css';
 @import '@fontsource/barlow-condensed/500.css';
 @import '@fontsource/barlow-condensed/600.css';
+@import '@fontsource/dm-mono/400.css';
 
 :root {
 	--font-text: 'Jost', system-ui, sans-serif;
 	--font-label: 'Barlow Condensed', 'Jost', sans-serif;
+	--font-mono: 'DM Mono', ui-monospace, monospace; /* files as SkyrimNet stores them: markup and Markdown */
 	--track: 0.12em;
 
 	--step--1: 0.8125rem;

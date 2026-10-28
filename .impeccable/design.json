@@ -393,6 +393,10 @@
       "button": {
         "displayName": "Button",
         "purpose": "Buttons and the hint strip."
+      },
+      "file": {
+        "displayName": "File",
+        "purpose": "A whole file as SkyrimNet stores it, shown or edited character for character."
       }
     },
     "shadows": [

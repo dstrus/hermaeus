@@ -22,5 +22,8 @@
 		"svelte-check": "4.7.7",
 		"typescript": "6.0.3",
 		"vite": "8.3.4"
+	},
+	"dependencies": {
+		"@fontsource/dm-mono": "^5.3.0"
 	}
 }
