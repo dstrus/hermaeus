@@ -12,6 +12,8 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { bioDependency, createBio, getHistory, kinds, restoreBio, saveBio, sectionLabel } from './api.ts';
+	import BioDiff from './BioDiff.svelte';
+	import { parseSections } from './diff.ts';
 
 	let {
 		save,
@@ -39,7 +41,27 @@
 	// The bio reads as one document. One section is selected (for the keys);
 	// editing turns that section into a field where it is. Raw and history
 	// replace the document.
-	let mode = $state<'read' | 'edit' | 'raw' | 'history'>('read');
+	let mode = $state<'read' | 'edit' | 'raw' | 'history' | 'compare'>('read');
+
+	// Comparing two of the bios: the later one against the one beneath it,
+	// so what SkyrimNet's rewrite did (dynamic against baseline) reads first.
+	const order = ['dynamic', 'baseline', 'default'];
+	let pairs = $derived.by(() => {
+		const have = order.filter((k) => versions.some((v) => v.kind === k));
+		const out: { value: string; label: string }[] = [];
+		for (let i = 0; i < have.length; i++) for (let j = i + 1; j < have.length; j++) out.push({ value: `${have[i]}|${have[j]}`, label: `${kinds[have[i]!]?.label} vs ${kinds[have[j]!]?.label.toLowerCase()}` });
+		return out;
+	});
+	let pair = $state('');
+	let compared = $derived.by(() => {
+		const chosenPair = pairs.some((p) => p.value === pair) ? pair : (pairs[0]?.value ?? '');
+		const [toKind, fromKind] = chosenPair.split('|');
+		const to = versions.find((v) => v.kind === toKind);
+		const from = versions.find((v) => v.kind === fromKind);
+		return to && from ? { to, from } : undefined;
+	});
+	// In history, the earlier version reads as text or as the changes since.
+	let historyView = $state('text');
 	let draft = $state('');
 	let saving = $state(false);
 	let notice = $state('');
@@ -52,7 +74,7 @@
 	let inView = $state<string | null>(null);
 	let doc = $state<HTMLElement>();
 	$effect(() => {
-		if (!doc || mode === 'raw' || mode === 'history') return;
+		if (!doc || mode === 'raw' || mode === 'history' || mode === 'compare') return;
 		const seen = new Map<string, number>();
 		const watch = new IntersectionObserver(
 			(entries) => {
@@ -158,10 +180,11 @@
 			{ key: 'e', shown: 'E', label: 'Edit section', hidden: !reading, disabled: !editable || !section, run: () => startEdit() },
 			{ key: 'r', shown: 'R', label: 'Raw file', hidden: !reading, disabled: !editable, run: startRaw },
 			{ key: 'h', shown: 'H', label: 'History', hidden: !reading, disabled: !version || version.kind === 'default', run: startHistory },
+			{ key: 'd', shown: 'D', label: 'Compare', hidden: !reading, disabled: pairs.length === 0, run: () => ((pair = pairs.some((p) => p.value === pair) ? pair : (pairs[0]?.value ?? '')), (mode = 'compare')) },
 			{ key: 'c', shown: 'C', label: 'Create save bio', hidden: !reading || version?.kind !== 'default' || hasBaseline, disabled: readOnly, run: create },
 			{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: submit },
 			{ key: 'Enter', label: 'Restore', hidden: mode !== 'history', disabled: readOnly || !earlier || earlier.current, run: restore },
-			...(reading ? [] : [{ key: 'Escape', shown: 'Esc', label: mode === 'history' ? 'Back' : 'Cancel', run: () => (mode = 'read') }])
+			...(reading ? [] : [{ key: 'Escape', shown: 'Esc', label: mode === 'history' || mode === 'compare' ? 'Back' : 'Cancel', run: () => (mode = 'read') }])
 		];
 	});
 </script>
@@ -193,6 +216,18 @@
 			<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
 		</div>
 	</div>
+{:else if mode === 'compare' && compared}
+	<div class="compare">
+		<div class="which">
+			{#if pairs.length > 1}
+				<Segmented bind:value={pair} options={pairs} label="Which two bios" />
+			{:else}
+				<span class="caps muted">{pairs[0]?.label}</span>
+			{/if}
+			<span class="muted small">What the {kinds[compared.to.kind]?.label.toLowerCase()} bio has that the {kinds[compared.from.kind]?.label.toLowerCase()} doesn’t, and the other way round.</span>
+		</div>
+		<BioDiff from={compared.from.sections} to={compared.to.sections} fromLabel={kinds[compared.from.kind]?.label ?? compared.from.kind} toLabel={kinds[compared.to.kind]?.label ?? compared.to.kind} />
+	</div>
 {:else if mode === 'history'}
 	<div class="split">
 		<table>
@@ -219,7 +254,16 @@
 					<div in:fly={{ y: 6, duration: 180 }}>
 						<h2 class="caps">{realTime(earlier.replaced)}</h2>
 						<p class="muted small">Kept by {earlier.source === 'skyrimnet' ? 'SkyrimNet when it replaced the bio' : 'Hermaeus before a save'}.</p>
-						<pre class="file">{earlier.raw}</pre>
+						{#if !earlier.current}
+							<div class="which">
+								<Segmented bind:value={historyView} options={[{ value: 'text', label: 'Text' }, { value: 'changes', label: 'Changes since' }]} label="How to read it" />
+							</div>
+						{/if}
+						{#if historyView === 'changes' && !earlier.current}
+							<BioDiff from={parseSections(earlier.raw)} to={version.sections} fromLabel="this version" toLabel="the bio now" />
+						{:else}
+							<pre class="file">{earlier.raw}</pre>
+						{/if}
 						<div class="buttons">
 							{#if !earlier.current && !readOnly}
 								<button type="button" class="button primary" onclick={restore} disabled={saving}>Restore this version</button>
@@ -445,6 +489,19 @@
 	}
 	.raw .buttons {
 		padding-bottom: var(--space-4);
+	}
+
+	/* Comparing two bios. */
+	.compare .which,
+	.pane .which {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-3) var(--space-4);
+		margin-bottom: var(--space-4);
+	}
+	.pane .which {
+		margin: var(--space-3) 0;
 	}
 
 	/* Earlier versions: the item table and the pane. */
