@@ -240,6 +240,7 @@ The core of every list screen.
 - The selected row gets the `select` haze; inactive rows drop to muted text.
 - Column heads are sort buttons in label caps, muted, accent-colored when sorted or hovered, with a `rule-strong` underline. Counts and dates sort largest or newest first.
 - Group heading rows (a day, a plugin) are label caps in the accent with generous top padding (1.5rem) and a `rule-strong` underline.
+- A selectable row tints `glass` under the pointer and `select` when selected; heading rows don't react.
 - Memory and diary rows enter with a short fly-in (6px rise, 180ms).
 
 ### Details Pane

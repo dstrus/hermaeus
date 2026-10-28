@@ -221,6 +221,10 @@
 		padding: var(--space-2) var(--space-3);
 		border-bottom: 1px solid var(--rule);
 	}
+	/* A row you can select tints under the pointer, as a bio's sections do. */
+	tbody tr[aria-selected]:not([aria-selected='true']):hover td {
+		background: var(--glass);
+	}
 	tr[aria-selected='true'] td {
 		background: var(--select);
 	}

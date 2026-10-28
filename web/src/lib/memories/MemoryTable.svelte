@@ -284,6 +284,10 @@
 	tbody tr {
 		cursor: default;
 	}
+	/* A row you can select tints under the pointer, as a bio's sections do. */
+	tbody tr[aria-selected]:not([aria-selected='true']):hover td {
+		background: var(--glass);
+	}
 	tr[aria-selected='true'] td {
 		background: var(--select);
 	}

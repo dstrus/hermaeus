@@ -104,6 +104,9 @@
 	[aria-selected='true'] button {
 		background: var(--select);
 	}
+	[aria-selected='false'] button:hover {
+		background: var(--glass);
+	}
 	.mark {
 		width: 1.25rem;
 		display: inline-flex;
