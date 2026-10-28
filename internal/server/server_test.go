@@ -35,7 +35,7 @@ func newHarness(t *testing.T) *harness {
 	}
 	h.prefs = prefs.Load(filepath.Join(t.TempDir(), "settings.json"))
 	files := fstest.MapFS{
-		"index.html":            {Data: []byte(`<meta name="hermaeus-token" content="__HERMAEUS_TOKEN__">`)},
+		"index.html":            {Data: []byte(`<html data-theme="__HERMAEUS_THEME__"><meta name="hermaeus-token" content="__HERMAEUS_TOKEN__">`)},
 		"_app/immutable/app.js": {Data: []byte(`console.log("hi")`)},
 		"favicon.svg":           {Data: []byte(`<svg/>`)},
 	}
@@ -160,6 +160,22 @@ func TestStatusAndFolder(t *testing.T) {
 	if got := h.prefs.Get().SkyrimNetDir; got != other.Dir {
 		t.Errorf("remembered folder = %q", got)
 	}
+}
+
+func TestThemeIsRememberedAndServed(t *testing.T) {
+	h := newHarness(t)
+	if page := h.request("GET", "/", "").Body.String(); !strings.Contains(page, `data-theme="system"`) {
+		t.Errorf("page before choosing a theme: %q", page)
+	}
+	var st Status
+	h.call(200, "PUT", "/api/theme", `{"theme": "light"}`, &st)
+	if st.Theme != "light" || h.prefs.Get().Theme != "light" {
+		t.Errorf("theme = %q, remembered %q", st.Theme, h.prefs.Get().Theme)
+	}
+	if page := h.request("GET", "/some/view", "").Body.String(); !strings.Contains(page, `data-theme="light"`) {
+		t.Errorf("page after choosing light: %q", page)
+	}
+	h.call(400, "PUT", "/api/theme", `{"theme": "mgo"}`, nil)
 }
 
 // TestPinsOverHTTP checks the characters routes are mounted, and that actor

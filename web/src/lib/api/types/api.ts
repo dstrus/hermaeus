@@ -25,7 +25,11 @@ export interface Status {
   gameRunning: boolean;
   playthroughs: store.Playthrough[]; // most recently played first
   version: string; // Hermaeus's own
+  theme: string; // "system", "dark" or "light"
 }
 export interface FolderRequest {
   path: string;
+}
+export interface ThemeRequest {
+  theme: string; // "system", "dark" or "light"
 }

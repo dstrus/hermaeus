@@ -11,6 +11,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"slices"
 	"strings"
 
 	"hermaeus/internal/apperr"
@@ -21,8 +22,12 @@ import (
 	"hermaeus/internal/store"
 )
 
-// tokenPlaceholder is replaced with the token in index.html (see app.html).
-var tokenPlaceholder = []byte("__HERMAEUS_TOKEN__")
+// Placeholders in index.html (see app.html): the session's token, and the
+// saved theme, so the page never loads in the wrong one first.
+var (
+	tokenPlaceholder = []byte("__HERMAEUS_TOKEN__")
+	themePlaceholder = []byte("__HERMAEUS_THEME__")
+)
 
 type Options struct {
 	Store   *store.Store
@@ -52,6 +57,13 @@ func New(o Options) (*Server, error) {
 func (s *Server) routes() {
 	m := s.api
 	m.Handle("GET /api/status", httpapi.JSON(func(*http.Request, httpapi.None) (Status, error) {
+		return s.status(), nil
+	}))
+	m.Handle("PUT /api/theme", httpapi.JSON(func(_ *http.Request, req ThemeRequest) (Status, error) {
+		if !slices.Contains(prefs.Themes, req.Theme) {
+			return Status{}, apperr.New(apperr.Invalid, "Unknown theme %q", req.Theme)
+		}
+		s.Prefs.Update(func(v *prefs.Values) { v.Theme = req.Theme })
 		return s.status(), nil
 	}))
 	m.Handle("PUT /api/folder", httpapi.JSON(func(_ *http.Request, req FolderRequest) (Status, error) {
@@ -121,5 +133,5 @@ func (s *Server) page(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store") // it carries this session's token
-	w.Write(s.index)
+	w.Write(bytes.Replace(s.index, themePlaceholder, []byte(s.Prefs.Get().ThemeOf()), 1))
 }

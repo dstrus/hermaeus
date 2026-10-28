@@ -1,8 +1,8 @@
 <script lang="ts">
+	import CharacterTable from '#lib/characters/CharacterTable.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 </script>
 
-<h1>{data.playthrough.player || data.playthrough.id}</h1>
-<p>Choose a character to see what SkyrimNet has stored about them.</p>
+<CharacterTable save={data.playthrough.id} characters={data.characters} />

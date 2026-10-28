@@ -1,0 +1,239 @@
+/*
+ * Hermaeus's look: one more menu of the game you just closed. A smoked-glass
+ * ground, hairline rules, tracked condensed capitals for anything that labels,
+ * and gold only for selection and action. Dark follows the game's own menus;
+ * light is the same world in pale smoke. The page's data-theme is "dark",
+ * "light" or "system" (follow the OS); anything else counts as "system".
+ */
+@import '@fontsource/jost/400.css';
+@import '@fontsource/jost/500.css';
+@import '@fontsource/barlow-condensed/500.css';
+@import '@fontsource/barlow-condensed/600.css';
+
+:root {
+	--font-text: 'Jost', system-ui, sans-serif;
+	--font-label: 'Barlow Condensed', 'Jost', sans-serif;
+	--track: 0.12em;
+
+	--step--1: 0.8125rem;
+	--step-0: 0.9375rem;
+	--step-1: 1.125rem;
+	--step-2: 1.375rem;
+	--step-3: 2.5rem;
+
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.5rem;
+	--space-6: 2rem;
+	--space-7: 2.5rem;
+
+	--radius: 3px;
+}
+
+/* Dark: the game's menus. */
+:root,
+:root[data-theme='dark'] {
+	color-scheme: dark;
+	--ground: #0b0b0b;
+	--smoke: #1c1c1c; /* the lighter heart of the smoked glass */
+	--glass: rgb(255 255 255 / 0.04);
+	--glass-strong: rgb(0 0 0 / 0.38);
+	--panel: #121212; /* opaque, for zones that scroll beneath fixed parts */
+	--ink: #f2efe6;
+	--muted: #a8a293;
+	--rule: #2a2a2a;
+	--rule-strong: #3a3a3a;
+	--gold: #c9a24b;
+	--on-gold: #141109;
+	--select: rgb(242 239 230 / 0.07);
+	--warn: #d9a441;
+	--danger: #e57368;
+}
+
+/* Light: the same world in pale smoke. */
+:root[data-theme='light'] {
+	color-scheme: light;
+	--ground: #e4e3df;
+	--smoke: #f3f2ef;
+	--glass: rgb(0 0 0 / 0.025);
+	--glass-strong: rgb(255 255 255 / 0.55);
+	--panel: #eceae6;
+	--ink: #1b1a17;
+	--muted: #5d5a52;
+	--rule: #cdcbc4;
+	--rule-strong: #b3b0a7;
+	--gold: #7f5d12;
+	--on-gold: #fdf8ec;
+	--select: rgb(27 26 23 / 0.06);
+	--warn: #8a5a00;
+	--danger: #b3261e;
+}
+
+@media (prefers-color-scheme: light) {
+	:root:not([data-theme='dark']):not([data-theme='light']) {
+		color-scheme: light;
+		--ground: #e4e3df;
+		--smoke: #f3f2ef;
+		--glass: rgb(0 0 0 / 0.025);
+		--glass-strong: rgb(255 255 255 / 0.55);
+		--panel: #eceae6;
+		--ink: #1b1a17;
+		--muted: #5d5a52;
+		--rule: #cdcbc4;
+		--rule-strong: #b3b0a7;
+		--gold: #7f5d12;
+		--on-gold: #fdf8ec;
+		--select: rgb(27 26 23 / 0.06);
+		--warn: #8a5a00;
+		--danger: #b3261e;
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	background: var(--ground);
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	background: radial-gradient(ellipse 70% 60% at 65% 25%, var(--smoke), var(--ground) 75%) fixed;
+	color: var(--ink);
+	font: 400 var(--step-0) / 1.5 var(--font-text);
+	font-variant-numeric: tabular-nums;
+	caret-color: var(--gold);
+	scrollbar-color: var(--rule-strong) transparent;
+	-webkit-font-smoothing: antialiased;
+}
+
+::selection {
+	background: var(--gold);
+	color: var(--on-gold);
+}
+
+:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+p {
+	margin: 0;
+}
+
+a {
+	color: inherit;
+	text-underline-offset: 0.2em;
+	text-decoration-color: var(--rule-strong);
+}
+
+a:hover {
+	text-decoration-color: var(--gold);
+}
+
+/* Anything that labels rather than reads: categories, headings, column heads, keys. */
+.caps {
+	font-family: var(--font-label);
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: var(--track);
+}
+
+.muted {
+	color: var(--muted);
+}
+
+/* Standard controls, in the world's materials. */
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+input:not([type='checkbox']):not([type='radio']),
+select,
+textarea {
+	background: var(--glass-strong);
+	border: 1px solid var(--rule-strong);
+	border-radius: var(--radius);
+	padding: var(--space-2) var(--space-3);
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: var(--muted);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+	accent-color: var(--gold);
+}
+
+.button {
+	font-family: var(--font-label);
+	font-weight: 500;
+	font-size: var(--step-0);
+	text-transform: uppercase;
+	letter-spacing: var(--track);
+	background: transparent;
+	border: 1px solid var(--rule-strong);
+	border-radius: var(--radius);
+	padding: var(--space-1) var(--space-3);
+	cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+	border-color: var(--gold);
+}
+
+.button.primary {
+	background: var(--gold);
+	border-color: var(--gold);
+	color: var(--on-gold);
+}
+
+.button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* A link-looking button, for actions inside text. */
+.textbutton {
+	background: none;
+	border: 0;
+	padding: 0;
+	color: var(--gold);
+	cursor: pointer;
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.notice {
+	color: var(--muted);
+}
+
+.notice.warn {
+	color: var(--warn);
+}
+
+.notice.error {
+	color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	* {
+		transition-duration: 0s !important;
+		animation-duration: 0s !important;
+	}
+}

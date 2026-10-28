@@ -22,10 +22,15 @@ type Status struct {
 	GameRunning  bool                `json:"gameRunning"`
 	Playthroughs []store.Playthrough `json:"playthroughs"` // most recently played first
 	Version      string              `json:"version"`      // Hermaeus's own
+	Theme        string              `json:"theme"`        // "system", "dark" or "light"
 }
 
 type FolderRequest struct {
 	Path string `json:"path"`
+}
+
+type ThemeRequest struct {
+	Theme string `json:"theme"` // "system", "dark" or "light"
 }
 
 func (s *Server) status() Status {
@@ -35,5 +40,6 @@ func (s *Server) status() Status {
 		GameRunning:  s.Store.GameRunning(),
 		Playthroughs: s.Store.Playthroughs(),
 		Version:      s.Version,
+		Theme:        s.Prefs.Get().ThemeOf(),
 	}
 }

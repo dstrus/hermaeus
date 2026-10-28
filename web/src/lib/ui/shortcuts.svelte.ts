@@ -1,0 +1,71 @@
+// Keyboard shortcuts, and the hint bar that shows them: the game's button
+// hints, backed by real keys. A page registers the shortcuts that apply to
+// it; the root layout listens for keys and draws the hint bar.
+import { onDestroy } from 'svelte';
+
+export interface Shortcut {
+	key: string; // KeyboardEvent.key, e.g. "e", "Delete", "/"
+	label: string; // what it does, for the hint bar
+	shown?: string; // the key as shown, when not key itself
+	run: () => void;
+	hidden?: boolean; // works, but isn't shown in the hint bar
+	disabled?: boolean;
+	command?: boolean; // pressed with Ctrl (⌘ on a Mac), and works while typing
+}
+
+// onMac is whether the command key is ⌘ rather than Ctrl.
+export const onMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
+
+// deleteShortcuts are the keys that delete: Delete, and on a Mac also the
+// key labelled delete (⌫), which sends Backspace.
+export function deleteShortcuts(s: Omit<Shortcut, 'key' | 'shown'>): Shortcut[] {
+	if (!onMac) return [{ ...s, key: 'Delete', shown: 'Del' }];
+	return [
+		{ ...s, key: 'Backspace', shown: '⌫' },
+		{ ...s, key: 'Delete', hidden: true }
+	];
+}
+
+let layers = $state<{ id: number; shortcuts: () => Shortcut[] }[]>([]);
+let next = 0;
+
+// active is every shortcut in force, later registrations winning a key.
+export function active(): Shortcut[] {
+	const byKey = new Map<string, Shortcut>();
+	for (const layer of layers) for (const s of layer.shortcuts()) byKey.set(`${s.command ? 'cmd+' : ''}${s.key.toLowerCase()}`, s);
+	return [...byKey.values()];
+}
+
+// useShortcuts registers shortcuts for as long as the calling component
+// exists. shortcuts is read whenever keys are pressed or hints are drawn,
+// so it can depend on the component's state.
+export function useShortcuts(shortcuts: () => Shortcut[]) {
+	const id = next++;
+	layers.push({ id, shortcuts });
+	onDestroy(() => {
+		layers = layers.filter((l) => l.id !== id);
+	});
+}
+
+function typing(target: EventTarget | null): boolean {
+	return (
+		target instanceof HTMLElement &&
+		(target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))
+	);
+}
+
+// handleKey runs the shortcut for a key press, if there is one. While
+// typing, only Escape and command shortcuts count, so typed letters stay
+// letters.
+export function handleKey(e: KeyboardEvent) {
+	if (e.altKey) return;
+	// An open dialog (quick find) handles its own keys, Esc included.
+	if (e.target instanceof Element && e.target.closest('dialog[open]')) return;
+	const command = onMac ? e.metaKey : e.ctrlKey;
+	if (!command && (e.metaKey || e.ctrlKey)) return;
+	if (!command && typing(e.target) && e.key !== 'Escape') return;
+	const s = active().find((x) => x.key.toLowerCase() === e.key.toLowerCase() && !!x.command === command);
+	if (!s || s.disabled) return;
+	e.preventDefault();
+	s.run();
+}

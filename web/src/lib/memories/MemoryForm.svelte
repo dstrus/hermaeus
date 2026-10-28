@@ -62,27 +62,74 @@
 </script>
 
 <form onsubmit={submit}>
-	<label>Text <textarea bind:value={f.content} required rows="5"></textarea></label>
-	<label>Title <input bind:value={f.title} placeholder="Optional; few memories have one" /></label>
-	<label>
-		Type
-		<select bind:value={f.type}>
-			{#each types as t (t)}<option value={t}>{t}</option>{/each}
-		</select>
-	</label>
-	<label>Emotion <input bind:value={f.emotion} list="memory-emotions" /></label>
+	<label class="field"><span class="caps">Text</span><textarea bind:value={f.content} required rows="7"></textarea></label>
+	<label class="field"><span class="caps">Title</span><input bind:value={f.title} placeholder="Optional; few memories have one" /></label>
+	<div class="pair">
+		<label class="field">
+			<span class="caps">Type</span>
+			<select bind:value={f.type}>
+				{#each types as t (t)}<option value={t}>{t}</option>{/each}
+			</select>
+		</label>
+		<label class="field"><span class="caps">Mood</span><input bind:value={f.emotion} list="memory-emotions" /></label>
+	</div>
 	<datalist id="memory-emotions">
 		{#each commonEmotions as e (e)}<option value={e}></option>{/each}
 	</datalist>
-	<label>Location <input bind:value={f.location} /></label>
-	<label>Importance <input type="number" bind:value={f.importance} min="0" max="1" step="0.05" required /></label>
-	<label>Tags <input bind:value={f.tags} placeholder="Separated by commas" /></label>
-	<label><input type="checkbox" bind:checked={f.active} /> Active</label>
-	<label><input type="checkbox" bind:checked={f.alwaysInject} /> Always included, not only when relevant</label>
-	<label>
-		Condition
-		<input bind:value={f.condition} spellcheck="false" placeholder="Optional; only used while this is true" />
+	<div class="pair">
+		<label class="field"><span class="caps">Place</span><input bind:value={f.location} /></label>
+		<label class="field"><span class="caps">Importance</span><input type="number" bind:value={f.importance} min="0" max="1" step="0.05" required /></label>
+	</div>
+	<label class="field"><span class="caps">Tags</span><input bind:value={f.tags} placeholder="Separated by commas" /></label>
+	<label class="field">
+		<span class="caps">Only while</span>
+		<input bind:value={f.condition} spellcheck="false" placeholder="Optional condition" />
 	</label>
-	<button disabled={saving}>{memory ? 'Save' : 'Add memory'}</button>
-	<button type="button" onclick={oncancel} disabled={saving}>Cancel</button>
+	<label class="check"><input type="checkbox" bind:checked={f.active} /> Active: SkyrimNet can recall it</label>
+	<label class="check"><input type="checkbox" bind:checked={f.alwaysInject} /> Always included, not only when relevant</label>
+	<div class="buttons">
+		<button class="button primary" disabled={saving}>{memory ? 'Save' : 'Add memory'}</button>
+		<button type="button" class="button" onclick={oncancel} disabled={saving}>Cancel</button>
+	</div>
 </form>
+
+<style>
+	form {
+		display: grid;
+		gap: var(--space-3);
+		margin-top: var(--space-4);
+	}
+	.field {
+		display: grid;
+		gap: var(--space-1);
+	}
+	.field span {
+		font-size: var(--step--1);
+		color: var(--muted);
+	}
+	.pair {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
+	}
+	textarea {
+		resize: vertical;
+		line-height: 1.55;
+	}
+	.check {
+		display: flex;
+		gap: var(--space-2);
+		align-items: center;
+	}
+	/* Save stays in reach however long the form is. */
+	.buttons {
+		position: sticky;
+		bottom: 0;
+		display: flex;
+		gap: var(--space-2);
+		padding: var(--space-3) 0 var(--space-5);
+		background: var(--pane);
+		border-top: 1px solid var(--rule);
+		margin-top: var(--space-2);
+	}
+</style>

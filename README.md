@@ -53,11 +53,12 @@ make types              # regenerate the API's TypeScript types after changing t
 | `internal/memories/` | Each character's memories and diary entries |
 | `internal/testenv/` | SkyrimNet folders with a real schema, for tests |
 | `web/src/routes/` | The app's pages; each folder is a URL |
+| `web/src/lib/ui/` | The look and its shared parts: theme tokens (`theme.css`), the keyboard-shortcut hint strip, sortable heads, row selection |
 | `web/src/lib/<domain>/` | Each domain's API calls and components, mirroring `internal/<domain>/` |
 | `web/src/lib/api/` | The API client, and TypeScript types generated from Go (`types/`, don't edit) |
 | `tygo.yaml` | Which Go types become TypeScript types |
 
-Domain packages own their logic, request and response types, routes, and tests. Only `store` touches SQLite.
+Domain packages own their logic, request and response types, routes, and tests. Only `store` touches SQLite. The visual system is recorded in [DESIGN.md](DESIGN.md).
 
 ## License
 

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { groupByDay, timeLabel } from '#lib/memories/dates.ts';
 	import { realTime } from '#lib/format.ts';
+	import Diamond from '#lib/ui/Diamond.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -8,47 +9,123 @@
 	let milestones = $derived(groupByDay(o.milestones));
 </script>
 
-<dl>
-	{#if o.formId}
-		<dt>Form ID</dt>
-		<dd><code>{o.formId}</code></dd>
-	{/if}
-	{#if o.modFile}
-		<dt>Plugin</dt>
-		<dd>{o.modFile}{#if o.localFormId}{' '}(local ID <code>{o.localFormId}</code>){/if}</dd>
-	{/if}
-	{#if o.bio}
-		<dt>Bio template</dt>
-		<dd><code>{o.bio}</code></dd>
-	{/if}
-	{#if o.firstEvent && o.lastEvent}
-		<dt>Active</dt>
-		<dd>{o.firstEvent.day} to {o.lastEvent.day}</dd>
-	{/if}
-	<dt>SkyrimNet ID</dt>
-	<dd><code>{o.uuid}</code></dd>
-	{#if o.firstSeen}
-		<dt>First seen</dt>
-		<dd>{realTime(o.firstSeen)}</dd>
-	{/if}
-	{#if o.updated}
-		<dt>Record updated</dt>
-		<dd>{realTime(o.updated)}</dd>
-	{/if}
-	{#each o.retired as r (r.uuid)}
-		<dt>Earlier identity</dt>
-		<dd>{r.name || 'unnamed'}{#if r.since} (re-identified {realTime(r.since)}){/if}</dd>
-	{/each}
-</dl>
-
-{#if milestones.length}
-	<h2>Milestones</h2>
-	{#each milestones as group (group.items[0]?.eventId)}
-		<h3>{group.day}</h3>
-		<ul>
-			{#each group.items as m (m.eventId)}
-				<li>{timeLabel(m)} {m.summary}</li>
+<div class="overview">
+	<section>
+		<h2 class="caps">Identity</h2>
+		<dl>
+			{#if o.firstEvent && o.lastEvent}
+				<dt class="caps">Active</dt>
+				<dd>{o.firstEvent.day} to {o.lastEvent.day}</dd>
+			{/if}
+			{#if o.formId}
+				<dt class="caps">Form ID</dt>
+				<dd class="id">{o.formId}</dd>
+			{/if}
+			{#if o.modFile}
+				<dt class="caps">Plugin</dt>
+				<dd>{o.modFile}{#if o.localFormId}<span class="muted">{' · local ID '}<span class="id">{o.localFormId}</span></span>{/if}</dd>
+			{/if}
+			{#if o.bio}
+				<dt class="caps">Bio template</dt>
+				<dd class="id">{o.bio}</dd>
+			{/if}
+			<dt class="caps">SkyrimNet ID</dt>
+			<dd class="id">{o.uuid}</dd>
+			{#if o.firstSeen}
+				<dt class="caps">First seen</dt>
+				<dd>{realTime(o.firstSeen)}</dd>
+			{/if}
+			{#if o.updated}
+				<dt class="caps">Record updated</dt>
+				<dd>{realTime(o.updated)}</dd>
+			{/if}
+			{#each o.retired as r (r.uuid)}
+				<dt class="caps">Earlier identity</dt>
+				<dd>{r.name || 'unnamed'}{#if r.since}<span class="muted">{' · re-identified '}{realTime(r.since)}</span>{/if}</dd>
 			{/each}
-		</ul>
-	{/each}
-{/if}
+		</dl>
+	</section>
+
+	<section>
+		<h2 class="caps">Milestones</h2>
+		{#if milestones.length}
+			<ol class="timeline">
+				{#each milestones as group (group.items[0]?.eventId)}
+					<li class="day caps">{group.day}</li>
+					{#each group.items as m (m.eventId)}
+						<li class="event"><Diamond /><span class="muted">{timeLabel(m)}</span><span class="summary" title={m.summary}>{m.summary}</span></li>
+					{/each}
+				{/each}
+			</ol>
+		{:else}
+			<p class="muted">Nothing that marks a turn in their story yet, such as joining you, a trade or a gift.</p>
+		{/if}
+	</section>
+</div>
+
+<style>
+	.overview {
+		display: grid;
+		grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+		gap: var(--space-7);
+		max-width: 80rem;
+	}
+	h2 {
+		font-size: var(--step-0);
+		color: var(--gold);
+		padding-bottom: var(--space-1);
+		border-bottom: 1px solid var(--rule-strong);
+		margin-bottom: var(--space-3);
+	}
+	dl {
+		display: grid;
+		grid-template-columns: 9rem 1fr;
+		gap: var(--space-2) var(--space-4);
+		margin: 0;
+	}
+	dt {
+		color: var(--muted);
+		font-size: var(--step--1);
+		padding-top: 0.2em;
+	}
+	dd {
+		margin: 0;
+	}
+	.id {
+		font-variant-numeric: tabular-nums;
+		letter-spacing: 0.02em;
+	}
+	.timeline {
+		list-style: none;
+		margin: 0;
+		padding: 0 0 0 var(--space-3);
+		border-left: 1px solid var(--rule-strong);
+	}
+	.timeline .day {
+		font-size: var(--step--1);
+		color: var(--muted);
+		margin: var(--space-4) 0 var(--space-1);
+	}
+	.timeline .day:first-child {
+		margin-top: 0;
+	}
+	.event {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-3);
+		padding: var(--space-1) 0;
+		margin-left: calc(-1 * var(--space-3) - 5px);
+	}
+	.summary {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		overflow: hidden;
+	}
+	@media (max-width: 70rem) {
+		.overview {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

@@ -15,6 +15,15 @@
 	let person = $derived((c: Count) =>
 		c.uuid && listed.has(c.uuid) ? `/${encodeURIComponent(data.playthrough.id)}/npc/${c.uuid}/stats` : undefined
 	);
+	// Memories SkyrimNet can't use as it should, worth knowing about.
+	let health = $derived(
+		[
+			mem.inactive && `${count(mem.inactive)} inactive`,
+			mem.alwaysInject && `${count(mem.alwaysInject)} always included`,
+			mem.pendingEmbedding && `${count(mem.pendingEmbedding)} not yet searchable (SkyrimNet builds the vectors when it starts)`,
+			mem.unembeddable && `${count(mem.unembeddable)} unsearchable`
+		].filter((x): x is string => !!x)
+	);
 	let nothing = $derived(!s.events.total && !mem.total && !s.diaries);
 	let summary = $derived.by(() => {
 		let events = plural(s.events.total, 'event', 'events');
@@ -27,69 +36,88 @@
 	});
 </script>
 
-<p>{summary}</p>
+<p class="summary">{summary}</p>
 
 {#if nothing}
-	<p>SkyrimNet hasn’t recorded anything about {name} in this playthrough yet.</p>
+	<p class="muted">SkyrimNet hasn’t recorded anything about {name} in this playthrough yet.</p>
 {/if}
 
-{#if s.events.total}
-	<h2>Spends time with</h2>
-	<CountList items={s.company} linkTo={person} />
-	<p><small>Events they were both part of.</small></p>
-{/if}
-
-{#if s.talksTo.length}
-	<h2>Talks to</h2>
-	<CountList items={s.talksTo} linkTo={person} />
-	<p><small>Lines {name} spoke to them.</small></p>
-{/if}
-
-{#if mem.total}
-	<h2>Memories</h2>
-	<ul>
-		{#each mem.types as t (t.type)}
-			<li>{t.type || 'No type'} — {count(t.n)} (average importance {t.importance.toFixed(2)})</li>
-		{/each}
-	</ul>
-	<ul class="flags">
-		{#if mem.inactive}<li>{count(mem.inactive)} inactive</li>{/if}
-		{#if mem.alwaysInject}<li>{count(mem.alwaysInject)} always included</li>{/if}
-		{#if mem.pendingEmbedding}
-			<li title="SkyrimNet builds their search vectors the next time it starts; until then, it can’t find them by meaning">
-				{count(mem.pendingEmbedding)} not yet searchable
-			</li>
-		{/if}
-		{#if mem.unembeddable}
-			<li title="SkyrimNet couldn’t build search vectors for these, so it can’t find them by meaning">
-				{count(mem.unembeddable)} unsearchable
-			</li>
-		{/if}
-	</ul>
-	<h3>Mood</h3>
-	<CountList items={mem.emotions} blank="no emotion" />
-	<h3>Places</h3>
-	<CountList items={mem.places} blank="no location" />
-{/if}
-
-{#if s.mentions.length || s.unknownMentions}
-	<h2>Mentioned in memories</h2>
-	<CountList items={s.mentions} linkTo={person} />
-	{#if s.unknownMentions}
-		<p><small>Plus {plural(s.unknownMentions, 'mention', 'mentions')} of actors SkyrimNet has no name for, such as enemies that died.</small></p>
+<div class="grid">
+	{#if s.events.total}
+		<CountList title="Spends time with" items={s.company} linkTo={person} note="Events they were both part of." />
 	{/if}
-{/if}
-
-{#if s.events.total}
-	<h2>Events by type</h2>
-	<CountList items={s.events.types} />
-{/if}
+	{#if s.talksTo.length}
+		<CountList title="Talks to" items={s.talksTo} linkTo={person} note="Lines {name} spoke to them." />
+	{/if}
+	{#if s.mentions.length || s.unknownMentions}
+		<CountList
+			title="Mentioned in memories"
+			items={s.mentions}
+			linkTo={person}
+			note={s.unknownMentions ? `Plus ${plural(s.unknownMentions, 'mention', 'mentions')} of actors SkyrimNet has no name for, such as enemies that died.` : undefined}
+		/>
+	{/if}
+	{#if mem.total}
+		<section>
+			<h2 class="caps">Memories by type</h2>
+			<table>
+				<thead><tr><th class="caps">Type</th><th class="caps n">Count</th><th class="caps n">Avg. importance</th></tr></thead>
+				<tbody>
+					{#each mem.types as t (t.type)}
+						<tr><td>{t.type || 'No type'}</td><td class="n">{count(t.n)}</td><td class="n">{t.importance.toFixed(2)}</td></tr>
+					{/each}
+				</tbody>
+			</table>
+			{#if health.length}<p class="note">{health.join(' · ')}</p>{/if}
+		</section>
+		<CountList title="Mood" items={mem.emotions} blank="no emotion" />
+		<CountList title="Places" items={mem.places} blank="no location" />
+	{/if}
+	{#if s.events.total}
+		<CountList title="Events by type" items={s.events.types} />
+	{/if}
+</div>
 
 <style>
-	.flags {
-		display: flex;
-		gap: 0.75rem;
-		list-style: none;
-		padding: 0;
+	.summary {
+		font-size: var(--step-1);
+		margin-bottom: var(--space-5);
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+		gap: var(--space-6) var(--space-7);
+		max-width: 80rem;
+	}
+	h2 {
+		font-size: var(--step-0);
+		color: var(--gold);
+		padding-bottom: var(--space-1);
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	th {
+		text-align: left;
+		font-size: var(--step--1);
+		color: var(--muted);
+		padding: var(--space-1) 0;
+		border-bottom: 1px solid var(--rule);
+		font-weight: inherit;
+	}
+	td {
+		padding: var(--space-1) 0;
+		border-bottom: 1px solid var(--rule);
+	}
+	.n {
+		text-align: right;
+		padding-left: var(--space-4);
+	}
+	.note {
+		font-size: var(--step--1);
+		margin-top: var(--space-2);
+		color: var(--warn);
 	}
 </style>

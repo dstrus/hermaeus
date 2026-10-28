@@ -1,0 +1,557 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-28T00:29:11+00:00",
+  "title": "Design System: Hermaeus",
+  "extensions": {
+    "colorMeta": {
+      "gold": {
+        "role": "primary",
+        "displayName": "Septim Gold",
+        "tonalRamp": [
+          "#2a1f08",
+          "#4a3710",
+          "#6b5016",
+          "#8d6a1f",
+          "#b0882f",
+          "#c9a24b",
+          "#dcc184",
+          "#f1e4c4"
+        ]
+      },
+      "on-gold": {
+        "role": "primary",
+        "displayName": "Gold Ink",
+        "tonalRamp": [
+          "#2a1f08",
+          "#4a3710",
+          "#6b5016",
+          "#8d6a1f",
+          "#b0882f",
+          "#c9a24b",
+          "#dcc184",
+          "#f1e4c4"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Menu Black",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "smoke": {
+        "role": "neutral",
+        "displayName": "Smoke Heart",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Pane Glass",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "glass-strong": {
+        "role": "neutral",
+        "displayName": "Smoked Field",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "select": {
+        "role": "neutral",
+        "displayName": "Selected Row Haze",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Parchment Ink",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Weathered Ink",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Amber Warning",
+        "tonalRamp": [
+          "#2b1d03",
+          "#4d3405",
+          "#6e4b06",
+          "#8a5a00",
+          "#b07a1c",
+          "#d9a441",
+          "#e8c27f",
+          "#f6e3bf"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Ember Error",
+        "tonalRamp": [
+          "#3a0c09",
+          "#5e1510",
+          "#841f17",
+          "#b3261e",
+          "#cc4a40",
+          "#e57368",
+          "#efa59e",
+          "#f8d6d3"
+        ]
+      },
+      "gold-light": {
+        "role": "primary",
+        "displayName": "Septim Gold (light)",
+        "tonalRamp": [
+          "#2a1f08",
+          "#4a3710",
+          "#6b5016",
+          "#8d6a1f",
+          "#b0882f",
+          "#c9a24b",
+          "#dcc184",
+          "#f1e4c4"
+        ]
+      },
+      "on-gold-light": {
+        "role": "primary",
+        "displayName": "Gold Ink (light)",
+        "tonalRamp": [
+          "#2a1f08",
+          "#4a3710",
+          "#6b5016",
+          "#8d6a1f",
+          "#b0882f",
+          "#c9a24b",
+          "#dcc184",
+          "#f1e4c4"
+        ]
+      },
+      "ground-light": {
+        "role": "neutral",
+        "displayName": "Menu Black (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "smoke-light": {
+        "role": "neutral",
+        "displayName": "Smoke Heart (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "panel-light": {
+        "role": "neutral",
+        "displayName": "Pane Glass (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "glass-strong-light": {
+        "role": "neutral",
+        "displayName": "Smoked Field (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "select-light": {
+        "role": "neutral",
+        "displayName": "Selected Row Haze (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "ink-light": {
+        "role": "neutral",
+        "displayName": "Parchment Ink (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Weathered Ink (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "rule-light": {
+        "role": "neutral",
+        "displayName": "Hairline (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "rule-strong-light": {
+        "role": "neutral",
+        "displayName": "Strong Hairline (light)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#1c1c1c",
+          "#2a2a2a",
+          "#3a3a3a",
+          "#5d5a52",
+          "#a8a293",
+          "#cdcbc4",
+          "#f2efe6"
+        ]
+      },
+      "warn-light": {
+        "role": "status",
+        "displayName": "Amber Warning (light)",
+        "tonalRamp": [
+          "#2b1d03",
+          "#4d3405",
+          "#6e4b06",
+          "#8a5a00",
+          "#b07a1c",
+          "#d9a441",
+          "#e8c27f",
+          "#f6e3bf"
+        ]
+      },
+      "danger-light": {
+        "role": "status",
+        "displayName": "Ember Error (light)",
+        "tonalRamp": [
+          "#3a0c09",
+          "#5e1510",
+          "#841f17",
+          "#b3261e",
+          "#cc4a40",
+          "#e57368",
+          "#efa59e",
+          "#f8d6d3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Page title only, uppercase."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Selected item's name in the details pane; app name in the top bar."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Sections column links and character tabs, uppercase."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Table cells, values and prose, tabular figures."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Column heads, group headings, small caps labels."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Buttons and the hint strip."
+      }
+    },
+    "shadows": [
+      {
+        "name": "modal-lift",
+        "value": "0 1.5rem 3rem rgb(0 0 0 / 0.45)",
+        "purpose": "Quick-find dialog only; its backdrop is rgb(0 0 0 / 0.45)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "row-fly-in",
+        "value": "fly y 6px, 180ms (Svelte default easing)",
+        "purpose": "Memory and diary rows entering the table."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "transition and animation durations 0s",
+        "purpose": "Honors prefers-reduced-motion everywhere."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "stack",
+        "value": "60rem"
+      },
+      {
+        "name": "compact",
+        "value": "70rem"
+      }
+    ],
+    "background": {
+      "name": "smoked-glass",
+      "value": "radial-gradient(ellipse 70% 60% at 65% 25%, var(--smoke), var(--ground) 75%) fixed",
+      "purpose": "The body ground in both themes."
+    },
+    "focus": {
+      "value": "outline: 2px solid var(--gold); outline-offset: 2px",
+      "purpose": "All focus-visible states."
+    }
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Outlined caps button; the border turns gold on hover.",
+      "html": "<button class=\"ds-btn\">Cancel</button>",
+      "css": ".ds-btn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn:hover{border-color:var(--gold);} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one gold-filled action in a group, such as Save.",
+      "html": "<button class=\"ds-btn-primary\">Save</button>",
+      "css": ".ds-btn-primary{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:var(--gold);color:var(--on-gold);border:1px solid var(--gold);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn-primary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;} .ds-btn-primary:disabled{opacity:.5;cursor:not-allowed;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Smoked-glass field with a strong hairline and a gold caret.",
+      "html": "<input class=\"ds-input\" placeholder=\"Search memories\">",
+      "css": ".ds-input{font:400 var(--step-0)/1.5 var(--font-text);color:var(--ink);background:var(--glass-strong);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-2) var(--space-3);caret-color:var(--gold);} .ds-input::placeholder{color:var(--muted);} .ds-input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}"
+    },
+    {
+      "name": "Item Table",
+      "kind": "custom",
+      "refersTo": "table-row-selected",
+      "description": "Sortable item list with the diamond marking the selected row and a gold group heading.",
+      "html": "<table class=\"ds-table\"><thead><tr><th class=\"ds-mark\"></th><th><button class=\"ds-sort ds-on\">When &#9662;</button></th><th><button class=\"ds-sort\">Memory</button></th><th class=\"ds-n\"><button class=\"ds-sort\">Imp.</button></th></tr></thead><tbody><tr class=\"ds-group\"><th colspan=\"4\">Fredas, 11th of Hearthfire</th></tr><tr class=\"ds-sel\"><td class=\"ds-mark\"><svg width=\"9\" height=\"9\" viewBox=\"0 0 10 10\"><path d=\"M5 0 10 5 5 10 0 5Z\" fill=\"var(--gold)\"/></svg></td><td>11:08 AM</td><td>A selected row</td><td class=\"ds-n\">0.55</td></tr><tr><td class=\"ds-mark\"></td><td>10:17 AM</td><td>Another row</td><td class=\"ds-n\">0.95</td></tr></tbody></table>",
+      "css": ".ds-table{width:100%;border-collapse:collapse;font:400 var(--step-0)/1.5 var(--font-text);font-variant-numeric:tabular-nums;color:var(--ink);} .ds-table th{text-align:left;padding:0;border-bottom:1px solid var(--rule-strong);font-weight:inherit;} .ds-sort{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:none;border:0;padding:var(--space-2) var(--space-3);font-size:var(--step--1);color:var(--muted);cursor:pointer;width:100%;text-align:inherit;} .ds-sort:hover,.ds-sort.ds-on{color:var(--gold);} .ds-table td{padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--rule);} .ds-mark{width:1.5rem;padding-right:0!important;} .ds-n{text-align:right!important;} .ds-sel td{background:var(--select);} .ds-group th{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-5) var(--space-3) var(--space-1);color:var(--gold);font-size:var(--step--1);}"
+    },
+    {
+      "name": "Details Pane",
+      "kind": "card",
+      "refersTo": "details-pane",
+      "description": "Opaque full-height zone beside the list holding the selected item.",
+      "html": "<aside class=\"ds-pane\"><h2>Serana</h2><dl><dt>Plugin</dt><dd>dawnguard.esm</dd><dt>Memories</dt><dd>51</dd></dl><button class=\"ds-pbtn\">Edit</button></aside>",
+      "css": ".ds-pane{width:22rem;padding:var(--space-5);background:var(--panel);border-left:1px solid var(--rule-strong);color:var(--ink);font:400 var(--step-0)/1.5 var(--font-text);} .ds-pane h2{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-weight:600;font-size:var(--step-2);margin:0 0 var(--space-1);} .ds-pane dl{display:grid;grid-template-columns:7.5rem 1fr;gap:var(--space-1) var(--space-3);margin:var(--space-4) 0;} .ds-pane dt{color:var(--muted);font-size:var(--step--1);} .ds-pane dd{margin:0;} .ds-pbtn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-pbtn:hover{border-color:var(--gold);}"
+    },
+    {
+      "name": "Button-Hint Strip",
+      "kind": "custom",
+      "refersTo": "hint-bar",
+      "description": "The signature: bottom strip of real keyboard shortcuts, each clickable.",
+      "html": "<nav class=\"ds-hints\"><button class=\"ds-hint\"><kbd>/</kbd>Find</button><button class=\"ds-hint\"><kbd>E</kbd>Edit</button><button class=\"ds-hint\" disabled><kbd>Del</kbd>Delete</button></nav>",
+      "css": ".ds-hints{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--space-2) var(--space-5);padding:var(--space-2) var(--space-6);background:var(--ground);border-top:1px solid var(--rule);} .ds-hint{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);display:flex;align-items:center;gap:var(--space-2);background:none;border:0;padding:0;color:var(--muted);font-size:var(--step-0);cursor:pointer;} .ds-hint:hover:not(:disabled){color:var(--ink);} .ds-hint:disabled{opacity:.45;cursor:not-allowed;} .ds-hint kbd{font:inherit;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:0 .4em;min-width:1.6em;text-align:center;}"
+    },
+    {
+      "name": "Tabs",
+      "kind": "nav",
+      "refersTo": "tab-active",
+      "description": "Caps tabs over a hairline; the current tab is ink with a gold underline.",
+      "html": "<nav class=\"ds-tabs\"><a href=\"#\">Overview</a><a href=\"#\">Stats</a><a href=\"#\" aria-current=\"page\">Memories<span>51</span></a></nav>",
+      "css": ".ds-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--rule);} .ds-tabs a{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-2) 0;font-size:var(--step-1);color:var(--muted);text-decoration:none;margin-bottom:-1px;border-bottom:1px solid transparent;} .ds-tabs a:hover{color:var(--ink);} .ds-tabs a[aria-current=page]{color:var(--ink);border-bottom-color:var(--gold);} .ds-tabs span{margin-left:var(--space-2);font-family:var(--font-text);font-size:var(--step--1);letter-spacing:0;color:var(--muted);}"
+    },
+    {
+      "name": "Theme Switch",
+      "kind": "chip",
+      "refersTo": "button",
+      "description": "Outlined three-way radio group; the checked option gets the selection haze.",
+      "html": "<div class=\"ds-switch\" role=\"radiogroup\"><button role=\"radio\" aria-checked=\"false\">Auto</button><button role=\"radio\" aria-checked=\"true\">Dark</button><button role=\"radio\" aria-checked=\"false\">Light</button></div>",
+      "css": ".ds-switch{display:inline-flex;border:1px solid var(--rule-strong);border-radius:var(--radius);overflow:hidden;} .ds-switch button{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:none;border:0;padding:0 var(--space-2);color:var(--muted);font-size:var(--step--1);cursor:pointer;} .ds-switch button[aria-checked=true]{background:var(--select);color:var(--ink);} .ds-switch button:hover{color:var(--ink);}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Game's Own Menus",
+    "overview": "Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and no accent color besides gold.\n\nThe world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. Gold is scarce and means \"this is selected\" or \"this is what you can do\". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.\n\nThe signature is the bottom button-hint strip: every hint is a real keyboard shortcut, and clicking the hint does the same thing. The SVG diamond marks the selected row, as it does in the game.",
+    "keyCharacteristics": [
+      "Smoked-glass ground: a fixed radial gradient from a lighter smoke heart to the ground color.",
+      "Hairline 1px rules (two strengths) instead of boxes, cards, or shadows.",
+      "Tracked condensed caps for labels; Jost for reading text; tabular figures everywhere.",
+      "Gold for selection and action, and for the group headings that sort lists into sections.",
+      "Item table plus a sticky, full-height details pane that sizes itself to end at the hint strip.",
+      "A fixed bottom hint strip of live keyboard shortcuts, right-aligned like the game's button hints."
+    ],
+    "rules": [
+      {
+        "name": "The Scarce Gold Rule",
+        "body": "Gold marks selection, action, and group headings that sort a list into sections. It never fills a surface larger than a button and never decorates. If something is gold, it is selected, actionable, or a heading inside a list.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Token Set Rule",
+        "body": "Light mode is the same roles with different values, never a different design. A new color ships as a dark/light pair or not at all.",
+        "section": "colors"
+      },
+      {
+        "name": "The Label Versus Read Rule",
+        "body": "Anything that labels is tracked condensed caps; anything that is read is Jost in sentence case. Counts beside a label switch back to Jost with no tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "The Lined-Up Figures Rule",
+        "body": "Tabular figures are on at the body level. Numeric columns align right.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hairline Rule",
+        "body": "Separate with a 1px rule, never a box or a shadow. Use `rule` between rows and shell zones, `rule-strong` under column heads and group headings and around controls.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** put every list in the item table with a diamond column and a details pane beside it.",
+      "**Do** register a real keyboard shortcut for every primary action and let the hint strip show it.",
+      "**Do** set labels in tracked Barlow Condensed caps and reading text in Jost, with tabular figures.",
+      "**Do** separate with 1px hairlines (`rule`, `rule-strong`) and keep corners at 3px.",
+      "**Do** define every new color as a dark and light pair in the same token set.",
+      "**Do** keep the details pane opaque and sized to end at the hint strip."
+    ],
+    "donts": [
+      "**Don't** use cards, gray sidebars, filled tiles, or a blue (or any second) accent color.",
+      "**Don't** use gold for decoration or large fills; it means selection, action, or a list's group heading.",
+      "**Don't** add shadows to rows, panes, or the shell; the only shadow is the floating quick-find dialog.",
+      "**Don't** show a hint in the strip that isn't backed by a working shortcut.",
+      "**Don't** make a group label as bright as the current section."
+    ]
+  }
+}
