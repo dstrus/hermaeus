@@ -59,10 +59,11 @@
 		cursor: pointer;
 	}
 	button[aria-checked='true'] {
-		background: var(--select);
-		color: var(--ink);
+		background: var(--accent);
+		color: var(--on-accent);
+		font-weight: 600;
 	}
-	button:hover {
+	button:hover:not([aria-checked='true']) {
 		color: var(--ink);
 	}
 </style>

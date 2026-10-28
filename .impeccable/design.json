@@ -489,7 +489,7 @@
       "refersTo": "tab-active",
       "description": "Caps tabs over a hairline; the current tab is ink with an accent underline.",
       "html": "<nav class=\"ds-tabs\"><a href=\"#\">Overview</a><a href=\"#\">Stats</a><a href=\"#\" aria-current=\"page\">Memories<span>51</span></a></nav>",
-      "css": ".ds-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--rule);} .ds-tabs a{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-2) 0;font-size:var(--step-1);color:var(--muted);text-decoration:none;margin-bottom:-1px;border-bottom:1px solid transparent;} .ds-tabs a:hover{color:var(--ink);} .ds-tabs a[aria-current=page]{color:var(--ink);border-bottom-color:var(--accent);} .ds-tabs span{margin-left:var(--space-2);font-family:var(--font-text);font-size:var(--step--1);letter-spacing:0;color:var(--muted);}"
+      "css": ".ds-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--rule);} .ds-tabs a{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-2) 0;font-size:var(--step-1);color:var(--muted);text-decoration:none;margin-bottom:-1px;border-bottom:1px solid transparent;} .ds-tabs a:hover{color:var(--ink);} .ds-tabs a[aria-current=page]{color:var(--ink);font-weight:600;border-bottom:2px solid var(--accent);} .ds-tabs span{margin-left:var(--space-2);font-family:var(--font-text);font-size:var(--step--1);letter-spacing:0;color:var(--muted);}"
     },
     {
       "name": "Theme Switch",

@@ -250,8 +250,8 @@ The core of every list screen.
 
 ### Navigation
 - **Sections column:** title-size caps in muted ink; the current section and hover turn ink. Unbuilt sections are listed in muted caps under a small "Not built yet" label with a hairline under it; the Configuration group label is muted label caps, never as bright as the current section.
-- **Tabs:** title-size caps in muted ink, spaced 2rem apart over a `rule` baseline; the current tab is ink with a 1px accent underline. A tab's count follows in muted Jost.
-- **Theme switch:** a 3px-radius outlined group of three caps options (Auto, Dark, Light); the checked one gets the `select` haze and ink text.
+- **Tabs:** title-size caps in muted ink, spaced 2rem apart over a `rule` baseline; the current tab is ink at weight 600 with a 2px accent underline. A tab's count follows in muted Jost.
+- **Theme switch, and any segmented choice:** a 3px-radius outlined group of caps options; the chosen one fills with the accent, in accent-ink text at weight 600. The game's menus mark the chosen item plainly, and so do these.
 
 ### Button-Hint Strip (signature)
 Fixed along the bottom of the viewport, opaque ground, `rule` top edge, hints right-aligned with 1.5rem gaps. Each hint is a button: a key cap (1px `rule-strong` border, 3px radius, ink, min 1.6em wide) followed by the action in muted caps; hover turns it ink, unavailable hints fade to 45%. Every hint is backed by a real shortcut registered in the shortcut registry, and the strip shows only what the current screen offers.

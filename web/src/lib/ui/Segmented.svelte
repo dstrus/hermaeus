@@ -38,11 +38,16 @@
 	button + button {
 		border-left: 1px solid var(--rule-strong);
 	}
+	button[aria-checked='true'] + button,
 	button[aria-checked='true'] {
-		background: var(--select);
-		color: var(--ink);
+		border-left-color: var(--accent);
 	}
-	button:hover {
+	button[aria-checked='true'] {
+		background: var(--accent);
+		color: var(--on-accent);
+		font-weight: 600;
+	}
+	button:hover:not([aria-checked='true']) {
 		color: var(--ink);
 	}
 </style>

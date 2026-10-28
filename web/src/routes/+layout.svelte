@@ -151,9 +151,12 @@
 	.sections a {
 		color: var(--muted);
 	}
-	.sections a:hover,
-	.sections a[aria-current='page'] {
+	.sections a:hover {
 		color: var(--ink);
+	}
+	.sections a[aria-current='page'] {
+		color: var(--accent);
+		font-weight: 600;
 	}
 	/* A group's label, never as bright as the current section. */
 	.group {
