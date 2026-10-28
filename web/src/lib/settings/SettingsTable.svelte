@@ -402,13 +402,28 @@
 		margin-bottom: var(--space-4);
 		margin-right: calc(clamp(20rem, 28vw, 26rem) + var(--space-5));
 	}
+	/* The bar sits on one baseline. The title's capitals have nothing
+	   below that baseline, while a control's box does (its text's descent
+	   and padding), so the title is set down a little to center its letters
+	   on the controls, which puts its baseline near their bottom edge. */
 	h1 {
 		font-size: var(--step-3);
 		font-weight: 600;
 		line-height: 1;
+		position: relative;
+		top: 0.21em;
+	}
+	/* Narrower than 90rem, the bar needs the pane's width too. */
+	@media (max-width: 90rem) {
+		.bar {
+			margin-right: 0;
+		}
 	}
 	.bar .n {
 		white-space: nowrap;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 	.path {
 		font: 400 var(--step--1) / 1.5 var(--font-mono);
@@ -416,7 +431,9 @@
 	}
 	.bar input {
 		margin-left: auto;
-		width: 18rem;
+		width: 16rem;
+		flex: 0 1 16rem;
+		min-width: 9rem;
 	}
 	.small {
 		font-size: var(--step--1);
