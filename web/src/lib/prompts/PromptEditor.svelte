@@ -101,7 +101,7 @@
 	<p class="path">{path}</p>
 	<p class="muted">
 		{#if mine}
-			You have your own copy, and SkyrimNet uses it in every playthrough{below[0] ? `, in place of the version from ${layerAt(below[0].layer).source}` : ''}.
+			You have <b class="changed">your own copy</b>, and SkyrimNet uses it in every playthrough{below[0] ? `, in place of the version from ${layerAt(below[0].layer).source}` : ''}.
 		{:else if layer}
 			SkyrimNet uses the version from {layer.source}. Editing it makes your own copy, which replaces it in every playthrough; SkyrimNet’s dashboard edits the same copy.
 		{/if}
@@ -153,6 +153,10 @@
 	}
 	.notice {
 		margin-top: var(--space-2);
+	}
+	.changed {
+		font-weight: 400;
+		color: var(--changed);
 	}
 	.small {
 		font-size: var(--step--1);

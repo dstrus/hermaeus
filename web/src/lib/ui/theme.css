@@ -2,7 +2,8 @@
  * Hermaeus's look: one more menu of the game you just closed. A smoked-glass
  * ground, hairline rules, tracked condensed capitals for anything that labels,
  * and one accent, only for selection and action: verdigris (old bronze) in
- * dark, frost blue in light. Dark follows the game's own menus; light is the
+ * dark, frost blue in light. Copper, the bronze under the verdigris, marks
+ * only what the player changed from what SkyrimNet ships. Dark follows the game's own menus; light is the
  * same world in pale smoke. The page's data-theme is "dark",
  * "light" or "system" (follow the OS); anything else counts as "system".
  */
@@ -50,6 +51,7 @@
 	--rule-strong: #3a3a3a;
 	--accent: #7fb8a0; /* verdigris */
 	--on-accent: #0e1a15;
+	--changed: #d2996b; /* copper: what the player changed from what SkyrimNet ships */
 	--select: rgb(242 239 230 / 0.07);
 	--warn: #d9a441;
 	--danger: #e57368;
@@ -69,6 +71,7 @@
 	--rule-strong: #b3b0a7;
 	--accent: #2a5f86; /* frost blue */
 	--on-accent: #eef4f9;
+	--changed: #9a4a20; /* copper */
 	--select: rgb(27 26 23 / 0.06);
 	--warn: #8a5a00;
 	--danger: #b3261e;
@@ -88,6 +91,7 @@
 		--rule-strong: #b3b0a7;
 		--accent: #2a5f86; /* frost blue */
 		--on-accent: #eef4f9;
+		--changed: #9a4a20; /* copper */
 		--select: rgb(27 26 23 / 0.06);
 		--warn: #8a5a00;
 		--danger: #b3261e;

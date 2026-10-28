@@ -15,6 +15,7 @@ colors:
   rule-strong: "#3a3a3a"
   warn: "#d9a441"
   danger: "#e57368"
+  changed: "#d2996b"
   accent-light: "#2a5f86"
   on-accent-light: "#eef4f9"
   ground-light: "#e4e3df"
@@ -28,6 +29,7 @@ colors:
   rule-strong-light: "#b3b0a7"
   warn-light: "#8a5a00"
   danger-light: "#b3261e"
+  changed-light: "#9a4a20"
 typography:
   display:
     fontFamily: "Barlow Condensed, Jost, sans-serif"
@@ -136,7 +138,7 @@ components:
 
 **Creative North Star: "The Game's Own Menus"**
 
-Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and no second accent color.
+Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and only one more color, copper, kept for what the player changed.
 
 The world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. The accent is scarce and means "this is selected" or "this is what you can do". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.
 
@@ -169,11 +171,16 @@ A near-monochrome palette, off-white on near-black (or near-black on pale smoke)
 - **Hairline** (`rule` / `rule-light`): row dividers and structural borders between shell zones.
 - **Strong Hairline** (`rule-strong` / `rule-strong-light`): column-head underlines, group-heading underlines, control borders, the pane's left edge.
 
+### Secondary
+- **Copper Changed** (`changed` / `changed-light`): the bronze under the verdigris, for what the player changed from what SkyrimNet ships: their own copy of a prompt, a setting off its default, a bio they made. A word, a small square mark, or a value in copper; never a fill. Passes AA on both grounds in both themes.
+
 ### Status
 - **Amber Warning** (`warn` / `warn-light`): "Skyrim running · read-only" and warning notices or flags.
 - **Ember Error** (`danger` / `danger-light`): error notices only.
 
 ### Named Rules
+**The Changed Rule.** Copper means one thing: the player changed this from what SkyrimNet ships. It marks the thing itself (the copy, the value), never the action on it, and never doubles as a warning; a warning stays amber.
+
 **The Scarce Accent Rule.** The accent marks selection, action, and group headings that sort a list into sections. It never fills a surface larger than a button and never decorates. If something is in the accent color, it is selected, actionable, or a heading inside a list.
 
 **The One Token Set Rule.** Light mode is the same roles with different values, never a different design. A new color ships as a dark/light pair or not at all.

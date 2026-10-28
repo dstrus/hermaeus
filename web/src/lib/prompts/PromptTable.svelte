@@ -21,6 +21,8 @@
 	let error = $state('');
 
 	const source = (p: Prompt) => list.layers[p.layer]?.source ?? '';
+	// The player's own copy is what they changed; it gets the changed mark.
+	const mine = (p: Prompt) => list.layers[p.layer]?.kind === 'overlay';
 	const folderName = (p: Prompt) => promptFolder(p.path) || 'prompts';
 
 	// Searching inside reads every prompt on the server, so it waits for a
@@ -77,7 +79,7 @@
 
 <div class="bar">
 	<h1 class="caps">Prompts</h1>
-	<span class="muted">{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
+	<span class="muted n">{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
 	<label class="inside"><input type="checkbox" bind:checked={inside} /> Search inside</label>
 	<input type="search" bind:value={query} placeholder={inside ? 'Search names and text' : 'Filter by name'} aria-label="Filter prompts" />
 </div>
@@ -95,7 +97,7 @@
 					<th class="mark" aria-label="Selected"></th>
 					<SortHeader label="Prompt" key="name" bind:sort />
 					<SortHeader label="Folder" key="folder" bind:sort class="folder" />
-					<SortHeader label="From" key="source" bind:sort />
+					<SortHeader label="From" key="source" bind:sort class="from" />
 				</tr>
 			</thead>
 			<tbody>
@@ -107,7 +109,7 @@
 						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
 						<td class="name"><a href={href(p)}>{promptName(p.path)}</a></td>
 						<td class="folder muted">{folderName(p)}</td>
-						<td class="muted">{source(p)}</td>
+						<td class="from muted">{#if mine(p)}<span class="changed">Your copy</span>{:else}{source(p)}{/if}</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -117,7 +119,7 @@
 				<h2 class="caps">{promptName(current.path)}</h2>
 				<p class="path">{current.path}</p>
 				<dl>
-					<dt class="caps">In use</dt><dd>{source(current)}</dd>
+					<dt class="caps">In use</dt><dd>{#if mine(current)}<span class="changed">Your copy</span>{:else}{source(current)}{/if}</dd>
 					{#if current.layers.length > 1}
 						<dt class="caps">Also in</dt><dd>{current.layers.slice(1).map((i) => list.layers[i]?.source ?? '').join(', ')}</dd>
 					{/if}
@@ -156,6 +158,18 @@
 	}
 	.bar input[type='search'] {
 		width: 18rem;
+	}
+	.bar .n {
+		white-space: nowrap;
+	}
+	/* The name takes what the folder and source leave; neither wraps. */
+	.split :global(.folder) {
+		width: 11rem;
+		white-space: nowrap;
+	}
+	.split :global(.from) {
+		width: 13rem;
+		white-space: nowrap;
 	}
 	.split {
 		display: grid;
@@ -249,6 +263,19 @@
 	}
 	.name a:hover {
 		text-decoration: underline;
+	}
+	.changed {
+		color: var(--changed);
+	}
+	td .changed::before {
+		content: '';
+		display: inline-block;
+		width: 0.45rem;
+		height: 0.45rem;
+		margin-right: var(--space-2);
+		background: var(--changed);
+		border-radius: 1px;
+		vertical-align: 1px;
 	}
 	.group th {
 		padding: var(--space-4) var(--space-3) var(--space-1);
