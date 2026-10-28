@@ -3,7 +3,7 @@
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
-.PHONY: build web types test dev clean
+.PHONY: build web types test dev icons clean
 
 # The program, for this machine.
 build: web
@@ -16,6 +16,19 @@ web: web/node_modules
 web/node_modules: web/package.json web/package-lock.json
 	npm --prefix web ci --ignore-scripts
 	@touch $@
+
+# The icon files, from the drawings in assets/: the icon, and a tighter
+# frame on the eye for the 16-pixel size, where the tentacles turn to mush.
+# Needs ImageMagick; only run when a drawing changes, since the results are
+# checked in.
+icons:
+	convert -background none -density 400 assets/hermaeus-icon-small.svg -resize 16x16 /tmp/hermaeus-16.png
+	for n in 24 32 48 64 128 256; do convert -background none -density 400 assets/hermaeus-icon.svg -resize $${n}x$${n} /tmp/hermaeus-$$n.png; done
+	convert /tmp/hermaeus-16.png /tmp/hermaeus-32.png /tmp/hermaeus-48.png web/static/favicon.ico
+	convert /tmp/hermaeus-16.png /tmp/hermaeus-24.png /tmp/hermaeus-32.png /tmp/hermaeus-48.png /tmp/hermaeus-64.png /tmp/hermaeus-128.png /tmp/hermaeus-256.png cmd/hermaeus/hermaeus.ico
+	convert -background none -density 400 assets/hermaeus-icon.svg -resize 180x180 web/static/apple-touch-icon.png
+	cp assets/hermaeus-icon.svg web/static/favicon.svg
+	rm -f /tmp/hermaeus-*.png
 
 # TypeScript types for the API, from the Go types listed in tygo.yaml.
 types:

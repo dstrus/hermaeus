@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { live, watchGame } from '#lib/api/live.svelte.ts';
 	import FolderForm from '#lib/folders/FolderForm.svelte';
+	import Mark from '#lib/ui/Mark.svelte';
 	import ToggleBar from '#lib/settings/ToggleBar.svelte';
 	import HintBar from '#lib/ui/HintBar.svelte';
 	import ThemeSwitch from '#lib/ui/ThemeSwitch.svelte';
@@ -44,7 +45,7 @@
 
 <div class="app" class:withsections={!!save && !!data.status.skyrimNetDir}>
 	<header class="top">
-		<a class="name caps" href="/">Hermaeus</a>
+		<a class="name caps" href="/"><Mark size="1.35em" /> Hermaeus</a>
 		<div class="state">
 			{#if save && data.status.playthroughs.length}
 				<label class="playthrough">
@@ -122,6 +123,9 @@
 		border-top: 1px solid var(--rule);
 	}
 	.name {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
 		font-size: var(--step-2);
 		font-weight: 600;
 		text-decoration: none;

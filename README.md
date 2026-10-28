@@ -58,6 +58,7 @@ make types              # regenerate the API's TypeScript types after changing t
 | `internal/templates/` | Checking the markup of SkyrimNet's prompt and bio templates |
 | `internal/textfile/` | How files SkyrimNet reads are changed: atomic writes, backups, line endings kept |
 | `internal/testenv/` | SkyrimNet folders with a real schema, for tests |
+| `assets/` | The drawings behind the app icon and the mark in the top bar; `make icons` renders the icon files from them |
 | `web/src/routes/` | The app's pages; each folder is a URL |
 | `web/src/lib/ui/` | The look and its shared parts: theme tokens (`theme.css`), the keyboard-shortcut hint strip, sortable heads, row selection |
 | `web/src/lib/<domain>/` | Each domain's API calls and components, mirroring `internal/<domain>/` |

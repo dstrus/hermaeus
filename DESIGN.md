@@ -144,6 +144,8 @@ The world is dense and quiet. Text is Jost at a compact 15px with tabular figure
 
 The signature is the bottom button-hint strip: every hint is a real keyboard shortcut, and clicking the hint does the same thing. The SVG diamond marks the selected row, as it does in the game.
 
+The mark is the eye of Hermaeus Mora among his tentacles (`assets/`). In the top bar it sits before the wordmark in the text color, with the eye cut out so the ground shows through; as the app icon and favicon it is verdigris on the game's near-black, in a rounded square, with a tighter frame on the eye at 16 pixels.
+
 **Key Characteristics:**
 - Smoked-glass ground: a fixed radial gradient from a lighter smoke heart to the ground color.
 - Hairline 1px rules (two strengths) instead of boxes, cards, or shadows.
