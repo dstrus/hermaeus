@@ -56,7 +56,7 @@ packages:
     output_path: web/src/lib/api/types/layers.ts
     fallback_type: unknown
   - path: hermaeus/internal/prompts
-    include_files: [prompts.go, save.go]
+    include_files: [prompts.go, save.go, pins.go]
     output_path: web/src/lib/api/types/prompts.ts
     fallback_type: unknown
     frontmatter: |

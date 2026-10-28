@@ -20,6 +20,12 @@ func (p *Prompts) Routes(mux *http.ServeMux) {
 	mux.Handle("PUT /api/prompts/file/{path...}", httpapi.JSON(func(r *http.Request, e Edit) (Saved, error) {
 		return p.Save(r.PathValue("path"), e)
 	}))
+	mux.Handle("PUT /api/prompts/pins/{path...}", httpapi.JSON(func(r *http.Request, _ httpapi.None) (PinsResponse, error) {
+		return p.SetPinned(r.PathValue("path"), true)
+	}))
+	mux.Handle("DELETE /api/prompts/pins/{path...}", httpapi.JSON(func(r *http.Request, _ httpapi.None) (PinsResponse, error) {
+		return p.SetPinned(r.PathValue("path"), false)
+	}))
 	mux.Handle("DELETE /api/prompts/file/{path...}", httpapi.JSON(func(r *http.Request, rv Revert) (Document, error) {
 		return p.RemoveCopy(r.PathValue("path"), rv)
 	}))

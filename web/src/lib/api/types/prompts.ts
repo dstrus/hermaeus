@@ -2,6 +2,13 @@
 import type * as layers from './layers.ts';
 
 //////////
+// source: pins.go
+
+export interface PinsResponse {
+  pins: string[]; // paths under prompts/, in the order they were pinned
+}
+
+//////////
 // source: prompts.go
 /*
 Package prompts is about SkyrimNet's prompts: the templates it fills in to
@@ -27,6 +34,7 @@ export interface Prompt {
   layer: number /* int */; // index into PromptList.Layers: the version SkyrimNet uses
   layers: number /* int */[]; // every layer that has it, highest priority first
   modified: number /* int64 */; // the version in use, Unix ms
+  pinned: boolean; // kept at the top of the Prompts page
 }
 export interface PromptList {
   layers: layers.Layer[];

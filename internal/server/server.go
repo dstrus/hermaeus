@@ -92,7 +92,7 @@ func (s *Server) routes() {
 	memories.Routes(m, s.Store)
 	bios.New(s.Store, s.Library).Routes(m)
 	settings.New(s.Store, s.Prefs).Routes(m)
-	prompts.New(s.Store, s.Library).Routes(m)
+	prompts.New(s.Store, s.Library, s.Prefs).Routes(m)
 
 	m.Handle("/api/", httpapi.JSON(func(r *http.Request, _ httpapi.None) (httpapi.None, error) {
 		return httpapi.None{}, apperr.New(apperr.NotFound, "Unknown endpoint: %s %s", r.Method, r.URL.Path)

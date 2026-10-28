@@ -20,6 +20,7 @@ import (
 
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/layers"
+	"hermaeus/internal/prefs"
 	"hermaeus/internal/store"
 	"hermaeus/internal/textfile"
 )
@@ -34,10 +35,11 @@ const (
 type Prompts struct {
 	store   *store.Store
 	library *layers.Library
+	prefs   *prefs.Prefs // where pinned prompts are remembered
 }
 
-func New(st *store.Store, lib *layers.Library) *Prompts {
-	return &Prompts{store: st, library: lib}
+func New(st *store.Store, lib *layers.Library, p *prefs.Prefs) *Prompts {
+	return &Prompts{store: st, library: lib, prefs: p}
 }
 
 // Prompt is one prompt, named by its path under prompts/ with forward
@@ -47,6 +49,7 @@ type Prompt struct {
 	Layer    int    `json:"layer"`    // index into PromptList.Layers: the version SkyrimNet uses
 	Layers   []int  `json:"layers"`   // every layer that has it, highest priority first
 	Modified int64  `json:"modified"` // the version in use, Unix ms
+	Pinned   bool   `json:"pinned"`   // kept at the top of the Prompts page
 }
 
 type PromptList struct {
@@ -120,11 +123,18 @@ func (p *Prompts) List() (PromptList, error) {
 			return nil
 		})
 	}
+	order := p.pinOrder()
 	for _, e := range byKey {
+		e.Pinned = order(e.Path) < len(p.prefs.Get().PinnedPrompts)
 		out.Prompts = append(out.Prompts, *e)
 	}
+	// Pinned prompts first, in the order they were pinned; the rest by path.
 	sort.Slice(out.Prompts, func(i, j int) bool {
-		return strings.ToLower(out.Prompts[i].Path) < strings.ToLower(out.Prompts[j].Path)
+		a, b := out.Prompts[i], out.Prompts[j]
+		if x, y := order(a.Path), order(b.Path); x != y {
+			return x < y
+		}
+		return strings.ToLower(a.Path) < strings.ToLower(b.Path)
 	})
 	return out, nil
 }

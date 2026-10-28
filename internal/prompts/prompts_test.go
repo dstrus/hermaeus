@@ -8,6 +8,7 @@ import (
 
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/layers"
+	"hermaeus/internal/prefs"
 	"hermaeus/internal/store"
 	"hermaeus/internal/testenv"
 )
@@ -36,7 +37,7 @@ func newHarness(t *testing.T) *harness {
 	if _, err := lib.SetModDir(mod); err != nil {
 		t.Fatal(err)
 	}
-	h.prompts = New(h.store, lib)
+	h.prompts = New(h.store, lib, prefs.Load(""))
 	return h
 }
 
@@ -188,5 +189,38 @@ func TestReadFindsEveryLayerIgnoringCase(t *testing.T) {
 	}
 	if len(doc.Versions) != 2 || doc.Versions[0].Text != "mine\n" || doc.Versions[1].Text != "shipped\n" || doc.Versions[1].Path != "Components/Mood.prompt" {
 		t.Errorf("versions = %+v", doc.Versions)
+	}
+}
+
+func TestPinnedPrompts(t *testing.T) {
+	h := newHarness(t)
+	for _, name := range []string{"a.prompt", "b.prompt", "components/c.prompt"} {
+		writeFile(t, filepath.Join(h.base, name), "x")
+	}
+	for _, path := range []string{"components/C.prompt", "b.prompt"} {
+		if _, err := h.prompts.SetPinned(path, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := h.prompts.SetPinned("../x.prompt", true); err == nil {
+		t.Error("pinned an invalid path")
+	}
+	list, err := h.prompts.List()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, p := range list.Prompts {
+		if p.Pinned {
+			got = append(got, "*"+p.Path)
+		} else {
+			got = append(got, p.Path)
+		}
+	}
+	if want := "*components/c.prompt,*b.prompt,a.prompt"; strings.Join(got, ",") != want {
+		t.Errorf("prompts = %v, want %s (pins first, as pinned)", got, want)
+	}
+	if pins, _ := h.prompts.SetPinned("B.prompt", false); strings.Join(pins.Pins, ",") != "components/C.prompt" {
+		t.Errorf("pins = %v", pins.Pins)
 	}
 }

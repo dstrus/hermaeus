@@ -1,6 +1,6 @@
 import { request } from '#lib/api/client.ts';
 import type { Layer } from '#lib/api/types/layers.ts';
-import type { Document, Edit, Matches, PromptList, Revert, Saved } from '#lib/api/types/prompts.ts';
+import type { Document, Edit, Matches, PinsResponse, PromptList, Revert, Saved } from '#lib/api/types/prompts.ts';
 
 // What load functions depend on for the prompt list and an open prompt;
 // invalidate them after saving or removing a copy.
@@ -31,6 +31,12 @@ export function savePrompt(path: string, edit: Edit): Promise<Saved> {
 
 export function removeCopy(path: string, r: Revert): Promise<Document> {
 	return request<Document>('DELETE', filePath(path), r);
+}
+
+// setPromptPinned pins or unpins a prompt, and returns the pins as they are
+// afterward.
+export function setPromptPinned(path: string, pinned: boolean): Promise<PinsResponse> {
+	return request<PinsResponse>(pinned ? 'PUT' : 'DELETE', '/api/prompts/pins/' + path.split('/').map(encodeURIComponent).join('/'));
 }
 
 // promptHref is the page for a prompt in a playthrough.

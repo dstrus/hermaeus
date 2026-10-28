@@ -1,17 +1,18 @@
 <!-- Every prompt SkyrimNet can use, with the layer each comes from. -->
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { Prompt, PromptList } from '#lib/api/types/prompts.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
+	import PinButton from '#lib/ui/PinButton.svelte';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
 	import { count, realTime } from '#lib/format.ts';
-	import { promptFolder, promptHref, promptName, searchPrompts } from './api.ts';
+	import { promptFolder, promptHref, promptName, promptsDependency, searchPrompts, setPromptPinned } from './api.ts';
 
-	let { save, list }: { save: string; list: PromptList } = $props();
+	let { save, list }: { save: string; list: PromptList } = $props(); // pinned prompts first, in the order they were pinned, then by path
 
 	let query = $state('');
 	let inside = $state(false); // search the prompts' text too, not only their names
@@ -50,18 +51,32 @@
 		}, 250);
 	});
 
+	let grouped = $derived(sort.key === 'folder');
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
 		const found = list.prompts.filter((p) => !q || p.path.toLowerCase().includes(q) || matches?.has(p.path.toLowerCase()));
-		return sorted(found, sort, {
+		const byKey = sorted(found, sort, {
 			name: (p) => promptName(p.path),
 			// Top-level prompts first, then each folder's; a space keeps a
 			// folder's own files ahead of its subfolders' when collated.
 			folder: (p) => promptFolder(p.path) + ' ' + promptName(p.path),
 			source: (p) => source(p)
 		});
+		// In their natural order, pinned prompts sit first, as pinned.
+		return grouped ? [...found.filter((p) => p.pinned), ...byKey.filter((p) => !p.pinned)] : byKey;
 	});
-	let grouped = $derived(sort.key === 'folder');
+	// The heading a row sits under when grouped: Pinned, or its folder.
+	const groupOf = (p: Prompt) => (p.pinned ? 'Pinned' : folderName(p));
+
+	async function togglePin(p: Prompt) {
+		error = '';
+		try {
+			await setPromptPinned(p.path, !p.pinned);
+			await invalidate(promptsDependency);
+		} catch (e) {
+			error = e instanceof ApiError ? e.message : String(e);
+		}
+	}
 
 	const selection = new Selection(() => shown, (p) => p.path);
 	let current = $derived(selection.current);
@@ -72,7 +87,8 @@
 		return [
 			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !p, run: () => p && goto(href(p)) }
+			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !p, run: () => p && goto(href(p)) },
+			{ key: 'p', shown: 'P', label: p?.pinned ? 'Unpin' : 'Pin', disabled: !p, run: () => p && togglePin(p) }
 		];
 	});
 </script>
@@ -98,18 +114,20 @@
 					<SortHeader label="Prompt" key="name" bind:sort />
 					<SortHeader label="Folder" key="folder" bind:sort class="folder" />
 					<SortHeader label="From" key="source" bind:sort class="from" />
+					<th class="pin" aria-label="Pinned"></th>
 				</tr>
 			</thead>
 			<tbody>
 				{#each shown as p, i (p.path)}
-					{#if grouped && (i === 0 || folderName(p) !== folderName(shown[i - 1]!))}
-						<tr class="group"><th colspan="4" class="caps" scope="rowgroup">{folderName(p)}</th></tr>
+					{#if grouped && (i === 0 || groupOf(p) !== groupOf(shown[i - 1]!))}
+						<tr class="group"><th colspan="5" class="caps" scope="rowgroup">{groupOf(p)}</th></tr>
 					{/if}
 					<tr aria-selected={selection.is(p)} onclick={() => selection.select(p)} ondblclick={() => goto(href(p))}>
 						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
 						<td class="name"><a href={href(p)}>{promptName(p.path)}</a></td>
 						<td class="folder muted">{folderName(p)}</td>
 						<td class="from muted">{#if mine(p)}<span class="changed">Your copy</span>{:else}{source(p)}{/if}</td>
+						<td class="pin"><PinButton pinned={p.pinned} name={promptName(p.path)} onclick={() => togglePin(p)} /></td>
 					</tr>
 				{/each}
 			</tbody>
@@ -127,6 +145,7 @@
 				</dl>
 				<div class="actions">
 					<a class="button primary" href={href(current)}>Open</a>
+					<button type="button" class="button" aria-pressed={current.pinned} onclick={() => togglePin(current!)}>{current.pinned ? 'Unpin' : 'Pin'}</button>
 				</div>
 			{/if}
 		</aside>
@@ -215,6 +234,10 @@
 		margin: 0;
 		overflow-wrap: anywhere;
 	}
+	.actions {
+		display: flex;
+		gap: var(--space-2);
+	}
 	.actions a {
 		text-decoration: none;
 	}
@@ -256,6 +279,15 @@
 		border-bottom: 1px solid var(--rule-strong);
 	}
 	tbody .mark {
+		border-bottom-color: var(--rule);
+	}
+	.pin {
+		width: 2.5rem;
+		padding: 0 var(--space-2);
+		text-align: right;
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	tbody .pin {
 		border-bottom-color: var(--rule);
 	}
 	.name a {
