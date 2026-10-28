@@ -7,6 +7,9 @@ import (
 )
 
 func (b *Bios) Routes(mux *http.ServeMux) {
+	mux.Handle("GET /api/bios", httpapi.JSON(func(*http.Request, httpapi.None) (Catalog, error) {
+		return b.CatalogOf()
+	}))
 	const base = "/api/playthroughs/{save}/bios"
 	mux.Handle("GET "+base, httpapi.JSON(func(r *http.Request, _ httpapi.None) (SaveBios, error) {
 		return b.List(r.PathValue("save"))

@@ -365,3 +365,30 @@ func TestHistoryAndRestore(t *testing.T) {
 		t.Error("restored a version that doesn't exist")
 	}
 }
+
+func TestCatalogListsEveryLayersBios(t *testing.T) {
+	h := newHarness(t)
+	mod := filepath.Join(t.TempDir(), "[NoDelete] SkyrimNet Beta27")
+	base := filepath.Join(mod, "SKSE", "Plugins", "SkyrimNet", "library", layers.BasePlugin)
+	writeFile(t, filepath.Join(base, "manifest.json"), `{"version": "0.25.3"}`)
+	writeFile(t, filepath.Join(base, "prompts", "characters", "lydia_A2C.prompt"), "base")
+	writeFile(t, filepath.Join(base, "prompts", "characters", "bandit_generic.prompt"), "base")
+	writeFile(t, filepath.Join(base, "prompts", "characters", "dynamic", "lydia_A2C.dynamic.prompt"), "not a default")
+	writeFile(t, filepath.Join(h.Dir, "library", "bios.pack", "prompts", "characters", "Lydia_A2C.prompt"), "pack")
+	writeFile(t, filepath.Join(h.Dir, "library", "bios.pack", "manifest.json"), `{"title": "Lydia Pack"}`)
+	writeFile(t, filepath.Join(h.Dir, "content-registry.json"), `{"priority": ["bios.pack"]}`)
+	if _, err := h.library.SetModDir(mod); err != nil {
+		t.Fatal(err)
+	}
+	c, err := h.bios.CatalogOf()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []string
+	for _, e := range c.Bios {
+		got = append(got, e.Template+"@"+c.Layers[e.Layer].Source)
+	}
+	if want := "bandit_generic@SkyrimNet’s defaults,Lydia_A2C@Lydia Pack"; strings.Join(got, ",") != want {
+		t.Errorf("catalog = %v, want %s", got, want)
+	}
+}

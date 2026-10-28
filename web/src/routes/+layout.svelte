@@ -36,7 +36,7 @@
 		const shared = data.status.playthroughs.filter((o) => (o.player || 'No player yet') === name).length > 1;
 		return shared ? `${name} · ${p.id}` : name;
 	}
-	let charactersActive = $derived(!!save && (page.url.pathname === base || page.url.pathname.startsWith(`${base}/npc/`)));
+	let charactersActive = $derived(!!save && (page.url.pathname === base || page.url.pathname.startsWith(`${base}/npc/`) || page.url.pathname.startsWith(`${base}/bios`)));
 	let promptsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/prompts`));
 	let settingsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/settings`));
 </script>

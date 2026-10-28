@@ -65,7 +65,7 @@
 
 <div class="bar">
 	<h1 class="caps">Characters</h1>
-	<span class="muted">{count(characters.length)} with something stored</span>
+	<span class="muted">{count(characters.length)} with something stored · <a href="/{encodeURIComponent(save)}/bios">every bio</a></span>
 	<input type="search" bind:value={query} placeholder="Filter by name or bio" aria-label="Filter characters" />
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}

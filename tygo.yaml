@@ -44,9 +44,13 @@ packages:
     type_mappings:
       calendar.GameDate: calendar.GameDate
   - path: hermaeus/internal/bios
-    include_files: [bios.go, save.go, history.go]
+    include_files: [bios.go, save.go, history.go, catalog.go]
     output_path: web/src/lib/api/types/bios.ts
     fallback_type: unknown
+    frontmatter: |
+      import type * as layers from './layers.ts';
+    type_mappings:
+      layers.Layer: layers.Layer
   - path: hermaeus/internal/settings
     include_files: [settings.go, save.go, toggles.go, pins.go]
     output_path: web/src/lib/api/types/settings.ts
