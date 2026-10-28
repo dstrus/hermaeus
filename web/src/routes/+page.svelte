@@ -22,6 +22,14 @@
 
 <h1 class="caps">Playthroughs</h1>
 <p class="muted">In <span class="path">{data.status.skyrimNetDir}</span></p>
+<p class="muted defaults">
+	{#if data.status.modDir}
+		SkyrimNet’s own files {data.status.modDirDetected ? 'were found' : 'are'} in <span class="path">{data.status.modDir}</span>.
+	{:else if !data.status.defaultBios}
+		SkyrimNet’s default bios weren’t found, so characters without a save bio show none. Under Mod Organizer 2, start Hermaeus with
+		<code>-mod-dir</code> pointing at SkyrimNet’s mod folder.
+	{/if}
+</p>
 
 {#if !playthroughs.length}
 	<p class="empty">There are no SkyrimNet databases here yet. SkyrimNet makes one the first time you load a save with it.</p>
@@ -57,7 +65,11 @@
 		line-height: 1;
 	}
 	h1 + p {
-		margin: var(--space-2) 0 var(--space-5);
+		margin: var(--space-2) 0 0;
+	}
+	.defaults {
+		margin: var(--space-1) 0 var(--space-5);
+		max-width: 70ch;
 	}
 	.path {
 		color: var(--ink);

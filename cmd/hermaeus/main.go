@@ -22,6 +22,7 @@ import (
 
 	"hermaeus/internal/gamecheck"
 	"hermaeus/internal/install"
+	"hermaeus/internal/layers"
 	"hermaeus/internal/prefs"
 	"hermaeus/internal/server"
 	"hermaeus/internal/store"
@@ -35,7 +36,8 @@ func main() {
 	log.SetFlags(log.Ltime)
 	dir := flag.String("dir", "", "SkyrimNet folder, the one containing data, config, and logs (with MO2 usually overwrite\\SKSE\\Plugins\\SkyrimNet)")
 	port := flag.Int("port", 8765, "port to listen on; if it's taken, the next nine are tried, then any free port")
-	backups := flag.String("backups", "", "folder for database backups (default: hermaeus-backups in the SkyrimNet folder)")
+	backups := flag.String("backups", "", "folder for backups (default: hermaeus-backups in the SkyrimNet folder)")
+	modDir := flag.String("mod-dir", "", "SkyrimNet's mod folder, for its default bios when using Mod Organizer 2 (usually found automatically)")
 	noBrowser := flag.Bool("no-browser", false, "don't open Hermaeus in a browser")
 	showVersion := flag.Bool("version", false, "print Hermaeus's version and exit")
 	flag.Parse()
@@ -60,6 +62,16 @@ func main() {
 		}
 	}
 
+	library := layers.New(st.Dir)
+	switch {
+	case *modDir != "":
+		if _, err := library.SetModDir(*modDir); err != nil {
+			exit("%v", err)
+		}
+	case saved.ModDir != "" && install.IsDir(saved.ModDir):
+		library.SetModDir(saved.ModDir)
+	}
+
 	ports := make([]int, 10)
 	for i := range ports {
 		ports[i] = *port + i
@@ -67,7 +79,7 @@ func main() {
 	ln, running, err := server.Listen(ports)
 	if running != "" {
 		fmt.Printf("Hermaeus is already running at %s, so this opens it instead of starting a second copy.\n", running)
-		if *dir != "" || *backups != "" {
+		if *dir != "" || *modDir != "" || *backups != "" {
 			fmt.Println("To use different options, close that copy first, then start Hermaeus again.")
 		}
 		if !*noBrowser {
@@ -81,6 +93,7 @@ func main() {
 	actualPort := ln.Addr().(*net.TCPAddr).Port
 	handler, err := server.New(server.Options{
 		Store:   st,
+		Library: library,
 		Prefs:   remembered,
 		Token:   sessionToken(),
 		Port:    actualPort,

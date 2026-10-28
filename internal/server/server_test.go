@@ -11,6 +11,7 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"hermaeus/internal/layers"
 	"hermaeus/internal/prefs"
 	"hermaeus/internal/store"
 	"hermaeus/internal/testenv"
@@ -39,7 +40,7 @@ func newHarness(t *testing.T) *harness {
 		"_app/immutable/app.js": {Data: []byte(`console.log("hi")`)},
 		"favicon.svg":           {Data: []byte(`<svg/>`)},
 	}
-	srv, err := New(Options{Store: st, Prefs: h.prefs, Token: token, Port: 8765, Files: files, Version: "test"})
+	srv, err := New(Options{Store: st, Library: layers.New(st.Dir), Prefs: h.prefs, Token: token, Port: 8765, Files: files, Version: "test"})
 	if err != nil {
 		t.Fatal(err)
 	}

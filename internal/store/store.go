@@ -70,6 +70,31 @@ func (s *Store) backupDir() string {
 
 func (s *Store) GameRunning() bool { return s.gameRunning() }
 
+// SaveDir is a playthrough's folder under saves, where SkyrimNet keeps its
+// save-specific files such as bios. It needn't exist yet.
+func (s *Store) SaveDir(playthrough string) (string, error) {
+	if _, err := s.path(playthrough); err != nil {
+		return "", err
+	}
+	return filepath.Join(s.Dir(), "saves", playthrough), nil
+}
+
+// ChangeFiles runs fn, which changes files SkyrimNet reads, under the same
+// rules as a database write: refused while Skyrim is running, and one change
+// at a time. what describes the change for the log.
+func (s *Store) ChangeFiles(what string, fn func() error) error {
+	s.writeMu.Lock()
+	defer s.writeMu.Unlock()
+	if s.gameRunning() {
+		return apperr.New(apperr.Conflict, "Skyrim is running. Close the game before saving; SkyrimNet changes its files while you play.")
+	}
+	if err := fn(); err != nil {
+		return err
+	}
+	log.Print(what)
+	return nil
+}
+
 // Read runs fn on a playthrough's database, opened read-only.
 func Read[T any](s *Store, playthrough string, fn func(DB) (T, error)) (T, error) {
 	var zero T

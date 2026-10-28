@@ -43,3 +43,7 @@ packages:
       import type * as calendar from './calendar.ts';
     type_mappings:
       calendar.GameDate: calendar.GameDate
+  - path: hermaeus/internal/bios
+    include_files: [bios.go, save.go, history.go]
+    output_path: web/src/lib/api/types/bios.ts
+    fallback_type: unknown

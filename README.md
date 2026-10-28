@@ -9,10 +9,10 @@ Hermaeus works with SkyrimNet but isn't part of it, and isn't affiliated with or
 ## Running it
 
 ```
-hermaeus [-dir <SkyrimNet folder>] [-port 8765] [-backups <folder>] [-no-browser] [-version]
+hermaeus [-dir <SkyrimNet folder>] [-mod-dir <SkyrimNet mod folder>] [-port 8765] [-backups <folder>] [-no-browser] [-version]
 ```
 
-Without `-dir`, Hermaeus uses the folder you last chose, or looks next to the program and in the current directory (including `SKSE/Plugins/SkyrimNet`, `Data/SKSE/Plugins/SkyrimNet` and `overwrite/SKSE/Plugins/SkyrimNet` below them). If it doesn't find one, it asks in the browser.
+With Mod Organizer 2, SkyrimNet's own files stay in its mod folder while what it writes lands in `overwrite`; Hermaeus looks for the mod folder next to `overwrite`, and `-mod-dir` names it when that fails. Without `-dir`, Hermaeus uses the folder you last chose, or looks next to the program and in the current directory (including `SKSE/Plugins/SkyrimNet`, `Data/SKSE/Plugins/SkyrimNet` and `overwrite/SKSE/Plugins/SkyrimNet` below them). If it doesn't find one, it asks in the browser.
 
 ## Safety
 
@@ -51,6 +51,10 @@ make types              # regenerate the API's TypeScript types after changing t
 | `internal/characters/` | The player and NPCs: who's listed, pins, each one's overview and stats |
 | `internal/events/` | What SkyrimNet records happening in the game |
 | `internal/memories/` | Each character's memories and diary entries |
+| `internal/bios/` | Each character's bios: the save's dynamic and baseline bios, the default, history, and restore |
+| `internal/layers/` | SkyrimNet's content layers: dashboard edits, enabled plugins in order, shipped defaults; the MO2 mod folder |
+| `internal/templates/` | Checking the markup of SkyrimNet's prompt and bio templates |
+| `internal/textfile/` | How files SkyrimNet reads are changed: atomic writes, backups, line endings kept |
 | `internal/testenv/` | SkyrimNet folders with a real schema, for tests |
 | `web/src/routes/` | The app's pages; each folder is a URL |
 | `web/src/lib/ui/` | The look and its shared parts: theme tokens (`theme.css`), the keyboard-shortcut hint strip, sortable heads, row selection |
@@ -58,7 +62,7 @@ make types              # regenerate the API's TypeScript types after changing t
 | `web/src/lib/api/` | The API client, and TypeScript types generated from Go (`types/`, don't edit) |
 | `tygo.yaml` | Which Go types become TypeScript types |
 
-Domain packages own their logic, request and response types, routes, and tests. Only `store` touches SQLite. The visual system is recorded in [DESIGN.md](DESIGN.md).
+Domain packages own their logic, request and response types, routes, and tests. Only `store` touches SQLite, and only `textfile` writes files SkyrimNet reads. The visual system is recorded in [DESIGN.md](DESIGN.md).
 
 ## License
 

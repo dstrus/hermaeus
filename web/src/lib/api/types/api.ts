@@ -26,9 +26,17 @@ export interface Status {
   playthroughs: store.Playthrough[]; // most recently played first
   version: string; // Hermaeus's own
   theme: string; // "system", "dark" or "light"
+  /**
+   * SkyrimNet's mod folder, when its defaults aren't in the SkyrimNet
+   * folder (Mod Organizer 2); "" otherwise.
+   */
+  modDir: string;
+  modDirDetected: boolean; // found automatically rather than chosen
+  defaultBios: boolean; // SkyrimNet's default bios were found
 }
 export interface FolderRequest {
   path: string;
+  modPath?: string; // SkyrimNet's mod folder under MO2; "" goes back to finding it
 }
 export interface ThemeRequest {
   theme: string; // "system", "dark" or "light"

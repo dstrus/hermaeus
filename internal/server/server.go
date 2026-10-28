@@ -15,8 +15,10 @@ import (
 	"strings"
 
 	"hermaeus/internal/apperr"
+	"hermaeus/internal/bios"
 	"hermaeus/internal/characters"
 	"hermaeus/internal/httpapi"
+	"hermaeus/internal/layers"
 	"hermaeus/internal/memories"
 	"hermaeus/internal/prefs"
 	"hermaeus/internal/store"
@@ -31,6 +33,7 @@ var (
 
 type Options struct {
 	Store   *store.Store
+	Library *layers.Library
 	Prefs   *prefs.Prefs
 	Token   string
 	Port    int
@@ -73,11 +76,19 @@ func (s *Server) routes() {
 		}
 		log.Printf("SkyrimNet folder: %s", dir)
 		s.Prefs.Update(func(v *prefs.Values) { v.SkyrimNetDir = dir })
+		if req.ModPath != nil {
+			modDir, err := s.Library.SetModDir(*req.ModPath)
+			if err != nil {
+				return Status{}, err
+			}
+			s.Prefs.Update(func(v *prefs.Values) { v.ModDir = modDir })
+		}
 		return s.status(), nil
 	}))
 
 	characters.Routes(m, s.Store)
 	memories.Routes(m, s.Store)
+	bios.New(s.Store, s.Library).Routes(m)
 
 	m.Handle("/api/", httpapi.JSON(func(r *http.Request, _ httpapi.None) (httpapi.None, error) {
 		return httpapi.None{}, apperr.New(apperr.NotFound, "Unknown endpoint: %s %s", r.Method, r.URL.Path)

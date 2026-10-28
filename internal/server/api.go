@@ -23,10 +23,16 @@ type Status struct {
 	Playthroughs []store.Playthrough `json:"playthroughs"` // most recently played first
 	Version      string              `json:"version"`      // Hermaeus's own
 	Theme        string              `json:"theme"`        // "system", "dark" or "light"
+	// SkyrimNet's mod folder, when its defaults aren't in the SkyrimNet
+	// folder (Mod Organizer 2); "" otherwise.
+	ModDir         string `json:"modDir"`
+	ModDirDetected bool   `json:"modDirDetected"` // found automatically rather than chosen
+	DefaultBios    bool   `json:"defaultBios"`    // SkyrimNet's default bios were found
 }
 
 type FolderRequest struct {
-	Path string `json:"path"`
+	Path    string  `json:"path"`
+	ModPath *string `json:"modPath,omitempty"` // SkyrimNet's mod folder under MO2; "" goes back to finding it
 }
 
 type ThemeRequest struct {
@@ -34,12 +40,15 @@ type ThemeRequest struct {
 }
 
 func (s *Server) status() Status {
-	return Status{
+	st := Status{
 		SkyrimNetDir: s.Store.Dir(),
 		BackupDir:    s.Store.BackupDir(),
 		GameRunning:  s.Store.GameRunning(),
 		Playthroughs: s.Store.Playthroughs(),
 		Version:      s.Version,
 		Theme:        s.Prefs.Get().ThemeOf(),
+		DefaultBios:  s.Library.HasDefaults(),
 	}
+	st.ModDir, st.ModDirDetected = s.Library.ModDir()
+	return st
 }
