@@ -1,8 +1,9 @@
 /*
  * Hermaeus's look: one more menu of the game you just closed. A smoked-glass
  * ground, hairline rules, tracked condensed capitals for anything that labels,
- * and gold only for selection and action. Dark follows the game's own menus;
- * light is the same world in pale smoke. The page's data-theme is "dark",
+ * and one accent, only for selection and action: verdigris (old bronze) in
+ * dark, frost blue in light. Dark follows the game's own menus; light is the
+ * same world in pale smoke. The page's data-theme is "dark",
  * "light" or "system" (follow the OS); anything else counts as "system".
  */
 @import '@fontsource/jost/400.css';
@@ -45,8 +46,8 @@
 	--muted: #a8a293;
 	--rule: #2a2a2a;
 	--rule-strong: #3a3a3a;
-	--gold: #c9a24b;
-	--on-gold: #141109;
+	--accent: #7fb8a0; /* verdigris */
+	--on-accent: #0e1a15;
 	--select: rgb(242 239 230 / 0.07);
 	--warn: #d9a441;
 	--danger: #e57368;
@@ -64,8 +65,8 @@
 	--muted: #5d5a52;
 	--rule: #cdcbc4;
 	--rule-strong: #b3b0a7;
-	--gold: #7f5d12;
-	--on-gold: #fdf8ec;
+	--accent: #2a5f86; /* frost blue */
+	--on-accent: #eef4f9;
 	--select: rgb(27 26 23 / 0.06);
 	--warn: #8a5a00;
 	--danger: #b3261e;
@@ -83,8 +84,8 @@
 		--muted: #5d5a52;
 		--rule: #cdcbc4;
 		--rule-strong: #b3b0a7;
-		--gold: #7f5d12;
-		--on-gold: #fdf8ec;
+		--accent: #2a5f86; /* frost blue */
+		--on-accent: #eef4f9;
 		--select: rgb(27 26 23 / 0.06);
 		--warn: #8a5a00;
 		--danger: #b3261e;
@@ -108,18 +109,18 @@ body {
 	color: var(--ink);
 	font: 400 var(--step-0) / 1.5 var(--font-text);
 	font-variant-numeric: tabular-nums;
-	caret-color: var(--gold);
+	caret-color: var(--accent);
 	scrollbar-color: var(--rule-strong) transparent;
 	-webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-	background: var(--gold);
-	color: var(--on-gold);
+	background: var(--accent);
+	color: var(--on-accent);
 }
 
 :focus-visible {
-	outline: 2px solid var(--gold);
+	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
 
@@ -137,7 +138,7 @@ a {
 }
 
 a:hover {
-	text-decoration-color: var(--gold);
+	text-decoration-color: var(--accent);
 }
 
 /* Anything that labels rather than reads: categories, headings, column heads, keys. */
@@ -177,7 +178,7 @@ textarea::placeholder {
 
 input[type='checkbox'],
 input[type='radio'] {
-	accent-color: var(--gold);
+	accent-color: var(--accent);
 }
 
 .button {
@@ -194,13 +195,13 @@ input[type='radio'] {
 }
 
 .button:hover:not(:disabled) {
-	border-color: var(--gold);
+	border-color: var(--accent);
 }
 
 .button.primary {
-	background: var(--gold);
-	border-color: var(--gold);
-	color: var(--on-gold);
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--on-accent);
 }
 
 .button:disabled {
@@ -213,7 +214,7 @@ input[type='radio'] {
 	background: none;
 	border: 0;
 	padding: 0;
-	color: var(--gold);
+	color: var(--accent);
 	cursor: pointer;
 	text-decoration: underline;
 	text-underline-offset: 0.2em;

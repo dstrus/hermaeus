@@ -19,7 +19,7 @@ related_targets: ["web/src/routes/[save]/+layout.svelte","web/src/routes/[save]/
 
 THESIS: Hermaeus is one more menu of the game you just closed: categories, a sortable item list, and a details pane, driven from the keyboard. It refuses the admin-dashboard default of gray sidebar, cards, and a blue button.
 
-OWN-WORLD: Smoked-glass ground (near-black in dark, pale smoke in light), hairline rules, off-white or near-black text, gold only for selection and action (darker gold in light). Tracked condensed caps (Barlow Condensed) for categories, headings and column heads; Jost for text; tabular figures. The ◆ marks the selected row.
+OWN-WORLD: Smoked-glass ground (near-black in dark, pale smoke in light), hairline rules, off-white or near-black text, one accent only for selection and action: verdigris in dark, frost blue in light. Tracked condensed caps (Barlow Condensed) for categories, headings and column heads; Jost for text; tabular figures. The ◆ marks the selected row.
 
 STORY: The visitor sees their playthrough and its toggles first, flips what they need, then drops into a character's memories as an inventory-like table, edits in the details pane, and sees exactly what the save did.
 

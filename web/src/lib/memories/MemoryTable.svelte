@@ -263,7 +263,7 @@
 	}
 	.marked {
 		margin-left: var(--space-3);
-		color: var(--gold);
+		color: var(--accent);
 	}
 	.split {
 		display: grid;
@@ -302,8 +302,8 @@
 		display: inline-block;
 		width: 9px;
 		height: 9px;
-		border: 1.5px solid var(--gold);
-		background: var(--gold);
+		border: 1.5px solid var(--accent);
+		background: var(--accent);
 		border-radius: 1px;
 	}
 	.when {
@@ -350,7 +350,7 @@
 	.day th {
 		text-align: left;
 		padding: var(--space-5) var(--space-3) var(--space-1);
-		color: var(--gold);
+		color: var(--accent);
 		font-size: var(--step--1);
 		border-bottom: 1px solid var(--rule-strong);
 	}

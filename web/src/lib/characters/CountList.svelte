@@ -48,7 +48,7 @@
 <style>
 	h2 {
 		font-size: var(--step-0);
-		color: var(--gold);
+		color: var(--accent);
 		padding-bottom: var(--space-1);
 		border-bottom: 1px solid var(--rule-strong);
 	}
@@ -76,7 +76,7 @@
 		left: 0;
 		bottom: 2px;
 		height: 2px;
-		background: var(--gold);
+		background: var(--accent);
 		opacity: 0.55;
 	}
 	.n {

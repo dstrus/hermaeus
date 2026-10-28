@@ -58,7 +58,7 @@
 	}
 	button:hover,
 	button.on {
-		color: var(--gold);
+		color: var(--accent);
 	}
 	svg {
 		margin-left: var(--space-1);

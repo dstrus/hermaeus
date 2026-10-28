@@ -259,7 +259,7 @@
 	.group th {
 		text-align: left;
 		padding: var(--space-5) var(--space-3) var(--space-1);
-		color: var(--gold);
+		color: var(--accent);
 		font-size: var(--step--1);
 		border-bottom: 1px solid var(--rule-strong);
 	}

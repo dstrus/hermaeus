@@ -105,7 +105,7 @@
 	}
 	nav a[aria-current='page'] {
 		color: var(--ink);
-		border-bottom-color: var(--gold);
+		border-bottom-color: var(--accent);
 	}
 	.n {
 		margin-left: var(--space-2);

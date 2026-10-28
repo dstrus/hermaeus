@@ -4,30 +4,30 @@
   "title": "Design System: Hermaeus",
   "extensions": {
     "colorMeta": {
-      "gold": {
+      "accent": {
         "role": "primary",
-        "displayName": "Septim Gold",
+        "displayName": "Verdigris",
         "tonalRamp": [
           "#2a1f08",
           "#4a3710",
           "#6b5016",
           "#8d6a1f",
           "#b0882f",
-          "#c9a24b",
+          "#7fb8a0",
           "#dcc184",
           "#f1e4c4"
         ]
       },
-      "on-gold": {
+      "on-accent": {
         "role": "primary",
-        "displayName": "Gold Ink",
+        "displayName": "Accent Ink",
         "tonalRamp": [
           "#2a1f08",
           "#4a3710",
           "#6b5016",
           "#8d6a1f",
           "#b0882f",
-          "#c9a24b",
+          "#7fb8a0",
           "#dcc184",
           "#f1e4c4"
         ]
@@ -186,30 +186,30 @@
           "#f8d6d3"
         ]
       },
-      "gold-light": {
+      "accent-light": {
         "role": "primary",
-        "displayName": "Septim Gold (light)",
+        "displayName": "Frost Blue",
         "tonalRamp": [
           "#2a1f08",
           "#4a3710",
           "#6b5016",
           "#8d6a1f",
           "#b0882f",
-          "#c9a24b",
+          "#7fb8a0",
           "#dcc184",
           "#f1e4c4"
         ]
       },
-      "on-gold-light": {
+      "on-accent-light": {
         "role": "primary",
-        "displayName": "Gold Ink (light)",
+        "displayName": "Accent Ink (light)",
         "tonalRamp": [
           "#2a1f08",
           "#4a3710",
           "#6b5016",
           "#8d6a1f",
           "#b0882f",
-          "#c9a24b",
+          "#7fb8a0",
           "#dcc184",
           "#f1e4c4"
         ]
@@ -430,7 +430,7 @@
       "purpose": "The body ground in both themes."
     },
     "focus": {
-      "value": "outline: 2px solid var(--gold); outline-offset: 2px",
+      "value": "outline: 2px solid var(--accent); outline-offset: 2px",
       "purpose": "All focus-visible states."
     }
   },
@@ -439,33 +439,33 @@
       "name": "Button",
       "kind": "button",
       "refersTo": "button",
-      "description": "Outlined caps button; the border turns gold on hover.",
+      "description": "Outlined caps button; the border takes the accent on hover.",
       "html": "<button class=\"ds-btn\">Cancel</button>",
-      "css": ".ds-btn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn:hover{border-color:var(--gold);} .ds-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}"
+      "css": ".ds-btn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn:hover{border-color:var(--accent);} .ds-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}"
     },
     {
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one gold-filled action in a group, such as Save.",
+      "description": "The one accent-filled action in a group, such as Save.",
       "html": "<button class=\"ds-btn-primary\">Save</button>",
-      "css": ".ds-btn-primary{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:var(--gold);color:var(--on-gold);border:1px solid var(--gold);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn-primary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;} .ds-btn-primary:disabled{opacity:.5;cursor:not-allowed;}"
+      "css": ".ds-btn-primary{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:var(--accent);color:var(--on-accent);border:1px solid var(--accent);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn-primary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-btn-primary:disabled{opacity:.5;cursor:not-allowed;}"
     },
     {
       "name": "Text Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Smoked-glass field with a strong hairline and a gold caret.",
+      "description": "Smoked-glass field with a strong hairline and a accent caret.",
       "html": "<input class=\"ds-input\" placeholder=\"Search memories\">",
-      "css": ".ds-input{font:400 var(--step-0)/1.5 var(--font-text);color:var(--ink);background:var(--glass-strong);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-2) var(--space-3);caret-color:var(--gold);} .ds-input::placeholder{color:var(--muted);} .ds-input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}"
+      "css": ".ds-input{font:400 var(--step-0)/1.5 var(--font-text);color:var(--ink);background:var(--glass-strong);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-2) var(--space-3);caret-color:var(--accent);} .ds-input::placeholder{color:var(--muted);} .ds-input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}"
     },
     {
       "name": "Item Table",
       "kind": "custom",
       "refersTo": "table-row-selected",
-      "description": "Sortable item list with the diamond marking the selected row and a gold group heading.",
-      "html": "<table class=\"ds-table\"><thead><tr><th class=\"ds-mark\"></th><th><button class=\"ds-sort ds-on\">When &#9662;</button></th><th><button class=\"ds-sort\">Memory</button></th><th class=\"ds-n\"><button class=\"ds-sort\">Imp.</button></th></tr></thead><tbody><tr class=\"ds-group\"><th colspan=\"4\">Fredas, 11th of Hearthfire</th></tr><tr class=\"ds-sel\"><td class=\"ds-mark\"><svg width=\"9\" height=\"9\" viewBox=\"0 0 10 10\"><path d=\"M5 0 10 5 5 10 0 5Z\" fill=\"var(--gold)\"/></svg></td><td>11:08 AM</td><td>A selected row</td><td class=\"ds-n\">0.55</td></tr><tr><td class=\"ds-mark\"></td><td>10:17 AM</td><td>Another row</td><td class=\"ds-n\">0.95</td></tr></tbody></table>",
-      "css": ".ds-table{width:100%;border-collapse:collapse;font:400 var(--step-0)/1.5 var(--font-text);font-variant-numeric:tabular-nums;color:var(--ink);} .ds-table th{text-align:left;padding:0;border-bottom:1px solid var(--rule-strong);font-weight:inherit;} .ds-sort{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:none;border:0;padding:var(--space-2) var(--space-3);font-size:var(--step--1);color:var(--muted);cursor:pointer;width:100%;text-align:inherit;} .ds-sort:hover,.ds-sort.ds-on{color:var(--gold);} .ds-table td{padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--rule);} .ds-mark{width:1.5rem;padding-right:0!important;} .ds-n{text-align:right!important;} .ds-sel td{background:var(--select);} .ds-group th{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-5) var(--space-3) var(--space-1);color:var(--gold);font-size:var(--step--1);}"
+      "description": "Sortable item list with the diamond marking the selected row and an accent group heading.",
+      "html": "<table class=\"ds-table\"><thead><tr><th class=\"ds-mark\"></th><th><button class=\"ds-sort ds-on\">When &#9662;</button></th><th><button class=\"ds-sort\">Memory</button></th><th class=\"ds-n\"><button class=\"ds-sort\">Imp.</button></th></tr></thead><tbody><tr class=\"ds-group\"><th colspan=\"4\">Fredas, 11th of Hearthfire</th></tr><tr class=\"ds-sel\"><td class=\"ds-mark\"><svg width=\"9\" height=\"9\" viewBox=\"0 0 10 10\"><path d=\"M5 0 10 5 5 10 0 5Z\" fill=\"var(--accent)\"/></svg></td><td>11:08 AM</td><td>A selected row</td><td class=\"ds-n\">0.55</td></tr><tr><td class=\"ds-mark\"></td><td>10:17 AM</td><td>Another row</td><td class=\"ds-n\">0.95</td></tr></tbody></table>",
+      "css": ".ds-table{width:100%;border-collapse:collapse;font:400 var(--step-0)/1.5 var(--font-text);font-variant-numeric:tabular-nums;color:var(--ink);} .ds-table th{text-align:left;padding:0;border-bottom:1px solid var(--rule-strong);font-weight:inherit;} .ds-sort{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:none;border:0;padding:var(--space-2) var(--space-3);font-size:var(--step--1);color:var(--muted);cursor:pointer;width:100%;text-align:inherit;} .ds-sort:hover,.ds-sort.ds-on{color:var(--accent);} .ds-table td{padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--rule);} .ds-mark{width:1.5rem;padding-right:0!important;} .ds-n{text-align:right!important;} .ds-sel td{background:var(--select);} .ds-group th{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-5) var(--space-3) var(--space-1);color:var(--accent);font-size:var(--step--1);}"
     },
     {
       "name": "Details Pane",
@@ -473,7 +473,7 @@
       "refersTo": "details-pane",
       "description": "Opaque full-height zone beside the list holding the selected item.",
       "html": "<aside class=\"ds-pane\"><h2>Serana</h2><dl><dt>Plugin</dt><dd>dawnguard.esm</dd><dt>Memories</dt><dd>51</dd></dl><button class=\"ds-pbtn\">Edit</button></aside>",
-      "css": ".ds-pane{width:22rem;padding:var(--space-5);background:var(--panel);border-left:1px solid var(--rule-strong);color:var(--ink);font:400 var(--step-0)/1.5 var(--font-text);} .ds-pane h2{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-weight:600;font-size:var(--step-2);margin:0 0 var(--space-1);} .ds-pane dl{display:grid;grid-template-columns:7.5rem 1fr;gap:var(--space-1) var(--space-3);margin:var(--space-4) 0;} .ds-pane dt{color:var(--muted);font-size:var(--step--1);} .ds-pane dd{margin:0;} .ds-pbtn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-pbtn:hover{border-color:var(--gold);}"
+      "css": ".ds-pane{width:22rem;padding:var(--space-5);background:var(--panel);border-left:1px solid var(--rule-strong);color:var(--ink);font:400 var(--step-0)/1.5 var(--font-text);} .ds-pane h2{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-weight:600;font-size:var(--step-2);margin:0 0 var(--space-1);} .ds-pane dl{display:grid;grid-template-columns:7.5rem 1fr;gap:var(--space-1) var(--space-3);margin:var(--space-4) 0;} .ds-pane dt{color:var(--muted);font-size:var(--step--1);} .ds-pane dd{margin:0;} .ds-pbtn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-pbtn:hover{border-color:var(--accent);}"
     },
     {
       "name": "Button-Hint Strip",
@@ -487,9 +487,9 @@
       "name": "Tabs",
       "kind": "nav",
       "refersTo": "tab-active",
-      "description": "Caps tabs over a hairline; the current tab is ink with a gold underline.",
+      "description": "Caps tabs over a hairline; the current tab is ink with an accent underline.",
       "html": "<nav class=\"ds-tabs\"><a href=\"#\">Overview</a><a href=\"#\">Stats</a><a href=\"#\" aria-current=\"page\">Memories<span>51</span></a></nav>",
-      "css": ".ds-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--rule);} .ds-tabs a{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-2) 0;font-size:var(--step-1);color:var(--muted);text-decoration:none;margin-bottom:-1px;border-bottom:1px solid transparent;} .ds-tabs a:hover{color:var(--ink);} .ds-tabs a[aria-current=page]{color:var(--ink);border-bottom-color:var(--gold);} .ds-tabs span{margin-left:var(--space-2);font-family:var(--font-text);font-size:var(--step--1);letter-spacing:0;color:var(--muted);}"
+      "css": ".ds-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--rule);} .ds-tabs a{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-2) 0;font-size:var(--step-1);color:var(--muted);text-decoration:none;margin-bottom:-1px;border-bottom:1px solid transparent;} .ds-tabs a:hover{color:var(--ink);} .ds-tabs a[aria-current=page]{color:var(--ink);border-bottom-color:var(--accent);} .ds-tabs span{margin-left:var(--space-2);font-family:var(--font-text);font-size:var(--step--1);letter-spacing:0;color:var(--muted);}"
     },
     {
       "name": "Theme Switch",
@@ -502,19 +502,19 @@
   ],
   "narrative": {
     "northStar": "The Game's Own Menus",
-    "overview": "Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and no accent color besides gold.\n\nThe world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. Gold is scarce and means \"this is selected\" or \"this is what you can do\". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.\n\nThe signature is the bottom button-hint strip: every hint is a real keyboard shortcut, and clicking the hint does the same thing. The SVG diamond marks the selected row, as it does in the game.",
+    "overview": "Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and no second accent color.\n\nThe world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. The accent is scarce and means \"this is selected\" or \"this is what you can do\". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.\n\nThe signature is the bottom button-hint strip: every hint is a real keyboard shortcut, and clicking the hint does the same thing. The SVG diamond marks the selected row, as it does in the game.",
     "keyCharacteristics": [
       "Smoked-glass ground: a fixed radial gradient from a lighter smoke heart to the ground color.",
       "Hairline 1px rules (two strengths) instead of boxes, cards, or shadows.",
       "Tracked condensed caps for labels; Jost for reading text; tabular figures everywhere.",
-      "Gold for selection and action, and for the group headings that sort lists into sections.",
+      "One accent for selection and action, and for the group headings that sort lists into sections.",
       "Item table plus a sticky, full-height details pane that sizes itself to end at the hint strip.",
       "A fixed bottom hint strip of live keyboard shortcuts, right-aligned like the game's button hints."
     ],
     "rules": [
       {
-        "name": "The Scarce Gold Rule",
-        "body": "Gold marks selection, action, and group headings that sort a list into sections. It never fills a surface larger than a button and never decorates. If something is gold, it is selected, actionable, or a heading inside a list.",
+        "name": "The Scarce Accent Rule",
+        "body": "The accent marks selection, action, and group headings that sort a list into sections. It never fills a surface larger than a button and never decorates. If something is in the accent color, it is selected, actionable, or a heading inside a list.",
         "section": "colors"
       },
       {
@@ -548,7 +548,7 @@
     ],
     "donts": [
       "**Don't** use cards, gray sidebars, filled tiles, or a blue (or any second) accent color.",
-      "**Don't** use gold for decoration or large fills; it means selection, action, or a list's group heading.",
+      "**Don't** use the accent for decoration or large fills; it means selection, action, or a list's group heading.",
       "**Don't** add shadows to rows, panes, or the shell; the only shadow is the floating quick-find dialog.",
       "**Don't** show a hint in the strip that isn't backed by a working shortcut.",
       "**Don't** make a group label as bright as the current section."

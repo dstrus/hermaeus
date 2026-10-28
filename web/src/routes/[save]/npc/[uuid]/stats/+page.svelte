@@ -91,7 +91,7 @@
 	}
 	h2 {
 		font-size: var(--step-0);
-		color: var(--gold);
+		color: var(--accent);
 		padding-bottom: var(--space-1);
 		border-bottom: 1px solid var(--rule-strong);
 	}

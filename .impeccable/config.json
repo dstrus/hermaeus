@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/assigned.html"
+        ],
+        "createdAt": "2026-10-28T00:30:17.821Z",
+        "reason": "Claude decided: unpicked decision-round sketch for a rejected direction (The Black Books); its fonts are that direction's, never shipped"
+      }
+    ]
+  }
+}

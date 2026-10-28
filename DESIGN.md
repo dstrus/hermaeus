@@ -2,8 +2,8 @@
 name: Hermaeus
 description: An offline dashboard for SkyrimNet that looks like one more menu of the game you just closed.
 colors:
-  gold: "#c9a24b"
-  on-gold: "#141109"
+  accent: "#7fb8a0"
+  on-accent: "#0e1a15"
   ground: "#0b0b0b"
   smoke: "#1c1c1c"
   panel: "#121212"
@@ -15,8 +15,8 @@ colors:
   rule-strong: "#3a3a3a"
   warn: "#d9a441"
   danger: "#e57368"
-  gold-light: "#7f5d12"
-  on-gold-light: "#fdf8ec"
+  accent-light: "#2a5f86"
+  on-accent-light: "#eef4f9"
   ground-light: "#e4e3df"
   smoke-light: "#f3f2ef"
   panel-light: "#eceae6"
@@ -79,8 +79,8 @@ components:
     rounded: "{rounded.base}"
     padding: "0.25rem 0.75rem"
   button-primary:
-    backgroundColor: "{colors.gold}"
-    textColor: "{colors.on-gold}"
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-accent}"
     typography: "{typography.button}"
     rounded: "{rounded.base}"
     padding: "0.25rem 0.75rem"
@@ -102,7 +102,7 @@ components:
     typography: "{typography.label}"
     padding: "0.5rem 0.75rem"
   column-head-sorted:
-    textColor: "{colors.gold}"
+    textColor: "{colors.accent}"
   details-pane:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.ink}"
@@ -131,9 +131,9 @@ components:
 
 **Creative North Star: "The Game's Own Menus"**
 
-Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and no accent color besides gold.
+Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and no second accent color.
 
-The world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. Gold is scarce and means "this is selected" or "this is what you can do". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.
+The world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. The accent is scarce and means "this is selected" or "this is what you can do". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.
 
 The signature is the bottom button-hint strip: every hint is a real keyboard shortcut, and clicking the hint does the same thing. The SVG diamond marks the selected row, as it does in the game.
 
@@ -141,17 +141,17 @@ The signature is the bottom button-hint strip: every hint is a real keyboard sho
 - Smoked-glass ground: a fixed radial gradient from a lighter smoke heart to the ground color.
 - Hairline 1px rules (two strengths) instead of boxes, cards, or shadows.
 - Tracked condensed caps for labels; Jost for reading text; tabular figures everywhere.
-- Gold for selection and action, and for the group headings that sort lists into sections.
+- One accent for selection and action, and for the group headings that sort lists into sections.
 - Item table plus a sticky, full-height details pane that sizes itself to end at the hint strip.
 - A fixed bottom hint strip of live keyboard shortcuts, right-aligned like the game's button hints.
 
 ## Colors
 
-A near-monochrome warm palette, off-white on near-black (or near-black on pale smoke), with one gold accent. Each role has a dark value and a `-light` counterpart; the light set applies under `data-theme="light"` or when the theme is "system" and the OS prefers light.
+A near-monochrome palette, off-white on near-black (or near-black on pale smoke), with one accent role that changes material with the theme: verdigris, the green of old bronze, in dark; frost blue, Skyrim's cold light, in light. Each role has a dark value and a `-light` counterpart; the light set applies under `data-theme="light"` or when the theme is "system" and the OS prefers light.
 
 ### Primary
-- **Septim Gold** (`gold` / `gold-light`): the selection and action color. The diamond marker, the primary button fill, the sorted column head and its hover, the active tab's underline, focus rings, text selection, the caret, checkbox accents, inline text buttons, the stats bars (at 55% opacity), and the group headings in tables and stat lists (a day in the memory table, a plugin group, a stat section's title). Light mode uses a much darker bronze so it holds contrast on pale smoke.
-- **Gold Ink** (`on-gold` / `on-gold-light`): text on a gold fill, used for the primary button and selected text.
+- **Verdigris** (`accent` / `accent-light`): the selection and action color: verdigris in dark, frost blue in light. The diamond marker, the primary button fill, the sorted column head and its hover, the active tab's underline, focus rings, text selection, the caret, checkbox accents, inline text buttons, the stats bars (at 55% opacity), and the group headings in tables and stat lists (a day in the memory table, a plugin group, a stat section's title). Both pass WCAG AA on their worst-case ground.
+- **Accent Ink** (`on-accent` / `on-accent-light`): text on an accent fill, used for the primary button and selected text.
 
 ### Neutral
 - **Menu Black** (`ground` / `ground-light`): the outer ground, the edge of the radial gradient, and the hint strip's opaque background.
@@ -169,7 +169,7 @@ A near-monochrome warm palette, off-white on near-black (or near-black on pale s
 - **Ember Error** (`danger` / `danger-light`): error notices only.
 
 ### Named Rules
-**The Scarce Gold Rule.** Gold marks selection, action, and group headings that sort a list into sections. It never fills a surface larger than a button and never decorates. If something is gold, it is selected, actionable, or a heading inside a list.
+**The Scarce Accent Rule.** The accent marks selection, action, and group headings that sort a list into sections. It never fills a surface larger than a button and never decorates. If something is in the accent color, it is selected, actionable, or a heading inside a list.
 
 **The One Token Set Rule.** Light mode is the same roles with different values, never a different design. A new color ships as a dark/light pair or not at all.
 
@@ -215,31 +215,31 @@ The world is flat. Depth comes from the smoked-glass gradient behind everything,
 
 ## Shapes
 
-Corners are nearly square: one radius (3px) on buttons, inputs, key caps, the theme switch, and the dialog. Tables, the pane, and the shell have square edges. The only drawn geometry is the 10-unit SVG diamond (rendered at 9px, filled gold) that marks the selected row, and an 8px triangle on the sorted column head that flips for ascending order. Marked memories show a 9px gold square in the same marker column.
+Corners are nearly square: one radius (3px) on buttons, inputs, key caps, the theme switch, and the dialog. Tables, the pane, and the shell have square edges. The only drawn geometry is the 10-unit SVG diamond (rendered at 9px, filled with the accent) that marks the selected row, and an 8px triangle on the sorted column head that flips for ascending order. Marked memories show a 9px accent square in the same marker column.
 
 ## Components
 
 ### Buttons
-Quiet outlined caps that light up gold on hover.
+Quiet outlined caps that light up in the accent on hover.
 - **Shape:** gently squared (3px radius), 1px `rule-strong` border, padding 0.25rem by 0.75rem.
-- **Default:** transparent fill, ink text, button typography. Hover turns the border gold.
-- **Primary:** gold fill and border, gold-ink text. Used once per action group (Save, confirm).
+- **Default:** transparent fill, ink text, button typography. Hover turns the border the accent color.
+- **Primary:** accent fill and border, accent-ink text. Used once per action group (Save, confirm).
 - **Disabled:** 50% opacity, not-allowed cursor.
-- **Text button:** gold, underlined, no border, for actions inside a sentence.
-- **Focus:** a 2px gold outline offset by 2px, across all controls.
+- **Text button:** accent-colored, underlined, no border, for actions inside a sentence.
+- **Focus:** a 2px accent outline offset by 2px, across all controls.
 
 ### Inputs / Fields
-- **Style:** smoked-field fill, 1px `rule-strong` border, 3px radius, 0.5rem by 0.75rem padding, muted placeholder, gold caret.
+- **Style:** smoked-field fill, 1px `rule-strong` border, 3px radius, 0.5rem by 0.75rem padding, muted placeholder, accent caret.
 - **Labels:** the field's label sits above it in muted text at the label size.
-- **Checkboxes and radios:** native, with a gold accent color.
+- **Checkboxes and radios:** native, with the accent color.
 
 ### Item Table
 The core of every list screen.
 - Collapsed borders, 1px `rule` under every row, cells padded 0.5rem by 0.75rem.
 - A narrow first column (1.5rem) holds the diamond for the selected row.
 - The selected row gets the `select` haze; inactive rows drop to muted text.
-- Column heads are sort buttons in label caps, muted, gold when sorted or hovered, with a `rule-strong` underline. Counts and dates sort largest or newest first.
-- Group heading rows (a day, a plugin) are gold label caps with generous top padding (1.5rem) and a `rule-strong` underline.
+- Column heads are sort buttons in label caps, muted, accent-colored when sorted or hovered, with a `rule-strong` underline. Counts and dates sort largest or newest first.
+- Group heading rows (a day, a plugin) are label caps in the accent with generous top padding (1.5rem) and a `rule-strong` underline.
 - Memory and diary rows enter with a short fly-in (6px rise, 180ms).
 
 ### Details Pane
@@ -249,14 +249,14 @@ The core of every list screen.
 
 ### Navigation
 - **Sections column:** title-size caps in muted ink; the current section and hover turn ink. Unbuilt sections are listed in muted caps under a small "Not built yet" label with a hairline under it; the Configuration group label is muted label caps, never as bright as the current section.
-- **Tabs:** title-size caps in muted ink, spaced 2rem apart over a `rule` baseline; the current tab is ink with a 1px gold underline. A tab's count follows in muted Jost.
+- **Tabs:** title-size caps in muted ink, spaced 2rem apart over a `rule` baseline; the current tab is ink with a 1px accent underline. A tab's count follows in muted Jost.
 - **Theme switch:** a 3px-radius outlined group of three caps options (Auto, Dark, Light); the checked one gets the `select` haze and ink text.
 
 ### Button-Hint Strip (signature)
 Fixed along the bottom of the viewport, opaque ground, `rule` top edge, hints right-aligned with 1.5rem gaps. Each hint is a button: a key cap (1px `rule-strong` border, 3px radius, ink, min 1.6em wide) followed by the action in muted caps; hover turns it ink, unavailable hints fade to 45%. Every hint is backed by a real shortcut registered in the shortcut registry, and the strip shows only what the current screen offers.
 
 ### Stat List
-A name-and-count list under a gold label-caps heading. Each row carries a 2px gold bar at 55% opacity under the name, scaled to the count; counts are muted and right-aligned.
+A name-and-count list under a label-caps heading in the accent. Each row carries a 2px accent bar at 55% opacity under the name, scaled to the count; counts are muted and right-aligned.
 
 ### Quick Find
 A dialog (28rem max, 18vh from the top) on the smoke surface with a strong hairline, 3px radius and the modal lift; results are full-width rows with the diamond on the selected one.
@@ -273,7 +273,7 @@ A dialog (28rem max, 18vh from the top) on the smoke surface with a strong hairl
 
 ### Don't:
 - **Don't** use cards, gray sidebars, filled tiles, or a blue (or any second) accent color.
-- **Don't** use gold for decoration or large fills; it means selection, action, or a list's group heading.
+- **Don't** use the accent for decoration or large fills; it means selection, action, or a list's group heading.
 - **Don't** add shadows to rows, panes, or the shell; the only shadow is the floating quick-find dialog.
 - **Don't** show a hint in the strip that isn't backed by a working shortcut.
 - **Don't** make a group label as bright as the current section.
