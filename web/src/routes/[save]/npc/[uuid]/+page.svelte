@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { groupByDay, timeLabel } from '#lib/memories/dates.ts';
 	import { realTime } from '#lib/format.ts';
+	import SpeechPattern from '#lib/characters/SpeechPattern.svelte';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import type { PageProps } from './$types';
 
@@ -46,7 +47,11 @@
 		</dl>
 	</section>
 
-	<section>
+	{#if data.character.bio}
+		<SpeechPattern template={data.character.bio} rule={data.speech} loadError={data.speechError} />
+	{/if}
+
+	<section class="milestones">
 		<h2 class="caps">Milestones</h2>
 		{#if milestones.length}
 			<ol class="timeline">
@@ -64,11 +69,28 @@
 </div>
 
 <style>
+	/* Identity and the speech pattern stack on the left; milestones run
+	   down the right. */
 	.overview {
 		display: grid;
 		grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
-		gap: var(--space-7);
+		grid-template-rows: auto 1fr; /* the first row is Identity's height; the pattern sits right under it */
+		grid-auto-flow: dense;
+		gap: var(--space-5) var(--space-7);
 		max-width: 80rem;
+	}
+	.milestones {
+		grid-column: 2;
+		grid-row: 1 / span 2;
+	}
+	@media (max-width: 60rem) {
+		.overview {
+			grid-template-columns: 1fr;
+		}
+		.milestones {
+			grid-column: 1;
+			grid-row: auto;
+		}
 	}
 	h2 {
 		font-size: var(--step-0);

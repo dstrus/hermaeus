@@ -52,7 +52,7 @@ packages:
     type_mappings:
       layers.Layer: layers.Layer
   - path: hermaeus/internal/settings
-    include_files: [settings.go, save.go, toggles.go, pins.go]
+    include_files: [settings.go, save.go, toggles.go, pins.go, speech.go]
     output_path: web/src/lib/api/types/settings.ts
     fallback_type: unknown
   - path: hermaeus/internal/layers

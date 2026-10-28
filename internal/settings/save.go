@@ -83,15 +83,27 @@ func (s *Settings) Save(name string, e Edit) (FileValues, error) {
 // apply returns the file with the changes made, the way it was written
 // (see yaml.go).
 func apply(old []byte, name string, defs map[string]any, changes []Change) ([]byte, error) {
+	return rewrite(old, name, func(doc *yaml.Node) error {
+		for _, c := range changes {
+			if err := applyChange(doc, name, defs, c); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+// rewrite returns the file with change made to its document, written the
+// way it was: values swapped in place where only values changed, otherwise
+// the changed lines merged in (see yaml.go).
+func rewrite(old []byte, name string, change func(doc *yaml.Node) error) ([]byte, error) {
 	untouched, err := parse(old)
 	if err != nil {
 		return nil, apperr.New(apperr.Invalid, "Could not read %s: %v", name, err)
 	}
 	edited, _ := parse(old)
-	for _, c := range changes {
-		if err := applyChange(edited.doc, name, defs, c); err != nil {
-			return nil, err
-		}
+	if err := change(edited.doc); err != nil {
+		return nil, err
 	}
 	if patched, ok := patchValues(string(old), untouched.doc, edited.doc); ok {
 		return []byte(patched), nil

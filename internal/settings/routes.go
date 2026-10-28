@@ -22,6 +22,13 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("DELETE /api/settings/{name}/pin", httpapi.JSON(func(r *http.Request, _ httpapi.None) (PinsResponse, error) {
 		return s.SetPinned(r.PathValue("name"), false)
 	}))
+	// An NPC's Universal Translator speech pattern, by bio template.
+	mux.Handle("GET /api/speech/{template}", httpapi.JSON(func(r *http.Request, _ httpapi.None) (SpeechRule, error) {
+		return s.Speech(r.PathValue("template"))
+	}))
+	mux.Handle("PUT /api/speech/{template}", httpapi.JSON(func(r *http.Request, e SpeechEdit) (SpeechRule, error) {
+		return s.SetSpeech(r.PathValue("template"), e)
+	}))
 	mux.Handle("GET /api/toggles", httpapi.JSON(func(*http.Request, httpapi.None) (ToggleList, error) {
 		return s.Toggles()
 	}))

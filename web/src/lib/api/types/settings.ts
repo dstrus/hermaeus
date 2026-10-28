@@ -84,6 +84,27 @@ export interface FileList {
 }
 
 //////////
+// source: speech.go
+
+/**
+ * SpeechRule is an NPC's Universal Translator speech pattern.
+ */
+export interface SpeechRule {
+  found: boolean; // the file exists, so a pattern can be set
+  enabled: boolean; // Universal Translator is switched on
+  pattern: string; // "" when the NPC has no rule
+  global?: string; // the pattern for every NPC
+  modified: number /* int64 */; // the file's time, sent back on save
+}
+/**
+ * SpeechEdit sets an NPC's pattern; an empty one removes their rule.
+ */
+export interface SpeechEdit {
+  modified: number /* int64 */;
+  pattern: string;
+}
+
+//////////
 // source: toggles.go
 
 export interface Toggle {

@@ -1,5 +1,5 @@
 import { request } from '#lib/api/client.ts';
-import type { Edit, File, FileList, FileValues, PinsResponse, SecretValue, Setting, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
+import type { Edit, File, FileList, FileValues, PinsResponse, SecretValue, Setting, SpeechEdit, SpeechRule, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
 
 // What load functions depend on for the quick toggles and the settings
 // files; invalidate them after changing either, since the toggles are
@@ -167,4 +167,14 @@ export function parseJSONText(v: unknown): Record<string, unknown> | unknown[] |
 	} catch {
 		return undefined;
 	}
+}
+
+// An NPC's Universal Translator speech pattern, by bio template.
+export function getSpeech(template: string, fetchFn?: typeof fetch): Promise<SpeechRule> {
+	return request<SpeechRule>('GET', `/api/speech/${encodeURIComponent(template)}`, undefined, fetchFn);
+}
+
+// setSpeech sets the pattern; an empty one removes the NPC's rule.
+export function setSpeech(template: string, edit: SpeechEdit): Promise<SpeechRule> {
+	return request<SpeechRule>('PUT', `/api/speech/${encodeURIComponent(template)}`, edit);
 }

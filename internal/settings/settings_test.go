@@ -440,3 +440,57 @@ func TestPinnedFiles(t *testing.T) {
 		t.Error("Read doesn't say game is pinned")
 	}
 }
+
+func TestSpeechPatterns(t *testing.T) {
+	h := newHarness(t)
+	if r, err := h.settings.Speech("aya_81A"); err != nil || r.Found {
+		t.Fatalf("without the file: %+v, %v", r, err)
+	}
+	_, err := h.settings.SetSpeech("aya_81A", SpeechEdit{Pattern: "Clipped."})
+	kindOf(t, err, apperr.NotFound)
+
+	orig := "enabled: true\r\nrules:\r\n  - id: rule_1\r\n    entityType: npc\r\n    entityId: ria_6d8\r\n    entityDisplayName: ria_6D8\r\n    speechPattern: Earnest.\r\n  - id: global_rule\r\n    entityType: global\r\n    entityId: global\r\n    entityDisplayName: Global (All NPCs)\r\n    speechPattern: \"\""
+	path := h.config("UniversalTranslator.yaml", orig)
+	past := time.Now().Add(-time.Hour)
+	os.Chtimes(path, past, past)
+
+	r, err := h.settings.Speech("ria_6D8") // regardless of case
+	if err != nil || !r.Found || !r.Enabled || r.Pattern != "Earnest." || r.Modified != past.UnixMilli() {
+		t.Fatalf("Ria's rule = %+v, %v", r, err)
+	}
+	if r, _ := h.settings.Speech("aya_81A"); r.Pattern != "" {
+		t.Errorf("Aya has a pattern already: %+v", r)
+	}
+
+	// A new rule goes before the global one; an edit changes one line; an
+	// empty pattern removes the rule. Windows line endings stay throughout.
+	r, err = h.settings.SetSpeech("aya_81A", SpeechEdit{Modified: r.Modified, Pattern: "Clipped and punchy."})
+	if err != nil || r.Pattern != "Clipped and punchy." {
+		t.Fatalf("after adding: %+v, %v", r, err)
+	}
+	got := h.read("UniversalTranslator.yaml")
+	if !strings.Contains(got, "    entityId: aya_81a\r\n    entityDisplayName: aya_81A\r\n    speechPattern: Clipped and punchy.\r\n  - id: global_rule") || strings.Contains(got, "\n\n") || !strings.HasPrefix(got, "enabled: true\r\nrules:\r\n  - id: rule_1\r\n") {
+		t.Errorf("after adding =\n%q", got)
+	}
+	r, err = h.settings.SetSpeech("ria_6D8", SpeechEdit{Modified: r.Modified, Pattern: "Earnest and quick."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := h.read("UniversalTranslator.yaml"); !strings.Contains(got, "    speechPattern: Earnest and quick.\r\n") {
+		t.Errorf("after editing =\n%q", got)
+	}
+	r, err = h.settings.SetSpeech("aya_81A", SpeechEdit{Modified: r.Modified})
+	if err != nil || r.Pattern != "" {
+		t.Fatalf("after removing: %+v, %v", r, err)
+	}
+	if got := h.read("UniversalTranslator.yaml"); strings.Contains(got, "aya") || !strings.Contains(got, "global_rule") {
+		t.Errorf("after removing =\n%q", got)
+	}
+	_, err = h.settings.SetSpeech("ria_6D8", SpeechEdit{Modified: 1, Pattern: "x"})
+	kindOf(t, err, apperr.Conflict)
+	_, err = h.settings.SetSpeech("../x", SpeechEdit{Modified: r.Modified, Pattern: "x"})
+	kindOf(t, err, apperr.Invalid)
+	h.running = true
+	_, err = h.settings.SetSpeech("ria_6D8", SpeechEdit{Modified: r.Modified, Pattern: "x"})
+	kindOf(t, err, apperr.Conflict)
+}
