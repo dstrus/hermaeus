@@ -7,6 +7,7 @@
 	import { characterName } from '#lib/characters/api.ts';
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
+	import Segmented from '#lib/ui/Segmented.svelte';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -67,14 +68,23 @@
 			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
 			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !e, run: () => e && goto(href(e)) },
-			{ key: 'Escape', shown: 'Esc', label: 'Characters', run: () => goto(`/${encodeURIComponent(save)}`) }
+			{ key: 'Escape', shown: 'Esc', label: 'This playthrough', run: () => goto(`/${encodeURIComponent(save)}`) }
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Every bio</h1>
-	<span class="muted n">{count(catalog.bios.length)} characters from {catalog.layers.length} {catalog.layers.length === 1 ? 'layer' : 'layers'}</span>
+	<h1 class="caps">Characters</h1>
+	<Segmented
+		value="all"
+		options={[
+			{ value: 'here', label: 'In this playthrough', title: 'Everyone with something stored in this playthrough' },
+			{ value: 'all', label: 'Every bio', title: 'Everyone SkyrimNet or a plugin ships a bio for, met or not' }
+		]}
+		label="Which characters"
+		onchange={(v) => v === 'here' && goto(`/${encodeURIComponent(save)}`)}
+	/>
+	<span class="muted n">{count(catalog.bios.length)} with a bio, from {catalog.layers.length} {catalog.layers.length === 1 ? 'layer' : 'layers'}</span>
 	<input type="search" bind:value={query} placeholder="Filter by name" aria-label="Filter bios" />
 </div>
 
@@ -148,9 +158,11 @@
 		gap: var(--space-5);
 		align-items: start;
 	}
+	/* Fixed columns, so the table never grows past its column into the pane. */
 	table {
 		width: 100%;
 		border-collapse: collapse;
+		table-layout: fixed;
 	}
 	.pane {
 		position: sticky;
@@ -209,6 +221,9 @@
 	td {
 		padding: var(--space-2) var(--space-3);
 		border-bottom: 1px solid var(--rule);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	tbody tr[aria-selected]:not([aria-selected='true']):hover td {
 		background: var(--glass);
@@ -237,18 +252,13 @@
 		font-family: var(--font-mono);
 		font-size: var(--step--1);
 	}
-	/* The name never wraps; the template column gives way first, since the
-	   pane shows it. */
-	.name {
-		white-space: nowrap;
+	/* The template column gives way first, since the pane shows it. */
+	.split :global(.template) {
+		width: 11rem;
 	}
 	.split :global(.from),
 	.split :global(.here) {
-		white-space: nowrap;
-		width: 12rem;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		max-width: 12rem;
+		width: 11rem;
 	}
 	@media (max-width: 90rem) {
 		.split :global(.template) {

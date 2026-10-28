@@ -3,17 +3,22 @@
 	let {
 		value = $bindable(),
 		options,
-		label
+		label,
+		onchange
 	}: {
 		value: string;
 		options: { value: string; label: string; title?: string }[];
 		label: string; // for assistive technology
+		onchange?: (value: string) => void; // after a choice, for a choice that leads elsewhere
 	} = $props();
 </script>
 
 <div class="segments caps" role="radiogroup" aria-label={label}>
 	{#each options as o (o.value)}
-		<button type="button" role="radio" aria-checked={value === o.value} title={o.title} onclick={() => (value = o.value)}>
+		<button type="button" role="radio" aria-checked={value === o.value} title={o.title} onclick={() => {
+				value = o.value;
+				onchange?.(o.value);
+			}}>
 			{o.label}
 		</button>
 	{/each}
@@ -22,6 +27,7 @@
 <style>
 	.segments {
 		display: inline-flex;
+		flex: none; /* a segment's label never wraps */
 		border: 1px solid var(--rule-strong);
 		border-radius: var(--radius);
 		overflow: hidden;
@@ -33,6 +39,7 @@
 		color: var(--muted);
 		font-size: var(--step-0);
 		letter-spacing: var(--track);
+		white-space: nowrap;
 		cursor: pointer;
 	}
 	button + button {

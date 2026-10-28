@@ -5,6 +5,8 @@
 	import { BusyMemories, type Character, type Group } from '#lib/api/types/characters.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import PinButton from '#lib/ui/PinButton.svelte';
+	import Segmented from '#lib/ui/Segmented.svelte';
+	import { catalogHref } from '#lib/bios/api.ts';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -65,7 +67,16 @@
 
 <div class="bar">
 	<h1 class="caps">Characters</h1>
-	<span class="muted">{count(characters.length)} with something stored · <a href="/{encodeURIComponent(save)}/bios">every bio</a></span>
+	<Segmented
+		value="here"
+		options={[
+			{ value: 'here', label: 'In this playthrough', title: 'Everyone with something stored in this playthrough' },
+			{ value: 'all', label: 'Every bio', title: 'Everyone SkyrimNet or a plugin ships a bio for, met or not' }
+		]}
+		label="Which characters"
+		onchange={(v) => v === 'all' && goto(catalogHref(save))}
+	/>
+	<span class="muted n">{count(characters.length)} with something stored</span>
 	<input type="search" bind:value={query} placeholder="Filter by name or bio" aria-label="Filter characters" />
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
@@ -152,6 +163,9 @@
 		font-size: var(--step-3);
 		font-weight: 600;
 		line-height: 1;
+	}
+	.bar .n {
+		white-space: nowrap;
 	}
 	.bar input {
 		margin-left: auto;
