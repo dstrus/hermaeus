@@ -13,6 +13,7 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { editable, fileLabel, kindOf, saveSettings, settingsDependency, settingsHref, show, togglesDependency, words, type Kind, type Row } from './api.ts';
+	import { codeOf, keyName, mouseCodeOf, noKey } from './keys.ts';
 
 	let {
 		save,
@@ -36,14 +37,18 @@
 	// The group a row sits under: its file, or the part of its key before the first dot.
 	const groupOf = (r: Row) => (byFile ? fileLabel(r.file) : r.setting.key.includes('.') ? r.setting.key.slice(0, r.setting.key.indexOf('.')) : '');
 	const rowKey = (r: Row) => `${r.file.name}\u0000${r.setting.key}`;
+	// Hotkey.yaml holds key codes; they're shown and edited as keys.
+	const valueOf = (r: Row) => (r.setting.set ? r.setting.value : r.setting.default);
+	const hotkey = (r: Row) => r.file.name.toLowerCase() === 'hotkey' && typeof valueOf(r) === 'number';
+	const showValue = (r: Row, v: unknown) => (hotkey(r) && typeof v === 'number' ? keyName(v) : show(v));
 
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
-		return rows.filter((r) => !q || r.setting.key.toLowerCase().includes(q) || show(r.setting.value).toLowerCase().includes(q));
+		return rows.filter((r) => !q || r.setting.key.toLowerCase().includes(q) || showValue(r, valueOf(r)).toLowerCase().includes(q));
 	});
 	const selection = new Selection(() => shown, rowKey);
 	let current = $derived(selection.current);
-	let kind = $derived<Kind>(current ? kindOf(current.setting) : 'none');
+	let kind = $derived<Kind>(!current ? 'none' : hotkey(current) ? 'hotkey' : kindOf(current.setting));
 	// What's holding a secret can't be changed here; a file SkyrimNet hasn't
 	// written yet can't be either.
 	let locked = $derived(!current || kind === 'secret' || current.setting.hasSecrets || !current.file.exists);
@@ -53,7 +58,7 @@
 	let editing = $state(false);
 	let draft = $state('');
 	let saving = $state(false);
-	let field = $state<HTMLTextAreaElement | HTMLInputElement>();
+	let field = $state<HTMLTextAreaElement | HTMLInputElement | HTMLButtonElement>();
 
 	let list = $derived(settingsHref(save));
 
@@ -73,7 +78,8 @@
 		switch (kind) {
 			case 'switch':
 				return draft === 'true';
-			case 'number': {
+			case 'number':
+			case 'hotkey': {
 				const n = Number(draft.trim());
 				if (draft.trim() === '' || Number.isNaN(n)) throw new Error('Enter a number.');
 				return n;
@@ -122,6 +128,23 @@
 			return;
 		}
 		apply({ key: current.setting.key, value }, `Saved ${current.setting.key}.`);
+	}
+
+	// A hotkey is set by pressing it in the capture box. Tab, Esc, and the
+	// save shortcut keep their jobs; a mouse button other than the left one
+	// (which focuses the box) counts too.
+	function captureKey(e: KeyboardEvent) {
+		if (e.key === 'Tab' || e.key === 'Escape' || (e.key === 'Enter' && (e.metaKey || e.ctrlKey))) return;
+		const code = codeOf(e);
+		e.preventDefault();
+		e.stopPropagation();
+		if (code !== undefined) draft = String(code);
+	}
+	function captureMouse(e: MouseEvent) {
+		const code = mouseCodeOf(e);
+		if (e.button === 0 || code === undefined) return;
+		e.preventDefault();
+		draft = String(code);
 	}
 
 	function reset() {
@@ -175,8 +198,8 @@
 					<tr aria-selected={selection.is(r)} onclick={() => selection.select(r)} ondblclick={startEdit}>
 						<td class="mark">{#if selection.is(r)}<Diamond />{/if}</td>
 						<td class="key">{byFile ? r.setting.key : r.setting.key.slice(groupOf(r) ? groupOf(r).length + 1 : 0)}</td>
-						<td class="value" class:changed={r.setting.changed} class:muted={!r.setting.set}>{show(r.setting.set ? r.setting.value : r.setting.default)}</td>
-						<td class="default muted">{r.setting.hasDefault ? show(r.setting.default) : ''}</td>
+						<td class="value" class:changed={r.setting.changed} class:muted={!r.setting.set}>{showValue(r, valueOf(r))}</td>
+						<td class="default muted">{r.setting.hasDefault ? showValue(r, r.setting.default) : ''}</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -193,6 +216,18 @@
 							<Segmented bind:value={draft} options={[{ value: 'true', label: 'On' }, { value: 'false', label: 'Off' }]} label="Value" />
 						{:else if kind === 'number'}
 							<input bind:this={field} bind:value={draft} type="text" inputmode="decimal" aria-label="Value" autocomplete="off" />
+						{:else if kind === 'hotkey'}
+							<button
+								type="button"
+								class="capture"
+								bind:this={field}
+								aria-label="Press the key to use"
+								onkeydown={captureKey}
+								onmousedown={captureMouse}
+								oncontextmenu={(e) => e.preventDefault()}>{keyName(Number(draft))}</button
+							>
+							<p class="muted small">Press a key, or click the box with a mouse button.</p>
+							<button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>No key</button>
 						{:else}
 							<textarea bind:this={field} bind:value={draft} rows={kind === 'text' ? 4 : 12} spellcheck="false" aria-label="Value"></textarea>
 						{/if}
@@ -205,9 +240,9 @@
 				{:else}
 					<dl>
 						<dt class="caps">Value</dt>
-						<dd class:changed={current.setting.changed}><pre>{show(current.setting.set ? current.setting.value : current.setting.default)}</pre>{#if !current.setting.set}<span class="muted"> (the default; the file doesn’t set it)</span>{/if}</dd>
+						<dd class:changed={current.setting.changed}><pre>{showValue(current, valueOf(current))}</pre>{#if !current.setting.set}<span class="muted"> (the default; the file doesn’t set it)</span>{/if}</dd>
 						{#if current.setting.hasDefault}
-							<dt class="caps">Default</dt><dd><pre>{show(current.setting.default)}</pre></dd>
+							<dt class="caps">Default</dt><dd><pre>{showValue(current, current.setting.default)}</pre></dd>
 						{/if}
 					</dl>
 					{#if kind === 'secret'}
@@ -357,6 +392,28 @@
 		display: block;
 		width: 100%;
 		font-family: var(--font-mono);
+		font-size: var(--step--1);
+	}
+	/* The box a hotkey is pressed into: a field that listens rather than types. */
+	.capture {
+		display: block;
+		width: 100%;
+		padding: var(--space-2) var(--space-3);
+		background: var(--glass-strong);
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--radius);
+		text-align: left;
+		cursor: pointer;
+	}
+	.capture:focus-visible {
+		border-color: var(--accent);
+		outline: none;
+	}
+	.edit .small {
+		margin-top: var(--space-2);
+	}
+	.edit .textbutton {
+		margin-top: var(--space-1);
 		font-size: var(--step--1);
 	}
 	.buttons {

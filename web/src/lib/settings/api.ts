@@ -60,7 +60,7 @@ export function isSecret(v: unknown): v is SecretValue {
 	return typeof v === 'object' && v !== null && (v as SecretValue).secret === true;
 }
 
-export type Kind = 'switch' | 'number' | 'text' | 'list' | 'group' | 'secret' | 'none';
+export type Kind = 'switch' | 'number' | 'hotkey' | 'text' | 'list' | 'group' | 'secret' | 'none';
 
 // kindOf is what sort of value a setting holds, from its value or, when the
 // file doesn't set it, its default.
