@@ -41,9 +41,9 @@
 	// The bio reads as one document. One section is selected (for the keys);
 	// editing turns that section into a field where it is. Raw and history
 	// replace the document.
-	let mode = $state<'read' | 'edit' | 'raw' | 'history' | 'compare'>('read');
+	let mode = $state<'read' | 'edit' | 'raw' | 'history' | 'diff'>('read');
 
-	// Comparing two of the bios: the later one against the one beneath it,
+	// The diff of two of the bios: the later one against the one beneath it,
 	// so what SkyrimNet's rewrite did (dynamic against baseline) reads first.
 	const order = ['dynamic', 'baseline', 'default'];
 	let pairs = $derived.by(() => {
@@ -74,7 +74,7 @@
 	let inView = $state<string | null>(null);
 	let doc = $state<HTMLElement>();
 	$effect(() => {
-		if (!doc || mode === 'raw' || mode === 'history' || mode === 'compare') return;
+		if (!doc || mode === 'raw' || mode === 'history' || mode === 'diff') return;
 		const seen = new Map<string, number>();
 		const watch = new IntersectionObserver(
 			(entries) => {
@@ -180,11 +180,11 @@
 			{ key: 'e', shown: 'E', label: 'Edit section', hidden: !reading, disabled: !editable || !section, run: () => startEdit() },
 			{ key: 'r', shown: 'R', label: 'Raw file', hidden: !reading, disabled: !editable, run: startRaw },
 			{ key: 'h', shown: 'H', label: 'History', hidden: !reading, disabled: !version || version.kind === 'default', run: startHistory },
-			{ key: 'd', shown: 'D', label: 'Compare', hidden: !reading, disabled: pairs.length === 0, run: () => ((pair = pairs.some((p) => p.value === pair) ? pair : (pairs[0]?.value ?? '')), (mode = 'compare')) },
+			{ key: 'd', shown: 'D', label: 'Diff', hidden: !reading, disabled: pairs.length === 0, run: () => ((pair = pairs.some((p) => p.value === pair) ? pair : (pairs[0]?.value ?? '')), (mode = 'diff')) },
 			{ key: 'c', shown: 'C', label: 'Create save bio', hidden: !reading || version?.kind !== 'default' || hasBaseline, disabled: readOnly, run: create },
 			{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: submit },
 			{ key: 'Enter', label: 'Restore', hidden: mode !== 'history', disabled: readOnly || !earlier || earlier.current, run: restore },
-			...(reading ? [] : [{ key: 'Escape', shown: 'Esc', label: mode === 'history' || mode === 'compare' ? 'Back' : 'Cancel', run: () => (mode = 'read') }])
+			...(reading ? [] : [{ key: 'Escape', shown: 'Esc', label: mode === 'history' || mode === 'diff' ? 'Back' : 'Cancel', run: () => (mode = 'read') }])
 		];
 	});
 </script>
@@ -216,8 +216,8 @@
 			<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
 		</div>
 	</div>
-{:else if mode === 'compare' && compared}
-	<div class="compare">
+{:else if mode === 'diff' && compared}
+	<div class="diff">
 		<div class="which">
 			{#if pairs.length > 1}
 				<Segmented bind:value={pair} options={pairs} label="Which two bios" />
@@ -491,8 +491,8 @@
 		padding-bottom: var(--space-4);
 	}
 
-	/* Comparing two bios. */
-	.compare .which,
+	/* The diff of two bios. */
+	.diff .which,
 	.pane .which {
 		display: flex;
 		flex-wrap: wrap;
