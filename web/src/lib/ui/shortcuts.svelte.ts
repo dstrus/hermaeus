@@ -76,6 +76,12 @@ export function handleKey(e: KeyboardEvent) {
 	const command = onMac ? e.metaKey : e.ctrlKey;
 	if (!command && (e.metaKey || e.ctrlKey)) return;
 	if (!command && typing(e.target) && e.key !== 'Escape') return;
+	// Esc in a text field leaves the field; the next Esc runs the shortcut.
+	// A textarea is different: it's the editor the shortcut cancels.
+	if (e.key === 'Escape' && (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement)) {
+		e.target.blur();
+		return;
+	}
 	const s = active().find((x) => x.key.toLowerCase() === e.key.toLowerCase() && !!x.command === command);
 	if (!s || s.disabled) return;
 	e.preventDefault();

@@ -1,9 +1,10 @@
 <!-- SkyrimNet's quick toggles as one row: each switches a feature on or
      off in its settings file. -->
 <script lang="ts">
+	import { invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
-	import { setToggle } from '#lib/settings/api.ts';
+	import { setToggle, settingsDependency } from '#lib/settings/api.ts';
 	import type { Toggle } from '#lib/api/types/settings.ts';
 
 	let { toggles, error: loadError = '' }: { toggles: Toggle[]; error?: string } = $props();
@@ -27,6 +28,7 @@
 		error = '';
 		try {
 			current = (await setToggle(t.id, on)).toggles;
+			await invalidate(settingsDependency); // a toggle is a setting; a settings page may be open
 		} catch (e) {
 			current = before;
 			error = e instanceof ApiError ? e.message : String(e);

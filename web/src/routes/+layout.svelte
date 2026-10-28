@@ -27,7 +27,7 @@
 		{ label: 'Screenshots' },
 		{ label: 'Bard songs' }
 	];
-	const configuration = [{ label: 'Prompts', built: true }, { label: 'Settings' }, { label: 'Plugins' }, { label: 'Content' }, { label: 'Overrides' }];
+	const configuration = [{ label: 'Prompts', built: true }, { label: 'Settings', built: true }, { label: 'Plugins' }, { label: 'Content' }, { label: 'Overrides' }];
 	// A playthrough is named by its player, with its save ID only when
 	// another playthrough has the same player.
 	function playthroughLabel(p: Playthrough): string {
@@ -37,6 +37,7 @@
 	}
 	let charactersActive = $derived(!!save && (page.url.pathname === base || page.url.pathname.startsWith(`${base}/npc/`)));
 	let promptsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/prompts`));
+	let settingsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/settings`));
 </script>
 
 <svelte:window onkeydown={handleKey} />
@@ -79,6 +80,7 @@
 			<p class="group caps">Configuration</p>
 			<ul aria-label="Configuration">
 				<li><a class="caps" href="{base}/prompts" aria-current={promptsActive ? 'page' : undefined}>Prompts</a></li>
+				<li><a class="caps" href="{base}/settings" aria-current={settingsActive ? 'page' : undefined}>Settings</a></li>
 			</ul>
 			<p class="later caps">Not built yet</p>
 			<ul class="soon" aria-label="Configuration, not built yet">
