@@ -48,7 +48,7 @@ packages:
     output_path: web/src/lib/api/types/bios.ts
     fallback_type: unknown
   - path: hermaeus/internal/settings
-    include_files: [settings.go, save.go, toggles.go]
+    include_files: [settings.go, save.go, toggles.go, pins.go]
     output_path: web/src/lib/api/types/settings.ts
     fallback_type: unknown
   - path: hermaeus/internal/layers

@@ -1,5 +1,5 @@
 import { request } from '#lib/api/client.ts';
-import type { Edit, File, FileList, FileValues, SecretValue, Setting, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
+import type { Edit, File, FileList, FileValues, PinsResponse, SecretValue, Setting, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
 
 // What load functions depend on for the quick toggles and the settings
 // files; invalidate them after changing either, since the toggles are
@@ -25,6 +25,12 @@ export function getSettingsFile(name: string, fetchFn?: typeof fetch): Promise<F
 
 export function saveSettings(name: string, edit: Edit): Promise<FileValues> {
 	return request<FileValues>('PATCH', `/api/settings/${encodeURIComponent(name)}`, edit);
+}
+
+// setFilePinned pins or unpins a settings file, and returns the pins as
+// they are afterward.
+export function setFilePinned(name: string, pinned: boolean): Promise<PinsResponse> {
+	return request<PinsResponse>(pinned ? 'PUT' : 'DELETE', `/api/settings/${encodeURIComponent(name)}/pin`);
 }
 
 // The page listing everything the player changed, across files.

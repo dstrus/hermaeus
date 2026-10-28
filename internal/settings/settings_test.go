@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"hermaeus/internal/apperr"
+	"hermaeus/internal/prefs"
 	"hermaeus/internal/store"
 	"hermaeus/internal/testenv"
 
@@ -31,7 +32,7 @@ func newHarness(t *testing.T) *harness {
 	if _, err := h.store.SetDir(h.Dir); err != nil {
 		t.Fatal(err)
 	}
-	h.settings = New(h.store)
+	h.settings = New(h.store, prefs.Load(""))
 	return h
 }
 
@@ -396,5 +397,43 @@ func TestRealSettingsRoundTrip(t *testing.T) {
 			}
 			break
 		}
+	}
+}
+
+func TestPinnedFiles(t *testing.T) {
+	h := newHarness(t)
+	h.config("defaults_manifest.json", `{"fields": {"game": {"narration.enabled": true}, "Providers": {"providers": []}}}`)
+	h.config("SkyrimNet.yaml", "narration:\n  enabled: true\n")
+	for _, name := range []string{"Providers", "game"} {
+		if _, err := h.settings.SetPinned(name, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := h.settings.SetPinned("../x", true); err == nil {
+		t.Error("pinned an invalid name")
+	}
+	pins, _ := h.settings.SetPinned("providers", false) // regardless of case
+	if strings.Join(pins.Pins, ",") != "game" {
+		t.Errorf("pins = %v", pins.Pins)
+	}
+	list, err := h.settings.List()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range list.Files {
+		if f.File.Pinned != (f.File.Name == "game") {
+			t.Errorf("%s pinned = %v", f.File.Name, f.File.Pinned)
+		}
+	}
+	if list.Files[0].File.Name != "game" {
+		t.Errorf("first file = %s, want the pinned one", list.Files[0].File.Name)
+	}
+	h.settings.SetPinned("Providers", true)
+	list, _ = h.settings.List()
+	if list.Files[0].File.Name != "game" || list.Files[1].File.Name != "Providers" {
+		t.Errorf("files = %v, want pins first in the order pinned", []string{list.Files[0].File.Name, list.Files[1].File.Name})
+	}
+	if f, _ := h.settings.Read("game"); !f.File.Pinned {
+		t.Error("Read doesn't say game is pinned")
 	}
 }

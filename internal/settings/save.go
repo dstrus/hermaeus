@@ -74,6 +74,7 @@ func (s *Settings) Save(name string, e Edit) (FileValues, error) {
 			return err
 		}
 		out, err = read(dir, name, loadDefaults(dir))
+		out.File.Pinned = s.pinned(name)
 		return err
 	})
 	return out, err

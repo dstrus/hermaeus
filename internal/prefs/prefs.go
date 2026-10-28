@@ -15,6 +15,9 @@ type Values struct {
 	SkyrimNetDir string `json:"skyrimNetDir,omitempty"`
 	Theme        string `json:"theme,omitempty"`           // see Themes; "" follows the system
 	ModDir       string `json:"skyrimNetModDir,omitempty"` // SkyrimNet's mod folder, when chosen
+	// Settings files pinned to the top of the Settings page, by name, in
+	// the order they were pinned.
+	PinnedSettings []string `json:"pinnedSettings,omitempty"`
 }
 
 // Themes are the themes Hermaeus has. "system" follows the operating
@@ -49,7 +52,7 @@ func (p *Prefs) merged() map[string]json.RawMessage {
 	var mine map[string]json.RawMessage
 	b, _ := json.Marshal(p.v)
 	json.Unmarshal(b, &mine)
-	for _, key := range []string{"skyrimNetDir", "theme", "skyrimNetModDir"} {
+	for _, key := range []string{"skyrimNetDir", "theme", "skyrimNetModDir", "pinnedSettings"} {
 		delete(all, key) // an omitted value was cleared
 	}
 	for k, v := range mine {

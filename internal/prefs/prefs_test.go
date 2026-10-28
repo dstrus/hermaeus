@@ -18,7 +18,7 @@ func TestChangesAreRemembered(t *testing.T) {
 func TestUnreadableFileRemembersNothing(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "settings.json")
 	os.WriteFile(path, []byte("not json"), 0o644)
-	if got := Load(path).Get(); got != (Values{}) {
+	if got := Load(path).Get(); got.SkyrimNetDir != "" || got.Theme != "" || got.ModDir != "" || len(got.PinnedSettings) != 0 {
 		t.Errorf("values = %+v, want none", got)
 	}
 }

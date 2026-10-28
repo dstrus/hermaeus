@@ -17,6 +17,7 @@ import (
 
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/install"
+	"hermaeus/internal/prefs"
 	"hermaeus/internal/store"
 
 	"go.yaml.in/yaml/v3"
@@ -24,10 +25,11 @@ import (
 
 type Settings struct {
 	store *store.Store
+	prefs *prefs.Prefs // where pinned files are remembered
 }
 
-func New(s *store.Store) *Settings {
-	return &Settings{store: s}
+func New(s *store.Store, p *prefs.Prefs) *Settings {
+	return &Settings{store: s, prefs: p}
 }
 
 // File is one settings file, named as SkyrimNet's defaults name it: the file
@@ -41,6 +43,7 @@ type File struct {
 	HasDefaults bool   `json:"hasDefaults"`
 	Settings    int    `json:"settings"`
 	Changed     int    `json:"changed"` // settings that differ from their defaults
+	Pinned      bool   `json:"pinned"`  // kept at the top of the Settings page
 }
 
 // Setting is one value in a file, named by its dotted key.
@@ -181,8 +184,14 @@ func (s *Settings) List() (FileList, error) {
 		if err != nil {
 			return FileList{}, err
 		}
+		f.File.Pinned = s.pinned(name)
 		out.Files = append(out.Files, f)
 	}
+	// Pinned files first, in the order they were pinned; the rest by name.
+	order := s.pinOrder()
+	sort.SliceStable(out.Files, func(i, j int) bool {
+		return order(out.Files[i].File.Name) < order(out.Files[j].File.Name)
+	})
 	return out, nil
 }
 
@@ -195,7 +204,9 @@ func (s *Settings) Read(name string) (FileValues, error) {
 	if !validName(name) {
 		return FileValues{}, apperr.New(apperr.Invalid, "Invalid settings name %q", name)
 	}
-	return read(dir, name, loadDefaults(dir))
+	f, err := read(dir, name, loadDefaults(dir))
+	f.File.Pinned = s.pinned(name)
+	return f, err
 }
 
 func read(configDir, name string, defs defaults) (FileValues, error) {
