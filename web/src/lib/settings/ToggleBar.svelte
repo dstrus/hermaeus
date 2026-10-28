@@ -37,6 +37,7 @@
 </script>
 
 <div class="toggles" role="group" aria-label="Quick toggles">
+	<span class="group caps muted" aria-hidden="true">Quick toggles</span>
 	{#each current as t (t.id)}
 		<button
 			type="button"
@@ -47,7 +48,12 @@
 			title={title(t)}
 			onclick={() => flip(t)}
 		>
-			<span class="mark" aria-hidden="true"></span>
+			<!-- A check box, as the game's own option menus draw them. -->
+			<span class="mark" aria-hidden="true">
+				<svg viewBox="0 0 10 10" width="10" height="10">
+					<path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</span>
 			<span class="caps">{t.label}</span>
 		</button>
 	{/each}
@@ -84,20 +90,36 @@
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
+	.group {
+		font-size: var(--step--1);
+		padding-right: var(--space-2);
+	}
 	/* The master switch stands apart: everything after it depends on it. */
 	button.master {
 		padding-right: var(--space-4);
 		border-right: 1px solid var(--rule-strong);
 	}
 	.mark {
-		width: 0.55rem;
-		height: 0.55rem;
+		display: inline-grid;
+		place-items: center;
+		width: 0.9rem;
+		height: 0.9rem;
 		border: 1px solid var(--rule-strong);
-		border-radius: 1px;
+		border-radius: var(--radius);
+		color: var(--on-accent);
+	}
+	.mark svg {
+		opacity: 0;
+	}
+	button:hover:not(:disabled) .mark {
+		border-color: var(--ink);
 	}
 	button[aria-checked='true'] .mark {
 		background: var(--accent);
 		border-color: var(--accent);
+	}
+	button[aria-checked='true'] .mark svg {
+		opacity: 1;
 	}
 	.notice {
 		font-size: var(--step--1);
