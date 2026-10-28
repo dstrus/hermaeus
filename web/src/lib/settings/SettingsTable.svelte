@@ -9,6 +9,7 @@
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import Segmented from '#lib/ui/Segmented.svelte';
+	import ListEditor from './ListEditor.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -79,6 +80,20 @@
 	let editing = $state(false);
 	let draft = $state('');
 	let saving = $state(false);
+	// A list is edited by its shape: one line per item for a list of words
+	// or numbers, a form per item for a list of records, and JSON for the
+	// rest or on request.
+	type Scalar = string | number | boolean | null;
+	let listMode = $state<'lines' | 'records' | 'json'>('json');
+	let lines = $state('');
+	let numbers = $state(false); // the list held numbers, so lines are read as numbers
+	let records = $state<Record<string, Scalar>[]>([]);
+	const isScalar = (v: unknown): v is Scalar => v === null || ['string', 'number', 'boolean'].includes(typeof v);
+	function shapeOf(v: unknown[]): 'lines' | 'records' | 'json' {
+		if (v.every(isScalar)) return 'lines'; // an empty list too: one per line is the likeliest
+		if (v.every((x) => typeof x === 'object' && x !== null && !Array.isArray(x) && Object.values(x).every(isScalar))) return 'records';
+		return 'json';
+	}
 	let field = $state<HTMLTextAreaElement | HTMLInputElement | HTMLButtonElement>();
 
 	let list = $derived(settingsHref(save));
@@ -86,7 +101,14 @@
 	async function startEdit() {
 		if (!editableNow || !current) return;
 		const s = current.setting;
-		draft = editable(s.set ? s.value : s.default);
+		const v = s.set ? s.value : s.default;
+		draft = editable(v);
+		if (kind === 'list' && Array.isArray(v)) {
+			listMode = shapeOf(v);
+			numbers = v.length > 0 && v.every((x) => typeof x === 'number');
+			lines = listMode === 'lines' ? v.map((x) => (x === null ? '' : String(x))).join('\n') : '';
+			records = listMode === 'records' ? (v as Record<string, Scalar>[]).map((x) => ({ ...x })) : [];
+		}
 		error = '';
 		notice = '';
 		editing = true;
@@ -108,6 +130,31 @@
 			case 'text':
 				return draft;
 			case 'list':
+				if (listMode === 'lines') {
+					const items = lines.split('\n').map((l) => l.trim()).filter(Boolean);
+					if (!numbers) return items;
+					return items.map((l) => {
+						const n = Number(l);
+						if (Number.isNaN(n)) throw new Error(`“${l}” isn’t a number; this list holds numbers.`);
+						return n;
+					});
+				}
+				if (listMode === 'records') {
+					// A number field left as text didn't parse (the editor keeps
+					// numbers as numbers); an empty one means no value.
+					const numeric = new Set(records.flatMap((r) => Object.keys(r).filter((k) => typeof r[k] === 'number')));
+					return records.map((r) => {
+						const out: Record<string, Scalar> = {};
+						for (const [key, v] of Object.entries(r)) {
+							if (numeric.has(key) && typeof v === 'string') {
+								if (v.trim() !== '') throw new Error(`${key} holds numbers; “${v}” isn’t one.`);
+								out[key] = null;
+							} else out[key] = v;
+						}
+						return out;
+					});
+				}
+			// falls through to JSON
 			case 'group': {
 				let v: unknown;
 				try {
@@ -249,10 +296,16 @@
 							>
 							<p class="muted small">Press a key, or click the box with a mouse button.</p>
 							<button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>No key</button>
+						{:else if kind === 'list' && listMode === 'lines'}
+							<textarea bind:this={field} bind:value={lines} rows={Math.min(16, Math.max(4, lines.split('\n').length + 1))} spellcheck="false" aria-label="Items, one per line"></textarea>
+							<p class="muted small">One {numbers ? 'number' : 'item'} per line. <button type="button" class="textbutton" onclick={() => (listMode = 'json')}>Edit as JSON</button></p>
+						{:else if kind === 'list' && listMode === 'records'}
+							<ListEditor bind:items={records} />
+							<p class="muted small"><button type="button" class="textbutton" onclick={() => (draft = JSON.stringify(records, null, 2), listMode = 'json')}>Edit as JSON</button></p>
 						{:else}
 							<textarea bind:this={field} bind:value={draft} rows={kind === 'text' ? 4 : 12} spellcheck="false" aria-label="Value"></textarea>
+							{#if kind === 'list' || kind === 'group'}<p class="muted small">As JSON.</p>{/if}
 						{/if}
-						{#if kind === 'list' || kind === 'group'}<p class="muted small">As JSON.</p>{/if}
 						<div class="buttons">
 							<button type="submit" class="button primary" disabled={saving}>Save</button>
 							<button type="button" class="button" onclick={() => (editing = false)} disabled={saving}>Cancel</button>
@@ -432,6 +485,10 @@
 	}
 	.edit .small {
 		margin-top: var(--space-2);
+	}
+	.edit .small .textbutton {
+		font-size: inherit;
+		margin: 0;
 	}
 	.edit .textbutton {
 		margin-top: var(--space-1);
