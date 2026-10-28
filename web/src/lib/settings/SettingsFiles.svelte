@@ -108,7 +108,10 @@
 		</table>
 		<aside class="pane" aria-label="Settings file">
 			{#if current}
-				<h2 class="caps">{fileLabel(current.file)}</h2>
+				<div class="title">
+					<h2 class="caps">{fileLabel(current.file)}</h2>
+					<PinButton always size={16} pinned={current.file.pinned} name={fileLabel(current.file)} onclick={() => togglePin(current!)} />
+				</div>
 				<p class="path">{current.file.path}</p>
 				<dl>
 					<dt class="caps">Settings</dt><dd>{count(current.file.settings)}</dd>
@@ -120,7 +123,6 @@
 				{/if}
 				<div class="actions">
 					<a class="button primary" href={href(current)}>Open</a>
-					<button type="button" class="button" aria-pressed={current.file.pinned} onclick={() => togglePin(current!)}>{current.file.pinned ? 'Unpin' : 'Pin'}</button>
 				</div>
 			{/if}
 		</aside>
@@ -188,10 +190,16 @@
 		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
 	}
+	/* The name, with the pin beside it as in the item's own header. */
+	.pane .title {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		margin-bottom: var(--space-1);
+	}
 	.pane h2 {
 		font-size: var(--step-2);
 		font-weight: 600;
-		margin-bottom: var(--space-1);
 	}
 	.path {
 		font: 400 var(--step--1) / 1.5 var(--font-mono);

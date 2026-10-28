@@ -135,7 +135,10 @@
 		</table>
 		<aside class="pane" aria-label="Prompt">
 			{#if current}
-				<h2 class="caps">{promptName(current.path)}</h2>
+				<div class="title">
+					<h2 class="caps">{promptName(current.path)}</h2>
+					<PinButton always size={16} pinned={current.pinned} name={promptName(current.path)} onclick={() => togglePin(current!)} />
+				</div>
 				<p class="path">{current.path}</p>
 				<dl>
 					<dt class="caps">In use</dt><dd>{#if mine(current)}<span class="changed">Your copy</span>{:else}{source(current)}{/if}</dd>
@@ -146,7 +149,6 @@
 				</dl>
 				<div class="actions">
 					<a class="button primary" href={href(current)}>Open</a>
-					<button type="button" class="button" aria-pressed={current.pinned} onclick={() => togglePin(current!)}>{current.pinned ? 'Unpin' : 'Pin'}</button>
 				</div>
 			{/if}
 		</aside>
@@ -227,10 +229,16 @@
 		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
 	}
+	/* The name, with the pin beside it as in the item's own header. */
+	.pane .title {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		margin-bottom: var(--space-1);
+	}
 	.pane h2 {
 		font-size: var(--step-2);
 		font-weight: 600;
-		margin-bottom: var(--space-1);
 	}
 	.path {
 		font: 400 var(--step--1) / 1.5 var(--font-mono);

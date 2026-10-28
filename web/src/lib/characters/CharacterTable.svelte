@@ -124,7 +124,12 @@
 	</table>
 	<aside class="pane" aria-label="Character">
 		{#if current}
-			<h2 class="caps">{characterName(current)}</h2>
+			<div class="title">
+				<h2 class="caps">{characterName(current)}</h2>
+				{#if current.group !== 'player'}
+					<PinButton always size={16} pinned={current.pinned} name={characterName(current)} disabled={live.gameRunning} reason="Close Skyrim to change pins" onclick={() => togglePin(current!)} />
+				{/if}
+			</div>
 			<p class="muted">{groupNames[current.group]}{#if current.formerNames.length}{' · previously '}{current.formerNames.map((n) => n || 'unnamed').join(', ')}{/if}</p>
 			<dl>
 				<dt class="caps">Memories</dt><dd>{count(current.memories)}</dd>
@@ -135,15 +140,6 @@
 			</dl>
 			<div class="actions">
 				<a class="button primary" href={href(current)}>Open</a>
-				{#if current.group !== 'player'}
-					<button
-						type="button"
-						class="button"
-						aria-pressed={current.pinned}
-						disabled={live.gameRunning}
-						onclick={() => togglePin(current!)}>{current.pinned ? 'Unpin' : 'Pin'}</button
-					>
-				{/if}
 			</div>
 			{#if live.gameRunning && current.group !== 'player'}<p class="notice warn">Close Skyrim to change pins.</p>{/if}
 		{/if}
@@ -208,10 +204,16 @@
 		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
 	}
+	/* The name, with the pin beside it as in the item's own header. */
+	.pane .title {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		margin-bottom: var(--space-1);
+	}
 	.pane h2 {
 		font-size: var(--step-2);
 		font-weight: 600;
-		margin-bottom: var(--space-1);
 	}
 	.pane dl {
 		display: grid;
