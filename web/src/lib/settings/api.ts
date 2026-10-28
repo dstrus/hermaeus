@@ -99,3 +99,72 @@ export function words(part: string): string {
 	const spaced = part.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase();
 	return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
+
+// An Entry is one row of a map being edited: its key, the kind of value it
+// holds, and that value as the row's field keeps it.
+export interface Entry {
+	key: string;
+	kind: 'switch' | 'number' | 'text' | 'json';
+	text: string; // for number, text, and json
+	on: boolean; // for switch
+}
+
+export function toEntries(obj: Record<string, unknown>): Entry[] {
+	return Object.entries(obj).map(([key, v]) => {
+		if (typeof v === 'boolean') return { key, kind: 'switch', text: '', on: v };
+		if (typeof v === 'number') return { key, kind: 'number', text: String(v), on: false };
+		if (typeof v === 'string') return { key, kind: 'text', text: v, on: false };
+		return { key, kind: 'json', text: v === null ? '' : JSON.stringify(v), on: false };
+	});
+}
+
+// fromEntries builds the map back, refusing an empty or repeated key, a
+// number that isn't one, or JSON that doesn't parse. An empty number or
+// JSON field is no value.
+export function fromEntries(entries: Entry[]): Record<string, unknown> {
+	const out: Record<string, unknown> = {};
+	for (const e of entries) {
+		const key = e.key.trim();
+		if (!key) throw new Error('Every row needs a key.');
+		if (key in out) throw new Error(`${key} is listed twice.`);
+		switch (e.kind) {
+			case 'switch':
+				out[key] = e.on;
+				break;
+			case 'number': {
+				const t = e.text.trim();
+				if (t === '') out[key] = null;
+				else if (Number.isNaN(Number(t))) throw new Error(`${key} holds a number; “${e.text}” isn’t one.`);
+				else out[key] = Number(t);
+				break;
+			}
+			case 'json': {
+				const t = e.text.trim();
+				if (t === '') out[key] = null;
+				else {
+					try {
+						out[key] = JSON.parse(t);
+					} catch {
+						throw new Error(`${key} isn’t valid JSON.`);
+					}
+				}
+				break;
+			}
+			default:
+				out[key] = e.text;
+		}
+	}
+	return out;
+}
+
+// parseJSONText is the object or list a text setting holds as JSON, or
+// undefined when it holds something else.
+export function parseJSONText(v: unknown): Record<string, unknown> | unknown[] | undefined {
+	if (typeof v !== 'string' || !/^\s*[[{]/.test(v)) return undefined;
+	try {
+		const parsed: unknown = JSON.parse(v);
+		return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown> | unknown[]) : undefined;
+	} catch {
+		return undefined;
+	}
+}
