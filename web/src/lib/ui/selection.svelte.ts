@@ -8,7 +8,8 @@ export class Selection<T> {
 
 	constructor(
 		private items: () => T[],
-		private keyOf: (item: T) => string
+		private keyOf: (item: T) => string,
+		private marker = '[aria-selected="true"]' // how the selected row is marked, for scrolling to it
 	) {}
 
 	get current(): T | undefined {
@@ -33,6 +34,6 @@ export class Selection<T> {
 		if (!next) return;
 		this.key = this.keyOf(next);
 		await tick();
-		document.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+		document.querySelector(this.marker)?.scrollIntoView({ block: 'nearest' });
 	}
 }
