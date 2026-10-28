@@ -1,6 +1,7 @@
 <!-- Every character SkyrimNet or a plugin ships a bio for, met or not, with
      where the bio comes from and what this playthrough has of its own. -->
 <script lang="ts">
+	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto } from '$app/navigation';
 	import type { Catalog, CatalogEntry } from '#lib/api/types/bios.ts';
 	import type { Character } from '#lib/api/types/characters.ts';
@@ -84,7 +85,7 @@
 		label="Which characters"
 		onchange={(v) => v === 'here' && goto(`/${encodeURIComponent(save)}`)}
 	/>
-	<span class="muted n">{count(catalog.bios.length)} with a bio, from {catalog.layers.length} {catalog.layers.length === 1 ? 'layer' : 'layers'}</span>
+	<span class="muted n" use:clipped>{count(catalog.bios.length)} with a bio, from {catalog.layers.length} {catalog.layers.length === 1 ? 'layer' : 'layers'}</span>
 	<input type="search" bind:value={query} placeholder="Filter by name" aria-label="Filter bios" />
 </div>
 
@@ -108,10 +109,10 @@
 				{#each shown as e (e.template)}
 					<tr aria-selected={selection.is(e)} onclick={() => selection.select(e)} ondblclick={() => goto(href(e))}>
 						<td class="mark">{#if selection.is(e)}<Diamond />{/if}</td>
-						<td class="name"><a href={href(e)}>{templateName(e.template)}</a></td>
-						<td class="template muted">{e.template}</td>
-						<td class="from muted">{source(e)}</td>
-						<td class="here">{here(e)}</td>
+						<td class="name" use:clipped><a href={href(e)}>{templateName(e.template)}</a></td>
+						<td class="template muted" use:clipped>{e.template}</td>
+						<td class="from muted" use:clipped>{source(e)}</td>
+						<td class="here" use:clipped>{here(e)}</td>
 					</tr>
 				{/each}
 			</tbody>

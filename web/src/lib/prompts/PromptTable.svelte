@@ -1,5 +1,6 @@
 <!-- Every prompt SkyrimNet can use, with the layer each comes from. -->
 <script lang="ts">
+	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { Prompt, PromptList } from '#lib/api/types/prompts.ts';
@@ -95,7 +96,7 @@
 
 <div class="bar">
 	<h1 class="caps">Prompts</h1>
-	<span class="muted n">{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
+	<span class="muted n" use:clipped>{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
 	<label class="inside"><input type="checkbox" bind:checked={inside} /> Search inside</label>
 	<input type="search" bind:value={query} placeholder={inside ? 'Search names and text' : 'Filter by name'} aria-label="Filter prompts" />
 </div>

@@ -1,6 +1,7 @@
 <!-- SkyrimNet's settings files, with how many settings each has and how
      many the player changed. -->
 <script lang="ts">
+	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { FileValues } from '#lib/api/types/settings.ts';
@@ -65,7 +66,7 @@
 	{#if changed}
 		<a class="changed n" href={settingsHref(save, changedPage)}>{count(changed)} changed from the defaults</a>
 	{:else}
-		<span class="muted n">Nothing differs from the defaults</span>
+		<span class="muted n" use:clipped>Nothing differs from the defaults</span>
 	{/if}
 	<input type="search" bind:value={query} placeholder="Filter by file" aria-label="Filter settings files" />
 </div>

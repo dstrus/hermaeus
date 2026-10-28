@@ -1,6 +1,7 @@
 <!-- The settings of one file (or everything the player changed, across
      files) as a table, with the selected one edited in the pane. -->
 <script lang="ts">
+	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
 	import { tick } from 'svelte';
 	import { ApiError } from '#lib/api/client.ts';
@@ -284,9 +285,9 @@
 <div class="bar">
 	<h1 class="caps">{title}</h1>
 	{#if file}
-		<span class="path n">{file.path}</span>
+		<span class="path n" use:clipped>{file.path}</span>
 	{:else}
-		<span class="muted n">{count(rows.length)} across {new Set(rows.map((r) => r.file.name)).size} files</span>
+		<span class="muted n" use:clipped>{count(rows.length)} across {new Set(rows.map((r) => r.file.name)).size} files</span>
 	{/if}
 	<input type="search" bind:value={query} placeholder="Filter by key or value" aria-label="Filter settings" />
 </div>
@@ -316,9 +317,9 @@
 					{/if}
 					<tr aria-selected={selection.is(r)} onclick={() => selection.select(r)} ondblclick={startEdit}>
 						<td class="mark">{#if selection.is(r)}<Diamond />{/if}</td>
-						<td class="key">{byFile ? r.setting.key : lastOf(r.setting.key)}</td>
-						<td class="value" class:changed={r.setting.changed} class:muted={!r.setting.set}>{showValue(r, valueOf(r))}</td>
-						<td class="default muted">{r.setting.hasDefault ? showValue(r, r.setting.default) : ''}</td>
+						<td class="key" use:clipped>{byFile ? r.setting.key : lastOf(r.setting.key)}</td>
+						<td class="value" use:clipped class:changed={r.setting.changed} class:muted={!r.setting.set}>{showValue(r, valueOf(r))}</td>
+						<td class="default muted" use:clipped>{r.setting.hasDefault ? showValue(r, r.setting.default) : ''}</td>
 					</tr>
 				{/each}
 			</tbody>

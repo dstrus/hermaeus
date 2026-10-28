@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
@@ -76,7 +77,7 @@
 		label="Which characters"
 		onchange={(v) => v === 'all' && goto(catalogHref(save))}
 	/>
-	<span class="muted n">{count(characters.length)} with something stored</span>
+	<span class="muted n" use:clipped>{count(characters.length)} with something stored</span>
 	<input type="search" bind:value={query} placeholder="Filter by name or bio" aria-label="Filter characters" />
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}

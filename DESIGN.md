@@ -227,6 +227,8 @@ The world is flat. Depth comes from the smoked-glass gradient behind everything,
 - **Modal lift** (`box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.45)`, backdrop `rgb(0 0 0 / 0.45)`): only for the quick-find dialog, which floats over the page.
 
 ### Named Rules
+**The Clipped Text Rule.** Text cut short with an ellipsis shows its whole self in a tip beneath it when the pointer rests there: the pane's material with a hairline edge, lifted by a soft shadow, never the browser's own tooltip. Text that fits shows nothing.
+
 **The Hairline Rule.** Separate with a 1px rule, never a box or a shadow. Use `rule` between rows and shell zones, `rule-strong` under column heads and group headings and around controls.
 
 ## Shapes
