@@ -8,6 +8,8 @@
 	import PinButton from '#lib/ui/PinButton.svelte';
 	import Segmented from '#lib/ui/Segmented.svelte';
 	import { catalogHref } from '#lib/bios/api.ts';
+	import { BioPreviews, type Preview } from '#lib/bios/preview.ts';
+	import { fitToViewport } from '#lib/ui/fit.ts';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -37,6 +39,18 @@
 
 	const selection = new Selection(() => shown, (c) => c.uuid);
 	let current = $derived(selection.current);
+
+	// The selected character's bio, as space in the pane permits.
+	const previews = new BioPreviews(() => save);
+	let preview = $state<Preview | null>(null);
+	$effect(() => {
+		const template = current?.bio;
+		preview = null;
+		if (!template) return;
+		previews.of(template).then((p) => {
+			if (current?.bio === template) preview = p;
+		});
+	});
 	const href = (c: Character) => `/${encodeURIComponent(save)}/npc/${c.uuid}`;
 
 	async function togglePin(c: Character) {
@@ -122,7 +136,7 @@
 			{/each}
 		</tbody>
 	</table>
-	<aside class="pane" aria-label="Character">
+	<aside class="pane" aria-label="Character" use:fitToViewport>
 		{#if current}
 			<div class="title">
 				<h2 class="caps">{characterName(current)}</h2>
@@ -142,6 +156,12 @@
 				<a class="button primary" href={href(current)}>Open</a>
 			</div>
 			{#if live.gameRunning && current.group !== 'player'}<p class="notice warn">Close Skyrim to change pins.</p>{/if}
+			{#if preview}
+				<section class="preview">
+					<h3 class="caps">Bio · {preview.kind}</h3>
+					<p>{preview.text}</p>
+				</section>
+			{/if}
 		{/if}
 	</aside>
 	</div>
@@ -199,10 +219,31 @@
 	.pane {
 		position: sticky;
 		top: 0;
-		min-height: calc(100vh - 7rem);
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100vh - 7rem); /* fitToViewport sets the height */
 		padding: var(--space-5);
 		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
+		overflow: hidden;
+	}
+	/* The bio preview takes what height is left, fading out at the bottom. */
+	.preview {
+		flex: 1;
+		min-height: 4rem;
+		margin-top: var(--space-4);
+		overflow: hidden;
+		mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+	}
+	.preview h3 {
+		font-size: var(--step--1);
+		color: var(--muted);
+		margin-bottom: var(--space-2);
+	}
+	.preview p {
+		font-size: var(--step--1);
+		line-height: 1.6;
+		white-space: pre-wrap;
 	}
 	/* The name, with the pin beside it as in the item's own header. */
 	.pane .title {

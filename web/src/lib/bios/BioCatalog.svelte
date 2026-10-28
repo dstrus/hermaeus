@@ -14,6 +14,8 @@
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
 	import { catalogHref, kinds, templateName } from './api.ts';
+	import { BioPreviews, type Preview } from './preview.ts';
+	import { fitToViewport } from '#lib/ui/fit.ts';
 
 	let {
 		save,
@@ -62,6 +64,18 @@
 
 	const selection = new Selection(() => shown, (e) => e.template);
 	let current = $derived(selection.current);
+
+	// The selected character's bio, as space in the pane permits.
+	const previews = new BioPreviews(() => save);
+	let preview = $state<Preview | null>(null);
+	$effect(() => {
+		const template = current?.template;
+		preview = null;
+		if (!template) return;
+		previews.of(template).then((p) => {
+			if (current?.template === template) preview = p;
+		});
+	});
 
 	useShortcuts(() => {
 		const e = selection.current;
@@ -117,7 +131,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<aside class="pane" aria-label="Character">
+		<aside class="pane" aria-label="Character" use:fitToViewport>
 			{#if current}
 				<h2 class="caps">{templateName(current.template)}</h2>
 				<p class="path">{current.template}</p>
@@ -128,6 +142,12 @@
 				<div class="actions">
 					<a class="button primary" href={href(current)}>{met(current) ? 'Open character' : 'Open bio'}</a>
 				</div>
+				{#if preview}
+					<section class="preview">
+						<h3 class="caps">Bio · {preview.kind}</h3>
+						<p>{preview.text}</p>
+					</section>
+				{/if}
 			{/if}
 		</aside>
 	</div>
@@ -185,10 +205,31 @@
 	.pane {
 		position: sticky;
 		top: 0;
-		min-height: calc(100vh - 7rem);
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100vh - 7rem); /* fitToViewport sets the height */
 		padding: var(--space-5);
 		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
+		overflow: hidden;
+	}
+	/* The bio preview takes what height is left, fading out at the bottom. */
+	.preview {
+		flex: 1;
+		min-height: 4rem;
+		margin-top: var(--space-4);
+		overflow: hidden;
+		mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+	}
+	.preview h3 {
+		font-size: var(--step--1);
+		color: var(--muted);
+		margin-bottom: var(--space-2);
+	}
+	.preview p {
+		font-size: var(--step--1);
+		line-height: 1.6;
+		white-space: pre-wrap;
 	}
 	.pane h2 {
 		font-size: var(--step-2);
