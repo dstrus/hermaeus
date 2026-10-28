@@ -26,13 +26,23 @@ export function deleteShortcuts(s: Omit<Shortcut, 'key' | 'shown'>): Shortcut[] 
 	];
 }
 
-let layers = $state<{ id: number; shortcuts: () => Shortcut[] }[]>([]);
+// The registered shortcut sets, in registration order, kept outside
+// reactive state: a page leaving reads state as it was when it mounted, so
+// filtering a reactive list in onDestroy would drop the page arriving.
+// changes is bumped whenever the set changes, so active() recomputes.
+const registered = new Map<number, () => Shortcut[]>();
+let changes = $state(0);
 let next = 0;
+
+function changed() {
+	queueMicrotask(() => changes++);
+}
 
 // active is every shortcut in force, later registrations winning a key.
 export function active(): Shortcut[] {
+	void changes;
 	const byKey = new Map<string, Shortcut>();
-	for (const layer of layers) for (const s of layer.shortcuts()) byKey.set(`${s.command ? 'cmd+' : ''}${s.key.toLowerCase()}`, s);
+	for (const shortcuts of registered.values()) for (const s of shortcuts()) byKey.set(`${s.command ? 'cmd+' : ''}${s.key.toLowerCase()}`, s);
 	return [...byKey.values()];
 }
 
@@ -41,9 +51,11 @@ export function active(): Shortcut[] {
 // so it can depend on the component's state.
 export function useShortcuts(shortcuts: () => Shortcut[]) {
 	const id = next++;
-	layers.push({ id, shortcuts });
+	registered.set(id, shortcuts);
+	changed();
 	onDestroy(() => {
-		layers = layers.filter((l) => l.id !== id);
+		registered.delete(id);
+		changed();
 	});
 }
 

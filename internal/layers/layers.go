@@ -214,6 +214,34 @@ func pluginDir(roots []string, id string) string {
 	return copies[0].dir
 }
 
+// Lookup finds rel (forward slashes) under root the way SkyrimNet does on
+// Windows, ignoring case, and returns its path as spelled on disk, or "" if
+// there's no such file or folder.
+func Lookup(root, rel string) string {
+	dir := root
+	for _, part := range strings.Split(rel, "/") {
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			return ""
+		}
+		found := ""
+		for _, e := range entries {
+			if strings.EqualFold(e.Name(), part) {
+				found = e.Name()
+				break
+			}
+		}
+		if found == "" {
+			return ""
+		}
+		dir = filepath.Join(dir, found)
+	}
+	if rel, err := filepath.Rel(root, dir); err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return ""
+	}
+	return dir
+}
+
 type manifest struct {
 	Title   string `json:"title"`
 	Version string `json:"version"`

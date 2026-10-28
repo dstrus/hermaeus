@@ -51,3 +51,15 @@ packages:
     include_files: [settings.go, save.go, toggles.go]
     output_path: web/src/lib/api/types/settings.ts
     fallback_type: unknown
+  - path: hermaeus/internal/layers
+    include_files: [layers.go]
+    output_path: web/src/lib/api/types/layers.ts
+    fallback_type: unknown
+  - path: hermaeus/internal/prompts
+    include_files: [prompts.go, save.go]
+    output_path: web/src/lib/api/types/prompts.ts
+    fallback_type: unknown
+    frontmatter: |
+      import type * as layers from './layers.ts';
+    type_mappings:
+      layers.Layer: layers.Layer

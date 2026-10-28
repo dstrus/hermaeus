@@ -1,0 +1,260 @@
+<!-- Every prompt SkyrimNet can use, with the layer each comes from. -->
+<script lang="ts">
+	import { goto } from '$app/navigation';
+	import { ApiError } from '#lib/api/client.ts';
+	import type { Prompt, PromptList } from '#lib/api/types/prompts.ts';
+	import Diamond from '#lib/ui/Diamond.svelte';
+	import SortHeader from '#lib/ui/SortHeader.svelte';
+	import { Selection } from '#lib/ui/selection.svelte.ts';
+	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import { sorted, type Sort } from '#lib/ui/sort.ts';
+	import { count, realTime } from '#lib/format.ts';
+	import { promptFolder, promptHref, promptName, searchPrompts } from './api.ts';
+
+	let { save, list }: { save: string; list: PromptList } = $props();
+
+	let query = $state('');
+	let inside = $state(false); // search the prompts' text too, not only their names
+	let matches = $state<Set<string> | null>(null); // paths whose text matches, when searching inside
+	let searching = $state(false);
+	let sort = $state<Sort>({ key: 'folder', descending: false });
+	let error = $state('');
+
+	const source = (p: Prompt) => list.layers[p.layer]?.source ?? '';
+	const folderName = (p: Prompt) => promptFolder(p.path) || 'prompts';
+
+	// Searching inside reads every prompt on the server, so it waits for a
+	// pause in typing.
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	$effect(() => {
+		const q = query.trim();
+		clearTimeout(timer);
+		if (!inside || !q) {
+			matches = null;
+			searching = false;
+			return;
+		}
+		searching = true;
+		timer = setTimeout(async () => {
+			try {
+				const found = (await searchPrompts(q)).paths;
+				matches = new Set(found.map((p) => p.toLowerCase()));
+				error = '';
+			} catch (e) {
+				error = e instanceof ApiError ? e.message : String(e);
+			} finally {
+				searching = false;
+			}
+		}, 250);
+	});
+
+	let shown = $derived.by(() => {
+		const q = query.trim().toLowerCase();
+		const found = list.prompts.filter((p) => !q || p.path.toLowerCase().includes(q) || matches?.has(p.path.toLowerCase()));
+		return sorted(found, sort, {
+			name: (p) => promptName(p.path),
+			// Top-level prompts first, then each folder's; a space keeps a
+			// folder's own files ahead of its subfolders' when collated.
+			folder: (p) => promptFolder(p.path) + ' ' + promptName(p.path),
+			source: (p) => source(p)
+		});
+	});
+	let grouped = $derived(sort.key === 'folder');
+
+	const selection = new Selection(() => shown, (p) => p.path);
+	let current = $derived(selection.current);
+	const href = (p: Prompt) => promptHref(save, p.path);
+
+	useShortcuts(() => {
+		const p = selection.current;
+		return [
+			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
+			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !p, run: () => p && goto(href(p)) }
+		];
+	});
+</script>
+
+<div class="bar">
+	<h1 class="caps">Prompts</h1>
+	<span class="muted">{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
+	<label class="inside"><input type="checkbox" bind:checked={inside} /> Search inside</label>
+	<input type="search" bind:value={query} placeholder={inside ? 'Search names and text' : 'Filter by name'} aria-label="Filter prompts" />
+</div>
+{#if error}<p class="notice error" role="alert">{error}</p>{/if}
+
+{#if !list.prompts.length}
+	<p class="muted">No prompts were found. Check that SkyrimNet’s folder, and under Mod Organizer 2 its mod folder, are set on the Playthroughs page.</p>
+{:else if !shown.length}
+	<p class="muted">{searching ? 'Searching…' : `Nothing matches “${query}”.`}</p>
+{:else}
+	<div class="split">
+		<table>
+			<thead>
+				<tr>
+					<th class="mark" aria-label="Selected"></th>
+					<SortHeader label="Prompt" key="name" bind:sort />
+					<SortHeader label="Folder" key="folder" bind:sort class="folder" />
+					<SortHeader label="From" key="source" bind:sort />
+				</tr>
+			</thead>
+			<tbody>
+				{#each shown as p, i (p.path)}
+					{#if grouped && (i === 0 || folderName(p) !== folderName(shown[i - 1]!))}
+						<tr class="group"><th colspan="4" class="caps" scope="rowgroup">{folderName(p)}</th></tr>
+					{/if}
+					<tr aria-selected={selection.is(p)} onclick={() => selection.select(p)} ondblclick={() => goto(href(p))}>
+						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
+						<td class="name"><a href={href(p)}>{promptName(p.path)}</a></td>
+						<td class="folder muted">{folderName(p)}</td>
+						<td class="muted">{source(p)}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<aside class="pane" aria-label="Prompt">
+			{#if current}
+				<h2 class="caps">{promptName(current.path)}</h2>
+				<p class="path">{current.path}</p>
+				<dl>
+					<dt class="caps">In use</dt><dd>{source(current)}</dd>
+					{#if current.layers.length > 1}
+						<dt class="caps">Also in</dt><dd>{current.layers.slice(1).map((i) => list.layers[i]?.source ?? '').join(', ')}</dd>
+					{/if}
+					<dt class="caps">Changed</dt><dd>{realTime(current.modified)}</dd>
+				</dl>
+				<div class="actions">
+					<a class="button primary" href={href(current)}>Open</a>
+				</div>
+			{/if}
+		</aside>
+	</div>
+{/if}
+
+<style>
+	/* Keeps the filter over the table, not the pane. */
+	.bar {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-4);
+		margin-bottom: var(--space-4);
+		margin-right: calc(clamp(18rem, 26vw, 24rem) + var(--space-5));
+	}
+	h1 {
+		font-size: var(--step-3);
+		font-weight: 600;
+		line-height: 1;
+	}
+	.inside {
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		font-size: var(--step--1);
+		color: var(--muted);
+		white-space: nowrap;
+	}
+	.bar input[type='search'] {
+		width: 18rem;
+	}
+	.split {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) clamp(18rem, 26vw, 24rem);
+		gap: var(--space-5);
+		align-items: start;
+	}
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+	/* The item card: a full-height zone of the menu beside the list. */
+	.pane {
+		position: sticky;
+		top: 0;
+		min-height: calc(100vh - 7rem);
+		padding: var(--space-5);
+		background: var(--panel);
+		border-left: 1px solid var(--rule-strong);
+	}
+	.pane h2 {
+		font-size: var(--step-2);
+		font-weight: 600;
+		margin-bottom: var(--space-1);
+	}
+	.path {
+		font: 400 var(--step--1) / 1.5 var(--font-mono);
+		color: var(--muted);
+		overflow-wrap: anywhere;
+	}
+	.pane dl {
+		display: grid;
+		grid-template-columns: 5.5rem 1fr;
+		gap: var(--space-1) var(--space-3);
+		margin: var(--space-4) 0;
+	}
+	.pane dt {
+		color: var(--muted);
+		font-size: var(--step--1);
+		padding-top: 0.15em;
+	}
+	.pane dd {
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+	.actions a {
+		text-decoration: none;
+	}
+	@media (max-width: 60rem) {
+		.bar {
+			margin-right: 0;
+			flex-wrap: wrap;
+		}
+		.split {
+			grid-template-columns: 1fr;
+		}
+		.pane {
+			position: static;
+			min-height: 0;
+			border-left: 0;
+			border-top: 1px solid var(--rule-strong);
+		}
+		.split :global(.folder) {
+			display: none;
+		}
+	}
+	td {
+		padding: var(--space-2) var(--space-3);
+		border-bottom: 1px solid var(--rule);
+	}
+	/* A row you can select tints under the pointer, as a bio's sections do. */
+	tbody tr[aria-selected]:not([aria-selected='true']):hover td {
+		background: var(--glass);
+	}
+	tr[aria-selected='true'] td {
+		background: var(--select);
+	}
+	tbody tr {
+		cursor: default;
+	}
+	.mark {
+		width: 1.5rem;
+		padding-right: 0;
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	tbody .mark {
+		border-bottom-color: var(--rule);
+	}
+	.name a {
+		text-decoration: none;
+	}
+	.name a:hover {
+		text-decoration: underline;
+	}
+	.group th {
+		padding: var(--space-4) var(--space-3) var(--space-1);
+		text-align: left;
+		font-size: var(--step--1);
+		color: var(--accent);
+		border-bottom: 1px solid var(--rule-strong);
+	}
+</style>

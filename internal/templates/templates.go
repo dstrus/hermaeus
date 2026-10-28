@@ -154,3 +154,30 @@ func Check(content string, rules Rules) error {
 	}
 	return nil
 }
+
+var referenceRe = regexp.MustCompile(`\b(render_template|render_subcomponent)\s*\(\s*"([^"]+)"`)
+
+// Warnings lists the templates content refers to by a literal name that
+// don't exist: render_template("components\\event_history") needs
+// components/event_history.prompt, and render_subcomponent("x") needs
+// submodules/x. exists reports whether a path under the prompts folder is
+// there in any layer. These are warnings, not errors, since SkyrimNet may
+// fill the name in a way this check can't see.
+func Warnings(content string, exists func(path string) bool) []string {
+	var out []string
+	seen := map[string]bool{}
+	for _, m := range referenceRe.FindAllStringSubmatch(content, -1) {
+		name := strings.ReplaceAll(m[2], `\\`, "/")
+		name = strings.ReplaceAll(name, `\`, "/")
+		path := "submodules/" + name
+		if m[1] == "render_template" {
+			path = name + ".prompt"
+		}
+		if seen[path] || exists(path) {
+			continue
+		}
+		seen[path] = true
+		out = append(out, fmt.Sprintf("%s(%q) refers to %s, which doesn't exist", m[1], m[2], path))
+	}
+	return out
+}

@@ -21,6 +21,7 @@ import (
 	"hermaeus/internal/layers"
 	"hermaeus/internal/memories"
 	"hermaeus/internal/prefs"
+	"hermaeus/internal/prompts"
 	"hermaeus/internal/settings"
 	"hermaeus/internal/store"
 )
@@ -91,6 +92,7 @@ func (s *Server) routes() {
 	memories.Routes(m, s.Store)
 	bios.New(s.Store, s.Library).Routes(m)
 	settings.New(s.Store).Routes(m)
+	prompts.New(s.Store, s.Library).Routes(m)
 
 	m.Handle("/api/", httpapi.JSON(func(r *http.Request, _ httpapi.None) (httpapi.None, error) {
 		return httpapi.None{}, apperr.New(apperr.NotFound, "Unknown endpoint: %s %s", r.Method, r.URL.Path)
