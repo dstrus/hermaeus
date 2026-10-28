@@ -16,10 +16,10 @@
 	let base = $derived(`${list}/npc/${c.uuid}`);
 	let tabs = $derived([
 		{ href: base, label: 'Overview' },
-		{ href: `${base}/stats`, label: 'Stats' },
+		...(c.bio ? [{ href: `${base}/bio`, label: 'Bio' }] : []),
 		{ href: `${base}/memories`, label: 'Memories', n: c.memories },
 		{ href: `${base}/diary`, label: 'Diary', n: c.diaries },
-		...(c.bio ? [{ href: `${base}/bio`, label: 'Bio' }] : [])
+		{ href: `${base}/stats`, label: 'Stats' }
 	]);
 	let error = $state('');
 
