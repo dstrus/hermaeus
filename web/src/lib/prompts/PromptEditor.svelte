@@ -11,6 +11,7 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import Segmented from '#lib/ui/Segmented.svelte';
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import Up from '#lib/ui/Up.svelte';
 	import { layerLabel, promptDependency, promptName, promptsDependency, removeCopy, savePrompt } from './api.ts';
 
 	let { save, path, doc: loaded }: { save: string; path: string; doc: Document } = $props();
@@ -97,6 +98,7 @@
 </script>
 
 <header>
+	<Up href={list} label="Prompts" />
 	<h1 class="caps">{promptName(path)}</h1>
 	<p class="path">{path}</p>
 	<p class="muted">

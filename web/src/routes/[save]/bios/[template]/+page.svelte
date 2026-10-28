@@ -3,6 +3,7 @@
 	import BioEditor from '#lib/bios/BioEditor.svelte';
 	import { catalogHref, templateName } from '#lib/bios/api.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import Up from '#lib/ui/Up.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -13,6 +14,7 @@
 </script>
 
 <header>
+	<Up href={catalogHref(data.playthrough.id)} label="Every bio" />
 	<h1 class="caps">{name}</h1>
 	<p class="muted">Bio template <span class="id">{data.template}</span> · not met in this playthrough</p>
 </header>

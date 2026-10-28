@@ -202,7 +202,6 @@
 			border-left: 0;
 			border-top: 1px solid var(--rule-strong);
 		}
-		.split :global(.template),
 		.split :global(.from) {
 			display: none;
 		}
@@ -238,14 +237,22 @@
 		font-family: var(--font-mono);
 		font-size: var(--step--1);
 	}
+	/* The name never wraps; the template column gives way first, since the
+	   pane shows it. */
+	.name {
+		white-space: nowrap;
+	}
 	.split :global(.from),
 	.split :global(.here) {
 		white-space: nowrap;
+		width: 12rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 12rem;
 	}
-	.split :global(.from) {
-		width: 16rem;
-	}
-	.split :global(.here) {
-		width: 14rem;
+	@media (max-width: 90rem) {
+		.split :global(.template) {
+			display: none;
+		}
 	}
 </style>

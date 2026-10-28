@@ -14,6 +14,7 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import Up from '#lib/ui/Up.svelte';
 	import { editable, fileLabel, fromEntries, kindOf, parseJSONText, saveSettings, settingsDependency, settingsHref, show, toEntries, togglesDependency, words, type Entry, type Kind, type Row } from './api.ts';
 	import { codeOf, keyName, mouseCodeOf, noKey } from './keys.ts';
 
@@ -279,6 +280,7 @@
 	]);
 </script>
 
+<Up href={list} label="Settings" />
 <div class="bar">
 	<h1 class="caps">{title}</h1>
 	{#if file}

@@ -6,6 +6,7 @@
 	import { characterName, charactersDependency, setPinned } from '#lib/characters/api.ts';
 	import { count } from '#lib/format.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import Up from '#lib/ui/Up.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
@@ -36,6 +37,7 @@
 </script>
 
 <header>
+	<Up href={list} label="Characters" />
 	<div class="title">
 		<h1 class="caps">{characterName(c)}</h1>
 		{#if c.group !== 'player'}
