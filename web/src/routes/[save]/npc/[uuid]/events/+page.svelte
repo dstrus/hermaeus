@@ -6,4 +6,4 @@
 	let { data }: PageProps = $props();
 </script>
 
-<EventTable save={data.playthrough.id} name={characterName(data.character)} events={data.events} characters={data.characters} />
+<EventTable save={data.playthrough.id} uuid={data.character.uuid} name={characterName(data.character)} events={data.events} characters={data.characters} />

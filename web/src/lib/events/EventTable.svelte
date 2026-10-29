@@ -13,7 +13,13 @@
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { fieldLabel } from './api.ts';
 
-	let { save, name, events: response, characters }: { save: string; name: string; events: EventsResponse; characters: Character[] } = $props();
+	let { save, uuid, name, events: response, characters }: { save: string; uuid: string; name: string; events: EventsResponse; characters: Character[] } = $props();
+
+	// The character's own events, where they act or are acted on, read in
+	// full ink; those they were merely present for are dimmed, so theirs
+	// surface by contrast. Likewise their name among the labels.
+	const theirs = (e: Event) => e.role !== 'present';
+	const self = (who: string | undefined) => who === uuid;
 
 	// Who can be opened: the characters with something stored, by UUID.
 	let known = $derived(new Set(characters.map((c) => c.uuid)));
@@ -59,9 +65,10 @@
 	]);
 </script>
 
-<!-- A name as a label on the words, opening the character when they're known. -->
-{#snippet who(name: string, href: string | undefined)}
-	{#if href}<a class="name" {href}>{name}</a>{:else}<span class="name">{name}</span>{/if}
+<!-- A name as a label on the words, opening the character when they're
+     known; the character whose events these are stands out among them. -->
+{#snippet who(name: string, href: string | undefined, own: boolean)}
+	{#if href}<a class="name" class:own {href}>{name}</a>{:else}<span class="name" class:own>{name}</span>{/if}
 {/snippet}
 
 <div class="tools">
@@ -101,13 +108,13 @@
 						{#if dayLabel(e) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
 							<tr class="day"><th colspan="4" scope="rowgroup" class="caps sticky-day">{dayLabel(e)}</th></tr>
 						{/if}
-						<tr aria-selected={selection.is(e)} onclick={() => selection.select(e)}>
+						<tr aria-selected={selection.is(e)} class:bystander={!theirs(e)} onclick={() => selection.select(e)}>
 							<td class="mark">{#if selection.is(e)}<Diamond />{/if}</td>
 							<td class="when">{timeLabel(e)}</td>
 							<td class="text">
 								<span class="line">
 									{#if e.speaker && e.line}
-										{@render who(e.speaker, pageOf(e.speakerUuid))}{#if e.listener}{' to '}{@render who(e.listener, pageOf(e.listenerUuid))}{/if}{': '}“{e.line}”
+										{@render who(e.speaker, pageOf(e.speakerUuid), self(e.speakerUuid))}{#if e.listener}{' to '}{@render who(e.listener, pageOf(e.listenerUuid), self(e.listenerUuid))}{/if}{': '}“{e.line}”
 									{:else}
 										{e.summary}
 									{/if}
@@ -135,7 +142,7 @@
 					<p class="muted">{current.date ? `${current.date.time}, ${current.date.day}` : dayLabel(current)}</p>
 					<p class="content">
 						{#if current.speaker && current.line}
-							{@render who(current.speaker, pageOf(current.speakerUuid))}{#if current.listener}{' to '}{@render who(current.listener, pageOf(current.listenerUuid))}{/if}{': '}“{current.line}”
+							{@render who(current.speaker, pageOf(current.speakerUuid), self(current.speakerUuid))}{#if current.listener}{' to '}{@render who(current.listener, pageOf(current.listenerUuid), self(current.listenerUuid))}{/if}{': '}“{current.line}”
 						{:else}
 							{current.text || current.summary}
 						{/if}
@@ -198,6 +205,9 @@
 	tr[aria-selected='true'] td {
 		background: var(--select);
 	}
+	tr.bystander td {
+		color: var(--muted);
+	}
 	th {
 		text-align: left;
 		padding: var(--space-2) var(--space-3);
@@ -231,6 +241,12 @@
 		letter-spacing: var(--track);
 		color: var(--muted);
 		text-decoration: none;
+	}
+	.name.own {
+		color: var(--ink);
+	}
+	tr.bystander .name.own {
+		color: inherit;
 	}
 	a.name:hover {
 		color: var(--ink);
