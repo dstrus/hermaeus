@@ -72,7 +72,30 @@ type FileValues struct {
 }
 
 type FileList struct {
-	Files []FileValues `json:"files"`
+	Files     []FileValues `json:"files"`
+	Elsewhere []OwnPage    `json:"elsewhere"` // files the list leaves out, each for a page of its own
+}
+
+// OwnPage is a settings file that Hermaeus shows on a page of its own, in
+// the feature's own terms, so the Settings page doesn't list it. The file
+// can still be read and saved by name.
+type OwnPage struct {
+	Name  string `json:"name"`  // the file's name, as in File
+	Label string `json:"label"` // the page's name
+	Page  string `json:"page"`  // the page's path under the playthrough
+}
+
+var ownPages = []OwnPage{
+	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "translator"},
+}
+
+func hasOwnPage(name string) bool {
+	for _, p := range ownPages {
+		if strings.EqualFold(p.Name, name) {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Settings) configDir() (string, error) {
@@ -171,15 +194,18 @@ func names(configDir string, defs defaults) []string {
 	return out
 }
 
-// List reads every settings file.
+// List reads every settings file, except those with a page of their own.
 func (s *Settings) List() (FileList, error) {
 	dir, err := s.configDir()
 	if err != nil {
 		return FileList{}, err
 	}
 	defs := loadDefaults(dir)
-	out := FileList{Files: []FileValues{}}
+	out := FileList{Files: []FileValues{}, Elsewhere: ownPages}
 	for _, name := range names(dir, defs) {
+		if hasOwnPage(name) {
+			continue
+		}
 		f, err := read(dir, name, defs)
 		if err != nil {
 			return FileList{}, err

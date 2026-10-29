@@ -4,9 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
-	"time"
 
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/textfile"
@@ -128,73 +126,39 @@ func (s *Settings) SetSpeech(template string, e SpeechEdit) (SpeechRule, error) 
 	if pattern == "" {
 		what = "Removed the speech pattern for " + template
 	}
-	err := s.store.ChangeFiles(what, func() error {
-		path, err := s.translatorPath()
-		if err != nil {
-			return err
-		}
-		info, err := os.Stat(path)
-		if os.IsNotExist(err) {
-			return apperr.New(apperr.NotFound, "%s.yaml doesn't exist yet. SkyrimNet creates it the next time it starts.", translatorFile)
-		}
-		if err != nil {
-			return err
-		}
-		if info.ModTime().UnixMilli() != e.Modified {
-			return apperr.New(apperr.Conflict, "Universal Translator's settings changed after you opened them. Reload to see the latest, then make your change again.")
-		}
-		old, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-		changed := true
-		updated, err := rewrite(old, translatorFile, func(doc *yaml.Node) error {
-			rules := rulesOf(doc)
-			i, rule := npcRule(rules, template)
-			switch {
-			case pattern == "" && rule == nil:
-				changed = false
-			case pattern == "":
-				rules.Content = append(rules.Content[:i], rules.Content[i+1:]...)
-			case rule != nil:
-				if n := findNode(rule, "speechPattern"); n != nil {
-					n.SetString(pattern)
-				} else {
-					rule.Content = append(rule.Content, scalar("speechPattern"), stringNode(pattern))
-				}
-			default:
-				if rules == nil {
-					rules = &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq"}
-					doc.Content = append(doc.Content, scalar("rules"), rules)
-				}
-				rule = &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map", Content: []*yaml.Node{
-					scalar("id"), scalar("rule_" + strconv.FormatInt(time.Now().UnixMilli(), 10)),
-					scalar("entityType"), scalar("npc"),
-					scalar("entityId"), scalar(strings.ToLower(template)),
-					scalar("entityDisplayName"), scalar(template),
-					scalar("speechPattern"), stringNode(pattern),
-				}}
-				at := len(rules.Content)
-				for j, r := range rules.Content {
-					if ruleField(r, "entityType") == "global" {
-						at = j
-						break
-					}
-				}
-				rules.Content = append(rules.Content[:at], append([]*yaml.Node{rule}, rules.Content[at:]...)...)
+	if _, err := s.editTranslator(what, e.Modified, func(doc *yaml.Node) error {
+		rules := rulesOf(doc)
+		i, rule := npcRule(rules, template)
+		switch {
+		case pattern == "" && rule == nil:
+			// nothing to remove
+		case pattern == "":
+			rules.Content = append(rules.Content[:i], rules.Content[i+1:]...)
+		case rule != nil:
+			setField(rule, "speechPattern", stringNode(pattern))
+		default:
+			if rules == nil {
+				rules = &yaml.Node{Kind: yaml.SequenceNode, Tag: "!!seq"}
+				doc.Content = append(doc.Content, scalar("rules"), rules)
 			}
-			return nil
-		})
-		if err != nil || !changed {
-			return err
+			rule = &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map", Content: []*yaml.Node{
+				scalar("id"), scalar(newRuleID(nil)),
+				scalar("entityType"), scalar("npc"),
+				scalar("entityId"), scalar(strings.ToLower(template)),
+				scalar("entityDisplayName"), scalar(template),
+				scalar("speechPattern"), stringNode(pattern),
+			}}
+			at := len(rules.Content)
+			for j, r := range rules.Content {
+				if ruleField(r, "entityType") == globalType {
+					at = j
+					break
+				}
+			}
+			rules.Content = append(rules.Content[:at], append([]*yaml.Node{rule}, rules.Content[at:]...)...)
 		}
-		rel, _ := filepath.Rel(s.store.Dir(), path)
-		if _, err := textfile.Backup(filepath.Join(s.store.BackupDir(), "settings", rel), old, 0o600); err != nil {
-			return apperr.New(apperr.Conflict, "Could not back up %s, so nothing was changed: %v", filepath.Base(path), err)
-		}
-		return textfile.WriteAtomic(path, updated, info.Mode().Perm())
-	})
-	if err != nil {
+		return nil
+	}); err != nil {
 		return SpeechRule{}, err
 	}
 	return s.Speech(template)

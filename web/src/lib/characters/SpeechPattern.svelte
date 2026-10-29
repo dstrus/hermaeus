@@ -7,10 +7,11 @@
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { SpeechRule } from '#lib/api/types/settings.ts';
 	import { setSpeech } from '#lib/settings/api.ts';
+	import { translatorHref } from '#lib/translator/api.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 
-	let { template, rule: loaded, loadError = '' }: { template: string; rule: SpeechRule | null; loadError?: string } = $props();
+	let { save: playthrough, template, rule: loaded, loadError = '' }: { save: string; template: string; rule: SpeechRule | null; loadError?: string } = $props();
 
 	let rule = $derived(loaded);
 	let readOnly = $derived(live.gameRunning);
@@ -97,6 +98,7 @@
 		{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 		<div class="buttons">
 			<button type="button" class="button" disabled={!editable} onclick={startEdit}>{rule.pattern ? 'Edit' : 'Set a pattern'}</button>
+			<a class="button" href={translatorHref(playthrough)}>All rules</a>
 		</div>
 		{#if readOnly}<p class="notice warn">Close Skyrim to change it.</p>{/if}
 	{/if}
@@ -130,6 +132,9 @@
 		flex-wrap: wrap;
 		gap: var(--space-2);
 		margin-top: var(--space-3);
+	}
+	.buttons a {
+		text-decoration: none;
 	}
 	.notice {
 		margin-top: var(--space-2);

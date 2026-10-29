@@ -27,7 +27,7 @@
 		{ label: 'Screenshots' },
 		{ label: 'Bard songs' }
 	];
-	const configuration = [{ label: 'Prompts', built: true }, { label: 'Settings', built: true }, { label: 'Plugins' }, { label: 'Content' }, { label: 'Overrides' }];
+	const configuration = [{ label: 'Prompts', built: true }, { label: 'Translator', built: true }, { label: 'Settings', built: true }, { label: 'Plugins' }, { label: 'Content' }, { label: 'Overrides' }];
 	// A playthrough is named by its player, with its save ID only when
 	// another playthrough has the same player.
 	function playthroughLabel(p: Playthrough): string {
@@ -38,6 +38,7 @@
 	let charactersActive = $derived(!!save && (page.url.pathname === base || page.url.pathname.startsWith(`${base}/npc/`) || page.url.pathname.startsWith(`${base}/bios`)));
 	let historyActive = $derived(!!save && page.url.pathname.startsWith(`${base}/history`));
 	let promptsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/prompts`));
+	let translatorActive = $derived(!!save && page.url.pathname.startsWith(`${base}/translator`));
 	let settingsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/settings`));
 </script>
 
@@ -82,6 +83,7 @@
 			<p class="group caps">Configuration</p>
 			<ul aria-label="Configuration">
 				<li><a class="caps" href="{base}/prompts" aria-current={promptsActive ? 'page' : undefined}>Prompts</a></li>
+				<li><a class="caps" href="{base}/translator" aria-current={translatorActive ? 'page' : undefined}>Translator</a></li>
 				<li><a class="caps" href="{base}/settings" aria-current={settingsActive ? 'page' : undefined}>Settings</a></li>
 			</ul>
 			<p class="later caps">Not built yet</p>

@@ -29,6 +29,16 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("PUT /api/speech/{template}", httpapi.JSON(func(r *http.Request, e SpeechEdit) (SpeechRule, error) {
 		return s.SetSpeech(r.PathValue("template"), e)
 	}))
+	// Universal Translator's whole configuration: its rules, filter, and switch.
+	mux.Handle("GET /api/translator", httpapi.JSON(func(*http.Request, httpapi.None) (Translator, error) {
+		return s.Translator()
+	}))
+	mux.Handle("PUT /api/translator", httpapi.JSON(func(_ *http.Request, e TranslatorEdit) (Translator, error) {
+		return s.SetTranslator(e)
+	}))
+	mux.Handle("POST /api/translator/import", httpapi.JSON(func(_ *http.Request, imp Import) (ImportResult, error) {
+		return s.ImportRules(imp)
+	}))
 	mux.Handle("GET /api/toggles", httpapi.JSON(func(*http.Request, httpapi.None) (ToggleList, error) {
 		return s.Toggles()
 	}))

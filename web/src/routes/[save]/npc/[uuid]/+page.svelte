@@ -48,7 +48,7 @@
 	</section>
 
 	{#if data.character.bio}
-		<SpeechPattern template={data.character.bio} rule={data.speech} loadError={data.speechError} />
+		<SpeechPattern save={data.playthrough.id} template={data.character.bio} rule={data.speech} loadError={data.speechError} />
 	{/if}
 
 	<section class="milestones">

@@ -81,6 +81,17 @@ export interface FileValues {
 }
 export interface FileList {
   files: FileValues[];
+  elsewhere: OwnPage[]; // files the list leaves out, each for a page of its own
+}
+/**
+ * OwnPage is a settings file that Hermaeus shows on a page of its own, in
+ * the feature's own terms, so the Settings page doesn't list it. The file
+ * can still be read and saved by name.
+ */
+export interface OwnPage {
+  name: string; // the file's name, as in File
+  label: string; // the page's name
+  page: string; // the page's path under the playthrough
 }
 
 //////////
@@ -122,4 +133,71 @@ export interface ToggleList {
 }
 export interface ToggleRequest {
   on: boolean;
+}
+
+//////////
+// source: translator.go
+
+/**
+ * Rule is one Universal Translator rule: a speech pattern for an NPC (by
+ * bio template), a faction, or a race.
+ */
+export interface Rule {
+  id: string;
+  entityType: string; // npc, faction, or race
+  entityId: string; // an NPC's bio template in lower case; a faction's or race's editor ID and the end of its form ID
+  name: string; // as shown
+  editorId?: string;
+  pattern: string; // empty leaves the entity untranslated, whatever the global pattern says
+  enabled: boolean; // off, the rule is skipped and those below it can apply
+}
+/**
+ * Translator is Universal Translator's configuration.
+ */
+export interface Translator {
+  found: boolean; // the file exists; until SkyrimNet writes it, nothing can be changed
+  path: string; // under the SkyrimNet folder
+  modified: number /* int64 */;
+  enabled: boolean;
+  rules: Rule[]; // in priority order
+  global: string;
+  filterMode: string; // blacklist or whitelist
+  filterPlugins: string[];
+  /**
+   * SkyrimNet voicing silent NPCs (dbvo.voiceSilentNPCs in SkyrimNet.yaml),
+   * without which the translator has nothing to speak with.
+   */
+  voiceSilentNPCs: Dependency;
+}
+/**
+ * Dependency is a setting in another file the translator needs.
+ */
+export interface Dependency {
+  available: boolean; // its file exists
+  on: boolean;
+  modified: number /* int64 */; // the file's time, for changing it
+}
+/**
+ * TranslatorEdit is the configuration as it should be, except the
+ * dependency, which is changed through its own file.
+ */
+export interface TranslatorEdit {
+  modified: number /* int64 */;
+  enabled: boolean;
+  rules: Rule[];
+  global: string;
+  filterMode: string;
+  filterPlugins: string[];
+}
+/**
+ * Import is a YAML file of rules to add to those there are.
+ */
+export interface Import {
+  modified: number /* int64 */;
+  yaml: string;
+}
+export interface ImportResult {
+  translator: Translator;
+  added: number /* int */;
+  updated: number /* int */; // rules for an entity that already had one
 }

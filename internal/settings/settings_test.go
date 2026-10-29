@@ -76,10 +76,22 @@ func TestComparedWithDefaults(t *testing.T) {
 	h.config("Providers.yaml", "providers:\n  - id: openrouter\n    api_key: SECRET-THREE\n    api_key_from: openrouter\n")
 	h.config("Auth.yaml", "access_token: SECRET-FOUR\n")
 	h.config(filepath.Join("plugins", "Sever", "settings.yaml"), "llm:\n  model: b\n  toggleMuteHotkey: F5\n")
+	h.config("UniversalTranslator.yaml", "enabled: true\n") // shown on its own page, so not listed
 
 	list, err := h.settings.List()
 	if err != nil {
 		t.Fatal(err)
+	}
+	for _, f := range list.Files {
+		if f.File.Name == "UniversalTranslator" {
+			t.Errorf("a file with a page of its own is listed: %+v", f.File)
+		}
+	}
+	if len(list.Elsewhere) == 0 || list.Elsewhere[0].Page != "translator" {
+		t.Errorf("elsewhere = %+v", list.Elsewhere)
+	}
+	if f, err := h.settings.Read("UniversalTranslator"); err != nil || !f.File.Exists {
+		t.Errorf("read by name anyway: %+v, %v", f.File, err)
 	}
 	sent, _ := json.Marshal(list)
 	for _, secret := range []string{"SECRET-ONE", "SECRET-TWO", "SECRET-THREE", "SECRET-FOUR"} {

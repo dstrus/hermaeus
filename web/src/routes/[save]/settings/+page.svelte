@@ -5,4 +5,4 @@
 	let { data }: PageProps = $props();
 </script>
 
-<SettingsFiles save={data.playthrough.id} files={data.list.files} />
+<SettingsFiles save={data.playthrough.id} files={data.list.files} elsewhere={data.list.elsewhere} />

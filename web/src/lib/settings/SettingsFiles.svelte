@@ -4,7 +4,7 @@
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
-	import type { FileValues } from '#lib/api/types/settings.ts';
+	import type { FileValues, OwnPage } from '#lib/api/types/settings.ts';
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import PinButton from '#lib/ui/PinButton.svelte';
@@ -14,7 +14,15 @@
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
 	import { changedPage, fileLabel, setFilePinned, settingsDependency, settingsHref } from './api.ts';
 
-	let { save, files }: { save: string; files: FileValues[] } = $props(); // pinned files first, in the order they were pinned, then by name
+	let {
+		save,
+		files,
+		elsewhere = []
+	}: {
+		save: string;
+		files: FileValues[]; // pinned files first, in the order they were pinned, then by name
+		elsewhere?: OwnPage[]; // files with a page of their own, not listed here
+	} = $props();
 
 	let query = $state('');
 	let sort = $state<Sort>({ key: 'group', descending: false });
@@ -128,6 +136,12 @@
 		</aside>
 	</div>
 {/if}
+{#if elsewhere.length}
+	<p class="muted elsewhere">
+		{#each elsewhere as e, i (e.name)}{i ? (i === elsewhere.length - 1 ? ', and ' : ', ') : ''}<a href="/{encodeURIComponent(save)}/{e.page}">{e.label}</a>{/each}
+		{elsewhere.length === 1 ? 'has a page of its own.' : 'have pages of their own.'}
+	</p>
+{/if}
 
 <style>
 	.bar {
@@ -229,6 +243,10 @@
 	}
 	.actions a {
 		text-decoration: none;
+	}
+	.elsewhere {
+		margin-top: var(--space-4);
+		font-size: var(--step--1);
 	}
 	.group th {
 		padding: var(--space-5) var(--space-3) var(--space-1);
