@@ -11,6 +11,7 @@
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
@@ -43,17 +44,34 @@
 		});
 	});
 
-	const selection = new Selection(() => shown, (e) => String(e.id));
+	const selection = new Selection(() => shown, (e) => String(e.id), { param: 'item' });
 	let current = $derived(selection.current);
 
-	let mode = $state<'view' | 'edit' | 'new' | 'delete'>('view');
+	// What the pane is doing, kept in the address: each state has its own
+	// URL, and Back closes a form.
+	type Mode = 'view' | 'edit' | 'new' | 'delete';
+	let mode = $derived.by((): Mode => {
+		const m = param('mode');
+		if (m === 'edit' && current) return 'edit';
+		if (m === 'new') return 'new';
+		if (m === 'delete' && current) return 'delete';
+		return 'view';
+	});
+	const open = (m: Mode) => setParams({ mode: m });
+	// close ends a form: back to where it was opened from, or on to an entry just added.
+	const close = (added?: string) => (added ? setParams({ item: added, mode: null }, 'replace') : leave('mode'));
+	$effect(() => {
+		if (mode === 'view' && param('mode')) setParams({ mode: null }, 'replace');
+	});
 
-	async function run(action: () => Promise<string>) {
+	type Done = string | { note: string; added: string };
+	async function run(action: () => Promise<Done>) {
 		error = '';
 		notice = '';
 		try {
-			notice = await action();
-			mode = 'view';
+			const done = await action();
+			notice = typeof done === 'string' ? done : done.note;
+			await close(typeof done === 'string' ? undefined : done.added); // settles before the reload, which it would cancel
 			await invalidate(knowledgeDependency);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -66,7 +84,8 @@
 			if (editing) return savedNote(await updateMemory(save, editing.id, changes), 'Entry');
 			// A new entry goes into the pack the list is narrowed to, if any.
 			const into = pack && pack !== 'none' ? Number(pack) : undefined;
-			return savedNote(await addKnowledge(save, { pack: into, changes }), 'New entry');
+			const r = await addKnowledge(save, { pack: into, changes });
+			return { note: savedNote(r, 'New entry'), added: String(r.id) };
 		});
 	}
 
@@ -93,9 +112,9 @@
 		return [
 			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => (mode = 'edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing, disabled: !can, run: () => (mode = 'new') },
-			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !current, run: () => (mode = 'delete') }),
+			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
+			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing, disabled: !can, run: () => open('new') },
+			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !current, run: () => open('delete') }),
 			{
 				key: 'Enter',
 				label: 'Save',
@@ -103,7 +122,7 @@
 				hidden: mode !== 'edit' && mode !== 'new',
 				run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit()
 			},
-			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => (mode = 'view') }])
+			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => close() }])
 		];
 	});
 </script>
@@ -177,13 +196,13 @@
 		{#if mode === 'new'}
 			<h2 class="caps">New entry</h2>
 			<p class="muted small">{pack && pack !== 'none' ? `Into ${packs.get(Number(pack))?.name ?? 'the pack'}.` : 'In no pack.'}</p>
-			<MemoryForm onsave={saveForm} oncancel={() => (mode = 'view')} />
+			<MemoryForm onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if mode === 'edit'}
 						<h2 class="caps">Edit entry {current.id}</h2>
-						<MemoryForm memory={current} onsave={saveForm} oncancel={() => (mode = 'view')} />
+						<MemoryForm memory={current} onsave={saveForm} oncancel={() => close()} />
 					{:else}
 						<h2 class="caps">{current.title || `Entry ${current.id}`}</h2>
 						{#if packOf(current)}<p class="muted">{packOf(current)?.name}</p>{/if}
@@ -200,12 +219,12 @@
 							<div class="confirm" role="alert">
 								<p>Delete this entry? Hermaeus backs up the database before its first change each session.</p>
 								<button type="button" class="button primary" onclick={remove}>Delete</button>
-								<button type="button" class="button" onclick={() => (mode = 'view')}>Keep</button>
+								<button type="button" class="button" onclick={() => close()}>Keep</button>
 							</div>
 						{:else if !readOnly}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => (mode = 'edit')}>Edit</button>
-								<button type="button" class="button" onclick={() => (mode = 'delete')}>Delete…</button>
+								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
+								<button type="button" class="button" onclick={() => open('delete')}>Delete…</button>
 							</div>
 						{/if}
 					{/if}

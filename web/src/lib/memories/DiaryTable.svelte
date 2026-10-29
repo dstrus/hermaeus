@@ -8,6 +8,7 @@
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
@@ -47,22 +48,40 @@
 	});
 	let byDay = $derived(sort.key === 'when');
 
-	const selection = new Selection(() => shown, (d) => String(d.id));
+	const selection = new Selection(() => shown, (d) => String(d.id), { param: 'item' });
 	let current = $derived(selection.current);
 
-	let mode = $state<'view' | 'edit' | 'new' | 'delete'>('view');
 	let keepMemory = $state(false);
 	let notice = $state('');
 	let error = $state('');
 
+	// What the pane is doing, kept in the address: each state has its own
+	// URL, and Back closes a form.
+	type Mode = 'view' | 'edit' | 'new' | 'delete';
+	let mode = $derived.by((): Mode => {
+		const m = param('mode');
+		if (m === 'edit' && current) return 'edit';
+		if (m === 'new' && uuid) return 'new';
+		if (m === 'delete' && current) return 'delete';
+		return 'view';
+	});
+	const open = (m: Mode) => setParams({ mode: m });
+	// close ends a form: back to where it was opened from, or on to an entry just added.
+	const close = (added?: string) => (added ? setParams({ item: added, mode: null }, 'replace') : leave('mode'));
+	$effect(() => {
+		if (mode === 'view' && param('mode')) setParams({ mode: null }, 'replace');
+	});
+
 	// run does a change, then reloads the diary, the memories (copies change
 	// with entries) and, when entries come or go, the character list's counts.
-	async function run(action: () => Promise<string>, countsChange: boolean) {
+	type Done = string | { note: string; added: string };
+	async function run(action: () => Promise<Done>, countsChange: boolean) {
 		error = '';
 		notice = '';
 		try {
-			notice = await action();
-			mode = 'view';
+			const done = await action();
+			notice = typeof done === 'string' ? done : done.note;
+			await close(typeof done === 'string' ? undefined : done.added); // settles before the reload, which it would cancel
 			await Promise.all([invalidate(diaryDependency), invalidate(memoriesDependency)]);
 			if (countsChange) await invalidate(charactersDependency);
 		} catch (e) {
@@ -75,8 +94,8 @@
 		await run(async () => {
 			if (!editing && !uuid) throw new Error('A new entry is added from its character’s page.');
 			const r = editing ? await updateDiary(save, editing.id, changes) : await addDiaryEntry(save, uuid!, changes);
-			if (!editing) selection.key = String(r.id);
-			return savedNote(r, editing ? 'Diary entry' : 'New diary entry');
+			const note = savedNote(r, editing ? 'Diary entry' : 'New diary entry');
+			return editing ? note : { note, added: String(r.id) };
 		}, !editing);
 	}
 
@@ -94,9 +113,9 @@
 		return [
 			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => (mode = 'edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => (mode = 'new') },
-			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !current, run: () => ((keepMemory = false), (mode = 'delete')) }),
+			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
+			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => open('new') },
+			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !current, run: () => ((keepMemory = false), open('delete')) }),
 			{
 				key: 'Enter',
 				label: 'Save',
@@ -105,7 +124,7 @@
 				run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit()
 			},
 			// Esc cancels when there's something to cancel; otherwise it's free for the page.
-			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => (mode = 'view') }])
+			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => close() }])
 		];
 	});
 </script>
@@ -170,13 +189,13 @@
 	<aside class="pane" use:fitToViewport aria-label="Diary entry">
 		{#if mode === 'new'}
 			<h2 class="caps">New diary entry</h2>
-			<DiaryForm onsave={saveForm} oncancel={() => (mode = 'view')} />
+			<DiaryForm onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if mode === 'edit'}
 						<h2 class="caps">Edit diary entry {current.id}</h2>
-						<DiaryForm entry={current} onsave={saveForm} oncancel={() => (mode = 'view')} />
+						<DiaryForm entry={current} onsave={saveForm} oncancel={() => close()} />
 					{:else}
 						<h2 class="caps">Diary entry {current.id}</h2>
 						<p class="muted">
@@ -196,12 +215,12 @@
 									<label class="check"><input type="checkbox" bind:checked={keepMemory} /> Keep its memory copy, so {name || 'the character'} still remembers it</label>
 								{/if}
 								<button type="button" class="button primary" onclick={() => remove(current!)}>Delete</button>
-								<button type="button" class="button" onclick={() => (mode = 'view')}>Keep</button>
+								<button type="button" class="button" onclick={() => close()}>Keep</button>
 							</div>
 						{:else if !readOnly}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => (mode = 'edit')}>Edit</button>
-								<button type="button" class="button" onclick={() => ((keepMemory = false), (mode = 'delete'))}>Delete…</button>
+								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
+								<button type="button" class="button" onclick={() => ((keepMemory = false), open('delete'))}>Delete…</button>
 							</div>
 						{/if}
 					{/if}

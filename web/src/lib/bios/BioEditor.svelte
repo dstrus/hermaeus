@@ -8,6 +8,7 @@
 	import { realTime } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import Segmented from '#lib/ui/Segmented.svelte';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -30,20 +31,35 @@
 	} = $props();
 
 	let readOnly = $derived(live.gameRunning);
-	// Starts on the bio NPCs use; follows the versions when they reload (a
-	// save, a created bio).
-	let kind = $state(untrack(() => versions[0]?.kind ?? 'dynamic'));
-	$effect(() => {
-		if (!versions.some((v) => v.kind === kind)) kind = versions[0]?.kind ?? 'dynamic';
+	// Which bio is shown is in the address (?bio=baseline); it starts on the
+	// one NPCs use, and falls back to it when the one named isn't there.
+	let kind = $derived.by(() => {
+		const k = param('bio');
+		return k && versions.some((v) => v.kind === k) ? k : (versions[0]?.kind ?? 'dynamic');
 	});
 	let version = $derived(versions.find((v) => v.kind === kind));
 	let editable = $derived(!!version && version.kind !== 'default' && !readOnly);
 	let hasBaseline = $derived(versions.some((v) => v.kind === 'baseline'));
 
 	// The bio reads as one document. One section is selected (for the keys);
-	// editing turns that section into a field where it is. Raw and history
-	// replace the document.
-	let mode = $state<'read' | 'edit' | 'raw' | 'history' | 'diff'>('read');
+	// editing turns that section into a field where it is. Raw, history, and
+	// diff replace the document. The mode is in the address (?mode=raw), so
+	// each has its own URL and Back leaves it; one the bio can't be in is
+	// dropped again.
+	type Mode = 'read' | 'edit' | 'raw' | 'history' | 'diff';
+	let mode = $derived.by((): Mode => {
+		const m = param('mode');
+		if (m === 'edit' && editable && section) return 'edit';
+		if (m === 'raw' && editable) return 'raw';
+		if (m === 'history' && version && version.kind !== 'default') return 'history';
+		if (m === 'diff' && pairs.length) return 'diff';
+		return 'read';
+	});
+	$effect(() => {
+		if (mode === 'read' && (param('mode') || param('version'))) setParams({ mode: null, version: null }, 'replace');
+	});
+	// back returns to reading, and to the entry the mode was opened from.
+	const back = () => leave('mode', 'version');
 
 	// The diff of two of the bios: the later one against the one beneath it,
 	// so what SkyrimNet's rewrite did (dynamic against baseline) reads first.
@@ -69,7 +85,7 @@
 	let notice = $state('');
 	let error = $state('');
 
-	const selection = new Selection(() => version?.sections ?? [], (s) => s.name, '[data-selected="true"]');
+	const selection = new Selection(() => version?.sections ?? [], (s) => s.name, { marker: '[data-selected="true"]', param: 'section' });
 	let section = $derived(selection.current);
 
 	// Which section is in view, for the index, from where the page has scrolled to.
@@ -93,8 +109,16 @@
 	});
 
 	let history = $state<Earlier[]>([]);
-	const chosen = new Selection(() => history, (e) => e.id);
+	const chosen = new Selection(() => history, (e) => e.id, { param: 'version' });
 	let earlier = $derived(chosen.current);
+
+	// The draft, or the history, is set up when the mode starts, however it
+	// starts; it follows the bio shown, should that change underneath.
+	$effect(() => {
+		if (mode === 'edit') draft = section?.text ?? '';
+		else if (mode === 'raw') draft = version?.raw ?? '';
+		else if (mode === 'history') untrack(loadHistory);
+	});
 
 	async function run(action: () => Promise<string>) {
 		error = '';
@@ -102,7 +126,7 @@
 		saving = true;
 		try {
 			notice = await action();
-			mode = 'read';
+			await back(); // settles before the reload, which it would cancel
 			await invalidate(bioDependency);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -114,24 +138,22 @@
 	function startEdit(name?: string) {
 		if (!editable) return;
 		if (name) selection.key = name;
-		if (!selection.current) return;
-		draft = selection.current.text;
-		mode = 'edit';
+		if (selection.current) setParams({ mode: 'edit' });
 	}
 
 	function startRaw() {
-		if (!editable || !version) return;
-		draft = version.raw;
-		mode = 'raw';
+		if (editable && version) setParams({ mode: 'raw' });
 	}
 
-	async function startHistory() {
-		if (!version || version.kind === 'default') return;
+	function startHistory() {
+		if (version && version.kind !== 'default') setParams({ mode: 'history' });
+	}
+
+	async function loadHistory() {
+		if (!version) return;
 		error = '';
 		try {
 			history = (await getHistory(save, template, version.kind)).earlier;
-			chosen.key = null;
-			mode = 'history';
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
 		}
@@ -150,7 +172,7 @@
 	function create() {
 		run(async () => {
 			await createBio(save, template);
-			kind = 'baseline';
+			setParams({ bio: 'baseline' }, 'replace');
 			return `${name} now has a baseline bio in this playthrough, copied from the default.`;
 		});
 	}
@@ -182,18 +204,18 @@
 			{ key: 'e', shown: 'E', label: 'Edit section', hidden: !reading, disabled: !editable || !section, run: () => startEdit() },
 			{ key: 'r', shown: 'R', label: 'Raw file', hidden: !reading, disabled: !editable, run: startRaw },
 			{ key: 'h', shown: 'H', label: 'History', hidden: !reading, disabled: !version || version.kind === 'default', run: startHistory },
-			{ key: 'd', shown: 'D', label: 'Diff', hidden: !reading, disabled: pairs.length === 0, run: () => ((pair = pairs.some((p) => p.value === pair) ? pair : (pairs[0]?.value ?? '')), (mode = 'diff')) },
+			{ key: 'd', shown: 'D', label: 'Diff', hidden: !reading, disabled: pairs.length === 0, run: () => setParams({ mode: 'diff' }) },
 			{ key: 'c', shown: 'C', label: 'Create save bio', hidden: !reading || version?.kind !== 'default' || hasBaseline, disabled: readOnly, run: create },
 			{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: submit },
 			{ key: 'Enter', label: 'Restore', hidden: mode !== 'history', disabled: readOnly || !earlier || earlier.current, run: restore },
-			...(reading ? [] : [{ key: 'Escape', shown: 'Esc', label: mode === 'history' || mode === 'diff' ? 'Back' : 'Cancel', run: () => (mode = 'read') }])
+			...(reading ? [] : [{ key: 'Escape', shown: 'Esc', label: mode === 'history' || mode === 'diff' ? 'Back' : 'Cancel', run: back }])
 		];
 	});
 </script>
 
 <div class="tools">
 	{#if versions.length > 1}
-		<Segmented bind:value={kind} options={kindOptions} label="Which bio" />
+		<Segmented value={kind} onchange={(k) => setParams({ bio: k }, 'replace')} options={kindOptions} label="Which bio" />
 	{:else if version}
 		<span class="caps muted">{kinds[version.kind]?.label ?? version.kind} bio</span>
 	{/if}
@@ -215,7 +237,7 @@
 		<CodeArea bind:value={draft} label="The whole bio" />
 		<div class="buttons">
 			<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
-			<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
+			<button type="button" class="button" onclick={back} disabled={saving}>Cancel</button>
 		</div>
 	</div>
 {:else if mode === 'diff' && compared}
@@ -270,7 +292,7 @@
 							{#if !earlier.current && !readOnly}
 								<button type="button" class="button primary" onclick={restore} disabled={saving}>Restore this version</button>
 							{/if}
-							<button type="button" class="button" onclick={() => (mode = 'read')}>Back</button>
+							<button type="button" class="button" onclick={back}>Back</button>
 						</div>
 					</div>
 				{/key}
@@ -293,12 +315,12 @@
 					data-section={s.name}
 					data-selected={selected}
 					class:editing
-					onclick={() => mode === 'read' && selection.select(s)}
+					onclick={() => mode === 'read' && (selection.key = s.name)}
 					ondblclick={() => mode === 'read' && startEdit(s.name)}
 				>
 					<div class="label">
 						<h2 class="caps">
-							<button type="button" onclick={() => mode === 'read' && selection.select(s)} disabled={mode !== 'read'}>
+							<button type="button" onclick={() => mode === 'read' && (selection.key = s.name)} disabled={mode !== 'read'}>
 								<span class="mark">{#if selected}<Diamond />{/if}</span>{sectionLabel(s.name)}
 							</button>
 						</h2>
@@ -311,7 +333,7 @@
 							<textarea bind:value={draft} rows={Math.max(6, Math.min(28, Math.ceil(draft.length / 80) + draft.split('\n').length + 1))}></textarea>
 							<div class="buttons">
 								<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
-								<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
+								<button type="button" class="button" onclick={back} disabled={saving}>Cancel</button>
 							</div>
 						</div>
 					{:else}

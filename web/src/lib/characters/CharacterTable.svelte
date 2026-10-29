@@ -37,7 +37,7 @@
 	// In their natural order, characters sit under their group's heading.
 	let grouped = $derived(sort.key === 'group');
 
-	const selection = new Selection(() => shown, (c) => c.uuid);
+	const selection = new Selection(() => shown, (c) => c.uuid, { param: 'item' });
 	let current = $derived(selection.current);
 
 	// The selected character's bio, as space in the pane permits.

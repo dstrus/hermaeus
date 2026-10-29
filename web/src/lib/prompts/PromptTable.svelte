@@ -81,7 +81,7 @@
 		}
 	}
 
-	const selection = new Selection(() => shown, (p) => p.path);
+	const selection = new Selection(() => shown, (p) => p.path, { param: 'item' });
 	let current = $derived(selection.current);
 
 	// The selected prompt's text, as space in the pane permits: the version

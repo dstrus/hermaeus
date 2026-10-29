@@ -2,18 +2,18 @@
      Overview. It lives in UniversalTranslator.yaml; an empty pattern
      removes the NPC's rule, and the global pattern applies to everyone. -->
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { SpeechRule } from '#lib/api/types/settings.ts';
 	import { setSpeech } from '#lib/settings/api.ts';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 
 	let { template, rule: loaded, loadError = '' }: { template: string; rule: SpeechRule | null; loadError?: string } = $props();
 
 	let rule = $derived(loaded);
 	let readOnly = $derived(live.gameRunning);
-	let editing = $state(false);
 	let draft = $state('');
 	let saving = $state(false);
 	let error = $state('');
@@ -21,13 +21,23 @@
 	let field = $state<HTMLTextAreaElement>();
 
 	let editable = $derived(!!rule?.found && !readOnly);
+	// Editing is a state of the Overview's address (?mode=speech), so it has
+	// its own URL and Back cancels it.
+	let editing = $derived(param('mode') === 'speech' && editable);
+	$effect(() => {
+		if (!editing && param('mode') === 'speech') setParams({ mode: null }, 'replace');
+	});
+	$effect(() => {
+		if (editing) untrack(prepare);
+	});
 
-	async function startEdit() {
-		if (!editable) return;
+	function startEdit() {
+		if (editable) setParams({ mode: 'speech' });
+	}
+	async function prepare() {
 		draft = rule?.pattern ?? '';
 		error = '';
 		notice = '';
-		editing = true;
 		await tick();
 		field?.focus();
 	}
@@ -39,7 +49,7 @@
 		try {
 			rule = await setSpeech(template, { modified: rule.modified, pattern });
 			notice = pattern.trim() ? 'Saved. SkyrimNet uses it from the next time it starts.' : 'Removed. They speak as written again.';
-			editing = false;
+			leave('mode');
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
 		} finally {
@@ -50,7 +60,7 @@
 	useShortcuts(() => [
 		{ key: 'e', shown: 'E', label: 'Edit speech pattern', hidden: editing, disabled: !editable, run: startEdit },
 		{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: () => save(draft) },
-		...(editing ? [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => (editing = false) }] : [])
+		...(editing ? [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => leave('mode') }] : [])
 	]);
 </script>
 
@@ -68,7 +78,7 @@
 				{#if rule.pattern}
 					<button type="button" class="button" onclick={() => save('')} disabled={saving}>Remove</button>
 				{/if}
-				<button type="button" class="button" onclick={() => (editing = false)} disabled={saving}>Cancel</button>
+				<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
 			</div>
 		</form>
 	{:else}

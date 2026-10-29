@@ -62,7 +62,7 @@
 		});
 	});
 
-	const selection = new Selection(() => shown, (e) => e.template);
+	const selection = new Selection(() => shown, (e) => e.template, { param: 'item' });
 	let current = $derived(selection.current);
 
 	// The selected character's bio, as space in the pane permits.

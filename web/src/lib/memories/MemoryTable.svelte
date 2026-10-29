@@ -10,6 +10,7 @@
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
@@ -70,12 +71,9 @@
 	});
 	let byDay = $derived(sort.key === 'when');
 
-	const selection = new Selection(() => shown, (m) => String(m.id));
+	const selection = new Selection(() => shown, (m) => String(m.id), { param: 'item' });
 	let current = $derived(selection.current);
 
-	// What the pane is doing: showing the selected memory, editing it, adding
-	// a new one, or confirming a delete.
-	let mode = $state<'view' | 'edit' | 'new' | 'delete'>('view');
 	let marked = new SvelteSet<number>();
 	let notice = $state('');
 	let error = $state('');
@@ -83,12 +81,34 @@
 	let chosen = $derived(marked.size ? memories.filter((m) => marked.has(m.id)) : current ? [current] : []);
 	let anyRetired = $derived(chosen.some((m) => m.retired !== undefined));
 
-	async function run(action: () => Promise<string>, countsChange = false) {
+	// What the pane is doing: showing the selected memory, editing it, adding
+	// a new one, or confirming a delete. It's in the address, so each has its
+	// own URL, and Back closes a form.
+	type Mode = 'view' | 'edit' | 'new' | 'delete';
+	let mode = $derived.by((): Mode => {
+		const m = param('mode');
+		if (m === 'edit' && current) return 'edit';
+		if (m === 'new' && uuid) return 'new';
+		if (m === 'delete' && chosen.length) return 'delete';
+		return 'view';
+	});
+	const open = (m: Mode) => setParams({ mode: m });
+	// close ends a form: back to where it was opened from, or on to a memory just added.
+	const close = (added?: string) => (added ? setParams({ item: added, mode: null }, 'replace') : leave('mode'));
+	// A mode the pane can't be in (a form for nothing) is dropped from the address.
+	$effect(() => {
+		if (mode === 'view' && param('mode')) setParams({ mode: null }, 'replace');
+	});
+
+	type Done = string | { note: string; added: string };
+	async function run(action: () => Promise<Done>, countsChange = false) {
 		error = '';
 		notice = '';
 		try {
-			notice = await action();
-			mode = 'view';
+			const done = await action();
+			notice = typeof done === 'string' ? done : done.note;
+			// The address settles first: a change to it cancels a reload in flight.
+			await close(typeof done === 'string' ? undefined : done.added);
 			await invalidate(memoriesDependency);
 			if (countsChange) await invalidate(charactersDependency);
 		} catch (e) {
@@ -101,8 +121,8 @@
 		await run(async () => {
 			if (!editing && !uuid) throw new Error('A new memory is added from its character’s page.');
 			const r = editing ? await updateMemory(save, editing.id, changes) : await addMemory(save, uuid!, changes);
-			if (!editing) selection.key = String(r.id);
-			return [savedNote(r, editing ? 'Memory' : 'New memory'), r.warning].filter(Boolean).join(' ');
+			const note = [savedNote(r, editing ? 'Memory' : 'New memory'), r.warning].filter(Boolean).join(' ');
+			return editing ? note : { note, added: String(r.id) };
 		}, !editing);
 	}
 
@@ -132,10 +152,10 @@
 		return [
 			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => (mode = 'edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => (mode = 'new') },
+			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
+			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => open('new') },
 			{ key: 'x', shown: 'X', label: 'Mark', hidden: !viewing, disabled: !can || !current, run: () => current && toggleMark(current) },
-			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !chosen.length, run: () => (mode = 'delete') }),
+			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !chosen.length, run: () => open('delete') }),
 			{
 				key: 'Enter',
 				label: 'Save',
@@ -146,7 +166,7 @@
 			// Esc cancels when there's something to cancel; otherwise it's free for the page.
 			...(viewing && !marked.size
 				? []
-				: [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => (mode === 'view' ? marked.clear() : (mode = 'view')) }])
+				: [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => (mode === 'view' ? marked.clear() : close()) }])
 		];
 	});
 </script>
@@ -228,13 +248,13 @@
 	<aside class="pane" use:fitToViewport aria-label="Memory">
 		{#if mode === 'new'}
 			<h2 class="caps">New memory</h2>
-			<MemoryForm onsave={saveForm} oncancel={() => (mode = 'view')} />
+			<MemoryForm onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if mode === 'edit'}
 						<h2 class="caps">Edit memory {current.id}</h2>
-						<MemoryForm memory={current} onsave={saveForm} oncancel={() => (mode = 'view')} />
+						<MemoryForm memory={current} onsave={saveForm} oncancel={() => close()} />
 					{:else}
 						<h2 class="caps">{current.title || `Memory ${current.id}`}</h2>
 						<p class="muted">{current.date ? `${current.date.time}, ${current.date.day}` : dayLabel(current)}</p>
@@ -258,16 +278,16 @@
 							<div class="confirm" role="alert">
 								<p>Delete {chosen.length === 1 ? 'this memory' : plural(chosen.length, 'marked memory', 'marked memories')}? Hermaeus backs up the database before its first change each session.</p>
 								<button type="button" class="button primary" onclick={() => act('delete')}>Delete</button>
-								<button type="button" class="button" onclick={() => (mode = 'view')}>Keep</button>
+								<button type="button" class="button" onclick={() => close()}>Keep</button>
 							</div>
 						{:else if !readOnly}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => (mode = 'edit')}>Edit</button>
+								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
 								<button type="button" class="button" onclick={() => act(current!.active ? 'deactivate' : 'activate')}>
 									{current.active ? 'Make inactive' : 'Make active'}
 								</button>
 								{#if anyRetired}<button type="button" class="button" onclick={() => act('move')}>Move to current identity</button>{/if}
-								<button type="button" class="button" onclick={() => (mode = 'delete')}>Delete…</button>
+								<button type="button" class="button" onclick={() => open('delete')}>Delete…</button>
 							</div>
 							{#if marked.size}<p class="muted small">Actions apply to the {plural(marked.size, 'marked memory', 'marked memories')}.</p>{/if}
 						{/if}

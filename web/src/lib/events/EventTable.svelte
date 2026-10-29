@@ -64,7 +64,7 @@
 	});
 	let shown = $derived(matching.slice(0, limit));
 
-	const selection = new Selection(() => shown, (e) => String(e.id));
+	const selection = new Selection(() => shown, (e) => String(e.id), { param: 'item' });
 	let current = $derived(selection.current);
 
 	// The details shown in the pane: every field but the ones the summary

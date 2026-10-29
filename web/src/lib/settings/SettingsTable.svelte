@@ -3,7 +3,7 @@
 <script lang="ts">
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { File } from '#lib/api/types/settings.ts';
@@ -13,6 +13,7 @@
 	import ListEditor from './ListEditor.svelte';
 	import MapEditor from './MapEditor.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import Up from '#lib/ui/Up.svelte';
@@ -56,7 +57,7 @@
 		if (root && parts[0] === root) parts = parts.slice(1);
 		return parts.length ? parts.map(words).join(' › ') : words(root);
 	}
-	const rowKey = (r: Row) => `${r.file.name}\u0000${r.setting.key}`;
+	const rowKey = (r: Row) => `${r.file.name}/${r.setting.key}`; // readable in the address
 	// Hotkey.yaml holds key codes; they're shown and edited as keys.
 	const valueOf = (r: Row) => (r.setting.set ? r.setting.value : r.setting.default);
 	const hotkey = (r: Row) => r.file.name.toLowerCase() === 'hotkey' && typeof valueOf(r) === 'number';
@@ -71,7 +72,7 @@
 		for (const r of found) if (!order.has(groupOf(r))) order.set(groupOf(r), order.size);
 		return found.toSorted((a, b) => order.get(groupOf(a))! - order.get(groupOf(b))!);
 	});
-	const selection = new Selection(() => shown, rowKey);
+	const selection = new Selection(() => shown, rowKey, { param: 'item' });
 	let current = $derived(selection.current);
 	let kind = $derived<Kind>(!current ? 'none' : hotkey(current) ? 'hotkey' : kindOf(current.setting));
 	// What's holding a secret can't be changed here; a file SkyrimNet hasn't
@@ -80,7 +81,16 @@
 	let editableNow = $derived(!!current && !locked && !readOnly && kind !== 'none');
 	let resettable = $derived(!!current && !locked && !readOnly && current.setting.hasDefault && (current.setting.changed || !current.setting.set));
 
-	let editing = $state(false);
+	// Editing is a state of the address (?mode=edit), so it has its own URL
+	// and Back cancels it; a setting that can't be edited drops it again.
+	let editing = $derived(param('mode') === 'edit' && editableNow);
+	$effect(() => {
+		if (!editing && param('mode') === 'edit') setParams({ mode: null }, 'replace');
+	});
+	// The form is set up from the setting whenever editing starts, however it starts.
+	$effect(() => {
+		if (editing) untrack(prepare);
+	});
 	let draft = $state('');
 	let saving = $state(false);
 	// A list or map is edited by its shape: one line per item for a list of
@@ -178,8 +188,12 @@
 
 	let list = $derived(settingsHref(save));
 
-	async function startEdit() {
-		if (!editableNow || !current) return;
+	function startEdit() {
+		if (editableNow) setParams({ mode: 'edit' });
+	}
+
+	async function prepare() {
+		if (!current) return;
 		const s = current.setting;
 		const v = s.set ? s.value : s.default;
 		draft = editable(v);
@@ -195,7 +209,6 @@
 		}
 		error = '';
 		notice = '';
-		editing = true;
 		await tick();
 		field?.focus();
 	}
@@ -227,7 +240,7 @@
 		try {
 			await saveSettings(current.file.name, { modified: current.file.modified, changes: [change] });
 			notice = done;
-			editing = false;
+			await leave('mode'); // settles before the reload, which it would cancel
 			await invalidate(settingsDependency);
 			await invalidate(togglesDependency);
 		} catch (e) {
@@ -277,7 +290,7 @@
 		{ key: 'e', shown: 'E', label: 'Edit', hidden: editing, disabled: !editableNow, run: startEdit },
 		{ key: 'r', shown: 'R', label: 'Reset to default', hidden: editing, disabled: !resettable, run: reset },
 		{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: submit },
-		{ key: 'Escape', shown: 'Esc', label: editing ? 'Cancel' : 'Settings', run: () => (editing ? (editing = false) : goto(list)) }
+		{ key: 'Escape', shown: 'Esc', label: editing ? 'Cancel' : 'Settings', run: () => (editing ? leave('mode') : goto(list)) }
 	]);
 </script>
 
@@ -315,7 +328,7 @@
 					{#if (groupOf(r) || root) && (i === 0 || groupOf(r) !== groupOf(shown[i - 1]!))}
 						<tr class="group"><th colspan="4" class="caps" scope="rowgroup">{heading(groupOf(r))}</th></tr>
 					{/if}
-					<tr aria-selected={selection.is(r)} onclick={() => selection.select(r)} ondblclick={startEdit}>
+					<tr aria-selected={selection.is(r)} onclick={() => !editing && selection.select(r)} ondblclick={startEdit}>
 						<td class="mark">{#if selection.is(r)}<Diamond />{/if}</td>
 						<td class="key" use:clipped>{byFile ? r.setting.key : lastOf(r.setting.key)}</td>
 						<td class="value" use:clipped class:changed={r.setting.changed} class:muted={!r.setting.set}>{showValue(r, valueOf(r))}</td>
@@ -365,7 +378,7 @@
 						{/if}
 						<div class="buttons">
 							<button type="submit" class="button primary" disabled={saving}>Save</button>
-							<button type="button" class="button" onclick={() => (editing = false)} disabled={saving}>Cancel</button>
+							<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
 						</div>
 					</form>
 				{:else}

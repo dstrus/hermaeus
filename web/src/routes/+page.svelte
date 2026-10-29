@@ -10,7 +10,7 @@
 	let { data }: PageProps = $props();
 	let playthroughs = $derived(data.status.playthroughs); // most recently played first
 
-	const selection = new Selection(() => playthroughs, (p) => p.id);
+	const selection = new Selection(() => playthroughs, (p) => p.id, { param: 'item' });
 	const open = (p: Playthrough) => goto(`/${encodeURIComponent(p.id)}`);
 
 	useShortcuts(() => [

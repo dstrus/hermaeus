@@ -45,7 +45,7 @@
 		}
 	}
 
-	const selection = new Selection(() => shown, (f) => f.file.name);
+	const selection = new Selection(() => shown, (f) => f.file.name, { param: 'item' });
 	let current = $derived(selection.current);
 	const href = (f: FileValues) => settingsHref(save, f.file.name);
 

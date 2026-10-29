@@ -8,6 +8,7 @@
 	import type { Layer } from '#lib/api/types/layers.ts';
 	import type { Document } from '#lib/api/types/prompts.ts';
 	import { realTime } from '#lib/format.ts';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import Segmented from '#lib/ui/Segmented.svelte';
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
@@ -30,7 +31,12 @@
 	let below = $derived(doc.versions.filter((v) => layerAt(v.layer).kind !== 'overlay'));
 	let choices = $derived(doc.versions.map((v) => ({ value: String(v.layer), label: layerLabel(layerAt(v.layer)), title: layerAt(v.layer).source })));
 
-	let mode = $state<'read' | 'edit'>('read');
+	// Editing is a state of the address (?mode=edit), so it has its own URL
+	// and Back cancels it.
+	let mode = $derived<'read' | 'edit'>(param('mode') === 'edit' && version ? 'edit' : 'read');
+	$effect(() => {
+		if (mode === 'read' && param('mode')) setParams({ mode: null }, 'replace');
+	});
 	let draft = $state('');
 	let saving = $state(false);
 	let error = $state('');
@@ -40,13 +46,18 @@
 	let list = $derived(`/${encodeURIComponent(save)}/prompts`);
 
 	function startEdit() {
-		if (!version || readOnly) return;
-		draft = version.text;
-		error = '';
-		notice = '';
-		warnings = [];
-		mode = 'edit';
+		if (version && !readOnly) setParams({ mode: 'edit' });
 	}
+	// The draft starts from the shown version whenever editing starts, however it starts.
+	$effect(() => {
+		if (mode !== 'edit') return;
+		untrack(() => {
+			draft = version?.text ?? '';
+			error = '';
+			notice = '';
+			warnings = [];
+		});
+	});
 
 	async function submit() {
 		if (saving) return;
@@ -58,7 +69,7 @@
 			warnings = saved.warnings ?? [];
 			shown = String(doc.versions[0]?.layer ?? 0);
 			notice = mine ? 'Saved your copy.' : 'Saved as your own copy. SkyrimNet uses it from the next time it starts.';
-			mode = 'read';
+			await leave('mode'); // settles before the reload, which it would cancel
 			await invalidate(promptsDependency);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -94,7 +105,7 @@
 			{ key: 'e', shown: 'E', label: mine && version === mine ? 'Edit' : 'Edit as your copy', hidden: !reading, disabled: readOnly || !version, run: startEdit },
 			...deleteShortcuts({ label: 'Remove your copy', hidden: !reading || !mine, disabled: readOnly, run: remove }),
 			{ key: 'Enter', label: 'Save', command: true, hidden: reading, disabled: saving, run: submit },
-			{ key: 'Escape', shown: 'Esc', label: reading ? 'Prompts' : 'Cancel', run: () => (reading ? goto(list) : (mode = 'read')) }
+			{ key: 'Escape', shown: 'Esc', label: reading ? 'Prompts' : 'Cancel', run: () => (reading ? goto(list) : leave('mode')) }
 		];
 	});
 </script>
@@ -124,7 +135,7 @@
 		<CodeArea bind:value={draft} label="Prompt text" />
 		<div class="buttons">
 			<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
-			<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
+			<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
 		</div>
 	</div>
 {:else if version}
