@@ -159,7 +159,7 @@ The mark is the eye of Hermaeus Mora among his tentacles (`assets/`). In the top
 A near-monochrome palette, off-white on near-black (or near-black on pale smoke), with one accent role that changes material with the theme: verdigris, the green of old bronze, in dark; frost blue, Skyrim's cold light, in light. Each role has a dark value and a `-light` counterpart; the light set applies under `data-theme="light"` or when the theme is "system" and the OS prefers light.
 
 ### Primary
-- **Verdigris** (`accent` / `accent-light`): the selection and action color: verdigris in dark, frost blue in light. The diamond marker, the primary button fill, the sorted column head and its hover, the active tab's underline, focus rings, text selection, the caret, checkbox accents, inline text buttons, the stats bars (at 55% opacity), and the group headings in tables and stat lists (a day in the memory table, a plugin group, a stat section's title). Both pass WCAG AA on their worst-case ground.
+- **Verdigris** (`accent` / `accent-light`): the selection and action color: verdigris in dark, frost blue in light. The diamond marker, the primary button fill, the sorted column head and its hover, the active tab's underline, focus rings, text selection, the caret, checkbox accents, inline text buttons, link underlines (mixed 75% into the ground at rest so a page of links stays quiet but clears 3:1, full on hover), the stats bars (at 55% opacity), and the group headings in tables and stat lists (a day in the memory table, a plugin group, a stat section's title). Both pass WCAG AA on their worst-case ground.
 - **Accent Ink** (`on-accent` / `on-accent-light`): text on an accent fill, used for the primary button and selected text.
 
 ### Neutral

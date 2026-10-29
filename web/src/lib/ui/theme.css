@@ -140,10 +140,14 @@ p {
 	margin: 0;
 }
 
+/* A link keeps its text's color and is marked by its underline: the accent,
+   a step quieter than full strength so a page of links doesn't shout, but
+   above 3:1 on every ground in both themes. Hover brings it to full. */
 a {
 	color: inherit;
 	text-underline-offset: 0.2em;
-	text-decoration-color: var(--rule-strong);
+	text-decoration-thickness: 1px;
+	text-decoration-color: color-mix(in srgb, var(--accent) 75%, var(--ground));
 }
 
 a:hover {

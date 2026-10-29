@@ -281,11 +281,9 @@
 	tr.bystander .name.own {
 		color: inherit;
 	}
-	/* A name that opens a character is underlined like any link here: in
-	   the hairline at rest, the accent under the pointer. */
+	/* A name that opens a character is underlined like any link. */
 	a.name {
 		text-decoration: underline;
-		text-decoration-color: var(--rule-strong);
 		text-underline-offset: 0.25em;
 	}
 	a.name:hover {
