@@ -93,14 +93,19 @@ func TestComparedWithDefaults(t *testing.T) {
 	if f, err := h.settings.Read("UniversalTranslator"); err != nil || !f.File.Exists {
 		t.Errorf("read by name anyway: %+v, %v", f.File, err)
 	}
-	sent, _ := json.Marshal(list)
+	// OpenRouter.yaml has a page of its own, so its secrets are checked as read by name.
+	openRouter, err := h.settings.Read("OpenRouter")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sent, _ := json.Marshal([]any{list, openRouter})
 	for _, secret := range []string{"SECRET-ONE", "SECRET-TWO", "SECRET-THREE", "SECRET-FOUR"} {
 		if strings.Contains(string(sent), secret) {
 			t.Errorf("%s would be sent to the page", secret)
 		}
 	}
 	files := map[string]map[string]Setting{}
-	for _, f := range list.Files {
+	for _, f := range append(list.Files, openRouter) {
 		files[f.File.Name] = map[string]Setting{}
 		for _, v := range f.Values {
 			files[f.File.Name][v.Key] = v

@@ -164,8 +164,13 @@ func (s *Settings) SetSpeech(template string, e SpeechEdit) (SpeechRule, error) 
 	return s.Speech(template)
 }
 
+// stringNode is a text value; one with line breaks is quoted rather than
+// written as a block, so it reads as one line.
 func stringNode(v string) *yaml.Node {
 	n := &yaml.Node{}
 	n.SetString(v)
+	if strings.ContainsAny(v, "\n\r\t") {
+		n.Style = yaml.DoubleQuotedStyle
+	}
 	return n
 }

@@ -3,7 +3,7 @@ import type { Catalog } from '#lib/api/types/bios.ts';
 import type { Character } from '#lib/api/types/characters.ts';
 import type { Import, ImportResult, Rule, Translator, TranslatorEdit } from '#lib/api/types/settings.ts';
 import { templateName } from '#lib/bios/api.ts';
-import { settingsHref } from '#lib/settings/api.ts';
+import { modelsHref } from '#lib/models/api.ts';
 
 export const translatorDependency = 'app:translator';
 
@@ -25,10 +25,10 @@ export function translatorHref(save: string): string {
 	return `/${encodeURIComponent(save)}/translator`;
 }
 
-// Where the model that rewrites the lines is chosen: the translator's
-// variant in the provider's settings.
+// Where the model that rewrites the lines is chosen: the translator's task
+// on the Models page.
 export function modelHref(save: string): string {
-	return `${settingsHref(save, 'OpenRouter')}?item=${encodeURIComponent('OpenRouter/openrouter.variants.UniversalTranslator.model_name')}`;
+	return modelsHref(save, 'UniversalTranslator');
 }
 
 // editOf is the configuration as it is, ready to be changed and saved.

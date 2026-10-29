@@ -87,6 +87,7 @@ type OwnPage struct {
 
 var ownPages = []OwnPage{
 	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "translator"},
+	{Name: "OpenRouter", Label: "Models", Page: "models"},
 }
 
 func hasOwnPage(name string) bool {

@@ -39,6 +39,13 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("POST /api/translator/import", httpapi.JSON(func(_ *http.Request, imp Import) (ImportResult, error) {
 		return s.ImportRules(imp)
 	}))
+	// Which model does each of SkyrimNet's tasks.
+	mux.Handle("GET /api/models", httpapi.JSON(func(*http.Request, httpapi.None) (Models, error) {
+		return s.Models()
+	}))
+	mux.Handle("PUT /api/models/{task}", httpapi.JSON(func(r *http.Request, e TaskEdit) (Models, error) {
+		return s.SetTask(r.PathValue("task"), e)
+	}))
 	mux.Handle("GET /api/toggles", httpapi.JSON(func(*http.Request, httpapi.None) (ToggleList, error) {
 		return s.Toggles()
 	}))

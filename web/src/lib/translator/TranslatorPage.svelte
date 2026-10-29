@@ -298,7 +298,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 			</tbody>
 		</table>
 		<p class="muted small">{filterSummary}</p>
-		<p class="muted small">The lines are rewritten by the model chosen for the translator in <a href={modelHref(save)}>OpenRouter’s settings</a>, or the provider’s you use.</p>
+		<p class="muted small">The lines are rewritten by the model chosen for the translator on the <a href={modelHref(save)}>Models</a> page.</p>
 	</div>
 
 	<aside class="pane" use:fitToViewport aria-label="Rule">
@@ -560,15 +560,15 @@ import type { Character } from '#lib/api/types/characters.ts';
 		text-overflow: ellipsis;
 		vertical-align: bottom;
 	}
+	/* A flag is a word of metadata, as in the other tables: never a button. */
 	.flag {
 		display: inline-block;
 		margin-left: var(--space-2);
-		padding: 0 var(--space-2);
-		font-size: var(--step--2);
+		font-size: var(--step--1);
 		color: var(--muted);
-		border: 1px solid var(--rule-strong);
-		border-radius: var(--radius);
-		vertical-align: middle;
+	}
+	.text .line:not(:empty) + .flag::before {
+		content: '· ';
 	}
 	tr.off td {
 		color: var(--muted);
