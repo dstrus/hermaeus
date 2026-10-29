@@ -24,6 +24,7 @@ import (
 	"hermaeus/internal/plugins"
 	"hermaeus/internal/prefs"
 	"hermaeus/internal/prompts"
+	"hermaeus/internal/records"
 	"hermaeus/internal/settings"
 	"hermaeus/internal/store"
 )
@@ -97,6 +98,7 @@ func (s *Server) routes() {
 	prompts.New(s.Store, s.Library, s.Prefs).Routes(m)
 	filters.New(s.Store, s.Library).Routes(m)
 	plugins.New(s.Store, s.Library).Routes(m)
+	records.New(s.Library).Routes(m)
 
 	m.Handle("/api/", httpapi.JSON(func(r *http.Request, _ httpapi.None) (httpapi.None, error) {
 		return httpapi.None{}, apperr.New(apperr.NotFound, "Unknown endpoint: %s %s", r.Method, r.URL.Path)
