@@ -11,7 +11,8 @@ export type Kind =
 	| 'percent' // stored 0–1, shown as a percentage
 	| 'minutes' // a whole number of minutes
 	| 'text'
-	| 'choice'; // one of a few values, or any text when custom is set
+	| 'choice' // one of a few values, or any text when custom is set
+	| 'set'; // any number of the choices, kept as a list
 
 export interface Choice {
 	value: string;
@@ -68,9 +69,25 @@ export function show(f: Field, v: unknown): string {
 			const c = f.choices?.find((c) => c.value === String(v));
 			return c ? c.label : String(v);
 		}
+		case 'set':
+			return Array.isArray(v) ? `${v.length} of ${f.choices?.length ?? v.length}` : String(v);
 		default:
 			return String(v);
 	}
+}
+
+// pickedOf is a set's value as the list of choices it holds.
+export function pickedOf(f: Field, v: unknown): string[] {
+	const known = new Set((f.choices ?? []).map((c) => c.value));
+	return Array.isArray(v) ? v.map(String).filter((x) => known.has(x)) : [];
+}
+
+// setValue is a set as it should be written: the values already in the
+// file keep their order, and newly picked ones follow in the choices' order.
+export function setValue(f: Field, before: unknown, picked: string[]): string[] {
+	const keep = pickedOf(f, before).filter((x) => picked.includes(x));
+	const added = (f.choices ?? []).map((c) => c.value).filter((x) => picked.includes(x) && !keep.includes(x));
+	return [...keep, ...added];
 }
 
 // draftOf is a value as the form holds it: text, percentages as whole numbers.

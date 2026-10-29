@@ -16,7 +16,7 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import Up from '#lib/ui/Up.svelte';
-	import { draftOf, parse, show, valueOf, type Feature, type Field } from './schema.ts';
+	import { draftOf, parse, pickedOf, setValue, show, valueOf, type Feature, type Field } from './schema.ts';
 
 	let { save, feature, file }: { save: string; feature: Feature; file: FileValues } = $props();
 
@@ -46,12 +46,17 @@
 		if (!editing && param('mode')) setParams({ mode: null }, 'replace');
 	});
 	let draft = $state('');
+	let picked = $state<string[]>([]); // a set's chosen values
 	let field = $state<HTMLInputElement | HTMLSelectElement>();
 	$effect(() => {
 		if (!editing) return;
 		draft = draftOf(current!.field, value);
+		picked = pickedOf(current!.field, value);
 		tick().then(() => field?.focus());
 	});
+	function pick(v: string, on: boolean) {
+		picked = on ? [...picked, v] : picked.filter((p) => p !== v);
+	}
 
 	async function apply(change: { key: string; value?: unknown; reset?: boolean }, done: string) {
 		if (saving) return;
@@ -85,7 +90,7 @@
 		if (!current) return;
 		let v: unknown;
 		try {
-			v = parse(current.field, draft);
+			v = current.field.kind === 'set' ? setValue(current.field, value, picked) : parse(current.field, draft);
 		} catch (err) {
 			error = err instanceof Error ? err.message : String(err);
 			return;
@@ -175,8 +180,23 @@
 					{#if editing}
 						<form onsubmit={submit}>
 							<label class="field">
-								<span class="caps label">{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : 'Value'}</span>
-								{#if f.kind === 'choice' && !f.custom}
+								<span class="caps label">{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : 'Value'}</span>
+								{#if f.kind === 'set'}
+									<ul class="picks">
+										{#each f.choices ?? [] as c, i (c.value)}
+											<li>
+												<label class="pick">
+													{#if i === 0}
+														<input bind:this={field} type="checkbox" checked={picked.includes(c.value)} onchange={(e) => pick(c.value, e.currentTarget.checked)} />
+													{:else}
+														<input type="checkbox" checked={picked.includes(c.value)} onchange={(e) => pick(c.value, e.currentTarget.checked)} />
+													{/if}
+													<span>{c.label}</span>
+												</label>
+											</li>
+										{/each}
+									</ul>
+								{:else if f.kind === 'choice' && !f.custom}
 									<select bind:this={field} bind:value={draft}>
 										{#each f.choices ?? [] as c (c.value)}<option value={c.value}>{c.label}</option>{/each}
 									</select>
@@ -201,7 +221,19 @@
 						</form>
 					{:else}
 						<dl>
-							<dt class="caps">Now</dt><dd class:changed={s?.changed}>{show(f, value)}{#if s && !s.set}<span class="muted"> · not in the file, so the default</span>{/if}</dd>
+							<dt class="caps">Now</dt>
+							<dd class:changed={s?.changed}>
+								{show(f, value)}{#if s && !s.set}<span class="muted"> · not in the file, so the default</span>{/if}
+								{#if f.kind === 'set'}
+									{@const on = pickedOf(f, value)}
+									<!-- Every choice, with the ones left out struck through, so what isn't chosen shows at a glance. -->
+									<ul class="setlist small">
+										{#each f.choices ?? [] as c (c.value)}
+											<li class:off={!on.includes(c.value)}>{c.label}</li>
+										{/each}
+									</ul>
+								{/if}
+							</dd>
 							{#if s?.hasDefault}<dt class="caps">Default</dt><dd>{show(f, s.default)}</dd>{/if}
 						</dl>
 						{#if can}
@@ -370,13 +402,42 @@
 		flex-direction: column;
 		gap: var(--space-1);
 	}
-	.field input,
+	.field input:not([type='checkbox']),
 	.field select {
 		width: 100%;
+	}
+	.pick span {
+		white-space: nowrap;
 	}
 	.label {
 		font-size: var(--step--1);
 		color: var(--muted);
+	}
+	.picks {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+	.pick {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+	.setlist {
+		list-style: none;
+		padding: 0;
+		margin: var(--space-1) 0 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--space-3);
+	}
+	.setlist .off {
+		color: var(--muted);
+		text-decoration: line-through;
+		text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent);
 	}
 	.buttons {
 		position: sticky;
