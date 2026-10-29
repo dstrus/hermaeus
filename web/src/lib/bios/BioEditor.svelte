@@ -13,6 +13,8 @@
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { bioDependency, createBio, getHistory, kinds, restoreBio, saveBio, sectionLabel } from './api.ts';
 	import BioDiff from './BioDiff.svelte';
+	import CodeArea from '#lib/ui/CodeArea.svelte';
+	import Inja from '#lib/ui/Inja.svelte';
 	import { parseSections } from './diff.ts';
 
 	let {
@@ -210,7 +212,7 @@
 {:else if mode === 'raw'}
 	<div class="raw" use:fitToViewport>
 		<p class="muted small">The whole file, with SkyrimNet’s own markup. Broken markup is refused; a removed section only warns.</p>
-		<textarea bind:value={draft} spellcheck="false"></textarea>
+		<CodeArea bind:value={draft} label="The whole bio" />
 		<div class="buttons">
 			<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
 			<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
@@ -262,7 +264,7 @@
 						{#if historyView === 'changes' && !earlier.current}
 							<BioDiff from={parseSections(earlier.raw)} to={version.sections} fromLabel="this version" toLabel="the bio now" />
 						{:else}
-							<pre class="file">{earlier.raw}</pre>
+							<pre class="file"><Inja text={earlier.raw} /></pre>
 						{/if}
 						<div class="buttons">
 							{#if !earlier.current && !readOnly}
@@ -313,7 +315,7 @@
 							</div>
 						</div>
 					{:else}
-						<p class="text">{s.text}</p>
+						<p class="text"><Inja text={s.text} /></p>
 					{/if}
 				</section>
 			{:else}
@@ -423,8 +425,7 @@
 	.field {
 		margin-right: var(--space-4);
 	}
-	.field textarea,
-	.raw textarea {
+	.field textarea {
 		width: 100%;
 		resize: vertical;
 		line-height: 1.55;
@@ -478,14 +479,9 @@
 		flex-direction: column;
 		max-width: 64rem; /* fitToViewport sets its height */
 	}
-	.raw textarea {
-		display: block;
+	.raw :global(.code) {
 		flex: 1;
-		min-height: 8rem;
 		margin-top: var(--space-3);
-		resize: none;
-		font-family: var(--font-mono);
-		font-size: var(--step--1);
 	}
 	.raw .buttons {
 		padding-bottom: var(--space-4);

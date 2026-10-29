@@ -12,6 +12,8 @@
 	import Segmented from '#lib/ui/Segmented.svelte';
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import Up from '#lib/ui/Up.svelte';
+	import CodeArea from '#lib/ui/CodeArea.svelte';
+	import Inja from '#lib/ui/Inja.svelte';
 	import { layerLabel, promptDependency, promptName, promptsDependency, removeCopy, savePrompt } from './api.ts';
 
 	let { save, path, doc: loaded }: { save: string; path: string; doc: Document } = $props();
@@ -119,7 +121,7 @@
 		{#if version !== mine}
 			<p class="muted small">Starting from the version from {layer?.source}. Saving makes your own copy.</p>
 		{/if}
-		<textarea bind:value={draft} spellcheck="false" aria-label="Prompt text"></textarea>
+		<CodeArea bind:value={draft} label="Prompt text" />
 		<div class="buttons">
 			<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
 			<button type="button" class="button" onclick={() => (mode = 'read')} disabled={saving}>Cancel</button>
@@ -132,7 +134,7 @@
 		{/if}
 		<span class="muted small">{layer?.source} · {realTime(version.modified)}</span>
 	</div>
-	<pre class="file">{version.text}</pre>
+	<pre class="file"><Inja text={version.text} /></pre>
 {/if}
 
 <style>
@@ -185,16 +187,9 @@
 		flex-direction: column;
 		max-width: 64rem; /* fitToViewport sets its height */
 	}
-	.raw textarea {
-		display: block;
+	.raw :global(.code) {
 		flex: 1;
-		min-height: 8rem;
 		margin-top: var(--space-3);
-		width: 100%;
-		resize: none;
-		font-family: var(--font-mono);
-		font-size: var(--step--1);
-		line-height: 1.55;
 	}
 	.buttons {
 		display: flex;

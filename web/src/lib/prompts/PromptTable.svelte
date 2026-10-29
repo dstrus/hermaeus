@@ -11,7 +11,9 @@
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
 	import { count, realTime } from '#lib/format.ts';
-	import { promptFolder, promptHref, promptName, promptsDependency, searchPrompts, setPromptPinned } from './api.ts';
+	import { fitToViewport } from '#lib/ui/fit.ts';
+	import Inja from '#lib/ui/Inja.svelte';
+	import { getPrompt, promptFolder, promptHref, promptName, promptsDependency, searchPrompts, setPromptPinned } from './api.ts';
 
 	let { save, list }: { save: string; list: PromptList } = $props(); // pinned prompts first, in the order they were pinned, then by path
 
@@ -81,6 +83,26 @@
 
 	const selection = new Selection(() => shown, (p) => p.path);
 	let current = $derived(selection.current);
+
+	// The selected prompt's text, as space in the pane permits: the version
+	// in use, fetched when selected and kept while the page is open.
+	const previews = new Map<string, Promise<string | null>>();
+	let preview = $state<string | null>(null);
+	$effect(() => {
+		const path = current?.path;
+		preview = null;
+		if (!path) return;
+		let p = previews.get(path);
+		if (!p) {
+			p = getPrompt(path)
+				.then((doc) => doc.versions[0]?.text ?? null)
+				.catch(() => null);
+			previews.set(path, p);
+		}
+		p.then((text) => {
+			if (current?.path === path) preview = text;
+		});
+	});
 	const href = (p: Prompt) => promptHref(save, p.path);
 
 	useShortcuts(() => {
@@ -133,7 +155,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<aside class="pane" aria-label="Prompt">
+		<aside class="pane" aria-label="Prompt" use:fitToViewport>
 			{#if current}
 				<div class="title">
 					<h2 class="caps">{promptName(current.path)}</h2>
@@ -150,6 +172,12 @@
 				<div class="actions">
 					<a class="button primary" href={href(current)}>Open</a>
 				</div>
+				{#if preview}
+					<section class="preview">
+						<h3 class="caps">Text{mine(current) ? ' · your copy' : ''}</h3>
+						<pre><Inja text={preview} /></pre>
+					</section>
+				{/if}
 			{/if}
 		</aside>
 	</div>
@@ -224,10 +252,32 @@
 	.pane {
 		position: sticky;
 		top: 0;
-		min-height: calc(100vh - 7rem);
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100vh - 7rem); /* fitToViewport sets the height */
 		padding: var(--space-5);
 		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
+		overflow: hidden;
+	}
+	/* The text preview takes what height is left, fading out at the bottom. */
+	.preview {
+		flex: 1;
+		min-height: 4rem;
+		margin-top: var(--space-4);
+		overflow: hidden;
+		mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+	}
+	.preview h3 {
+		font-size: var(--step--1);
+		color: var(--muted);
+		margin-bottom: var(--space-2);
+	}
+	.preview pre {
+		margin: 0;
+		font: 400 var(--step--1) / 1.55 var(--font-mono);
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 	}
 	/* The name, with the pin beside it as in the item's own header. */
 	.pane .title {

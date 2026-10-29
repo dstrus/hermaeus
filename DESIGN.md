@@ -227,6 +227,8 @@ The world is flat. Depth comes from the smoked-glass gradient behind everything,
 - **Modal lift** (`box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.45)`, backdrop `rgb(0 0 0 / 0.45)`): only for the quick-find dialog, which floats over the page.
 
 ### Named Rules
+**The Template Markup Rule.** A prompt or bio shows its Inja markup set apart from its prose: statements (`{% if %}`, `{% block %}`) in the accent, since they're the structure that acts; expressions (`{{ npc.name }}`) in a heavier ink, since they're what gets filled in; comments muted and italic; strings muted; delimiters muted. Prose stays as it is. The same marks show while the text is edited.
+
 **The Clipped Text Rule.** Text cut short with an ellipsis shows its whole self in a tip beneath it when the pointer rests there: the pane's material with a hairline edge, lifted by a soft shadow, never the browser's own tooltip. Text that fits shows nothing.
 
 **The Hairline Rule.** Separate with a 1px rule, never a box or a shadow. Use `rule` between rows and shell zones, `rule-strong` under column heads and group headings and around controls.
