@@ -18,6 +18,7 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import Up from '#lib/ui/Up.svelte';
+	import { codeOf, keyName, mouseCodeOf, noKey } from '#lib/settings/keys.ts';
 	import { draftOf, parse, pickedOf, setValue, show, valueOf, type Feature, type Field } from './schema.ts';
 
 	let { save, feature, file, lists }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse } = $props();
@@ -51,13 +52,29 @@
 	let listForm = $derived(param('mode') === 'list' || param('mode') === 'list-new');
 	let draft = $state('');
 	let picked = $state<string[]>([]); // a set's chosen values
-	let field = $state<HTMLInputElement | HTMLSelectElement>();
+	let field = $state<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>();
 	$effect(() => {
 		if (!editing) return;
 		draft = draftOf(current!.field, value);
 		picked = pickedOf(current!.field, value);
 		tick().then(() => field?.focus());
 	});
+	// A hotkey is set by pressing it in the capture box. Tab, Esc, and the
+	// save shortcut keep their jobs; a mouse button other than the left one
+	// (which focuses the box) counts too.
+	function captureKey(e: KeyboardEvent) {
+		if (e.key === 'Tab' || e.key === 'Escape' || (e.key === 'Enter' && (e.metaKey || e.ctrlKey))) return;
+		const code = codeOf(e);
+		e.preventDefault();
+		e.stopPropagation();
+		if (code !== undefined) draft = String(code);
+	}
+	function captureMouse(e: MouseEvent) {
+		const code = mouseCodeOf(e);
+		if (e.button === 0 || code === undefined) return;
+		e.preventDefault();
+		draft = String(code);
+	}
 	function pick(v: string, on: boolean) {
 		picked = on ? [...picked, v] : picked.filter((p) => p !== v);
 	}
@@ -99,7 +116,7 @@
 			error = err instanceof Error ? err.message : String(err);
 			return;
 		}
-		apply({ key: current.field.key, value: v }, `Saved ${current.field.label.toLowerCase()}: ${show(current.field, v)}.`);
+		apply({ key: current.field.key, value: v }, `${current.field.label}: ${show(current.field, v)}.`);
 	}
 
 	function reset() {
@@ -190,8 +207,19 @@
 					{#if editing}
 						<form onsubmit={submit}>
 							<label class="field">
-								<span class="caps label">{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : 'Value'}</span>
-								{#if f.kind === 'set'}
+								<span class="caps label">{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : f.kind === 'hotkey' ? 'Key' : 'Value'}</span>
+								{#if f.kind === 'hotkey'}
+									<button
+										type="button"
+										class="capture"
+										bind:this={field}
+										aria-label="Press the key to use"
+										onkeydown={captureKey}
+										onmousedown={captureMouse}
+										oncontextmenu={(e) => e.preventDefault()}>{keyName(Number(draft))}</button
+									>
+									<span class="muted small">Press a key, or click the box with a mouse button. <button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>No key</button></span>
+								{:else if f.kind === 'set'}
 									<ul class="picks">
 										{#each f.choices ?? [] as c, i (c.value)}
 											<li>
@@ -422,6 +450,23 @@
 	.label {
 		font-size: var(--step--1);
 		color: var(--muted);
+	}
+	.capture {
+		display: block;
+		width: 100%;
+		padding: var(--space-2) var(--space-3);
+		background: var(--glass-strong);
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--radius);
+		text-align: left;
+		cursor: pointer;
+	}
+	.capture:focus-visible {
+		border-color: var(--accent);
+		outline: none;
+	}
+	.field .small .textbutton {
+		font-size: inherit;
 	}
 	.picks {
 		list-style: none;

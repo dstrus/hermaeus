@@ -97,6 +97,7 @@ var ownPages = []OwnPage{
 	{Name: "MemoryFilter", Label: "Memory filter", Page: "settings/memory-filter"},
 	{Name: "Diary", Label: "Diaries", Page: "settings/diaries"},
 	{Name: "DynamicBio", Label: "Dynamic bios", Page: "settings/dynamic-bios"},
+	{Name: "Hotkey", Label: "Hotkeys", Page: "settings/hotkeys"},
 }
 
 // withPage notes the page a file has of its own, if any.

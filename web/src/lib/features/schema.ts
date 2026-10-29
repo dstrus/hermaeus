@@ -3,6 +3,7 @@
 // does, and the kind of value it takes. The page reads and writes the
 // file through the ordinary settings API, one setting at a time.
 import type { Setting } from '#lib/api/types/settings.ts';
+import { keyName } from '#lib/settings/keys.ts';
 
 export type Kind =
 	| 'switch' // true or false
@@ -12,7 +13,8 @@ export type Kind =
 	| 'minutes' // a whole number of minutes
 	| 'text'
 	| 'choice' // one of a few values, or any text when custom is set
-	| 'set'; // any number of the choices, kept as a list
+	| 'set' // any number of the choices, kept as a list
+	| 'hotkey'; // a key code, -1 for none
 
 export interface Choice {
 	value: string;
@@ -70,6 +72,8 @@ export function show(f: Field, v: unknown): string {
 			const c = f.choices?.find((c) => c.value === String(v));
 			return c ? c.label : String(v);
 		}
+		case 'hotkey':
+			return typeof v === 'number' ? keyName(v) : String(v);
 		case 'set':
 			return Array.isArray(v) ? `${v.length} of ${f.choices?.length ?? v.length}` : String(v);
 		default:
@@ -110,6 +114,8 @@ export function parse(f: Field, draft: string): unknown {
 		case 'choice':
 			if (!t) throw new Error(`Choose a value for ${f.label}.`);
 			return t;
+		case 'hotkey':
+			return number(t, f.label);
 		case 'percent': {
 			const n = number(t, f.label);
 			if (n < 0 || n > 100) throw new Error(`${f.label} is a percentage, from 0 to 100.`);
