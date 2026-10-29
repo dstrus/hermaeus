@@ -197,7 +197,7 @@
 					<p class="small what">{f.what}</p>
 					{#if f.kind === 'choice' && f.choices?.length}
 						<ul class="choices small">
-							{#each f.choices as c (c.value)}<li><span class="id">{c.value}</span>{#if c.what}<span class="muted"> · {c.what}</span>{/if}</li>{/each}
+							{#each f.choices as c (c.value)}<li><span class="id">{c.value}</span>{#if c.what}<span class="muted what-choice">· {c.what}</span>{/if}</li>{/each}
 						</ul>
 					{/if}
 					<p class="muted small"><span class="id">{f.key}</span> in {file.file.path}</p>
@@ -395,6 +395,9 @@
 	.what {
 		margin-bottom: var(--space-3);
 		line-height: 1.5;
+	}
+	.what-choice {
+		margin-left: var(--space-2);
 	}
 	.choices {
 		list-style: none;

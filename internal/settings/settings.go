@@ -95,6 +95,7 @@ var ownPages = []OwnPage{
 	{Name: "Providers", Label: "Providers", Page: "settings/providers"},
 	{Name: "Memory", Label: "Memories", Page: "settings/memories"},
 	{Name: "MemoryFilter", Label: "Memory filter", Page: "settings/memory-filter"},
+	{Name: "ActorFilter", Label: "Actor filter", Page: "settings/actor-filter"},
 	{Name: "Diary", Label: "Diaries", Page: "settings/diaries"},
 	{Name: "DynamicBio", Label: "Dynamic bios", Page: "settings/dynamic-bios"},
 	{Name: "Hotkey", Label: "Hotkeys", Page: "settings/hotkeys"},

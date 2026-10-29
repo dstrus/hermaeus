@@ -14,6 +14,7 @@ export const settingsPages: SettingsPage[] = [
 	{ path: 'translator', label: 'Translator', file: 'UniversalTranslator' },
 	{ path: 'gamemaster', label: 'GameMaster' }, // part of SkyrimNet.yaml, which stays under Other
 	{ path: 'narration', label: 'Narration' },
+	{ path: 'actor-filter', label: 'Actor filter', file: 'ActorFilter' },
 	{ path: 'memories', label: 'Memories', file: 'Memory' },
 	{ path: 'memory-filter', label: 'Memory filter', file: 'MemoryFilter' },
 	{ path: 'diaries', label: 'Diaries', file: 'Diary' },

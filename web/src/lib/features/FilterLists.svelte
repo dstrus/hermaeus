@@ -107,7 +107,7 @@
 				{#if entries.length}
 					<ul>
 						{#each entries as e (e.value)}
-							<li><span class="id">{e.value}</span><span class="muted small"> · {e.from.map((s) => s.name).join(', ')}</span></li>
+							<li><span class="id">{e.value}</span><span class="muted small from">· {e.from.map((s) => s.name).join(', ')}</span></li>
 						{/each}
 					</ul>
 				{:else}
@@ -138,7 +138,7 @@
 				{#each filterFields as f (f.key)}
 					<label class="field">
 						<span class="caps label">{f.label}</span>
-						<textarea bind:value={fields[f.key]} rows="3" spellcheck="false" placeholder="One {f.noun} per line, by editor ID"></textarea>
+						<textarea bind:value={fields[f.key]} rows="3" spellcheck="false" placeholder={'placeholder' in f ? f.placeholder : `One ${f.noun} per line, by editor ID`}></textarea>
 					</label>
 				{/each}
 			</div>
@@ -217,6 +217,10 @@
 	}
 	.effect dd {
 		margin: 0;
+	}
+	/* The lists an entry comes from, set a step away from the entry. */
+	.from {
+		margin-left: var(--space-2);
 	}
 	.effect ul {
 		list-style: none;

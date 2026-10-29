@@ -28,6 +28,6 @@ export const filterFields = [
 	{ key: 'FactionBlacklist', label: 'Faction blacklist', noun: 'faction' },
 	{ key: 'RaceWhitelist', label: 'Race whitelist', noun: 'race' },
 	{ key: 'RaceBlacklist', label: 'Race blacklist', noun: 'race' },
-	{ key: 'GenderWhitelist', label: 'Gender whitelist', noun: 'gender' },
-	{ key: 'GenderBlacklist', label: 'Gender blacklist', noun: 'gender' }
+	{ key: 'GenderWhitelist', label: 'Gender whitelist', noun: 'gender', placeholder: 'Male or Female, one per line' },
+	{ key: 'GenderBlacklist', label: 'Gender blacklist', noun: 'gender', placeholder: 'Male or Female, one per line' }
 ];
