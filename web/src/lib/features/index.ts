@@ -4,9 +4,10 @@
 import { diary } from './diary.ts';
 import { dynamicBio } from './dynamicbio.ts';
 import { memory } from './memory.ts';
+import { memoryFilter } from './memoryfilter.ts';
 import type { Feature } from './schema.ts';
 
-export const features: Feature[] = [memory, diary, dynamicBio];
+export const features: Feature[] = [memory, memoryFilter, diary, dynamicBio];
 
 export function featureById(id: string): Feature | undefined {
 	return features.find((f) => f.id === id);

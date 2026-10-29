@@ -45,6 +45,7 @@ export interface Feature {
 	title: string;
 	what: string; // the page's lead
 	sections: Section[];
+	lists?: 'memory' | 'actor'; // the filter lists of this kind, shown below the settings
 }
 
 // valueOf is a setting's value as the file has it, or its default.

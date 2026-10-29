@@ -7,7 +7,9 @@
 	import { fly } from 'svelte/transition';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
+	import type { ListsResponse } from '#lib/api/types/filters.ts';
 	import type { FileValues, Setting } from '#lib/api/types/settings.ts';
+	import FilterLists from './FilterLists.svelte';
 	import { count } from '#lib/format.ts';
 	import { saveSettings, settingsDependency, settingsHref, togglesDependency } from '#lib/settings/api.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
@@ -18,7 +20,7 @@
 	import Up from '#lib/ui/Up.svelte';
 	import { draftOf, parse, pickedOf, setValue, show, valueOf, type Feature, type Field } from './schema.ts';
 
-	let { save, feature, file }: { save: string; feature: Feature; file: FileValues } = $props();
+	let { save, feature, file, lists }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse } = $props();
 
 	let readOnly = $derived(live.gameRunning);
 	let can = $derived(file.file.exists && !readOnly);
@@ -43,8 +45,10 @@
 	// it flips on E.
 	let editing = $derived(param('mode') === 'edit' && !!current && can && current.field.kind !== 'switch');
 	$effect(() => {
-		if (!editing && param('mode')) setParams({ mode: null }, 'replace');
+		if (!editing && param('mode') === 'edit') setParams({ mode: null }, 'replace');
 	});
+	// A filter list's form is open (see FilterLists), so the keys are its.
+	let listForm = $derived(param('mode') === 'list' || param('mode') === 'list-new');
 	let draft = $state('');
 	let picked = $state<string[]>([]); // a set's chosen values
 	let field = $state<HTMLInputElement | HTMLSelectElement>();
@@ -105,14 +109,17 @@
 
 	let list = $derived(settingsHref(save));
 
-	useShortcuts(() => [
-		{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: editing, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: editing, run: () => selection.move(-1) },
-		{ key: 'e', shown: 'E', label: current?.field.kind === 'switch' ? (value === true ? 'Switch off' : 'Switch on') : 'Edit', hidden: editing, disabled: !can || !current, run: startEdit },
-		{ key: 'r', shown: 'R', label: 'Reset to default', hidden: editing, disabled: !can || !resettable, run: reset },
-		{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit() },
-		{ key: 'Escape', shown: 'Esc', label: editing ? 'Cancel' : 'Settings', run: () => (editing ? leave('mode') : goto(list)) }
-	]);
+	useShortcuts(() => {
+		const busy = editing || listForm;
+		return [
+			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: busy, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: busy, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: current?.field.kind === 'switch' ? (value === true ? 'Switch off' : 'Switch on') : 'Edit', hidden: busy, disabled: !can || !current, run: startEdit },
+			{ key: 'r', shown: 'R', label: 'Reset to default', hidden: busy, disabled: !can || !resettable, run: reset },
+			{ key: 'Enter', label: 'Save', command: true, hidden: !busy, disabled: saving, run: () => document.querySelector<HTMLFormElement>(listForm ? '.listform' : '.pane form')?.requestSubmit() },
+			{ key: 'Escape', shown: 'Esc', label: busy ? 'Cancel' : 'Settings', run: () => (busy ? leave('mode') : goto(list)) }
+		];
+	});
 </script>
 
 <Up href={list} label="Settings" />
@@ -161,6 +168,9 @@
 			</tbody>
 		</table>
 		<p class="muted small">Everything else in <span class="id">{file.file.path}</span> is on its <a href={settingsHref(save, feature.file)}>full settings page</a>.</p>
+		{#if feature.lists && lists}
+			<FilterLists kind={feature.lists} {lists} canEdit={file.file.exists} />
+		{/if}
 	</div>
 
 	<aside class="pane" use:fitToViewport aria-label="Setting">

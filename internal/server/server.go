@@ -17,6 +17,7 @@ import (
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/bios"
 	"hermaeus/internal/characters"
+	"hermaeus/internal/filters"
 	"hermaeus/internal/httpapi"
 	"hermaeus/internal/layers"
 	"hermaeus/internal/memories"
@@ -93,6 +94,7 @@ func (s *Server) routes() {
 	bios.New(s.Store, s.Library).Routes(m)
 	settings.New(s.Store, s.Prefs).Routes(m)
 	prompts.New(s.Store, s.Library, s.Prefs).Routes(m)
+	filters.New(s.Store, s.Library).Routes(m)
 
 	m.Handle("/api/", httpapi.JSON(func(r *http.Request, _ httpapi.None) (httpapi.None, error) {
 		return httpapi.None{}, apperr.New(apperr.NotFound, "Unknown endpoint: %s %s", r.Method, r.URL.Path)

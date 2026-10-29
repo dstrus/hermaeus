@@ -8,7 +8,7 @@
 
 {#key data.title}
 	{#if data.feature}
-		<FeaturePage save={data.playthrough.id} feature={data.feature} file={data.file} />
+		<FeaturePage save={data.playthrough.id} feature={data.feature} file={data.file} lists={data.lists} />
 	{:else}
 		<SettingsTable save={data.playthrough.id} title={data.title} file={data.file} rows={data.rows} byFile={data.byFile} />
 	{/if}

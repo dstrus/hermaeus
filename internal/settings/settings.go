@@ -94,6 +94,7 @@ var ownPages = []OwnPage{
 	{Name: "OpenRouter", Label: "Models", Page: "models"},
 	{Name: "Providers", Label: "Providers", Page: "providers"},
 	{Name: "Memory", Label: "Memories", Page: "settings/memories"},
+	{Name: "MemoryFilter", Label: "Memory filter", Page: "settings/memory-filter"},
 	{Name: "Diary", Label: "Diaries", Page: "settings/diaries"},
 	{Name: "DynamicBio", Label: "Dynamic bios", Page: "settings/dynamic-bios"},
 }
