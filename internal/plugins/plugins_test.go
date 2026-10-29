@@ -78,6 +78,7 @@ func newHarness(t *testing.T) *harness {
 	write(t, filepath.Join(lib, "author.off", "manifest.json"), `{"title": "Off"}`)
 	write(t, filepath.Join(lib, "author.off", "prompts", "dialogue.prompt"), "off")
 	write(t, filepath.Join(h.Dir, "overlay", "prompts", "dialogue.prompt"), "mine")
+	write(t, filepath.Join(h.Dir, "external", "author.new", "manifest.json"), `{"title": "New", "version": "0.1"}`) // not registered yet
 	write(t, filepath.Join(h.Dir, "content-registry.json"), registryJSON)
 	l := layers.New(s.Dir)
 	if _, err := l.SetModDir(mod); err != nil {
@@ -109,10 +110,13 @@ func TestListLowestFirst(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := ids(l); got != "skyrimnet.base author.low author.off author.high overlay" {
+	if got := ids(l); got != "skyrimnet.base author.new author.low author.off author.high overlay" {
 		t.Fatalf("order = %s", got)
 	}
-	base, low, off, high, mine := l.Plugins[0], l.Plugins[1], l.Plugins[2], l.Plugins[3], l.Plugins[4]
+	if n := l.Plugins[1]; n.Kind != "new" || n.Title != "New" || n.Enabled {
+		t.Errorf("unregistered = %+v", n)
+	}
+	base, low, off, high, mine := l.Plugins[0], l.Plugins[2], l.Plugins[3], l.Plugins[4], l.Plugins[5]
 	if base.Kind != "base" || !base.Enabled || base.Title != "SkyrimNet’s defaults" {
 		t.Errorf("base = %+v", base)
 	}
@@ -165,7 +169,7 @@ func TestOrderAndSwitch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := ids(l); got != "skyrimnet.base author.off author.high author.low overlay" {
+	if got := ids(l); got != "skyrimnet.base author.new author.off author.high author.low overlay" {
 		t.Errorf("order = %s", got)
 	}
 	want := strings.Replace(registryJSON, `"author.high",
@@ -189,8 +193,8 @@ func TestOrderAndSwitch(t *testing.T) {
     }`) {
 		t.Errorf("after switching off:\n%s", b)
 	}
-	if l.Plugins[3].ID != "author.low" || l.Plugins[3].Enabled {
-		t.Errorf("low = %+v", l.Plugins[3])
+	if l.Plugins[4].ID != "author.low" || l.Plugins[4].Enabled {
+		t.Errorf("low = %+v", l.Plugins[4])
 	}
 
 	// What's refused.

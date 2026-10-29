@@ -22,6 +22,8 @@
 	let shown = $derived(list.plugins);
 	let installed = $derived(shown.filter((p) => p.kind === 'plugin'));
 	let off = $derived(installed.filter((p) => !p.enabled).length);
+	// Plugins on disk the registry doesn't have yet, listed after the defaults.
+	let pending = $derived(shown.filter((p) => p.kind === 'new').length);
 
 	const selection = new Selection(() => shown, (p) => p.id, { param: 'item' });
 	let current = $derived(selection.current);
@@ -67,7 +69,8 @@
 		run(() => setEnabled(p.id, { modified: list.modified, enabled: !p.enabled }), p.enabled ? `Switched off ${p.title}. SkyrimNet ignores it from the next time it starts.` : `Switched on ${p.title}. SkyrimNet loads it from the next time it starts.`);
 	}
 
-	const kindLabel = (p: Plugin) => (p.kind === 'base' ? 'SkyrimNet' : p.kind === 'overlay' ? 'Yours' : p.source === 'external' ? 'From a mod' : p.source === 'hub' ? 'From the Hub' : 'Local');
+	const kindLabel = (p: Plugin) =>
+		p.kind === 'base' ? 'SkyrimNet' : p.kind === 'overlay' ? 'Yours' : p.source === 'hub' ? 'From the Hub' : p.source === 'external' || p.external ? 'From a mod' : 'Local';
 
 	useShortcuts(() => {
 		const p = current;
@@ -84,7 +87,7 @@
 
 <div class="bar">
 	<h1 class="caps">Plugins</h1>
-	<span class="muted n" use:clipped>{plural(installed.length, 'plugin', 'plugins')} installed{off ? ` · ${off} off` : ''}</span>
+	<span class="muted n" use:clipped>{plural(installed.length, 'plugin', 'plugins')} installed{off ? ` · ${off} off` : ''}{pending ? ` · ${pending} not added yet` : ''}</span>
 </div>
 <p class="muted lead">What SkyrimNet loads, in order. Lower in the list wins: a plugin’s prompt replaces the same prompt in any plugin above it, and your own edits, at the bottom, win over them all.</p>
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
@@ -106,10 +109,10 @@
 				{#each shown as p, i (p.id)}
 					<tr aria-selected={selection.is(p)} class:off={!p.enabled} class:fixed={p.kind !== 'plugin'} onclick={() => selection.select(p)}>
 						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
-						<td class="at n">{p.kind === 'overlay' ? '∞' : i}</td>
+						<td class="at n">{p.kind === 'overlay' ? '∞' : p.kind === 'base' ? 0 : p.kind === 'new' ? '' : i - pending}</td>
 						<td class="name" use:clipped>
 							{p.title}
-							{#if !p.enabled}<span class="flag">off</span>{/if}
+							{#if p.kind === 'new'}<span class="flag">not added yet</span>{:else if !p.enabled}<span class="flag">off</span>{/if}
 							{#if p.kind === 'plugin' && p.replaced.length}<span class="flag">some replaced</span>{/if}
 						</td>
 						<td class="version muted">{p.version}</td>
@@ -136,7 +139,9 @@
 							<button type="button" class="button" onclick={() => move(1)} disabled={readOnly || saving || at >= installed.length - 1}>Move down</button>
 						</div>
 					{/if}
-					{#if !p.enabled}
+					{#if p.kind === 'new'}
+						<p class="notice">Found on disk, but SkyrimNet hasn’t added it to its plugins yet. It will the next time it starts, at the top of this list, and it can be moved and switched here then.</p>
+					{:else if !p.enabled}
 						<p class="notice">Switched off: SkyrimNet doesn’t load it, so nothing in it applies.</p>
 					{/if}
 					{#if p.description}<p class="description small">{p.description}</p>{/if}

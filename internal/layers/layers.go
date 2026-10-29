@@ -110,16 +110,13 @@ func (l *Library) HasDefaults() bool {
 // whose overwrite folder is skyrimNetDir. If several mods contain it (say,
 // two versions), the newest by its manifest wins.
 func detectModDir(skyrimNetDir string) string {
-	parts := strings.Split(filepath.ToSlash(skyrimNetDir), "/")
-	n := len(parts)
-	if n < 5 || !strings.EqualFold(parts[n-4], "overwrite") {
+	root := mo2Root(skyrimNetDir)
+	if root == "" {
 		return ""
 	}
-	root := filepath.Dir(filepath.Dir(filepath.Dir(filepath.Dir(skyrimNetDir))))
-	mods, _ := os.ReadDir(filepath.Join(root, "mods"))
 	best, bestVersion := "", ""
-	for _, mod := range mods {
-		dir := filepath.Join(root, "mods", mod.Name(), "SKSE", "Plugins", "SkyrimNet")
+	for _, mod := range mo2Mods(root) {
+		dir := filepath.Join(root, "mods", mod, "SKSE", "Plugins", "SkyrimNet")
 		mf, err := readManifest(filepath.Join(dir, "library", BasePlugin))
 		if err != nil {
 			continue
@@ -150,17 +147,102 @@ func compareVersions(a, b string) int {
 }
 
 // Roots are the folders that can hold library/ and external/ plugin
-// folders: the SkyrimNet folder, and SkyrimNet's mod folder under MO2.
+// folders: the SkyrimNet folder, SkyrimNet's mod folder under MO2, and,
+// under MO2, every other mod's SkyrimNet folder, as the game sees them all
+// merged. That's where a mod's own SkyrimNet plugin (external/) lives.
 func (l *Library) Roots() []string {
 	sky := l.skyrimNetDir()
 	if sky == "" {
 		return nil
 	}
 	roots := []string{sky}
-	if mod, _ := l.ModDir(); mod != "" {
-		roots = append(roots, mod)
+	seen := map[string]bool{filepath.Clean(sky): true}
+	add := func(dir string) {
+		if dir != "" && !seen[filepath.Clean(dir)] {
+			seen[filepath.Clean(dir)] = true
+			roots = append(roots, dir)
+		}
+	}
+	mod, _ := l.ModDir()
+	add(mod)
+	if root := mo2Root(sky); root != "" {
+		for _, m := range mo2Mods(root) {
+			if d := filepath.Join(root, "mods", m, "SKSE", "Plugins", "SkyrimNet"); install.IsDir(d) {
+				add(d)
+			}
+		}
 	}
 	return roots
+}
+
+// MO2Root is the MO2 instance the SkyrimNet folder is in, or "".
+func (l *Library) MO2Root() string {
+	if sky := l.skyrimNetDir(); sky != "" {
+		return mo2Root(sky)
+	}
+	return ""
+}
+
+// mo2Root is the MO2 instance whose overwrite folder holds skyrimNetDir
+// (overwrite/SKSE/Plugins/SkyrimNet), or "".
+func mo2Root(skyrimNetDir string) string {
+	parts := strings.Split(filepath.ToSlash(filepath.Clean(skyrimNetDir)), "/")
+	n := len(parts)
+	if n < 5 || !strings.EqualFold(parts[n-4], "overwrite") {
+		return ""
+	}
+	return filepath.Dir(filepath.Dir(filepath.Dir(filepath.Dir(skyrimNetDir))))
+}
+
+// mo2Mods lists an MO2 instance's mods, by folder name: those the selected
+// profile switches on, when the profile can be read, or else every mod.
+func mo2Mods(root string) []string {
+	entries, _ := os.ReadDir(filepath.Join(root, "mods"))
+	var all []string
+	for _, e := range entries {
+		if e.IsDir() {
+			all = append(all, e.Name())
+		}
+	}
+	on, ok := mo2Enabled(root)
+	if !ok {
+		return all
+	}
+	var out []string
+	for _, m := range all {
+		if on[m] {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+// mo2Enabled reads the selected profile's modlist.txt, where "+Name" is a
+// mod switched on. ok is false when there's no profile to read.
+func mo2Enabled(root string) (on map[string]bool, ok bool) {
+	profile := ""
+	if b, err := os.ReadFile(filepath.Join(root, "ModOrganizer.ini")); err == nil {
+		for _, line := range strings.Split(strings.ReplaceAll(string(b), "\r\n", "\n"), "\n") {
+			if v, found := strings.CutPrefix(strings.TrimSpace(line), "selected_profile="); found {
+				v = strings.TrimSuffix(strings.TrimPrefix(v, "@ByteArray("), ")")
+				profile = strings.Trim(v, `"`)
+			}
+		}
+	}
+	if profile == "" {
+		return nil, false
+	}
+	b, err := os.ReadFile(filepath.Join(root, "profiles", profile, "modlist.txt"))
+	if err != nil {
+		return nil, false
+	}
+	on = map[string]bool{}
+	for _, line := range strings.Split(strings.ReplaceAll(string(b), "\r\n", "\n"), "\n") {
+		if name, found := strings.CutPrefix(line, "+"); found {
+			on[strings.TrimRight(name, "\r")] = true
+		}
+	}
+	return on, true
 }
 
 // Layers lists the content layers, highest priority first: the player's
@@ -189,6 +271,26 @@ func (l *Library) Layers() []Layer {
 		layers = append(layers, Layer{ID: BasePlugin, Kind: "base", Source: "SkyrimNet’s defaults", Root: dir})
 	}
 	return layers
+}
+
+// PluginIDs lists every plugin folder in the roots' library/ and external/
+// folders, whether or not the registry has it yet.
+func (l *Library) PluginIDs() []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, root := range l.Roots() {
+		for _, kind := range []string{"library", "external"} {
+			entries, _ := os.ReadDir(filepath.Join(root, kind))
+			for _, e := range entries {
+				if e.IsDir() && !seen[strings.ToLower(e.Name())] {
+					seen[strings.ToLower(e.Name())] = true
+					out = append(out, e.Name())
+				}
+			}
+		}
+	}
+	sort.Strings(out)
+	return out
 }
 
 // PluginDir is the folder SkyrimNet uses for a plugin, or "" when it isn't

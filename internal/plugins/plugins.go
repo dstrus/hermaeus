@@ -33,7 +33,7 @@ func New(s *store.Store, l *layers.Library) *Plugins {
 // Plugin is one installed plugin, or SkyrimNet's defaults, or the player's edits.
 type Plugin struct {
 	ID          string   `json:"id"`
-	Kind        string   `json:"kind"` // base, plugin, or overlay
+	Kind        string   `json:"kind"` // base, plugin, new (found, not yet registered), or overlay
 	Title       string   `json:"title"`
 	Tagline     string   `json:"tagline,omitempty"`
 	Description string   `json:"description,omitempty"`
@@ -46,6 +46,7 @@ type Plugin struct {
 	Enabled     bool     `json:"enabled"`
 	Found       bool     `json:"found"` // its folder is in the SkyrimNet folder or SkyrimNet's mod folder
 	Folder      string   `json:"folder,omitempty"`
+	External    bool     `json:"external"` // in an external/ folder, as a mod's own plugin is
 	Contents    []Count  `json:"contents"` // files by top folder: prompts, filters, knowledge…
 	// Prompts it replaces in a layer below, and its prompts a layer above
 	// replaces in turn; only for plugins that are switched on.
@@ -149,6 +150,21 @@ func (p *Plugins) List() (List, error) {
 	base := p.describe(layers.BasePlugin, "base", p.library.PluginDir(layers.BasePlugin))
 	base.Title, base.Enabled = "SkyrimNet’s defaults", true
 	out.Plugins = append(out.Plugins, base)
+	// A plugin folder the registry doesn't have yet: SkyrimNet adds it, at
+	// the bottom of its order, the next time it starts.
+	listed := map[string]bool{strings.ToLower(layers.BasePlugin): true}
+	for _, id := range reg.priority {
+		listed[strings.ToLower(id)] = true
+	}
+	for id := range reg.plugins {
+		listed[strings.ToLower(id)] = true
+	}
+	for _, id := range p.library.PluginIDs() {
+		if !listed[strings.ToLower(id)] {
+			pl := p.describe(id, "new", p.library.PluginDir(id))
+			out.Plugins = append(out.Plugins, pl)
+		}
+	}
 	for i := len(reg.priority) - 1; i >= 0; i-- {
 		id := reg.priority[i]
 		if id == layers.BasePlugin {
@@ -175,11 +191,15 @@ func (p *Plugins) describe(id, kind, dir string) Plugin {
 		return pl
 	}
 	pl.Found = true
-	if rel, err := filepath.Rel(p.store.Dir(), dir); err == nil && !strings.HasPrefix(rel, "..") {
-		pl.Folder = filepath.ToSlash(rel)
-	} else {
-		pl.Folder = dir
+	pl.Folder = dir
+	// Shown from the SkyrimNet folder, or under MO2 from the instance: mods/…
+	for _, base := range []string{p.store.Dir(), p.library.MO2Root()} {
+		if rel, err := filepath.Rel(base, dir); base != "" && err == nil && !strings.HasPrefix(rel, "..") {
+			pl.Folder = filepath.ToSlash(rel)
+			break
+		}
 	}
+	pl.External = strings.Contains(filepath.ToSlash(dir), "/external/")
 	if b, err := os.ReadFile(filepath.Join(dir, "manifest.json")); err == nil {
 		var mf manifest
 		if json.Unmarshal(b, &mf) == nil {
@@ -215,16 +235,23 @@ func (p *Plugins) describe(id, kind, dir string) Plugin {
 // replace a lower layer's and which a higher layer's replace.
 func (p *Plugins) overrides(list []Plugin) {
 	sets := make([]map[string]string, len(list)) // folded path → as spelled
+	dirs := make([]string, len(list))
+	for i, pl := range list {
+		switch pl.Kind {
+		case "overlay":
+			if lay := p.library.Layers(); len(lay) > 0 {
+				dirs[i] = lay[0].Root
+			}
+		default:
+			dirs[i] = p.library.PluginDir(pl.ID)
+		}
+	}
 	for i, pl := range list {
 		sets[i] = map[string]string{}
 		if !pl.Enabled || !pl.Found {
 			continue
 		}
-		root := filepath.Join(p.store.Dir(), filepath.FromSlash(pl.Folder))
-		if filepath.IsAbs(pl.Folder) {
-			root = pl.Folder
-		}
-		prompts := layers.Lookup(root, "prompts")
+		prompts := layers.Lookup(dirs[i], "prompts")
 		if prompts == "" {
 			continue
 		}

@@ -18,7 +18,7 @@ export interface Plugins {
  */
 export interface Plugin {
   id: string;
-  kind: string; // base, plugin, or overlay
+  kind: string; // base, plugin, new (found, not yet registered), or overlay
   title: string;
   tagline?: string;
   description?: string;
@@ -31,6 +31,7 @@ export interface Plugin {
   enabled: boolean;
   found: boolean; // its folder is in the SkyrimNet folder or SkyrimNet's mod folder
   folder?: string;
+  external: boolean; // in an external/ folder, as a mod's own plugin is
   contents: Count[]; // files by top folder: prompts, filters, knowledge…
   /**
    * Prompts it replaces in a layer below, and its prompts a layer above
