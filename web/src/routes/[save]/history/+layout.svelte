@@ -9,13 +9,14 @@
 	let tabs = $derived([
 		{ href: `${base}/events`, label: 'Events' },
 		{ href: `${base}/memories`, label: 'Memories' },
-		{ href: `${base}/diary`, label: 'Diary' }
+		{ href: `${base}/diary`, label: 'Diary' },
+		{ href: `${base}/knowledge`, label: 'Knowledge' }
 	]);
 </script>
 
 <header>
 	<h1 class="caps">History</h1>
-	<p class="muted">Everything SkyrimNet recorded in this playthrough, everyone's together.</p>
+	<p class="muted">Everything SkyrimNet recorded in this playthrough, everyone’s together, and the knowledge any NPC can draw on.</p>
 	<nav aria-label="History">
 		{#each tabs as tab (tab.href)}
 			<a class="caps" href={tab.href} aria-current={page.url.pathname === tab.href ? 'page' : undefined}>{tab.label}</a>

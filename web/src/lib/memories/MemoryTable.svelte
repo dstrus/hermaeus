@@ -419,7 +419,7 @@
 		align-self: start;
 		overflow: auto; /* fitToViewport sets its height */
 		padding: var(--space-5) var(--space-5) 0;
-		background: var(--pane);
+		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
 	}
 	.pane h2 {

@@ -95,6 +95,33 @@ export interface Count {
 }
 
 //////////
+// source: knowledge.go
+
+export interface Pack {
+  id: number /* int64 */;
+  name: string;
+  description: string;
+  version: string;
+  enabled: boolean;
+  source?: string; // the .sknpack file it was loaded from
+  entries: number /* int */;
+}
+export interface KnowledgeResponse {
+  packs: Pack[]; // by name
+  entries: Memory[]; // by title, with Pack set for those in a pack
+}
+export interface PackChanges {
+  enabled: boolean;
+}
+/**
+ * NewEntry is a world-knowledge entry to add, to a pack or to none.
+ */
+export interface NewEntry {
+  pack?: number /* int64 */;
+  changes: MemoryChanges;
+}
+
+//////////
 // source: memories.go
 /*
 Package memories is about what SkyrimNet remembers for each character:
@@ -125,6 +152,7 @@ export interface Memory {
    */
   actor?: string;
   actorUuid?: string;
+  pack?: number /* int64 */; // the knowledge pack it belongs to
 }
 export interface MemoriesResponse {
   memories: Memory[]; // newest first

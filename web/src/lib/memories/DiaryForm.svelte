@@ -100,7 +100,7 @@
 		display: flex;
 		gap: var(--space-2);
 		padding: var(--space-3) 0 var(--space-5);
-		background: var(--pane);
+		background: var(--panel);
 		border-top: 1px solid var(--rule);
 	}
 </style>

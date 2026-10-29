@@ -24,7 +24,6 @@
 	const sections = [
 		{ label: 'Characters', built: true },
 		{ label: 'History', built: true },
-		{ label: 'Knowledge' },
 		{ label: 'Screenshots' },
 		{ label: 'Bard songs' }
 	];

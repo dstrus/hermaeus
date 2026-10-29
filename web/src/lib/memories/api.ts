@@ -1,15 +1,5 @@
 import { playthroughPath, request } from '#lib/api/client.ts';
-import type {
-	BulkChanges,
-	Count,
-	DeleteDiary,
-	DeletedDiary,
-	DiaryChanges,
-	DiaryResponse,
-	MemoriesResponse,
-	MemoryChanges,
-	SaveResult
-} from '#lib/api/types/memories.ts';
+import type { BulkChanges, Count, DeleteDiary, DeletedDiary, DiaryChanges, DiaryResponse, KnowledgeResponse, MemoriesResponse, MemoryChanges, NewEntry, PackChanges, SaveResult } from '#lib/api/types/memories.ts';
 
 // What load functions depend on for memories and diary entries; invalidate
 // them after changing either.
@@ -86,4 +76,20 @@ export function getAllMemories(save: string, fetchFn?: typeof fetch): Promise<Me
 
 export function getAllDiary(save: string, fetchFn?: typeof fetch): Promise<DiaryResponse> {
 	return request<DiaryResponse>('GET', playthroughPath(save, 'diary'), undefined, fetchFn);
+}
+
+// World knowledge: packs and the entries any NPC can draw on.
+export const knowledgeDependency = 'app:knowledge';
+
+export function getKnowledge(save: string, fetchFn?: typeof fetch): Promise<KnowledgeResponse> {
+	return request<KnowledgeResponse>('GET', playthroughPath(save, 'knowledge'), undefined, fetchFn);
+}
+
+export function addKnowledge(save: string, entry: NewEntry): Promise<SaveResult> {
+	return request<SaveResult>('POST', playthroughPath(save, 'knowledge'), entry);
+}
+
+// setPackEnabled switches a pack on or off, and returns the knowledge as it is afterward.
+export function setPackEnabled(save: string, id: number, enabled: boolean): Promise<KnowledgeResponse> {
+	return request<KnowledgeResponse>('PUT', playthroughPath(save, 'knowledge', 'packs', String(id)), { enabled } satisfies PackChanges);
 }

@@ -37,6 +37,7 @@ type Memory struct {
 	// Whose it is, in a list across characters: their current identity.
 	Actor     string `json:"actor,omitempty"`
 	ActorUUID string `json:"actorUuid,omitempty"`
+	Pack      *int64 `json:"pack,omitempty"` // the knowledge pack it belongs to
 }
 
 type MemoriesResponse struct {
@@ -142,7 +143,7 @@ func listMemories(db store.DB, p *person, where string, args []any) (MemoriesRes
 			m.content, coalesce(m.location, ''), coalesce(m.emotion, ''), coalesce(m.importance_score, 0), m.tags,
 			coalesce(m.is_active, 1), coalesce(m.always_inject, 0), coalesce(m.condition_expr, ''),
 			m.game_time, m.creation_time,
-			exists (select 1 from memory_embeddings e where e.memory_id = m.id)
+			exists (select 1 from memory_embeddings e where e.memory_id = m.id), m.pack_id
 		from memories m
 		where `+where+`
 		order by m.id desc`, args...)
@@ -156,9 +157,13 @@ func listMemories(db store.DB, p *person, where string, args []any) (MemoriesRes
 		var tags sql.NullString
 		var gameTime sql.NullFloat64
 		var written any
+		var pack sql.NullInt64
 		if err := rows.Scan(&m.ID, &actor, &m.Type, &m.Title, &m.Content, &m.Location, &m.Emotion, &m.Importance, &tags,
-			&m.Active, &m.AlwaysInject, &m.Condition, &gameTime, &written, &m.Embedded); err != nil {
+			&m.Active, &m.AlwaysInject, &m.Condition, &gameTime, &written, &m.Embedded, &pack); err != nil {
 			return out, err
+		}
+		if pack.Valid {
+			m.Pack = &pack.Int64
 		}
 		m.Tags = parseTags(tags.String)
 		m.DiaryEntry = diaryEntryOf(m.Tags)

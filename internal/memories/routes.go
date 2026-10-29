@@ -16,6 +16,30 @@ func Routes(mux *http.ServeMux, st *store.Store) {
 	mux.Handle("GET "+base+"/memories", httpapi.JSON(func(r *http.Request, _ httpapi.None) (MemoriesResponse, error) {
 		return store.Read(st, r.PathValue("save"), All)
 	}))
+	mux.Handle("GET "+base+"/knowledge", httpapi.JSON(func(r *http.Request, _ httpapi.None) (KnowledgeResponse, error) {
+		return store.Read(st, r.PathValue("save"), Knowledge)
+	}))
+	mux.Handle("POST "+base+"/knowledge", httpapi.JSON(func(r *http.Request, e NewEntry) (SaveResult, error) {
+		return store.Write(st, r.PathValue("save"), "Added a world-knowledge entry", func(tx store.DB) (SaveResult, error) {
+			return AddKnowledge(tx, e)
+		})
+	}))
+	mux.Handle("PUT "+base+"/knowledge/packs/{id}", httpapi.JSON(func(r *http.Request, c PackChanges) (KnowledgeResponse, error) {
+		id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+		if err != nil {
+			return KnowledgeResponse{}, apperr.New(apperr.Invalid, "Invalid pack id %q", r.PathValue("id"))
+		}
+		what := "Switched off knowledge pack " + r.PathValue("id")
+		if c.Enabled {
+			what = "Switched on knowledge pack " + r.PathValue("id")
+		}
+		return store.Write(st, r.PathValue("save"), what, func(tx store.DB) (KnowledgeResponse, error) {
+			if err := SetPackEnabled(tx, id, c.Enabled); err != nil {
+				return KnowledgeResponse{}, err
+			}
+			return Knowledge(tx)
+		})
+	}))
 	mux.Handle("GET "+base+"/diary", httpapi.JSON(func(r *http.Request, _ httpapi.None) (DiaryResponse, error) {
 		return store.Read(st, r.PathValue("save"), AllDiary)
 	}))
