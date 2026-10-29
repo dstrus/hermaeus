@@ -240,7 +240,6 @@
 		text-transform: uppercase;
 		letter-spacing: var(--track);
 		color: var(--muted);
-		text-decoration: none;
 	}
 	.name.own {
 		color: var(--ink);
@@ -248,11 +247,16 @@
 	tr.bystander .name.own {
 		color: inherit;
 	}
+	/* A name that opens a character is underlined like any link here: in
+	   the hairline at rest, the accent under the pointer. */
+	a.name {
+		text-decoration: underline;
+		text-decoration-color: var(--rule-strong);
+		text-underline-offset: 0.25em;
+	}
 	a.name:hover {
 		color: var(--ink);
-		text-decoration: underline;
 		text-decoration-color: var(--accent);
-		text-underline-offset: 0.25em;
 	}
 	/* Two lines of the summary at most in the list; the pane has it all. */
 	.line {
