@@ -301,13 +301,15 @@
 	.flag::before {
 		content: '· ';
 	}
+	/* The pane is fitted to the window and scrolls on its own, so a form's
+	   Save stays at its bottom edge, above the hint bar. */
 	.pane {
 		position: sticky;
 		top: 0;
-		min-height: calc(100vh - 7rem);
 		padding: var(--space-5) var(--space-5) 0;
 		background: var(--panel);
 		border-left: 1px solid var(--rule-strong);
+		overflow: auto;
 	}
 	.pane h2 {
 		font-size: var(--step-2);
@@ -385,7 +387,6 @@
 		}
 		.pane {
 			position: static;
-			min-height: 0;
 			border-left: 0;
 			border-top: 1px solid var(--rule-strong);
 		}
