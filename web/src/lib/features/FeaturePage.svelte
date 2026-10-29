@@ -119,7 +119,7 @@
 		{:else if changed}
 			<span class="changed">{count(changed)} changed from the defaults</span>
 		{:else}
-			As SkyrimNet ships it
+			Nothing differs from the defaults
 		{/if}
 	</span>
 </div>

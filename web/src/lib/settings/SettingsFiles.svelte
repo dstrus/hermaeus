@@ -81,7 +81,7 @@
 	<nav class="pages" aria-label="Pages of their own">
 		<span class="caps group">Pages</span>
 		{#each pages as f (f.file.name)}
-			<a href="/{encodeURIComponent(save)}/{f.file.page}">{f.file.pageLabel}{#if f.file.changed}<span class="changed n"> {count(f.file.changed)}</span>{/if}</a>
+			<a href="/{encodeURIComponent(save)}/{f.file.page}">{f.file.pageLabel}{#if f.file.changed}<span class="badge" title="{count(f.file.changed)} changed from the defaults">{count(f.file.changed)}</span>{/if}</a>
 		{/each}
 		<span class="muted small">Each shows one file in its feature’s own terms; the files below are shown as written.</span>
 	</nav>
@@ -260,6 +260,20 @@
 	}
 	.pages a:hover {
 		text-decoration: underline;
+	}
+	/* How many of the page's settings were changed by you: a count set
+	   apart from the name, in the copper of changed things. */
+	.badge {
+		display: inline-block;
+		margin-left: var(--space-2);
+		padding: 0 0.45em;
+		font-size: var(--step--2);
+		font-variant-numeric: tabular-nums;
+		line-height: 1.6;
+		color: var(--changed);
+		background: color-mix(in srgb, var(--changed) 14%, transparent);
+		border-radius: var(--radius);
+		vertical-align: 0.1em;
 	}
 	.pages .small {
 		flex-basis: 100%;
