@@ -56,7 +56,7 @@
 		{#if milestones.length}
 			<ol class="timeline">
 				{#each milestones as group (group.items[0]?.eventId)}
-					<li class="day caps">{group.day}</li>
+					<li class="day caps sticky-day">{group.day}</li>
 					{#each group.items as m (m.eventId)}
 						<li class="event"><Diamond /><span class="muted">{timeLabel(m)}</span><span class="summary" title={m.summary}>{m.summary}</span></li>
 					{/each}

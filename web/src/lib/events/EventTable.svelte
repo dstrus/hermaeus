@@ -99,7 +99,7 @@
 				<tbody>
 					{#each shown as e, i (e.id)}
 						{#if dayLabel(e) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
-							<tr class="day"><th colspan="4" scope="rowgroup" class="caps">{dayLabel(e)}</th></tr>
+							<tr class="day"><th colspan="4" scope="rowgroup" class="caps sticky-day">{dayLabel(e)}</th></tr>
 						{/if}
 						<tr aria-selected={selection.is(e)} onclick={() => selection.select(e)}>
 							<td class="mark">{#if selection.is(e)}<Diamond />{/if}</td>

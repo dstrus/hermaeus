@@ -238,6 +238,16 @@ input[type='radio'] {
 	color: var(--danger);
 }
 
+/* A day's heading in a list of dated records stays at the top of the window
+   while its day scrolls past, on the pane's opaque material so rows pass
+   beneath it. */
+.sticky-day {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: var(--panel);
+}
+
 /* The tip beneath text cut short with an ellipsis (see clipped.ts): the
    pane's material, lifted a little, never in the way of the pointer. */
 .tip {

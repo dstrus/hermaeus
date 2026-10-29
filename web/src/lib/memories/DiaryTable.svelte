@@ -116,7 +116,7 @@
 				<tbody>
 					{#each shown as d, i (d.id)}
 						{#if byDay && dayLabel(d) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
-							<tr class="day"><th colspan="5" scope="rowgroup" class="caps">{dayLabel(d)}</th></tr>
+							<tr class="day"><th colspan="5" scope="rowgroup" class="caps sticky-day">{dayLabel(d)}</th></tr>
 						{/if}
 						<tr aria-selected={selection.is(d)} onclick={() => mode === 'view' && selection.select(d)}>
 							<td class="mark">{#if selection.is(d)}<Diamond />{/if}</td>
