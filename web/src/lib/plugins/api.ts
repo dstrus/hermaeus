@@ -27,7 +27,8 @@ export function contentsLine(p: Plugin): string {
 	return p.contents
 		.map((c) => {
 			const name = c.folder.replace(/_/g, ' ');
-			return `${c.files} ${c.files === 1 && name.endsWith('s') ? name.slice(0, -1) : name}`;
+			if (c.files !== 1) return `${c.files} ${name}`;
+			return `1 ${name.endsWith('ies') ? `${name.slice(0, -3)}y` : name.endsWith('s') ? name.slice(0, -1) : name}`;
 		})
 		.join(' · ');
 }

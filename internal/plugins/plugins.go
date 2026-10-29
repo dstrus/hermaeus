@@ -46,8 +46,9 @@ type Plugin struct {
 	Enabled     bool     `json:"enabled"`
 	Found       bool     `json:"found"` // its folder is in the SkyrimNet folder or SkyrimNet's mod folder
 	Folder      string   `json:"folder,omitempty"`
-	External    bool     `json:"external"` // in an external/ folder, as a mod's own plugin is
-	Contents    []Count  `json:"contents"` // files by top folder: prompts, filters, knowledge…
+	External    bool     `json:"external"`         // in an external/ folder, as a mod's own plugin is
+	ModOff      string   `json:"modOff,omitempty"` // the MO2 mod holding it, switched off in the profile, when it isn't found for that reason
+	Contents    []Count  `json:"contents"`         // files by top folder: prompts, filters, knowledge…
 	// Prompts it replaces in a layer below, and its prompts a layer above
 	// replaces in turn; only for plugins that are switched on.
 	Replaces []string `json:"replaces"`
@@ -188,6 +189,7 @@ func (p *Plugins) List() (List, error) {
 func (p *Plugins) describe(id, kind, dir string) Plugin {
 	pl := Plugin{ID: id, Kind: kind, Title: id, Tags: []string{}, Contents: []Count{}, Replaces: []string{}, Replaced: []string{}}
 	if dir == "" {
+		pl.ModOff = p.library.SwitchedOffMod(id)
 		return pl
 	}
 	pl.Found = true

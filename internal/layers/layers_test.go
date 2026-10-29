@@ -129,4 +129,16 @@ func TestPluginsInOtherMods(t *testing.T) {
 	if mod, detected := l.ModDir(); !detected || filepath.Base(filepath.Dir(filepath.Dir(filepath.Dir(mod)))) != "[NoDelete] SkyrimNet Beta28" {
 		t.Errorf("mod dir = %q, %v", mod, detected)
 	}
+	if got := l.SwitchedOffMod("a.off"); got != " Switched Off" {
+		t.Errorf("a.off's switched-off mod = %q", got)
+	}
+	if got := l.SwitchedOffMod("a.sever"); got != "" {
+		t.Errorf("a.sever's mod is on, but got %q", got)
+	}
+
+	// A profile from another layout, naming none of these mods, is ignored.
+	writeFile(t, filepath.Join(root, "profiles", "Default", "modlist.txt"), "+Something Else\r\n-Another\r\n")
+	if l.PluginDir("a.off") == "" || l.PluginDir("a.sever") == "" || !l.HasDefaults() {
+		t.Error("a profile naming none of the mods hid them")
+	}
 }

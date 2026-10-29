@@ -195,8 +195,31 @@ func mo2Root(skyrimNetDir string) string {
 }
 
 // mo2Mods lists an MO2 instance's mods, by folder name: those the selected
-// profile switches on, when the profile can be read, or else every mod.
+// profile switches on, when the profile can be read, or else every mod. A
+// profile that names none of the mods on disk belongs to another layout, so
+// it's ignored rather than hiding everything.
 func mo2Mods(root string) []string {
+	all := mo2AllMods(root)
+	on, ok := mo2Enabled(root)
+	if !ok {
+		return all
+	}
+	var out []string
+	named := false
+	for _, m := range all {
+		_, listed := on[strings.ToLower(m)]
+		named = named || listed
+		if on[strings.ToLower(m)] {
+			out = append(out, m)
+		}
+	}
+	if !named {
+		return all
+	}
+	return out
+}
+
+func mo2AllMods(root string) []string {
 	entries, _ := os.ReadDir(filepath.Join(root, "mods"))
 	var all []string
 	for _, e := range entries {
@@ -204,21 +227,35 @@ func mo2Mods(root string) []string {
 			all = append(all, e.Name())
 		}
 	}
-	on, ok := mo2Enabled(root)
-	if !ok {
-		return all
-	}
-	var out []string
-	for _, m := range all {
-		if on[m] {
-			out = append(out, m)
-		}
-	}
-	return out
+	return all
 }
 
-// mo2Enabled reads the selected profile's modlist.txt, where "+Name" is a
-// mod switched on. ok is false when there's no profile to read.
+// SwitchedOffMod names the MO2 mod holding a plugin when the profile has
+// that mod switched off, so SkyrimNet can't see the plugin; "" otherwise.
+func (l *Library) SwitchedOffMod(id string) string {
+	root := l.MO2Root()
+	if root == "" {
+		return ""
+	}
+	on := map[string]bool{}
+	for _, m := range mo2Mods(root) {
+		on[m] = true
+	}
+	for _, m := range mo2AllMods(root) {
+		if on[m] {
+			continue
+		}
+		for _, kind := range []string{"library", "external"} {
+			if install.IsDir(filepath.Join(root, "mods", m, "SKSE", "Plugins", "SkyrimNet", kind, id)) {
+				return m
+			}
+		}
+	}
+	return ""
+}
+
+// mo2Enabled reads the selected profile's modlist.txt. ok is false when
+// there's no profile to read.
 func mo2Enabled(root string) (on map[string]bool, ok bool) {
 	profile := ""
 	if b, err := os.ReadFile(filepath.Join(root, "ModOrganizer.ini")); err == nil {
@@ -236,10 +273,15 @@ func mo2Enabled(root string) (on map[string]bool, ok bool) {
 	if err != nil {
 		return nil, false
 	}
+	// Listed mods by folder name, folded as Windows compares them: true for
+	// "+Name", switched on, and false for "-Name", switched off.
 	on = map[string]bool{}
 	for _, line := range strings.Split(strings.ReplaceAll(string(b), "\r\n", "\n"), "\n") {
+		line = strings.TrimRight(line, "\r")
 		if name, found := strings.CutPrefix(line, "+"); found {
-			on[strings.TrimRight(name, "\r")] = true
+			on[strings.ToLower(name)] = true
+		} else if name, found := strings.CutPrefix(line, "-"); found {
+			on[strings.ToLower(name)] = false
 		}
 	}
 	return on, true

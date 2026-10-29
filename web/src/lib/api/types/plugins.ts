@@ -32,6 +32,7 @@ export interface Plugin {
   found: boolean; // its folder is in the SkyrimNet folder or SkyrimNet's mod folder
   folder?: string;
   external: boolean; // in an external/ folder, as a mod's own plugin is
+  modOff?: string; // the MO2 mod holding it, switched off in the profile, when it isn't found for that reason
   contents: Count[]; // files by top folder: prompts, filters, knowledge…
   /**
    * Prompts it replaces in a layer below, and its prompts a layer above

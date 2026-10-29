@@ -116,7 +116,7 @@
 							{#if p.kind === 'plugin' && p.replaced.length}<span class="flag">some replaced</span>{/if}
 						</td>
 						<td class="version muted">{p.version}</td>
-						<td class="holds muted" use:clipped>{p.found ? contentsLine(p) || 'Nothing' : 'In another mod’s folder'}</td>
+						<td class="holds muted" use:clipped>{p.found ? contentsLine(p) || 'Nothing' : p.modOff ? 'Its mod is switched off' : 'Not found'}</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -148,7 +148,13 @@
 					<dl>
 						{#if !p.found}
 							<dt class="caps">Files</dt>
-							<dd>In another mod’s folder, which Hermaeus can’t see under Mod Organizer 2. Its order and switch still work here.</dd>
+							<dd>
+								{#if p.modOff}
+									Its mod, <span class="id">{p.modOff}</span>, is switched off in Mod Organizer’s profile, so SkyrimNet can’t see it either. Its order and switch here still apply when the mod is on again.
+								{:else}
+									Not in the SkyrimNet folder or any mod Hermaeus can see. Its order and switch still work here.
+								{/if}
+							</dd>
 						{:else}
 							<dt class="caps">Holds</dt>
 							<dd>{contentsLine(p) || 'Nothing'}</dd>
