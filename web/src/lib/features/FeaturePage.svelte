@@ -2,7 +2,7 @@
      what it does, and an editor on request. Each change saves at once,
      with a backup; the selected setting and the editor are in the address. -->
 <script lang="ts">
-	import { goto, invalidate } from '$app/navigation';
+	import { invalidate } from '$app/navigation';
 	import { tick } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { ApiError } from '#lib/api/client.ts';
@@ -17,7 +17,6 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
-	import Up from '#lib/ui/Up.svelte';
 	import { codeOf, keyName, mouseCodeOf, noKey } from '#lib/settings/keys.ts';
 	import { draftOf, parse, pickedOf, setValue, show, valueOf, type Feature, type Field } from './schema.ts';
 
@@ -124,7 +123,6 @@
 		apply({ key: current.field.key, reset: true }, `${current.field.label} is back to its default.`);
 	}
 
-	let list = $derived(settingsHref(save));
 
 	useShortcuts(() => {
 		const busy = editing || listForm;
@@ -134,12 +132,11 @@
 			{ key: 'e', shown: 'E', label: current?.field.kind === 'switch' ? (value === true ? 'Switch off' : 'Switch on') : 'Edit', hidden: busy, disabled: !can || !current, run: startEdit },
 			{ key: 'r', shown: 'R', label: 'Reset to default', hidden: busy, disabled: !can || !resettable, run: reset },
 			{ key: 'Enter', label: 'Save', command: true, hidden: !busy, disabled: saving, run: () => document.querySelector<HTMLFormElement>(listForm ? '.listform' : '.pane form')?.requestSubmit() },
-			{ key: 'Escape', shown: 'Esc', label: busy ? 'Cancel' : 'Settings', run: () => (busy ? leave('mode') : goto(list)) }
+			...(busy ? [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => leave('mode') }] : [])
 		];
 	});
 </script>
 
-<Up href={list} label="Settings" />
 <div class="bar">
 	<h1 class="caps">{feature.title}</h1>
 	<span class="muted n">

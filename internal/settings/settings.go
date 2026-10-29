@@ -90,9 +90,9 @@ type OwnPage struct {
 }
 
 var ownPages = []OwnPage{
-	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "translator"},
-	{Name: "OpenRouter", Label: "Models", Page: "models"},
-	{Name: "Providers", Label: "Providers", Page: "providers"},
+	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "settings/translator"},
+	{Name: "OpenRouter", Label: "Models", Page: "settings/models"},
+	{Name: "Providers", Label: "Providers", Page: "settings/providers"},
 	{Name: "Memory", Label: "Memories", Page: "settings/memories"},
 	{Name: "MemoryFilter", Label: "Memory filter", Page: "settings/memory-filter"},
 	{Name: "Diary", Label: "Diaries", Page: "settings/diaries"},

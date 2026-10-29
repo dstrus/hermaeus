@@ -36,8 +36,9 @@ export function setFilePinned(name: string, pinned: boolean): Promise<PinsRespon
 // The page listing everything the player changed, across files.
 export const changedPage = 'changed';
 
+// settingsHref is the Other page's list of settings files, or one file.
 export function settingsHref(save: string, name?: string): string {
-	const base = `/${encodeURIComponent(save)}/settings`;
+	const base = `/${encodeURIComponent(save)}/settings/other`;
 	return name ? `${base}/${encodeURIComponent(name)}` : base;
 }
 

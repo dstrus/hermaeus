@@ -14,7 +14,7 @@ export function saveTask(id: string, edit: TaskEdit): Promise<Models> {
 }
 
 export function modelsHref(save: string, task?: string): string {
-	const base = `/${encodeURIComponent(save)}/models`;
+	const base = `/${encodeURIComponent(save)}/settings/models`;
 	return task ? `${base}?item=${encodeURIComponent(task)}` : base;
 }
 

@@ -22,7 +22,7 @@ export function importRules(imp: Import): Promise<ImportResult> {
 }
 
 export function translatorHref(save: string): string {
-	return `/${encodeURIComponent(save)}/translator`;
+	return `/${encodeURIComponent(save)}/settings/translator`;
 }
 
 // Where the model that rewrites the lines is chosen: the translator's task

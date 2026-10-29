@@ -26,7 +26,7 @@ export function setKey(id: string, edit: KeyEdit): Promise<ProvidersResponse> {
 }
 
 export function providersHref(save: string, id?: string): string {
-	const base = `/${encodeURIComponent(save)}/providers`;
+	const base = `/${encodeURIComponent(save)}/settings/providers`;
 	return id ? `${base}?item=${encodeURIComponent(id)}` : base;
 }
 

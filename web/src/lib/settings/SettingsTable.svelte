@@ -290,11 +290,11 @@
 		{ key: 'e', shown: 'E', label: 'Edit', hidden: editing, disabled: !editableNow, run: startEdit },
 		{ key: 'r', shown: 'R', label: 'Reset to default', hidden: editing, disabled: !resettable, run: reset },
 		{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: submit },
-		{ key: 'Escape', shown: 'Esc', label: editing ? 'Cancel' : 'Settings', run: () => (editing ? leave('mode') : goto(list)) }
+		{ key: 'Escape', shown: 'Esc', label: editing ? 'Cancel' : 'Other settings', run: () => (editing ? leave('mode') : goto(list)) }
 	]);
 </script>
 
-<Up href={list} label="Settings" />
+<Up href={list} label="Other settings" />
 <div class="bar">
 	<h1 class="caps">{title}</h1>
 	{#if file}

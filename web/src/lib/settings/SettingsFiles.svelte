@@ -16,8 +16,7 @@
 
 	let { save, files: all }: { save: string; files: FileValues[] } = $props(); // pinned files first, in the order they were pinned, then by name
 
-	// Files with a page of their own are offered as pages; the rest are listed.
-	let pages = $derived(all.filter((f) => f.file.page));
+	// Files with a page of their own are on that page; the rest are listed here.
 	let files = $derived(all.filter((f) => !f.file.page));
 
 	let query = $state('');
@@ -66,7 +65,7 @@
 </script>
 
 <div class="bar">
-	<h1 class="caps">Settings</h1>
+	<h1 class="caps">Other settings</h1>
 	{#if changed}
 		<a class="changed n" href={settingsHref(save, changedPage)}>{count(changed)} changed from the defaults</a>
 	{:else}
@@ -76,16 +75,7 @@
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
-{#if pages.length}
-	<!-- Files with a page of their own, in the feature's terms, come first. -->
-	<nav class="pages" aria-label="Pages of their own">
-		<span class="caps group">Pages</span>
-		{#each pages as f (f.file.name)}
-			<a href="/{encodeURIComponent(save)}/{f.file.page}">{f.file.pageLabel}{#if f.file.changed}<span class="badge" title="{count(f.file.changed)} changed from the defaults">{count(f.file.changed)}</span>{/if}</a>
-		{/each}
-		<span class="muted small">Each shows one file in its feature’s own terms; the files below are shown as written.</span>
-	</nav>
-{/if}
+<p class="muted lead">Every settings file without a page of its own, as SkyrimNet writes it.</p>
 {#if !files.length}
 	<p class="muted">No settings files were found in SkyrimNet’s config folder.</p>
 {:else if !shown.length}
@@ -244,41 +234,8 @@
 	.actions a {
 		text-decoration: none;
 	}
-	.pages {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		gap: var(--space-2) var(--space-5);
-		margin-bottom: var(--space-5);
-	}
-	.pages .group {
-		font-size: var(--step--1);
-		color: var(--accent);
-	}
-	.pages a {
-		text-decoration: none;
-	}
-	.pages a:hover {
-		text-decoration: underline;
-	}
 	/* How many of the page's settings were changed by you: a count set
 	   apart from the name, in the copper of changed things. */
-	.badge {
-		display: inline-block;
-		margin-left: var(--space-2);
-		padding: 0 0.45em;
-		font-size: var(--step--2);
-		font-variant-numeric: tabular-nums;
-		line-height: 1.6;
-		color: var(--changed);
-		background: color-mix(in srgb, var(--changed) 14%, transparent);
-		border-radius: var(--radius);
-		vertical-align: 0.1em;
-	}
-	.pages .small {
-		flex-basis: 100%;
-		font-size: var(--step--1);
-	}
 	.group th {
 		padding: var(--space-5) var(--space-3) var(--space-1);
 		text-align: left;
