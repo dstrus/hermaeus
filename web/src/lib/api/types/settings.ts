@@ -196,6 +196,13 @@ export interface File {
   settings: number /* int */;
   changed: number /* int */; // settings that differ from their defaults
   pinned: boolean; // kept at the top of the Settings page
+  /**
+   * A file with a page of its own, in its feature's terms: the page's path
+   * under the playthrough, and its name. The Settings page lists the page
+   * in place of the file.
+   */
+  page?: string;
+  pageLabel?: string;
 }
 /**
  * Setting is one value in a file, named by its dotted key.
@@ -227,17 +234,15 @@ export interface FileValues {
 }
 export interface FileList {
   files: FileValues[];
-  elsewhere: OwnPage[]; // files the list leaves out, each for a page of its own
 }
 /**
  * OwnPage is a settings file that Hermaeus shows on a page of its own, in
- * the feature's own terms, so the Settings page doesn't list it. The file
- * can still be read and saved by name.
+ * the feature's own terms. The file can still be read and saved by name.
  */
 export interface OwnPage {
-  name: string; // the file's name, as in File
-  label: string; // the page's name
-  page: string; // the page's path under the playthrough
+  Name: string; // the file's name, as in File
+  Label: string; // the page's name
+  Page: string; // the page's path under the playthrough
 }
 
 //////////

@@ -45,6 +45,11 @@ type File struct {
 	Settings    int    `json:"settings"`
 	Changed     int    `json:"changed"` // settings that differ from their defaults
 	Pinned      bool   `json:"pinned"`  // kept at the top of the Settings page
+	// A file with a page of its own, in its feature's terms: the page's path
+	// under the playthrough, and its name. The Settings page lists the page
+	// in place of the file.
+	Page      string `json:"page,omitempty"`
+	PageLabel string `json:"pageLabel,omitempty"`
 }
 
 // Setting is one value in a file, named by its dotted key.
@@ -73,32 +78,31 @@ type FileValues struct {
 }
 
 type FileList struct {
-	Files     []FileValues `json:"files"`
-	Elsewhere []OwnPage    `json:"elsewhere"` // files the list leaves out, each for a page of its own
+	Files []FileValues `json:"files"`
 }
 
 // OwnPage is a settings file that Hermaeus shows on a page of its own, in
-// the feature's own terms, so the Settings page doesn't list it. The file
-// can still be read and saved by name.
+// the feature's own terms. The file can still be read and saved by name.
 type OwnPage struct {
-	Name  string `json:"name"`  // the file's name, as in File
-	Label string `json:"label"` // the page's name
-	Page  string `json:"page"`  // the page's path under the playthrough
+	Name  string // the file's name, as in File
+	Label string // the page's name
+	Page  string // the page's path under the playthrough
 }
 
 var ownPages = []OwnPage{
 	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "translator"},
 	{Name: "OpenRouter", Label: "Models", Page: "models"},
 	{Name: "Providers", Label: "Providers", Page: "providers"},
+	{Name: "Memory", Label: "Memories", Page: "settings/memories"},
 }
 
-func hasOwnPage(name string) bool {
+// withPage notes the page a file has of its own, if any.
+func withPage(f *File) {
 	for _, p := range ownPages {
-		if strings.EqualFold(p.Name, name) {
-			return true
+		if strings.EqualFold(p.Name, f.Name) {
+			f.Page, f.PageLabel = p.Page, p.Label
 		}
 	}
-	return false
 }
 
 func (s *Settings) configDir() (string, error) {
@@ -197,18 +201,15 @@ func names(configDir string, defs defaults) []string {
 	return out
 }
 
-// List reads every settings file, except those with a page of their own.
+// List reads every settings file.
 func (s *Settings) List() (FileList, error) {
 	dir, err := s.configDir()
 	if err != nil {
 		return FileList{}, err
 	}
 	defs := loadDefaults(dir)
-	out := FileList{Files: []FileValues{}, Elsewhere: ownPages}
+	out := FileList{Files: []FileValues{}}
 	for _, name := range names(dir, defs) {
-		if hasOwnPage(name) {
-			continue
-		}
 		f, err := read(dir, name, defs)
 		if err != nil {
 			return FileList{}, err
@@ -242,6 +243,7 @@ func read(configDir, name string, defs defaults) (FileValues, error) {
 	path := filePath(configDir, name)
 	rel, _ := filepath.Rel(filepath.Dir(configDir), path)
 	f := FileValues{File: File{Name: name, Path: filepath.ToSlash(rel)}, Values: []Setting{}}
+	withPage(&f.File)
 	fileDefs, hasDefs := defs.of(name)
 	f.File.HasDefaults = hasDefs
 

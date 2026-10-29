@@ -82,16 +82,17 @@ func TestComparedWithDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// A file with a page of its own says so, as listed and as read by name.
 	for _, f := range list.Files {
-		if f.File.Name == "UniversalTranslator" {
-			t.Errorf("a file with a page of its own is listed: %+v", f.File)
+		if f.File.Name == "UniversalTranslator" && (f.File.Page != "translator" || f.File.PageLabel != "Universal Translator") {
+			t.Errorf("the translator's page = %+v", f.File)
+		}
+		if f.File.Name == "Memory" && f.File.Page != "settings/memories" {
+			t.Errorf("Memory's page = %+v", f.File)
 		}
 	}
-	if len(list.Elsewhere) == 0 || list.Elsewhere[0].Page != "translator" {
-		t.Errorf("elsewhere = %+v", list.Elsewhere)
-	}
-	if f, err := h.settings.Read("UniversalTranslator"); err != nil || !f.File.Exists {
-		t.Errorf("read by name anyway: %+v, %v", f.File, err)
+	if f, err := h.settings.Read("UniversalTranslator"); err != nil || !f.File.Exists || f.File.Page != "translator" {
+		t.Errorf("read by name: %+v, %v", f.File, err)
 	}
 	// OpenRouter.yaml and Providers.yaml have pages of their own, so their
 	// secrets are checked as read by name.

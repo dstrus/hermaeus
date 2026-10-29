@@ -4,7 +4,7 @@
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
-	import type { FileValues, OwnPage } from '#lib/api/types/settings.ts';
+	import type { FileValues } from '#lib/api/types/settings.ts';
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import PinButton from '#lib/ui/PinButton.svelte';
@@ -14,15 +14,11 @@
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
 	import { changedPage, fileLabel, setFilePinned, settingsDependency, settingsHref } from './api.ts';
 
-	let {
-		save,
-		files,
-		elsewhere = []
-	}: {
-		save: string;
-		files: FileValues[]; // pinned files first, in the order they were pinned, then by name
-		elsewhere?: OwnPage[]; // files with a page of their own, not listed here
-	} = $props();
+	let { save, files: all }: { save: string; files: FileValues[] } = $props(); // pinned files first, in the order they were pinned, then by name
+
+	// Files with a page of their own are offered as pages; the rest are listed.
+	let pages = $derived(all.filter((f) => f.file.page));
+	let files = $derived(all.filter((f) => !f.file.page));
 
 	let query = $state('');
 	let sort = $state<Sort>({ key: 'group', descending: false });
@@ -80,6 +76,16 @@
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
+{#if pages.length}
+	<!-- Files with a page of their own, in the feature's terms, come first. -->
+	<nav class="pages" aria-label="Pages of their own">
+		<span class="caps group">Pages</span>
+		{#each pages as f (f.file.name)}
+			<a href="/{encodeURIComponent(save)}/{f.file.page}">{f.file.pageLabel}{#if f.file.changed}<span class="changed n"> {count(f.file.changed)}</span>{/if}</a>
+		{/each}
+		<span class="muted small">Each shows one file in its feature’s own terms; the files below are shown as written.</span>
+	</nav>
+{/if}
 {#if !files.length}
 	<p class="muted">No settings files were found in SkyrimNet’s config folder.</p>
 {:else if !shown.length}
@@ -135,12 +141,6 @@
 			{/if}
 		</aside>
 	</div>
-{/if}
-{#if elsewhere.length}
-	<p class="muted elsewhere">
-		{#each elsewhere as e, i (e.name)}{i ? (i === elsewhere.length - 1 ? ', and ' : ', ') : ''}<a href="/{encodeURIComponent(save)}/{e.page}">{e.label}</a>{/each}
-		{elsewhere.length === 1 ? 'has a page of its own.' : 'have pages of their own.'}
-	</p>
 {/if}
 
 <style>
@@ -244,8 +244,25 @@
 	.actions a {
 		text-decoration: none;
 	}
-	.elsewhere {
-		margin-top: var(--space-4);
+	.pages {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--space-2) var(--space-5);
+		margin-bottom: var(--space-5);
+	}
+	.pages .group {
+		font-size: var(--step--1);
+		color: var(--accent);
+	}
+	.pages a {
+		text-decoration: none;
+	}
+	.pages a:hover {
+		text-decoration: underline;
+	}
+	.pages .small {
+		flex-basis: 100%;
 		font-size: var(--step--1);
 	}
 	.group th {
