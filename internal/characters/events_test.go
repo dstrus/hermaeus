@@ -48,4 +48,16 @@ func TestEventsOfACharacter(t *testing.T) {
 	if len(r.Types) != 4 || r.Types[0].Count != 1 || r.Types[0].Type != "book_read" {
 		t.Errorf("types = %+v", r.Types)
 	}
+	if r.Events[2].From != "Serana" || r.Events[2].FromUUID != s || r.Events[1].To != "Serana" {
+		t.Errorf("from and to = %+v / %+v", r.Events[2], r.Events[1])
+	}
+
+	// Everyone's events: Aya's too, with no part for anyone.
+	all, err := store.Read(st, testenv.SaveID, AllEvents)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(all.Events) != 5 || all.Events[0].Summary != "Aya: “Not hers.”" || all.Events[0].Role != "" {
+		t.Errorf("everyone's events = %+v", all.Events)
+	}
 }

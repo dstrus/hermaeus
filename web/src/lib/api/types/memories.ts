@@ -15,6 +15,11 @@ export interface DiaryEntry {
   retired?: string; // stored under a retired identity with this name ("" if unnamed)
   date?: calendar.GameDate;
   written?: number /* int64 */; // when SkyrimNet wrote it, Unix ms
+  /**
+   * Whose it is, in a list across characters: their current identity.
+   */
+  actor?: string;
+  actorUuid?: string;
 }
 export interface DiaryResponse {
   entries: DiaryEntry[]; // newest first
@@ -115,6 +120,11 @@ export interface Memory {
   retired?: string; // stored under a retired identity with this name ("" if unnamed)
   date?: calendar.GameDate;
   written?: number /* int64 */; // when SkyrimNet wrote it, Unix ms
+  /**
+   * Whose it is, in a list across characters: their current identity.
+   */
+  actor?: string;
+  actorUuid?: string;
 }
 export interface MemoriesResponse {
   memories: Memory[]; // newest first

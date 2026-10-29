@@ -15,7 +15,24 @@
 	import { dayLabel, timeLabel } from './dates.ts';
 	import DiaryForm from './DiaryForm.svelte';
 
-	let { save, uuid, name, entries }: { save: string; uuid: string; name: string; entries: DiaryEntry[] } = $props(); // newest first
+	import type { Character } from '#lib/api/types/characters.ts';
+	import { characterName } from '#lib/characters/api.ts';
+
+	let {
+		save,
+		uuid,
+		name = '',
+		entries,
+		characters = []
+	}: {
+		save: string;
+		uuid?: string; // whose diary this is; everyone's when left out
+		name?: string;
+		entries: DiaryEntry[]; // newest first
+		characters?: Character[]; // for narrowing everyone's to one character's
+	} = $props();
+	let actor = $state('');
+	const owner = (d: DiaryEntry) => (d.actorUuid ? `/${encodeURIComponent(save)}/npc/${d.actorUuid}/diary` : undefined);
 
 	let readOnly = $derived(live.gameRunning);
 	let query = $state('');
@@ -23,8 +40,10 @@
 
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
-		const list = entries.filter((d) => !q || [d.content, d.location, d.emotion, ...d.tags].some((v) => v.toLowerCase().includes(q)));
-		return sorted(list, sort, { when: (d) => d.id, mood: (d) => d.emotion || '￿', importance: (d) => d.importance });
+		const list = entries.filter(
+			(d) => (!actor || d.actorUuid === actor) && (!q || [d.content, d.location, d.emotion, ...d.tags].some((v) => v.toLowerCase().includes(q)))
+		);
+		return sorted(list, sort, { when: (d) => d.id, who: (d) => d.actor || '￿', mood: (d) => d.emotion || '￿', importance: (d) => d.importance });
 	});
 	let byDay = $derived(sort.key === 'when');
 
@@ -54,7 +73,8 @@
 	async function saveForm(changes: DiaryChanges) {
 		const editing = mode === 'edit' ? current : undefined;
 		await run(async () => {
-			const r = editing ? await updateDiary(save, editing.id, changes) : await addDiaryEntry(save, uuid, changes);
+			if (!editing && !uuid) throw new Error('A new entry is added from its character’s page.');
+			const r = editing ? await updateDiary(save, editing.id, changes) : await addDiaryEntry(save, uuid!, changes);
 			if (!editing) selection.key = String(r.id);
 			return savedNote(r, editing ? 'Diary entry' : 'New diary entry');
 		}, !editing);
@@ -75,7 +95,7 @@
 			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
 			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => (mode = 'edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing, disabled: !can, run: () => (mode = 'new') },
+			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => (mode = 'new') },
 			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !current, run: () => ((keepMemory = false), (mode = 'delete')) }),
 			{
 				key: 'Enter',
@@ -92,11 +112,19 @@
 
 <div class="tools">
 	<input type="search" bind:value={query} placeholder="Search the diary" aria-label="Search the diary" />
+	{#if !uuid}
+		<select bind:value={actor} aria-label="Character">
+			<option value="">Everyone</option>
+			{#each characters as c (c.uuid)}
+				<option value={c.uuid}>{characterName(c)}</option>
+			{/each}
+		</select>
+	{/if}
 </div>
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
-<div class="split">
+<div class="split" class:everyone={!uuid}>
 	<div class="list">
 		{#if !entries.length}
 			<p class="muted">No diary entries yet.</p>
@@ -108,6 +136,7 @@
 					<tr>
 						<th class="mark" aria-label="Selected"></th>
 						<SortHeader label="When" key="when" bind:sort descendingFirst />
+						{#if !uuid}<SortHeader label="Who" key="who" bind:sort />{/if}
 						<th class="caps text">Entry</th>
 						<SortHeader label="Mood" key="mood" bind:sort class="wide" />
 						<SortHeader label="Imp." key="importance" bind:sort descendingFirst align="end" class="wide" />
@@ -116,11 +145,14 @@
 				<tbody>
 					{#each shown as d, i (d.id)}
 						{#if byDay && dayLabel(d) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
-							<tr class="day"><th colspan="5" scope="rowgroup" class="caps sticky-day">{dayLabel(d)}</th></tr>
+							<tr class="day"><th colspan={uuid ? 5 : 6} scope="rowgroup" class="caps sticky-day">{dayLabel(d)}</th></tr>
 						{/if}
 						<tr aria-selected={selection.is(d)} onclick={() => mode === 'view' && selection.select(d)}>
 							<td class="mark">{#if selection.is(d)}<Diamond />{/if}</td>
 							<td class="when">{timeLabel(d)}{#if !byDay}<span class="muted"> · {dayLabel(d)}</span>{/if}</td>
+							{#if !uuid}
+								<td class="who">{#if owner(d)}<a href={owner(d)}>{d.actor || 'Unnamed'}</a>{:else}{d.actor || 'Unnamed'}{/if}</td>
+							{/if}
 							<td class="text">
 								<span class="line">{d.content}</span>
 								{#if d.retired !== undefined}<span class="flag warn">under “{d.retired || 'an earlier identity'}”</span>{/if}
@@ -161,7 +193,7 @@
 							<div class="confirm" role="alert">
 								<p>Delete this diary entry? Hermaeus backs up the database before its first change each session.</p>
 								{#if current.memory !== undefined}
-									<label class="check"><input type="checkbox" bind:checked={keepMemory} /> Keep its memory copy, so {name} still remembers it</label>
+									<label class="check"><input type="checkbox" bind:checked={keepMemory} /> Keep its memory copy, so {name || 'the character'} still remembers it</label>
 								{/if}
 								<button type="button" class="button primary" onclick={() => remove(current!)}>Delete</button>
 								<button type="button" class="button" onclick={() => (mode = 'view')}>Keep</button>
@@ -227,6 +259,29 @@
 	}
 	.when {
 		color: var(--muted);
+	}
+	.who {
+		max-width: 9rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* A mood list never widens the table; the pane shows it whole. */
+	td.wide {
+		max-width: 7rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* Everyone's records carry a Who column, so the side columns give way sooner. */
+	@media (max-width: 90rem) {
+		.split.everyone :global(.wide) {
+			display: none;
+		}
+	}
+	.who a {
+		text-decoration: none;
+	}
+	.who a:hover {
+		text-decoration: underline;
 	}
 	.text {
 		width: 100%;

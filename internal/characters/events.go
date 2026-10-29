@@ -10,6 +10,7 @@ import (
 
 	"hermaeus/internal/calendar"
 	"hermaeus/internal/events"
+	"hermaeus/internal/identity"
 	"hermaeus/internal/store"
 )
 
@@ -33,11 +34,18 @@ type Event struct {
 	Location     string             `json:"location,omitempty"`
 	Date         *calendar.GameDate `json:"date,omitempty"`
 	Written      *int64             `json:"written,omitempty"` // when SkyrimNet recorded it, Unix ms
-	// The character's part in it: "acting", "acted on", or "present".
-	Role    string         `json:"role"`
-	Present int            `json:"present"`        // how many characters were there
-	Data    map[string]any `json:"data,omitempty"` // the details SkyrimNet stored, when they're fields
-	Text    string         `json:"text,omitempty"` // the details, when they're a sentence instead
+	// The character's part in it: "acting", "acted on", or "present"; ""
+	// in a list across characters.
+	Role string `json:"role,omitempty"`
+	// Who acted and who was acted on, by their current identities, when
+	// the event names them.
+	From     string         `json:"from,omitempty"`
+	FromUUID string         `json:"fromUuid,omitempty"`
+	To       string         `json:"to,omitempty"`
+	ToUUID   string         `json:"toUuid,omitempty"`
+	Present  int            `json:"present"`        // how many characters were there
+	Data     map[string]any `json:"data,omitempty"` // the details SkyrimNet stored, when they're fields
+	Text     string         `json:"text,omitempty"` // the details, when they're a sentence instead
 }
 
 type EventsResponse struct {
@@ -57,11 +65,49 @@ const detailText = 2000
 
 // EventsOf lists a character's events.
 func EventsOf(db store.DB, uuid string) (EventsResponse, error) {
-	out := EventsResponse{Events: []Event{}, Types: []EventTypeCount{}}
 	p, err := loadPerson(db, uuid)
 	if err != nil {
-		return out, err
+		return EventsResponse{Events: []Event{}, Types: []EventTypeCount{}}, err
 	}
+	mine := map[string]bool{}
+	for _, u := range p.uuids {
+		mine[u] = true
+	}
+	theirs, args := p.theirEvents()
+	return listEvents(db, p.aliases, mine, theirs+"select * from theirs", args)
+}
+
+// AllEvents lists every event in the playthrough.
+func AllEvents(db store.DB) (EventsResponse, error) {
+	a, err := identity.Load(db)
+	if err != nil {
+		return EventsResponse{Events: []Event{}, Types: []EventTypeCount{}}, err
+	}
+	return listEvents(db, a, nil, "select * from events", nil)
+}
+
+// actorNames is every character's name by UUID.
+func actorNames(db store.DB) (map[string]string, error) {
+	names := map[string]string{}
+	rows, err := db.Query(`select cast(uuid as text), coalesce(actor_name, '') from uuid_mappings`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var u, n string
+		if err := rows.Scan(&u, &n); err != nil {
+			return nil, err
+		}
+		names[u] = n
+	}
+	return names, rows.Err()
+}
+
+// listEvents reads the events a query selects, newest first. mine is the
+// character whose list it is, or nil for everyone's.
+func listEvents(db store.DB, aliases *identity.Aliases, mine map[string]bool, from string, args []any) (EventsResponse, error) {
+	out := EventsResponse{Events: []Event{}, Types: []EventTypeCount{}}
 	if ok, err := hasEvents(db); err != nil || !ok {
 		return out, err
 	}
@@ -69,14 +115,14 @@ func EventsOf(db store.DB, uuid string) (EventsResponse, error) {
 	if err != nil {
 		return out, err
 	}
-	mine := map[string]bool{}
-	for _, u := range p.uuids {
-		mine[u] = true
+	names, err := actorNames(db)
+	if err != nil {
+		return out, err
 	}
-	theirs, args := p.theirEvents()
-	rows, err := db.Query(theirs+`select id, event_type, coalesce(event_data, ''), coalesce(location, ''), game_time, local_time,
+	rows, err := db.Query(`with chosen as (`+from+`)
+		select id, event_type, coalesce(event_data, ''), coalesce(location, ''), game_time, local_time,
 		coalesce(actor_UUIDs, ''), cast(originating_actor_UUID as text), cast(target_actor_UUID as text)
-		from theirs order by game_time is null, game_time desc, id desc`, args...)
+		from chosen order by game_time is null, game_time desc, id desc`, args...)
 	if err != nil {
 		return out, err
 	}
@@ -94,22 +140,32 @@ func EventsOf(db store.DB, uuid string) (EventsResponse, error) {
 		e.Date = cal.DatePtr(t.Float64)
 		e.Written = store.Timestamp(written)
 		e.Present = len(uuidStrings(actors))
-		switch {
-		case mine[origin]:
-			e.Role = "acting"
-		case mine[target]:
-			e.Role = "acted on"
-		default:
-			e.Role = "present"
+		if mine != nil {
+			switch {
+			case mine[origin]:
+				e.Role = "acting"
+			case mine[target]:
+				e.Role = "acted on"
+			default:
+				e.Role = "present"
+			}
+		}
+		if origin != "0" {
+			e.FromUUID = aliases.Resolve(origin)
+			e.From = names[e.FromUUID]
+		}
+		if target != "0" {
+			e.ToUUID = aliases.Resolve(target)
+			e.To = names[e.ToUUID]
 		}
 		e.Data, e.Text = details(data)
 		e.Summary = summarize(e.Type, e.Data, e.Text)
 		e.Speaker, e.Listener, e.Line = said(e.Type, e.Data)
-		if e.Speaker != "" && origin != "0" {
-			e.SpeakerUUID = p.aliases.Resolve(origin)
+		if e.Speaker != "" {
+			e.SpeakerUUID = e.FromUUID
 		}
-		if e.Listener != "" && target != "0" {
-			e.ListenerUUID = p.aliases.Resolve(target)
+		if e.Listener != "" {
+			e.ListenerUUID = e.ToUUID
 		}
 		counts[e.Type]++
 		out.Events = append(out.Events, e)

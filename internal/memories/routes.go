@@ -13,6 +13,12 @@ import (
 func Routes(mux *http.ServeMux, st *store.Store) {
 	const base = "/api/playthroughs/{save}"
 
+	mux.Handle("GET "+base+"/memories", httpapi.JSON(func(r *http.Request, _ httpapi.None) (MemoriesResponse, error) {
+		return store.Read(st, r.PathValue("save"), All)
+	}))
+	mux.Handle("GET "+base+"/diary", httpapi.JSON(func(r *http.Request, _ httpapi.None) (DiaryResponse, error) {
+		return store.Read(st, r.PathValue("save"), AllDiary)
+	}))
 	mux.Handle("GET "+base+"/characters/{uuid}/memories", httpapi.JSON(func(r *http.Request, _ httpapi.None) (MemoriesResponse, error) {
 		return store.Read(st, r.PathValue("save"), func(db store.DB) (MemoriesResponse, error) {
 			return ForCharacter(db, r.PathValue("uuid"))

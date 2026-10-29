@@ -78,3 +78,12 @@ export function savedNote(r: SaveResult, what: string): string {
 export function parseTags(s: string): string[] {
 	return s.split(',').map((t) => t.trim()).filter(Boolean);
 }
+
+// Everyone's memories and diary entries in the playthrough, for History.
+export function getAllMemories(save: string, fetchFn?: typeof fetch): Promise<MemoriesResponse> {
+	return request<MemoriesResponse>('GET', playthroughPath(save, 'memories'), undefined, fetchFn);
+}
+
+export function getAllDiary(save: string, fetchFn?: typeof fetch): Promise<DiaryResponse> {
+	return request<DiaryResponse>('GET', playthroughPath(save, 'diary'), undefined, fetchFn);
+}

@@ -11,15 +11,31 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import { characterName } from '#lib/characters/api.ts';
 	import { fieldLabel } from './api.ts';
 
-	let { save, uuid, name, events: response, characters }: { save: string; uuid: string; name: string; events: EventsResponse; characters: Character[] } = $props();
+	let {
+		save,
+		uuid,
+		name = 'They',
+		events: response,
+		characters
+	}: {
+		save: string;
+		uuid?: string; // whose events these are; everyone's when left out
+		name?: string;
+		events: EventsResponse;
+		characters: Character[];
+	} = $props();
 
-	// The character's own events, where they act or are acted on, read in
+	// One character's own events, where they act or are acted on, read in
 	// full ink; those they were merely present for are dimmed, so theirs
-	// surface by contrast. Likewise their name among the labels.
-	const theirs = (e: Event) => e.role !== 'present';
-	const self = (who: string | undefined) => who === uuid;
+	// surface by contrast. Likewise their name among the labels. Everyone's
+	// events are all in full ink.
+	const theirs = (e: Event) => !uuid || e.role !== 'present';
+	const self = (who: string | undefined) => !!uuid && who === uuid;
+	// Everyone's events can be narrowed to one character's doings.
+	let actor = $state('');
 
 	// Who can be opened: the characters with something stored, by UUID.
 	let known = $derived(new Set(characters.map((c) => c.uuid)));
@@ -35,6 +51,7 @@
 			(e) =>
 				(!type || e.type === type) &&
 				(!role || (role === 'present' ? e.role === 'present' : e.role !== 'present')) &&
+				(!actor || e.fromUuid === actor || e.toUuid === actor) &&
 				(!q || [e.summary, e.label, e.location ?? '', e.text ?? ''].some((v) => v.toLowerCase().includes(q)))
 		);
 	});
@@ -79,15 +96,24 @@
 			<option value={t.type}>{t.label} · {count(t.count)}</option>
 		{/each}
 	</select>
-	<select bind:value={role} aria-label="Their part">
-		<option value="">Any part</option>
-		<option value="part">Acting or acted on</option>
-		<option value="present">Only present</option>
-	</select>
+	{#if uuid}
+		<select bind:value={role} aria-label="Their part">
+			<option value="">Any part</option>
+			<option value="part">Acting or acted on</option>
+			<option value="present">Only present</option>
+		</select>
+	{:else}
+		<select bind:value={actor} aria-label="Character">
+			<option value="">Everyone</option>
+			{#each characters as c (c.uuid)}
+				<option value={c.uuid}>{characterName(c)}</option>
+			{/each}
+		</select>
+	{/if}
 	<input type="search" bind:value={query} placeholder="Filter events" aria-label="Filter events" />
 </div>
 
-<div class="split">
+<div class="split" class:everyone={!uuid}>
 	<div class="list">
 		{#if !response.events.length}
 			<p class="muted">SkyrimNet hasn’t recorded {name} taking part in anything yet.</p>
@@ -99,6 +125,7 @@
 					<tr>
 						<th class="mark" aria-label="Selected"></th>
 						<th class="caps when">When</th>
+						{#if !uuid}<th class="caps who">Who</th>{/if}
 						<th class="caps text">Event</th>
 						<th class="caps type">Type</th>
 					</tr>
@@ -106,11 +133,16 @@
 				<tbody>
 					{#each shown as e, i (e.id)}
 						{#if dayLabel(e) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
-							<tr class="day"><th colspan="4" scope="rowgroup" class="caps sticky-day">{dayLabel(e)}</th></tr>
+							<tr class="day"><th colspan={uuid ? 4 : 5} scope="rowgroup" class="caps sticky-day">{dayLabel(e)}</th></tr>
 						{/if}
 						<tr aria-selected={selection.is(e)} class:bystander={!theirs(e)} onclick={() => selection.select(e)}>
 							<td class="mark">{#if selection.is(e)}<Diamond />{/if}</td>
 							<td class="when">{timeLabel(e)}</td>
+							{#if !uuid}
+								<td class="who" use:clipped>
+									{#if e.from}{@render who(e.from, pageOf(e.fromUuid), false)}{/if}{#if e.from && e.to}{' › '}{/if}{#if e.to}{@render who(e.to, pageOf(e.toUuid), false)}{/if}
+								</td>
+							{/if}
 							<td class="text">
 								<span class="line">
 									{#if e.speaker && e.line}
@@ -149,7 +181,9 @@
 					</p>
 					<dl>
 						{#if current.location}<dt class="caps">Place</dt><dd>{current.location}</dd>{/if}
-						<dt class="caps">{name}’s part</dt><dd>{current.role}</dd>
+						{#if current.role}<dt class="caps">{name}’s part</dt><dd>{current.role}</dd>{/if}
+						{#if !uuid && current.from}<dt class="caps">From</dt><dd>{@render who(current.from, pageOf(current.fromUuid), false)}</dd>{/if}
+						{#if !uuid && current.to}<dt class="caps">To</dt><dd>{@render who(current.to, pageOf(current.toUuid), false)}</dd>{/if}
 						{#if current.present}<dt class="caps">Present</dt><dd>{count(current.present)} {current.present === 1 ? 'character' : 'characters'}</dd>{/if}
 						{#if current.written}<dt class="caps">Recorded</dt><dd>{realTime(current.written)}</dd>{/if}
 						<dt class="caps">Event</dt><dd>#{current.id}</dd>
@@ -265,6 +299,18 @@
 		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+	td.who {
+		max-width: 9rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* Everyone's events carry a Who column, so the type gives way sooner;
+	   the type filter and the pane still say it. */
+	@media (max-width: 90rem) {
+		.split.everyone :global(.type) {
+			display: none;
+		}
 	}
 	td.type {
 		max-width: 11rem;

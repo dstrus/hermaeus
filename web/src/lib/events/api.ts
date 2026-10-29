@@ -1,6 +1,11 @@
 import { playthroughPath, request } from '#lib/api/client.ts';
 import type { EventsResponse } from '#lib/api/types/characters.ts';
 
+// getAllEvents lists every event in the playthrough.
+export function getAllEvents(save: string, fetchFn?: typeof fetch): Promise<EventsResponse> {
+	return request<EventsResponse>('GET', playthroughPath(save, 'events'), undefined, fetchFn);
+}
+
 export function getEvents(save: string, uuid: string, fetchFn?: typeof fetch): Promise<EventsResponse> {
 	return request<EventsResponse>('GET', playthroughPath(save, 'characters', uuid, 'events'), undefined, fetchFn);
 }

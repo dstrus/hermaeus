@@ -34,6 +34,9 @@ type Memory struct {
 	Retired      *string            `json:"retired,omitempty"`    // stored under a retired identity with this name ("" if unnamed)
 	Date         *calendar.GameDate `json:"date,omitempty"`
 	Written      *int64             `json:"written,omitempty"` // when SkyrimNet wrote it, Unix ms
+	// Whose it is, in a list across characters: their current identity.
+	Actor     string `json:"actor,omitempty"`
+	ActorUUID string `json:"actorUuid,omitempty"`
 }
 
 type MemoriesResponse struct {
@@ -46,6 +49,7 @@ type person struct {
 	uuids    []string
 	aliases  *identity.Aliases
 	calendar *calendar.Calendar
+	names    map[string]string // by UUID, for a list across characters
 }
 
 func loadPerson(db store.DB, uuid string) (*person, error) {
@@ -75,22 +79,72 @@ func (p *person) retired(uuid string) *string {
 	return nil
 }
 
+// everyone is the whole playthrough for a list across characters: no
+// UUIDs of its own, but every name.
+func everyone(db store.DB) (*person, error) {
+	a, err := identity.Load(db)
+	if err != nil {
+		return nil, err
+	}
+	cal, err := calendar.Load(db)
+	if err != nil {
+		return nil, err
+	}
+	names := map[string]string{}
+	rows, err := db.Query(`select cast(uuid as text), coalesce(actor_name, '') from uuid_mappings`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var u, n string
+		if err := rows.Scan(&u, &n); err != nil {
+			return nil, err
+		}
+		names[u] = n
+	}
+	return &person{aliases: a, calendar: cal, names: names}, rows.Err()
+}
+
+// owner names a record's character by their current identity, for a list
+// across characters.
+func (p *person) owner(actor string) (name, uuid string) {
+	if p.names == nil {
+		return "", ""
+	}
+	uuid = p.aliases.Resolve(actor)
+	return p.names[uuid], uuid
+}
+
 // ForCharacter lists a character's memories, including those stored under
 // their retired identities. Knowledge-pack entries aren't anyone's own.
 func ForCharacter(db store.DB, uuid string) (MemoriesResponse, error) {
-	out := MemoriesResponse{Memories: []Memory{}}
 	p, err := loadPerson(db, uuid)
 	if err != nil {
-		return out, err
+		return MemoriesResponse{Memories: []Memory{}}, err
 	}
 	in, args := p.in()
+	return listMemories(db, p, "m.actor_uuid in ("+in+") and m.pack_id is null", args)
+}
+
+// All lists every character's memories in the playthrough.
+func All(db store.DB) (MemoriesResponse, error) {
+	p, err := everyone(db)
+	if err != nil {
+		return MemoriesResponse{Memories: []Memory{}}, err
+	}
+	return listMemories(db, p, "m.pack_id is null", nil)
+}
+
+func listMemories(db store.DB, p *person, where string, args []any) (MemoriesResponse, error) {
+	out := MemoriesResponse{Memories: []Memory{}}
 	rows, err := db.Query(`select m.id, cast(m.actor_uuid as text), coalesce(m.memory_type, ''), coalesce(m.display_name, ''),
 			m.content, coalesce(m.location, ''), coalesce(m.emotion, ''), coalesce(m.importance_score, 0), m.tags,
 			coalesce(m.is_active, 1), coalesce(m.always_inject, 0), coalesce(m.condition_expr, ''),
 			m.game_time, m.creation_time,
 			exists (select 1 from memory_embeddings e where e.memory_id = m.id)
 		from memories m
-		where m.actor_uuid in (`+in+`) and m.pack_id is null
+		where `+where+`
 		order by m.id desc`, args...)
 	if err != nil {
 		return out, err
@@ -109,6 +163,7 @@ func ForCharacter(db store.DB, uuid string) (MemoriesResponse, error) {
 		m.Tags = parseTags(tags.String)
 		m.DiaryEntry = diaryEntryOf(m.Tags)
 		m.Retired = p.retired(actor)
+		m.Actor, m.ActorUUID = p.owner(actor)
 		m.Date = p.calendar.DatePtr(gameTime.Float64)
 		m.Written = store.Timestamp(written)
 		out.Memories = append(out.Memories, m)

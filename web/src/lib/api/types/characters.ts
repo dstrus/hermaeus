@@ -22,9 +22,18 @@ export interface Event {
   date?: calendar.GameDate;
   written?: number /* int64 */; // when SkyrimNet recorded it, Unix ms
   /**
-   * The character's part in it: "acting", "acted on", or "present".
+   * The character's part in it: "acting", "acted on", or "present"; ""
+   * in a list across characters.
    */
-  role: string;
+  role?: string;
+  /**
+   * Who acted and who was acted on, by their current identities, when
+   * the event names them.
+   */
+  from?: string;
+  fromUuid?: string;
+  to?: string;
+  toUuid?: string;
   present: number /* int */; // how many characters were there
   data?: { [key: string]: unknown}; // the details SkyrimNet stored, when they're fields
   text?: string; // the details, when they're a sentence instead

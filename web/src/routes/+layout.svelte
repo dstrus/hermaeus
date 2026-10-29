@@ -23,7 +23,7 @@
 	// shape of Hermaeus is clear, but can't be opened.
 	const sections = [
 		{ label: 'Characters', built: true },
-		{ label: 'Events' },
+		{ label: 'History', built: true },
 		{ label: 'Knowledge' },
 		{ label: 'Screenshots' },
 		{ label: 'Bard songs' }
@@ -37,6 +37,7 @@
 		return shared ? `${name} · ${p.id}` : name;
 	}
 	let charactersActive = $derived(!!save && (page.url.pathname === base || page.url.pathname.startsWith(`${base}/npc/`) || page.url.pathname.startsWith(`${base}/bios`)));
+	let historyActive = $derived(!!save && page.url.pathname.startsWith(`${base}/history`));
 	let promptsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/prompts`));
 	let settingsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/settings`));
 </script>
@@ -73,6 +74,7 @@
 		<nav class="sections" aria-label="Sections">
 			<ul aria-label="This playthrough">
 				<li><a class="caps" href={base} aria-current={charactersActive ? 'page' : undefined}>Characters</a></li>
+				<li><a class="caps" href="{base}/history/events" aria-current={historyActive ? 'page' : undefined}>History</a></li>
 			</ul>
 			<p class="later caps">Not built yet</p>
 			<ul class="soon" aria-label="This playthrough, not built yet">

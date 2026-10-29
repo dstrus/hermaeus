@@ -25,7 +25,22 @@
 	import { dayLabel, timeLabel } from './dates.ts';
 	import MemoryForm from './MemoryForm.svelte';
 
-	let { save, uuid, memories }: { save: string; uuid: string; memories: Memory[] } = $props(); // newest first
+	import type { Character } from '#lib/api/types/characters.ts';
+	import { characterName } from '#lib/characters/api.ts';
+
+	let {
+		save,
+		uuid,
+		memories,
+		characters = []
+	}: {
+		save: string;
+		uuid?: string; // whose memories these are; everyone's when left out
+		memories: Memory[]; // newest first
+		characters?: Character[]; // for narrowing everyone's to one character's
+	} = $props();
+	let actor = $state('');
+	const owner = (m: Memory) => (m.actorUuid ? `/${encodeURIComponent(save)}/npc/${m.actorUuid}/memories` : undefined);
 
 	let readOnly = $derived(live.gameRunning);
 	let query = $state('');
@@ -42,11 +57,13 @@
 			(m) =>
 				(!type || m.type === type) &&
 				(!mood || m.emotion === mood) &&
+				(!actor || m.actorUuid === actor) &&
 				(!q || [m.content, m.title, m.location, m.emotion, ...m.tags].some((v) => v.toLowerCase().includes(q)))
 		);
 		return sorted(list, sort, {
 			when: (m) => m.id,
 			type: (m) => m.type,
+			who: (m) => m.actor || '￿',
 			mood: (m) => m.emotion || '￿',
 			importance: (m) => m.importance
 		});
@@ -82,7 +99,8 @@
 	async function saveForm(changes: MemoryChanges) {
 		const editing = mode === 'edit' ? current : undefined;
 		await run(async () => {
-			const r = editing ? await updateMemory(save, editing.id, changes) : await addMemory(save, uuid, changes);
+			if (!editing && !uuid) throw new Error('A new memory is added from its character’s page.');
+			const r = editing ? await updateMemory(save, editing.id, changes) : await addMemory(save, uuid!, changes);
 			if (!editing) selection.key = String(r.id);
 			return [savedNote(r, editing ? 'Memory' : 'New memory'), r.warning].filter(Boolean).join(' ');
 		}, !editing);
@@ -115,7 +133,7 @@
 			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
 			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => (mode = 'edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing, disabled: !can, run: () => (mode = 'new') },
+			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => (mode = 'new') },
 			{ key: 'x', shown: 'X', label: 'Mark', hidden: !viewing, disabled: !can || !current, run: () => current && toggleMark(current) },
 			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !chosen.length, run: () => (mode = 'delete') }),
 			{
@@ -143,6 +161,14 @@
 		<option value="">All moods</option>
 		{#each moods as e (e)}<option value={e}>{e}</option>{/each}
 	</select>
+	{#if !uuid}
+		<select bind:value={actor} aria-label="Character">
+			<option value="">Everyone</option>
+			{#each characters as c (c.uuid)}
+				<option value={c.uuid}>{characterName(c)}</option>
+			{/each}
+		</select>
+	{/if}
 	{#if marked.size}
 		<span class="marked">{plural(marked.size, 'memory', 'memories')} marked</span>
 		<button type="button" class="textbutton" onclick={() => marked.clear()}>Clear</button>
@@ -151,7 +177,7 @@
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
-<div class="split">
+<div class="split" class:everyone={!uuid}>
 	<div class="list">
 		{#if !memories.length}
 			<p class="muted">No memories yet.</p>
@@ -163,6 +189,7 @@
 					<tr>
 						<th class="mark" aria-label="Selected"></th>
 						<SortHeader label="When" key="when" bind:sort descendingFirst />
+						{#if !uuid}<SortHeader label="Who" key="who" bind:sort />{/if}
 						<th class="caps text">Memory</th>
 						<SortHeader label="Type" key="type" bind:sort class="narrow-hide" />
 						<SortHeader label="Mood" key="mood" bind:sort class="wide" />
@@ -172,13 +199,16 @@
 				<tbody>
 					{#each shown as m, i (m.id)}
 						{#if byDay && dayLabel(m) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
-							<tr class="day"><th colspan="6" scope="rowgroup" class="caps sticky-day">{dayLabel(m)}</th></tr>
+							<tr class="day"><th colspan={uuid ? 6 : 7} scope="rowgroup" class="caps sticky-day">{dayLabel(m)}</th></tr>
 						{/if}
 						<tr aria-selected={selection.is(m)} class:inactive={!m.active} onclick={() => mode === 'view' && selection.select(m)}>
 							<td class="mark">
 								{#if marked.has(m.id)}<span class="tick" aria-label="Marked"></span>{:else if selection.is(m)}<Diamond />{/if}
 							</td>
 							<td class="when">{timeLabel(m)}{#if !byDay}<span class="muted"> · {dayLabel(m)}</span>{/if}</td>
+							{#if !uuid}
+								<td class="who">{#if owner(m)}<a href={owner(m)}>{m.actor || 'Unnamed'}</a>{:else}{m.actor || 'Unnamed'}{/if}</td>
+							{/if}
 							<td class="text">
 								<span class="line">{#if m.title}<strong>{m.title}: </strong>{/if}{m.content}</span>
 								{#if m.retired !== undefined}<span class="flag warn">under “{m.retired || 'an earlier identity'}”</span>{/if}
@@ -312,6 +342,29 @@
 	}
 	.when {
 		color: var(--muted);
+	}
+	.who {
+		max-width: 9rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* A mood list never widens the table; the pane shows it whole. */
+	td.wide {
+		max-width: 7rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	/* Everyone's records carry a Who column, so the side columns give way sooner. */
+	@media (max-width: 90rem) {
+		.split.everyone :global(.wide) {
+			display: none;
+		}
+	}
+	.who a {
+		text-decoration: none;
+	}
+	.who a:hover {
+		text-decoration: underline;
 	}
 	.text {
 		width: 100%;
