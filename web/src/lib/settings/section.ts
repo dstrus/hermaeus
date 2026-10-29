@@ -12,6 +12,8 @@ export const settingsPages: SettingsPage[] = [
 	{ path: 'models', label: 'Models', file: 'OpenRouter' },
 	{ path: 'providers', label: 'Providers', file: 'Providers' },
 	{ path: 'translator', label: 'Translator', file: 'UniversalTranslator' },
+	{ path: 'gamemaster', label: 'GameMaster' }, // part of SkyrimNet.yaml, which stays under Other
+	{ path: 'narration', label: 'Narration' },
 	{ path: 'memories', label: 'Memories', file: 'Memory' },
 	{ path: 'memory-filter', label: 'Memory filter', file: 'MemoryFilter' },
 	{ path: 'diaries', label: 'Diaries', file: 'Diary' },

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { settingsPages } from '#lib/settings/section.ts';
 	import '#lib/ui/theme.css';
 	import { goto } from '$app/navigation';
@@ -72,7 +73,7 @@
 	{#if !data.status.skyrimNetDir}
 		<main class="solo"><FolderForm /></main>
 	{:else if save}
-		<nav class="sections" aria-label="Sections">
+		<nav class="sections" aria-label="Sections" use:fitToViewport>
 			<ul aria-label="This playthrough">
 				<li><a class="caps" href={base} aria-current={charactersActive ? 'page' : undefined}>Characters</a></li>
 				<li><a class="caps" href="{base}/history/events" aria-current={historyActive ? 'page' : undefined}>History</a></li>
@@ -162,7 +163,14 @@
 	.game.running {
 		color: var(--warn);
 	}
+	/* The sidebar stays put as the page scrolls, fitted above the hints,
+	   and scrolls on its own when its groups run longer than the window. */
 	.sections {
+		position: sticky;
+		top: 0;
+		align-self: start;
+		overflow-y: auto;
+		overscroll-behavior: contain;
 		padding: var(--space-5) var(--space-4) var(--space-5) var(--space-6);
 		border-right: 1px solid var(--rule);
 	}
@@ -229,6 +237,8 @@
 			display: none;
 		}
 		.sections {
+			position: static;
+			overflow: visible;
 			display: flex;
 			gap: var(--space-5);
 			border-right: 0;

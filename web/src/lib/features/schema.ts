@@ -33,6 +33,7 @@ export interface Field {
 	choices?: Choice[];
 	custom?: boolean; // a choice may also be typed in
 	unit?: string; // after a count, such as "events"
+	placeholder?: string; // an example, for a text field
 }
 
 export interface Section {
@@ -76,6 +77,8 @@ export function show(f: Field, v: unknown): string {
 			return typeof v === 'number' ? keyName(v) : String(v);
 		case 'set':
 			return Array.isArray(v) ? `${v.length} of ${f.choices?.length ?? v.length}` : String(v);
+		case 'text':
+			return String(v).trim() === '' ? 'None' : String(v);
 		default:
 			return String(v);
 	}

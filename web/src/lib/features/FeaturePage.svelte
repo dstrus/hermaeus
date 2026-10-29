@@ -241,7 +241,7 @@
 										{#each f.choices ?? [] as c (c.value)}<option value={c.value}>{c.label}</option>{/each}
 									</datalist>
 								{:else if f.kind === 'text'}
-									<input bind:this={field} type="text" bind:value={draft} autocomplete="off" />
+									<input bind:this={field} type="text" bind:value={draft} placeholder={f.placeholder} autocomplete="off" />
 								{:else}
 									<input bind:this={field} type="text" inputmode="decimal" bind:value={draft} autocomplete="off" />
 									<span class="muted small">
