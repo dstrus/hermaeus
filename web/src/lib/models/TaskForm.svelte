@@ -6,6 +6,7 @@
 	import type { Provider, Slot, Task, TaskEdit } from '#lib/api/types/settings.ts';
 	import Segmented from '#lib/ui/Segmented.svelte';
 	import { blankSlot, reasoningEfforts } from './api.ts';
+	import { describe, modelLists } from './lists.svelte.ts';
 
 	let {
 		task,
@@ -80,6 +81,18 @@
 		{ value: 'random', label: 'At random' }
 	]);
 	let usableProviders = $derived(providers.length ? providers : [{ id: 'openrouter', name: 'OpenRouter', style: 'chat', hasKey: false, builtin: true }]);
+	// The providers the slots use, for fetching each one's model list.
+	let used = $derived([...new Set(slots.map((d) => d.provider))].map((id) => usableProviders.find((p) => p.id === id)).filter((p) => p !== undefined));
+	const listOf = (provider: string) => modelLists.lists[provider];
+	// What a provider says about a slot's model, or that it doesn't list it.
+	function hint(d: Draft): string {
+		const list = listOf(d.provider);
+		const model = d.model.trim();
+		if (!list || !model) return '';
+		const m = modelLists.find(d.provider, model);
+		if (!m) return `Not in ${usableProviders.find((p) => p.id === d.provider)?.name ?? d.provider}’s list.`;
+		return describe(m);
+	}
 
 	$effect(() => {
 		tick().then(() => first?.focus());
@@ -173,10 +186,11 @@
 					<label class="field">
 						<span class="caps label">Model</span>
 						{#if i === 0}
-							<input bind:this={first} type="text" bind:value={s.model} list="models-known" placeholder="vendor/model" autocomplete="off" spellcheck="false" />
+							<input bind:this={first} type="text" bind:value={s.model} list="models-{listOf(s.provider) ? s.provider : 'known'}" placeholder="vendor/model" autocomplete="off" spellcheck="false" />
 						{:else}
-							<input type="text" bind:value={s.model} list="models-known" placeholder="vendor/model" autocomplete="off" spellcheck="false" />
+							<input type="text" bind:value={s.model} list="models-{listOf(s.provider) ? s.provider : 'known'}" placeholder="vendor/model" autocomplete="off" spellcheck="false" />
 						{/if}
+						{#if hint(s)}<span class="muted small">{hint(s)}</span>{/if}
 					</label>
 					<div class="row">
 						<label class="field">
@@ -243,7 +257,37 @@
 		<datalist id="models-known">
 			{#each choices as m (m)}<option value={m}></option>{/each}
 		</datalist>
-		<button type="button" class="button" onclick={add}>Add a model</button>
+		{#each used as p (p.id)}
+			{@const list = listOf(p.id)}
+			<datalist id="models-{p.id}">
+				{#each list?.models ?? [] as m (m.id)}<option value={m.id}>{m.name && m.name !== m.id ? m.name : ''}</option>{/each}
+			</datalist>
+		{/each}
+		<div class="row">
+			<button type="button" class="button" onclick={add}>Add a model</button>
+		</div>
+		<!-- Each provider's list is fetched only when asked: the call goes to the provider, with the key when it has one. -->
+		<div class="lists">
+			{#each used as p (p.id)}
+				{@const list = listOf(p.id)}
+				<div class="list">
+					<button type="button" class="textbutton" onclick={() => modelLists.fetch(p.id, !!list)} disabled={modelLists.loading[p.id] || p.style !== 'chat'}>
+						{modelLists.loading[p.id] ? `Asking ${p.name}…` : list ? `Fetch ${p.name}’s models again` : `Fetch ${p.name}’s models`}
+					</button>
+					<span class="muted small">
+						{#if modelLists.errors[p.id]}
+							<span class="error">{modelLists.errors[p.id]}</span>
+						{:else if list}
+							{list.models.length} models, offered as you type.
+						{:else if p.style !== 'chat'}
+							{p.name} has no list to fetch.
+						{:else}
+							Asks {p.name} over the Internet{p.hasKey ? ', with your key' : ''}.
+						{/if}
+					</span>
+				</div>
+			{/each}
+		</div>
 	</fieldset>
 
 	<fieldset>
@@ -384,6 +428,20 @@
 		resize: vertical;
 		font-family: var(--font-mono);
 		font-size: var(--step--1);
+	}
+	.lists {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+	.list {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--space-1) var(--space-3);
+	}
+	.list .error {
+		color: var(--warn);
 	}
 	.buttons {
 		position: sticky;

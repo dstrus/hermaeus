@@ -43,6 +43,10 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("GET /api/models", httpapi.JSON(func(*http.Request, httpapi.None) (Models, error) {
 		return s.Models()
 	}))
+	// A provider's own model list, fetched from it on request.
+	mux.Handle("GET /api/models/providers/{id}", httpapi.JSON(func(r *http.Request, _ httpapi.None) (ModelList, error) {
+		return s.ModelList(r.PathValue("id"), r.URL.Query().Has("refresh"))
+	}))
 	mux.Handle("PUT /api/models/{task}", httpapi.JSON(func(r *http.Request, e TaskEdit) (Models, error) {
 		return s.SetTask(r.PathValue("task"), e)
 	}))

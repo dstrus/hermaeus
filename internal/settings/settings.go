@@ -26,6 +26,7 @@ import (
 type Settings struct {
 	store *store.Store
 	prefs *prefs.Prefs // where pinned files are remembered
+	lists modelLists   // providers' model lists, fetched this session
 }
 
 func New(s *store.Store, p *prefs.Prefs) *Settings {

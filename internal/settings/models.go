@@ -290,7 +290,20 @@ func (s *Settings) providers() ([]Provider, error) {
 	if err != nil {
 		return nil, err
 	}
-	b, err := os.ReadFile(filePath(dir, "Providers"))
+	nodes, err := providerNodes(dir)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]Provider, 0, len(nodes))
+	for _, p := range nodes {
+		out = append(out, providerOf(p))
+	}
+	return out, nil
+}
+
+// providerNodes reads Providers.yaml's providers: list.
+func providerNodes(configDir string) ([]*yaml.Node, error) {
+	b, err := os.ReadFile(filePath(configDir, "Providers"))
 	if err != nil {
 		return nil, err
 	}
@@ -298,24 +311,25 @@ func (s *Settings) providers() ([]Provider, error) {
 	if err != nil {
 		return nil, err
 	}
-	out := []Provider{}
-	list := findNode(d.doc, "providers")
-	if list == nil || list.Kind != yaml.SequenceNode {
-		return out, nil
-	}
-	for _, p := range list.Content {
-		if p.Kind != yaml.MappingNode {
-			continue
+	var out []*yaml.Node
+	if list := findNode(d.doc, "providers"); list != nil && list.Kind == yaml.SequenceNode {
+		for _, p := range list.Content {
+			if p.Kind == yaml.MappingNode {
+				out = append(out, p)
+			}
 		}
-		out = append(out, Provider{
-			ID:      ruleField(p, "id"),
-			Name:    ruleField(p, "name"),
-			Style:   ruleField(p, "api_style"),
-			HasKey:  strings.TrimSpace(ruleField(p, "api_key")) != "",
-			Builtin: ruleField(p, "builtin") == "true",
-		})
 	}
 	return out, nil
+}
+
+func providerOf(p *yaml.Node) Provider {
+	return Provider{
+		ID:      ruleField(p, "id"),
+		Name:    ruleField(p, "name"),
+		Style:   ruleField(p, "api_style"),
+		HasKey:  strings.TrimSpace(ruleField(p, "api_key")) != "",
+		Builtin: ruleField(p, "builtin") == "true",
+	}
 }
 
 var reasoningEfforts = map[string]bool{"": true, "off": true, "minimal": true, "low": true, "medium": true, "high": true, "default": true}
