@@ -59,6 +59,10 @@ packages:
     include_files: [filters.go, routes.go]
     output_path: web/src/lib/api/types/filters.ts
     fallback_type: unknown
+  - path: hermaeus/internal/plugins
+    include_files: [plugins.go]
+    output_path: web/src/lib/api/types/plugins.ts
+    fallback_type: unknown
   - path: hermaeus/internal/layers
     include_files: [layers.go]
     output_path: web/src/lib/api/types/layers.ts

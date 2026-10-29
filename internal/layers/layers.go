@@ -191,6 +191,22 @@ func (l *Library) Layers() []Layer {
 	return layers
 }
 
+// PluginDir is the folder SkyrimNet uses for a plugin, or "" when it isn't
+// in any of the roots (an external plugin in another mod's folder, say).
+func (l *Library) PluginDir(id string) string {
+	return pluginDir(l.Roots(), id)
+}
+
+// RegistryPath is content-registry.json in the SkyrimNet folder, which keeps
+// the installed plugins, their order, and which are switched on.
+func (l *Library) RegistryPath() string {
+	sky := l.skyrimNetDir()
+	if sky == "" {
+		return ""
+	}
+	return filepath.Join(sky, registryFile)
+}
+
 // pluginDir is the folder SkyrimNet uses for a plugin: of every copy in the
 // roots' library/ and external/ folders, the highest version, and on a tie a
 // library copy over an external one.
