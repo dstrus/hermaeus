@@ -13,7 +13,10 @@ func TestPluginSchemas(t *testing.T) {
 	mod := filepath.Join(t.TempDir(), "SeverActions 4.5.0", "SKSE", "Plugins", "SkyrimNet")
 	os.MkdirAll(filepath.Join(mod, "external", "severause.severactions"), 0o755)
 	os.MkdirAll(filepath.Join(mod, "config", "plugins", "SeverActions"), 0o755)
-	os.WriteFile(filepath.Join(mod, "config", "plugins", "SeverActions", "manifest.yaml"), []byte(`plugin:
+	os.WriteFile(filepath.Join(mod, "config", "plugins", "SeverActions", "manifest.yaml"), []byte(`variants:
+  - name: sever_background
+    description: "Background prompts"
+plugin:
   name: SeverActions
   version: "3.0"
   description: "An action pack"
@@ -50,7 +53,7 @@ schema:
 		t.Fatalf("schemas = %+v", schemas)
 	}
 	ps := schemas[0]
-	if ps.Name != "Plugin_SeverActions" || ps.Title != "SeverActions" || ps.Plugin != "severause.severactions" || len(ps.Fields) != 4 {
+	if ps.Name != "Plugin_SeverActions" || ps.Title != "SeverActions" || ps.Plugin != "severause.severactions" || len(ps.Fields) != 4 || strings.Join(ps.Variants, ",") != "sever_background" {
 		t.Errorf("schema = %+v", ps)
 	}
 	if f := ps.Fields[1]; !f.Secret || f.Category != "LLM Overrides" {

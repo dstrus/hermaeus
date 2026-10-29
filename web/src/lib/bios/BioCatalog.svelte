@@ -16,6 +16,8 @@
 	import { catalogHref, kinds, templateName } from './api.ts';
 	import { BioPreviews, type Preview } from './preview.ts';
 	import { fitToViewport } from '#lib/ui/fit.ts';
+	import { pluginHref } from '#lib/plugins/links.ts';
+	import { param, setParams } from '#lib/ui/address.svelte.ts';
 
 	let {
 		save,
@@ -30,6 +32,9 @@
 	} = $props();
 
 	let query = $state('');
+	// Narrowed to the bios one plugin brings, from its pane on the Plugins page.
+	let from = $derived(param('from'));
+	let fromLayer = $derived(from ? catalog.layers.findIndex((l) => l.id === from) : -1);
 	let sort = $state<Sort>({ key: 'name', descending: false });
 
 	// Templates match the way SkyrimNet names files: ignoring case.
@@ -53,7 +58,7 @@
 
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
-		const list = catalog.bios.filter((e) => !q || e.template.toLowerCase().includes(q) || templateName(e.template).toLowerCase().includes(q));
+		const list = catalog.bios.filter((e) => (fromLayer < 0 || e.layer === fromLayer) && (!q || e.template.toLowerCase().includes(q) || templateName(e.template).toLowerCase().includes(q)));
 		return sorted(list, sort, {
 			name: (e) => templateName(e.template),
 			template: (e) => e.template,
@@ -99,7 +104,11 @@
 		label="Which characters"
 		onchange={(v) => v === 'here' && goto(`/${encodeURIComponent(save)}`)}
 	/>
-	<span class="muted n" use:clipped>{count(catalog.bios.length)} with a bio, from {catalog.layers.length} {catalog.layers.length === 1 ? 'layer' : 'layers'}</span>
+	{#if fromLayer >= 0}
+		<span class="muted n" use:clipped>{count(shown.length)} from <a href={pluginHref(save, from!)}>{catalog.layers[fromLayer]?.source}</a> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>Show all</button></span>
+	{:else}
+		<span class="muted n" use:clipped>{count(catalog.bios.length)} with a bio, from {catalog.layers.length} {catalog.layers.length === 1 ? 'layer' : 'layers'}</span>
+	{/if}
 	<input type="search" bind:value={query} placeholder="Filter by name" aria-label="Filter bios" />
 </div>
 

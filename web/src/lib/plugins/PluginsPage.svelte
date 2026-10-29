@@ -17,10 +17,13 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
-	import { contentsLine, pluginsDependency, priorityOf, setEnabled, setOrder } from './api.ts';
+	import { contentsLine, countLine, pluginsDependency, priorityOf, setEnabled, setOrder } from './api.ts';
+	import { fromHref } from './links.ts';
+	import { modelsHref } from '#lib/models/api.ts';
 
 	let { list }: { list: List } = $props();
 	// A plugin's own settings page, when it ships a schema for them.
+	let save = $derived(page.params.save ?? '');
 	const settingsOf = (id: string) => (page.data.pluginSettings as PluginSchema[] | undefined)?.find((s) => s.plugin === id);
 
 	let readOnly = $derived(live.gameRunning);
@@ -162,7 +165,10 @@
 							</dd>
 						{:else}
 							<dt class="caps">Holds</dt>
-							<dd>{contentsLine(p) || 'Nothing'}</dd>
+							<dd>
+								<!-- Prompts, actions, and triggers link to their pages, narrowed to this plugin. -->
+								{#each p.contents as c, n (c.folder)}{n ? ' · ' : ''}{#if c.folder === 'prompts' || c.folder === 'actions' || c.folder === 'triggers' || c.folder === 'bios'}<a href={fromHref(save, c.folder, p.id)}>{countLine(c.folder, c.files)}</a>{:else}{countLine(c.folder, c.files)}{/if}{:else}Nothing{/each}
+							</dd>
 							<dt class="caps">Folder</dt>
 							<dd class="id folder">{p.folder}</dd>
 						{/if}
@@ -170,7 +176,11 @@
 						{#if settingsOf(p.id)}
 							{@const s = settingsOf(p.id)!}
 							<dt class="caps">Settings</dt>
-							<dd><a href={pluginSettingsHref(page.params.save ?? '', s.folder)}>{s.fields.length} of its own</a></dd>
+							<dd><a href={pluginSettingsHref(save, s.folder)}>{s.fields.length} of its own</a></dd>
+							{#if s.variants.length}
+								<dt class="caps">Models</dt>
+								<dd>{#each s.variants as v, n (v)}{n ? ', ' : ''}<a href={modelsHref(save, v)}>{v.replace(/_/g, ' ')}</a>{/each}<span class="muted small aside">· its own model {s.variants.length === 1 ? 'task' : 'tasks'}</span></dd>
+							{/if}
 						{/if}
 					</dl>
 					{#if p.replaces.length}
@@ -345,6 +355,9 @@
 	}
 	.folder {
 		overflow-wrap: anywhere;
+	}
+	.aside {
+		margin-left: var(--space-2);
 	}
 	details {
 		margin: var(--space-3) 0;

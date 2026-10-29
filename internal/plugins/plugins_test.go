@@ -75,6 +75,7 @@ func newHarness(t *testing.T) *harness {
 	write(t, filepath.Join(lib, "author.high", "manifest.json"), `{"title": "High", "version": "2.0"}`)
 	write(t, filepath.Join(lib, "author.high", "prompts", "dialogue.prompt"), "high")
 	write(t, filepath.Join(lib, "author.high", "knowledge", "k.yaml"), "k")
+	write(t, filepath.Join(lib, "author.high", "prompts", "characters", "lydia_a2c.prompt"), "a bio")
 	write(t, filepath.Join(lib, "author.off", "manifest.json"), `{"title": "Off"}`)
 	write(t, filepath.Join(lib, "author.off", "prompts", "dialogue.prompt"), "off")
 	write(t, filepath.Join(h.Dir, "overlay", "prompts", "dialogue.prompt"), "mine")
@@ -140,7 +141,7 @@ func TestListLowestFirst(t *testing.T) {
 	for _, c := range high.Contents {
 		counts[c.Folder] = c.Files
 	}
-	if counts["prompts"] != 1 || counts["knowledge"] != 1 {
+	if counts["prompts"] != 1 || counts["bios"] != 1 || counts["knowledge"] != 1 {
 		t.Errorf("high's contents = %+v", high.Contents)
 	}
 	if mine.Kind != "overlay" || mine.Title != "Your edits" {

@@ -18,11 +18,16 @@
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { modelChoices, modelsDependency, providerName, rotation, saveTask } from './api.ts';
 	import { modelLists } from './lists.svelte.ts';
+	import { page } from '$app/state';
+	import type { PluginSchema } from '#lib/api/types/settings.ts';
+	import { pluginHref } from '#lib/plugins/links.ts';
 	import TaskForm from './TaskForm.svelte';
 
 	let { save, models }: { save: string; models: Models } = $props();
 
 	let readOnly = $derived(live.gameRunning);
+	// The plugin that added a task, when its settings schema names it.
+	const addedBy = (task: string) => (page.data.pluginSettings as PluginSchema[] | undefined)?.find((s) => s.variants.includes(task) && s.plugin);
 	let can = $derived(models.found && !readOnly);
 	let choices = $derived(modelChoices(models));
 	let dialogue = $derived(models.tasks.find((t) => t.id === 'default'));
@@ -184,7 +189,12 @@
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2 class="caps">{current.label}</h2>
-					<p class="muted small">{current.what || `A task added by a plugin, as ${current.id}.`}</p>
+					{#if current.what}
+						<p class="muted small">{current.what}</p>
+					{:else}
+						{@const by = addedBy(current.id)}
+						<p class="muted small">A task added by {#if by}<a href={pluginHref(save, by.plugin ?? '')}>{by.title}</a>{:else}a plugin{/if}, as <span class="id">{current.id}</span>.</p>
+					{/if}
 					{#if mode === 'edit'}
 						<TaskForm task={current} modified={models.modified} providers={models.providers} {choices} {saving} onsave={submit} oncancel={() => leave('mode')} />
 					{:else}

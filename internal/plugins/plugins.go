@@ -219,15 +219,26 @@ func (p *Plugins) describe(id, kind, dir string) Plugin {
 		if !e.IsDir() || strings.HasPrefix(e.Name(), "_") || strings.HasPrefix(e.Name(), ".") {
 			continue
 		}
-		n := 0
-		filepath.WalkDir(filepath.Join(dir, e.Name()), func(_ string, d fs.DirEntry, err error) error {
-			if err == nil && !d.IsDir() {
+		// Character bios sit in prompts/characters but are a kind of their
+		// own, shown on the bio pages, so they're counted apart.
+		n, bios := 0, 0
+		filepath.WalkDir(filepath.Join(dir, e.Name()), func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
+			}
+			rel, _ := filepath.Rel(filepath.Join(dir, e.Name()), path)
+			if strings.EqualFold(e.Name(), "prompts") && strings.HasPrefix(strings.ToLower(filepath.ToSlash(rel)), "characters/") {
+				bios++
+			} else {
 				n++
 			}
 			return nil
 		})
 		if n > 0 {
 			pl.Contents = append(pl.Contents, Count{Folder: e.Name(), Files: n})
+		}
+		if bios > 0 {
+			pl.Contents = append(pl.Contents, Count{Folder: "bios", Files: bios})
 		}
 	}
 	return pl
@@ -261,7 +272,10 @@ func (p *Plugins) overrides(list []Plugin) {
 			if err == nil && !d.IsDir() {
 				rel, _ := filepath.Rel(prompts, path)
 				rel = filepath.ToSlash(rel)
-				sets[i][strings.ToLower(rel)] = rel
+				// Bios layer the same way, but have their own pages.
+				if !strings.HasPrefix(strings.ToLower(rel), "characters/") {
+					sets[i][strings.ToLower(rel)] = rel
+				}
 			}
 			return nil
 		})

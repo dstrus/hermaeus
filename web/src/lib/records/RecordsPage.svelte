@@ -11,6 +11,9 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import { page } from '$app/state';
+	import { pluginHref } from '#lib/plugins/links.ts';
+	import { param, setParams } from '#lib/ui/address.svelte.ts';
 	import { sourceLabel } from './api.ts';
 
 	let {
@@ -34,10 +37,14 @@
 	} = $props();
 
 	let query = $state('');
+	// Narrowed to what one plugin brings, from its pane on the Plugins page.
+	let from = $derived(param('from'));
+	let fromLabel = $derived(from ? records.find((r) => r.layer === from) : undefined);
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
-		return q ? records.filter((r) => [r.name, r.description, r.source, r.id].some((v) => v.toLowerCase().includes(q))) : records;
+		return records.filter((r) => (!from || r.layer === from) && (!q || [r.name, r.description, r.source, r.id].some((v) => v.toLowerCase().includes(q))));
 	});
+	let save = $derived(page.params.save ?? '');
 	let off = $derived(records.filter((r) => !r.enabled).length);
 	let sources = $derived(new Set(records.map((r) => r.layer)).size);
 
@@ -52,7 +59,11 @@
 
 <div class="bar">
 	<h1 class="caps">{title}</h1>
-	<span class="muted n" use:clipped>{plural(records.length, noun[0], noun[1])} from {plural(sources, 'source', 'sources')}{off ? ` · ${off} off` : ''}</span>
+	{#if from}
+		<span class="muted n" use:clipped>{plural(shown.length, noun[0], noun[1])} from <a href={pluginHref(save, from)}>{fromLabel ? sourceLabel(fromLabel) : from}</a> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>Show all</button></span>
+	{:else}
+		<span class="muted n" use:clipped>{plural(records.length, noun[0], noun[1])} from {plural(sources, 'source', 'sources')}{off ? ` · ${off} off` : ''}</span>
+	{/if}
 	<input type="search" bind:value={query} placeholder="Search {noun[1]}" aria-label="Search {noun[1]}" />
 </div>
 <p class="muted lead">{lead}</p>
@@ -95,7 +106,7 @@
 			{#key `${r.layer}/${r.id}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2 class="caps">{r.name}</h2>
-					<p class="muted small">{sourceLabel(r)} · <span class="id">{r.path}</span></p>
+					<p class="muted small"><a href={pluginHref(save, r.layer)}>{sourceLabel(r)}</a> · <span class="id">{r.path}</span></p>
 					{#if !r.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
 					{#if r.replaces}<p class="muted small">Replaces the one from {r.replaces}.</p>{/if}
 					{@render pane(r)}

@@ -25,6 +25,7 @@ type PluginSchema struct {
 	Version     string        `json:"version,omitempty"`
 	Plugin      string        `json:"plugin,omitempty"` // the installed plugin shipped alongside it, when known
 	Fields      []SchemaField `json:"fields"`
+	Variants    []string      `json:"variants"` // model tasks it adds, as named on the Models page
 }
 
 // SchemaField is one setting: type is bool, int, float, string, select, or
@@ -43,6 +44,9 @@ type SchemaField struct {
 }
 
 type schemaFile struct {
+	Variants []struct {
+		Name string `yaml:"name"`
+	} `yaml:"variants"`
 	Plugin struct {
 		Name        string `yaml:"name"`
 		Version     string `yaml:"version"`
@@ -96,7 +100,12 @@ func (s *Settings) PluginSchemas() []PluginSchema {
 				continue
 			}
 			seen[key] = true
-			ps := PluginSchema{Name: pluginPrefix + d.Name(), Folder: d.Name(), Title: f.Plugin.Name, Description: f.Plugin.Description, Version: f.Plugin.Version, Fields: []SchemaField{}}
+			ps := PluginSchema{Name: pluginPrefix + d.Name(), Folder: d.Name(), Title: f.Plugin.Name, Description: f.Plugin.Description, Version: f.Plugin.Version, Fields: []SchemaField{}, Variants: []string{}}
+			for _, v := range f.Variants {
+				if v.Name != "" {
+					ps.Variants = append(ps.Variants, v.Name)
+				}
+			}
 			if ps.Title == "" {
 				ps.Title = d.Name()
 			}

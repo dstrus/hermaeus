@@ -185,6 +185,7 @@ export interface PluginSchema {
   version?: string;
   plugin?: string; // the installed plugin shipped alongside it, when known
   fields: SchemaField[];
+  variants: string[]; // model tasks it adds, as named on the Models page
 }
 /**
  * SchemaField is one setting: type is bool, int, float, string, select, or

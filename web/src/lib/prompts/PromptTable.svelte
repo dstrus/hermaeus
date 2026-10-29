@@ -1,5 +1,7 @@
 <!-- Every prompt SkyrimNet can use, with the layer each comes from. -->
 <script lang="ts">
+	import { pluginHref } from '#lib/plugins/links.ts';
+	import { param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
@@ -18,6 +20,9 @@
 	let { save, list }: { save: string; list: PromptList } = $props(); // pinned prompts first, in the order they were pinned, then by path
 
 	let query = $state('');
+	// Narrowed to what one plugin brings, from its pane on the Plugins page.
+	let from = $derived(param('from'));
+	let fromLayer = $derived(from ? list.layers.findIndex((l) => l.id === from) : -1);
 	let inside = $state(false); // search the prompts' text too, not only their names
 	let matches = $state<Set<string> | null>(null); // paths whose text matches, when searching inside
 	let searching = $state(false);
@@ -57,7 +62,7 @@
 	let grouped = $derived(sort.key === 'folder');
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
-		const found = list.prompts.filter((p) => !q || p.path.toLowerCase().includes(q) || matches?.has(p.path.toLowerCase()));
+		const found = list.prompts.filter((p) => (fromLayer < 0 || p.layers.includes(fromLayer)) && (!q || p.path.toLowerCase().includes(q) || matches?.has(p.path.toLowerCase())));
 		const byKey = sorted(found, sort, {
 			name: (p) => promptName(p.path),
 			// Top-level prompts first, then each folder's; a space keeps a
@@ -118,7 +123,11 @@
 
 <div class="bar">
 	<h1 class="caps">Prompts</h1>
-	<span class="muted n" use:clipped>{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
+	{#if fromLayer >= 0}
+		<span class="muted n" use:clipped>{count(shown.length)} from <a href={pluginHref(save, from!)}>{list.layers[fromLayer]?.source}</a> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>Show all</button></span>
+	{:else}
+		<span class="muted n" use:clipped>{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
+	{/if}
 	<label class="inside"><input type="checkbox" bind:checked={inside} /> Search inside</label>
 	<input type="search" bind:value={query} placeholder={inside ? 'Search names and text' : 'Filter by name'} aria-label="Filter prompts" />
 </div>
@@ -163,9 +172,10 @@
 				</div>
 				<p class="path">{current.path}</p>
 				<dl>
-					<dt class="caps">In use</dt><dd>{#if mine(current)}<span class="changed">Your copy</span>{:else}{source(current)}{/if}</dd>
+					<dt class="caps">In use</dt><dd>{#if mine(current)}<a class="changed" href={pluginHref(save, 'overlay')}>Your copy</a>{:else}<a href={pluginHref(save, list.layers[current.layer]?.id ?? '')}>{source(current)}</a>{/if}</dd>
 					{#if current.layers.length > 1}
-						<dt class="caps">Also in</dt><dd>{current.layers.slice(1).map((i) => list.layers[i]?.source ?? '').join(', ')}</dd>
+						<dt class="caps">Also in</dt>
+						<dd>{#each current.layers.slice(1) as i, n (i)}{n ? ', ' : ''}<a href={pluginHref(save, list.layers[i]?.id ?? '')}>{list.layers[i]?.source}</a>{/each}</dd>
 					{/if}
 					<dt class="caps">Changed</dt><dd>{realTime(current.modified)}</dd>
 				</dl>
