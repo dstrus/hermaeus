@@ -17,6 +17,7 @@
 	let tabs = $derived([
 		{ href: base, label: 'Overview' },
 		...(c.bio ? [{ href: `${base}/bio`, label: 'Bio' }] : []),
+		{ href: `${base}/events`, label: 'Events' },
 		{ href: `${base}/memories`, label: 'Memories', n: c.memories },
 		{ href: `${base}/diary`, label: 'Diary', n: c.diaries },
 		{ href: `${base}/stats`, label: 'Stats' }

@@ -2,6 +2,44 @@
 import type * as calendar from './calendar.ts';
 
 //////////
+// source: events.go
+
+export interface Event {
+  id: number /* int64 */;
+  type: string;
+  label: string; // the type, in words
+  summary: string; // what happened, in a sentence
+  /**
+   * For something said: who said it, to whom, and the words, so the page
+   * can set the names apart from the words.
+   */
+  speaker?: string;
+  listener?: string;
+  line?: string;
+  speakerUuid?: string; // the speaker's current identity, when the event names one
+  listenerUuid?: string; // likewise the listener's
+  location?: string;
+  date?: calendar.GameDate;
+  written?: number /* int64 */; // when SkyrimNet recorded it, Unix ms
+  /**
+   * The character's part in it: "acting", "acted on", or "present".
+   */
+  role: string;
+  present: number /* int */; // how many characters were there
+  data?: { [key: string]: unknown}; // the details SkyrimNet stored, when they're fields
+  text?: string; // the details, when they're a sentence instead
+}
+export interface EventsResponse {
+  events: Event[]; // newest first
+  types: EventTypeCount[]; // how many of each type, most first
+}
+export interface EventTypeCount {
+  type: string;
+  label: string;
+  count: number /* int */;
+}
+
+//////////
 // source: list.go
 /*
 Package characters is about the player and the NPCs SkyrimNet knows:

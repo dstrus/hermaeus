@@ -17,6 +17,9 @@ func Routes(mux *http.ServeMux, st *store.Store) {
 	mux.Handle("GET /api/playthroughs/{save}/characters/{uuid}/overview", httpapi.JSON(func(r *http.Request, _ httpapi.None) (Overview, error) {
 		return store.Read(st, r.PathValue("save"), func(db store.DB) (Overview, error) { return OverviewOf(db, r.PathValue("uuid")) })
 	}))
+	mux.Handle("GET /api/playthroughs/{save}/characters/{uuid}/events", httpapi.JSON(func(r *http.Request, _ httpapi.None) (EventsResponse, error) {
+		return store.Read(st, r.PathValue("save"), func(db store.DB) (EventsResponse, error) { return EventsOf(db, r.PathValue("uuid")) })
+	}))
 	mux.Handle("GET /api/playthroughs/{save}/characters/{uuid}/stats", httpapi.JSON(func(r *http.Request, _ httpapi.None) (Stats, error) {
 		return store.Read(st, r.PathValue("save"), func(db store.DB) (Stats, error) { return StatsOf(db, r.PathValue("uuid")) })
 	}))
