@@ -16,6 +16,7 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { modelChoices, modelsDependency, providerName, rotation, saveTask } from './api.ts';
+	import { modelLists } from './lists.svelte.ts';
 	import TaskForm from './TaskForm.svelte';
 
 	let { save, models }: { save: string; models: Models } = $props();
@@ -87,7 +88,12 @@
 		];
 	});
 
-	let keyed = $derived(models.providers.filter((p) => p.hasKey).map((p) => p.name));
+	// A provider's model list, as a few words.
+	function listState(id: string): string {
+		if (modelLists.loading[id]) return 'asking…';
+		const list = modelLists.lists[id];
+		return list ? `${plural(list.models.length, 'model', 'models')} fetched` : 'models not fetched';
+	}
 </script>
 
 <div class="bar">
@@ -96,11 +102,35 @@
 		{#if !models.found}
 			Not set up yet
 		{:else}
-			{plural(models.tasks.length, 'task', 'tasks')}{keyed.length ? ` · keys for ${keyed.join(', ')}` : ' · no provider has a key yet'}
+			{plural(models.tasks.length, 'task', 'tasks')} · {plural(models.providers.length, 'provider', 'providers')}
 		{/if}
 	</span>
 </div>
 <p class="muted lead">Which model does each of SkyrimNet’s jobs. A task tries its models in rotation, each with its own provider and settings; a task without a model of its own uses Dialogue’s.</p>
+{#if models.providers.length}
+	<!-- The providers, each with its model list to fetch here, before any
+	     form needs it; a fetched list is offered as you type a model. -->
+	<div class="providers" role="group" aria-label="Providers">
+		<span class="caps muted group" aria-hidden="true">Providers</span>
+		{#each models.providers as p (p.id)}
+			<span class="item">
+				<span class="name">{p.name}</span>
+				<span class="muted small">
+					{[!p.hasKey ? 'no key' : '', p.style === 'chat' ? listState(p.id) : ''].filter(Boolean).join(' · ')}
+				</span>
+				{#if p.style === 'chat'}
+					<button type="button" class="textbutton small" onclick={() => modelLists.fetch(p.id, !!modelLists.lists[p.id])} disabled={modelLists.loading[p.id]}>
+						{modelLists.lists[p.id] ? 'Fetch again' : 'Fetch models'}
+					</button>
+				{/if}
+			</span>
+		{/each}
+		<span class="muted small note">Fetching asks the provider over the Internet, with your key when it has one; its models are then offered as you type one into a task.</span>
+		{#each models.providers.filter((p) => modelLists.errors[p.id]) as p (p.id)}
+			<span class="notice error small" role="alert">{p.name}: {modelLists.errors[p.id]}</span>
+		{/each}
+	</div>
+{/if}
 {#if !models.found}
 	<p class="notice">SkyrimNet hasn’t written <span class="id">{models.path}</span> yet; it will the next time it starts. Until then there’s nothing to change here.</p>
 {/if}
@@ -219,6 +249,31 @@
 	}
 	.notice {
 		margin-bottom: var(--space-4);
+	}
+	/* The providers run in one row, as the quick toggles do, each with
+	   its model list's state and the one action on it. */
+	.providers {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--space-1) var(--space-5);
+		margin-bottom: var(--space-4);
+	}
+	.providers .group {
+		font-size: var(--step--1);
+	}
+	.providers .item {
+		display: inline-flex;
+		align-items: baseline;
+		gap: var(--space-2);
+		white-space: nowrap;
+	}
+	.providers .note {
+		flex-basis: 100%;
+	}
+	.providers .notice {
+		flex-basis: 100%;
+		margin: 0;
 	}
 	/* The pane is wider here: a rotation is a form of several fields per model. */
 	.split {
