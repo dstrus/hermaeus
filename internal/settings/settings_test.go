@@ -93,19 +93,24 @@ func TestComparedWithDefaults(t *testing.T) {
 	if f, err := h.settings.Read("UniversalTranslator"); err != nil || !f.File.Exists {
 		t.Errorf("read by name anyway: %+v, %v", f.File, err)
 	}
-	// OpenRouter.yaml has a page of its own, so its secrets are checked as read by name.
+	// OpenRouter.yaml and Providers.yaml have pages of their own, so their
+	// secrets are checked as read by name.
 	openRouter, err := h.settings.Read("OpenRouter")
 	if err != nil {
 		t.Fatal(err)
 	}
-	sent, _ := json.Marshal([]any{list, openRouter})
+	providersFile, err := h.settings.Read("Providers")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sent, _ := json.Marshal([]any{list, openRouter, providersFile})
 	for _, secret := range []string{"SECRET-ONE", "SECRET-TWO", "SECRET-THREE", "SECRET-FOUR"} {
 		if strings.Contains(string(sent), secret) {
 			t.Errorf("%s would be sent to the page", secret)
 		}
 	}
 	files := map[string]map[string]Setting{}
-	for _, f := range append(list.Files, openRouter) {
+	for _, f := range append(list.Files, openRouter, providersFile) {
 		files[f.File.Name] = map[string]Setting{}
 		for _, v := range f.Values {
 			files[f.File.Name][v.Key] = v
@@ -422,9 +427,9 @@ func TestRealSettingsRoundTrip(t *testing.T) {
 
 func TestPinnedFiles(t *testing.T) {
 	h := newHarness(t)
-	h.config("defaults_manifest.json", `{"fields": {"game": {"narration.enabled": true}, "Providers": {"providers": []}}}`)
+	h.config("defaults_manifest.json", `{"fields": {"game": {"narration.enabled": true}, "Memory": {"retrieval.max": 5}}}`)
 	h.config("SkyrimNet.yaml", "narration:\n  enabled: true\n")
-	for _, name := range []string{"Providers", "game"} {
+	for _, name := range []string{"Memory", "game"} {
 		if _, err := h.settings.SetPinned(name, true); err != nil {
 			t.Fatal(err)
 		}
@@ -432,7 +437,7 @@ func TestPinnedFiles(t *testing.T) {
 	if _, err := h.settings.SetPinned("../x", true); err == nil {
 		t.Error("pinned an invalid name")
 	}
-	pins, _ := h.settings.SetPinned("providers", false) // regardless of case
+	pins, _ := h.settings.SetPinned("memory", false) // regardless of case
 	if strings.Join(pins.Pins, ",") != "game" {
 		t.Errorf("pins = %v", pins.Pins)
 	}
@@ -448,9 +453,9 @@ func TestPinnedFiles(t *testing.T) {
 	if list.Files[0].File.Name != "game" {
 		t.Errorf("first file = %s, want the pinned one", list.Files[0].File.Name)
 	}
-	h.settings.SetPinned("Providers", true)
+	h.settings.SetPinned("Memory", true)
 	list, _ = h.settings.List()
-	if list.Files[0].File.Name != "game" || list.Files[1].File.Name != "Providers" {
+	if list.Files[0].File.Name != "game" || list.Files[1].File.Name != "Memory" {
 		t.Errorf("files = %v, want pins first in the order pinned", []string{list.Files[0].File.Name, list.Files[1].File.Name})
 	}
 	if f, _ := h.settings.Read("game"); !f.File.Pinned {

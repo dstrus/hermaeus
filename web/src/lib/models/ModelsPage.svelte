@@ -8,6 +8,7 @@
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { Models, Slot, Task, TaskEdit } from '#lib/api/types/settings.ts';
 	import { plural } from '#lib/format.ts';
+	import { providersHref } from '#lib/providers/api.ts';
 	import { settingsHref } from '#lib/settings/api.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
@@ -88,6 +89,10 @@
 		];
 	});
 
+	// The row above the tasks shows the providers a task can use: those with
+	// a key. The rest wait on the Providers page.
+	let ready = $derived(models.providers.filter((p) => p.hasKey && p.style === 'chat'));
+	let waiting = $derived(models.providers.filter((p) => !p.hasKey && p.style === 'chat'));
 	// A provider's model list, as a few words.
 	function listState(id: string): string {
 		if (modelLists.loading[id]) return 'asking…';
@@ -108,25 +113,29 @@
 </div>
 <p class="muted lead">Which model does each of SkyrimNet’s jobs. A task tries its models in rotation, each with its own provider and settings; a task without a model of its own uses Dialogue’s.</p>
 {#if models.providers.length}
-	<!-- The providers, each with its model list to fetch here, before any
-	     form needs it; a fetched list is offered as you type a model. -->
+	<!-- The providers with a key, each with its model list to fetch here,
+	     before any form needs it; a fetched list is offered as you type. -->
 	<div class="providers" role="group" aria-label="Providers">
 		<span class="caps muted group" aria-hidden="true">Providers</span>
-		{#each models.providers as p (p.id)}
+		{#each ready as p (p.id)}
 			<span class="item">
 				<span class="name">{p.name}</span>
-				<span class="muted small">
-					{[!p.hasKey ? 'no key' : '', p.style === 'chat' ? listState(p.id) : ''].filter(Boolean).join(' · ')}
-				</span>
-				{#if p.style === 'chat'}
-					<button type="button" class="textbutton small" onclick={() => modelLists.fetch(p.id, !!modelLists.lists[p.id])} disabled={modelLists.loading[p.id]}>
-						{modelLists.lists[p.id] ? 'Fetch again' : 'Fetch models'}
-					</button>
-				{/if}
+				<span class="muted small">{listState(p.id)}</span>
+				<button type="button" class="textbutton small" onclick={() => modelLists.fetch(p.id, !!modelLists.lists[p.id])} disabled={modelLists.loading[p.id]}>
+					{modelLists.lists[p.id] ? 'Fetch again' : 'Fetch models'}
+				</button>
 			</span>
 		{/each}
-		<span class="muted small note">Fetching asks the provider over the Internet, with your key when it has one; its models are then offered as you type one into a task.</span>
-		{#each models.providers.filter((p) => modelLists.errors[p.id]) as p (p.id)}
+		<a class="small" href={providersHref(save)}>
+			{#if !ready.length}
+				None has a key yet: set one on the Providers page
+			{:else if waiting.length}
+				{plural(waiting.length, 'more without a key', 'more without keys')}
+			{:else}
+				All providers
+			{/if}
+		</a>
+		{#each ready.filter((p) => modelLists.errors[p.id]) as p (p.id)}
 			<span class="notice error small" role="alert">{p.name}: {modelLists.errors[p.id]}</span>
 		{/each}
 	</div>
@@ -167,7 +176,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<p class="muted small">Providers and their keys, and the rest of <span class="id">{models.path}</span>, are under <a href={settingsHref(save, 'Providers')}>Providers</a> and <a href={settingsHref(save, 'OpenRouter')}>OpenRouter</a> in Settings.</p>
+		<p class="muted small">Fetching a provider’s models asks it over the Internet, with your key. Providers and their keys are on the <a href={providersHref(save)}>Providers</a> page; the rest of <span class="id">{models.path}</span> is under <a href={settingsHref(save, 'OpenRouter')}>OpenRouter</a> in Settings.</p>
 	</div>
 
 	<aside class="pane" use:fitToViewport aria-label="Task">
@@ -267,9 +276,6 @@
 		align-items: baseline;
 		gap: var(--space-2);
 		white-space: nowrap;
-	}
-	.providers .note {
-		flex-basis: 100%;
 	}
 	.providers .notice {
 		flex-basis: 100%;

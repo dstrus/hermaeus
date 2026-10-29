@@ -50,6 +50,22 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("PUT /api/models/{task}", httpapi.JSON(func(r *http.Request, e TaskEdit) (Models, error) {
 		return s.SetTask(r.PathValue("task"), e)
 	}))
+	// The providers tasks can be sent to; a key is set or cleared, never read.
+	mux.Handle("GET /api/providers", httpapi.JSON(func(*http.Request, httpapi.None) (ProvidersResponse, error) {
+		return s.Providers()
+	}))
+	mux.Handle("POST /api/providers", httpapi.JSON(func(_ *http.Request, e ProviderEdit) (ProvidersResponse, error) {
+		return s.AddProvider(e)
+	}))
+	mux.Handle("PUT /api/providers/{id}", httpapi.JSON(func(r *http.Request, e ProviderEdit) (ProvidersResponse, error) {
+		return s.SetProvider(r.PathValue("id"), e)
+	}))
+	mux.Handle("DELETE /api/providers/{id}", httpapi.JSON(func(r *http.Request, e KeyEdit) (ProvidersResponse, error) {
+		return s.RemoveProvider(r.PathValue("id"), e.Modified)
+	}))
+	mux.Handle("PUT /api/providers/{id}/key", httpapi.JSON(func(r *http.Request, e KeyEdit) (ProvidersResponse, error) {
+		return s.SetKey(r.PathValue("id"), e)
+	}))
 	mux.Handle("GET /api/toggles", httpapi.JSON(func(*http.Request, httpapi.None) (ToggleList, error) {
 		return s.Toggles()
 	}))

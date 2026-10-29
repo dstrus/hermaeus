@@ -103,6 +103,57 @@ export interface PinsResponse {
 }
 
 //////////
+// source: providers.go
+
+/**
+ * ProviderDetails is a provider as shown, without its key.
+ */
+export interface ProviderDetails {
+  id: string;
+  name: string;
+  style: string;
+  hasKey: boolean;
+  builtin: boolean;
+  endpoint: string;
+  keyFrom?: string; // the provider whose key it borrows while its own is blank
+  streaming: boolean; // use_sse
+  structuredOutputs: boolean;
+  reasoning: boolean;
+  settings: string; // provider_settings as JSON, "" for none
+  sorting: string; // provider_sorting: how OpenRouter picks among its upstreams
+  cacheTTL: string;
+  tasks: string[]; // the tasks with a slot on it, by label
+}
+export interface ProvidersResponse {
+  found: boolean;
+  path: string;
+  modified: number /* int64 */;
+  providers: ProviderDetails[];
+}
+/**
+ * ProviderEdit is a provider as it should be, except its key.
+ */
+export interface ProviderEdit {
+  modified: number /* int64 */;
+  name: string;
+  endpoint: string;
+  style: string;
+  streaming: boolean;
+  structuredOutputs: boolean;
+  reasoning: boolean;
+  settings: string;
+  sorting: string;
+  cacheTTL: string;
+}
+/**
+ * KeyEdit sets a provider's key; empty clears it.
+ */
+export interface KeyEdit {
+  modified: number /* int64 */;
+  key: string;
+}
+
+//////////
 // source: save.go
 
 /**
