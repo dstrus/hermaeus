@@ -98,6 +98,14 @@
 					<li><a class="caps" href="{base}/settings/{s.path}" aria-current={here(s.path) ? 'page' : undefined}>{s.label}</a></li>
 				{/each}
 			</ul>
+			{#if data.pluginSettings.length}
+				<p class="group caps">Plugin settings</p>
+				<ul aria-label="Plugin settings">
+					{#each data.pluginSettings as p (p.folder)}
+						<li><a class="caps" href="{base}/settings/plugin/{encodeURIComponent(p.folder)}" aria-current={here(`plugin/${p.folder}`) ? 'page' : undefined}>{p.title}</a></li>
+					{/each}
+				</ul>
+			{/if}
 		</nav>
 		<main>{@render children()}</main>
 	{:else}

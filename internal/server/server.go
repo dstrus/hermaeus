@@ -93,7 +93,7 @@ func (s *Server) routes() {
 	characters.Routes(m, s.Store)
 	memories.Routes(m, s.Store)
 	bios.New(s.Store, s.Library).Routes(m)
-	settings.New(s.Store, s.Prefs).Routes(m)
+	settings.New(s.Store, s.Prefs).WithRoots(s.Library.Roots).Routes(m)
 	prompts.New(s.Store, s.Library, s.Prefs).Routes(m)
 	filters.New(s.Store, s.Library).Routes(m)
 	plugins.New(s.Store, s.Library).Routes(m)

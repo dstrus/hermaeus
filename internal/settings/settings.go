@@ -25,8 +25,9 @@ import (
 
 type Settings struct {
 	store *store.Store
-	prefs *prefs.Prefs // where pinned files are remembered
-	lists modelLists   // providers' model lists, fetched this session
+	prefs *prefs.Prefs    // where pinned files are remembered
+	lists modelLists      // providers' model lists, fetched this session
+	roots func() []string // where plugins are, for their settings schemas
 }
 
 func New(s *store.Store, p *prefs.Prefs) *Settings {
@@ -212,13 +213,15 @@ func (s *Settings) List() (FileList, error) {
 	if err != nil {
 		return FileList{}, err
 	}
-	defs := loadDefaults(dir)
+	defs := s.loadDefaults(dir)
+	schemas := s.PluginSchemas()
 	out := FileList{Files: []FileValues{}}
 	for _, name := range names(dir, defs) {
 		f, err := read(dir, name, defs)
 		if err != nil {
 			return FileList{}, err
 		}
+		s.markPluginPage(&f.File, schemas)
 		f.File.Pinned = s.pinned(name)
 		out.Files = append(out.Files, f)
 	}
@@ -239,7 +242,10 @@ func (s *Settings) Read(name string) (FileValues, error) {
 	if !validName(name) {
 		return FileValues{}, apperr.New(apperr.Invalid, "Invalid settings name %q", name)
 	}
-	f, err := read(dir, name, loadDefaults(dir))
+	f, err := read(dir, name, s.loadDefaults(dir))
+	if err == nil {
+		s.markPluginPage(&f.File, s.PluginSchemas())
+	}
 	f.File.Pinned = s.pinned(name)
 	return f, err
 }
@@ -340,6 +346,11 @@ func read(configDir, name string, defs defaults) (FileValues, error) {
 // defaults at single precision (0.699999988 for 0.7), so numbers that agree
 // as float32 are the same.
 func sameValue(a, b any) bool {
+	// No value and empty text both mean nothing set, as a plugin's unset
+	// hotkey is "" in its file and null in SkyrimNet's defaults.
+	if (a == nil || a == "") && (b == nil || b == "") {
+		return true
+	}
 	if x, ok := toNumber(a); ok {
 		y, ok := toNumber(b)
 		return ok && (x == y || float32(x) == float32(y))

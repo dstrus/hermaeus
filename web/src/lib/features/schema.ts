@@ -14,7 +14,8 @@ export type Kind =
 	| 'text'
 	| 'choice' // one of a few values, or any text when custom is set
 	| 'set' // any number of the choices, kept as a list
-	| 'hotkey'; // a key code, -1 for none
+	| 'hotkey' // a key code, -1 for none
+	| 'secret'; // text that's written but never shown, like an API key
 
 export interface Choice {
 	value: string;
@@ -34,6 +35,7 @@ export interface Field {
 	custom?: boolean; // a choice may also be typed in
 	unit?: string; // after a count, such as "events"
 	placeholder?: string; // an example, for a text field
+	pluginHotkey?: boolean; // a plugin's hotkey: unset is empty or 0, and it may be stored as text
 }
 
 export interface Section {
@@ -59,6 +61,10 @@ export function valueOf(s: Setting | undefined): unknown {
 
 // show formats a value for a field.
 export function show(f: Field, v: unknown): string {
+	if (f.kind === 'hotkey') {
+		const n = hotkeyCode(v);
+		return n <= 0 ? keyName(-1) : keyName(n);
+	}
 	if (v === undefined || v === null) return '—';
 	switch (f.kind) {
 		case 'switch':
@@ -73,8 +79,8 @@ export function show(f: Field, v: unknown): string {
 			const c = f.choices?.find((c) => c.value === String(v));
 			return c ? c.label : String(v);
 		}
-		case 'hotkey':
-			return typeof v === 'number' ? keyName(v) : String(v);
+		case 'secret':
+			return typeof v === 'object' && v !== null && 'filled' in v ? ((v as { filled: boolean }).filled ? 'Set' : 'Not set') : String(v) ? 'Set' : 'Not set';
 		case 'set':
 			return Array.isArray(v) ? `${v.length} of ${f.choices?.length ?? v.length}` : String(v);
 		case 'text':
@@ -98,8 +104,20 @@ export function setValue(f: Field, before: unknown, picked: string[]): string[] 
 	return [...keep, ...added];
 }
 
+// hotkeyCode reads a key code stored as a number or as text, as plugins do;
+// -1 when there's none.
+export function hotkeyCode(v: unknown): number {
+	const n = typeof v === 'string' ? (v.trim() === '' ? -1 : Number(v)) : typeof v === 'number' ? v : -1;
+	return Number.isNaN(n) ? -1 : n;
+}
+
 // draftOf is a value as the form holds it: text, percentages as whole numbers.
 export function draftOf(f: Field, v: unknown): string {
+	if (f.kind === 'secret') return ''; // never shown, only replaced
+	if (f.kind === 'hotkey') {
+		const n = hotkeyCode(v);
+		return String(n <= 0 ? -1 : n);
+	}
 	if (v === undefined || v === null) return '';
 	if (f.kind === 'percent' && typeof v === 'number') return String(Number((v * 100).toFixed(2)));
 	return String(v);
@@ -119,6 +137,8 @@ export function parse(f: Field, draft: string): unknown {
 			return t;
 		case 'hotkey':
 			return number(t, f.label);
+		case 'secret':
+			return t;
 		case 'percent': {
 			const n = number(t, f.label);
 			if (n < 0 || n > 100) throw new Error(`${f.label} is a percentage, from 0 to 100.`);

@@ -61,7 +61,7 @@ func (s *Settings) Save(name string, e Edit) (FileValues, error) {
 		if err != nil {
 			return err
 		}
-		defs, _ := loadDefaults(dir).of(name)
+		defs, _ := s.loadDefaults(dir).of(name)
 		updated, err := apply(old, name, defs, e.Changes)
 		if err != nil {
 			return err
@@ -73,7 +73,7 @@ func (s *Settings) Save(name string, e Edit) (FileValues, error) {
 		if err := textfile.WriteAtomic(path, updated, info.Mode().Perm()); err != nil {
 			return err
 		}
-		out, err = read(dir, name, loadDefaults(dir))
+		out, err = read(dir, name, s.loadDefaults(dir))
 		out.File.Pinned = s.pinned(name)
 		return err
 	})

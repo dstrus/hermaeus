@@ -172,6 +172,38 @@ export interface Change {
 }
 
 //////////
+// source: schemas.go
+
+/**
+ * PluginSchema is one plugin's settings, as its schema describes them.
+ */
+export interface PluginSchema {
+  name: string; // the settings file: Plugin_<Name>
+  folder: string; // <Name>
+  title: string;
+  description?: string;
+  version?: string;
+  plugin?: string; // the installed plugin shipped alongside it, when known
+  fields: SchemaField[];
+}
+/**
+ * SchemaField is one setting: type is bool, int, float, string, select, or
+ * hotkey (a virtual-key code).
+ */
+export interface SchemaField {
+  name: string;
+  path: string;
+  type: string;
+  description?: string;
+  default?: unknown;
+  category?: string;
+  min?: number /* float64 */;
+  max?: number /* float64 */;
+  options?: string[];
+  secret?: boolean; // written but never read back, like an API key
+}
+
+//////////
 // source: settings.go
 /*
 Package settings reads and changes SkyrimNet's settings files, the YAML

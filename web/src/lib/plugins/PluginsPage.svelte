@@ -4,10 +4,13 @@
      content-registry.json with a backup. -->
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
+	import { page } from '$app/state';
+	import { pluginSettingsHref } from '#lib/features/plugins.ts';
 	import { fly } from 'svelte/transition';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { List, Plugin } from '#lib/api/types/plugins.ts';
+	import type { PluginSchema } from '#lib/api/types/settings.ts';
 	import { plural } from '#lib/format.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
@@ -17,6 +20,8 @@
 	import { contentsLine, pluginsDependency, priorityOf, setEnabled, setOrder } from './api.ts';
 
 	let { list }: { list: List } = $props();
+	// A plugin's own settings page, when it ships a schema for them.
+	const settingsOf = (id: string) => (page.data.pluginSettings as PluginSchema[] | undefined)?.find((s) => s.plugin === id);
 
 	let readOnly = $derived(live.gameRunning);
 	let shown = $derived(list.plugins);
@@ -162,6 +167,11 @@
 							<dd class="id folder">{p.folder}</dd>
 						{/if}
 						{#if p.tags.length}<dt class="caps">Tags</dt><dd>{p.tags.join(', ')}</dd>{/if}
+						{#if settingsOf(p.id)}
+							{@const s = settingsOf(p.id)!}
+							<dt class="caps">Settings</dt>
+							<dd><a href={pluginSettingsHref(page.params.save ?? '', s.folder)}>{s.fields.length} of its own</a></dd>
+						{/if}
 					</dl>
 					{#if p.replaces.length}
 						<details>

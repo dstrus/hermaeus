@@ -111,6 +111,12 @@
 		let v: unknown;
 		try {
 			v = current.field.kind === 'set' ? setValue(current.field, value, picked) : parse(current.field, draft);
+			// A plugin's hotkey goes back as the file keeps it: text when it's text,
+			// and unset as empty text or 0, as SkyrimNet's dashboard writes it.
+			if (current.field.pluginHotkey && typeof v === 'number') {
+				if (typeof value === 'string') v = v === noKey ? '' : String(v);
+				else if (v === noKey) v = 0;
+			}
 		} catch (err) {
 			error = err instanceof Error ? err.message : String(err);
 			return;
@@ -216,6 +222,9 @@
 										oncontextmenu={(e) => e.preventDefault()}>{keyName(Number(draft))}</button
 									>
 									<span class="muted small">Press a key, or click the box with a mouse button. <button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>No key</button></span>
+								{:else if f.kind === 'secret'}
+									<input bind:this={field} type="password" bind:value={draft} placeholder={show(f, value) === 'Set' ? 'Type a new one to replace it' : ''} autocomplete="off" spellcheck="false" />
+									<span class="muted small">Saved into the plugin’s settings file. Hermaeus never shows it again; save it empty to clear it.</span>
 								{:else if f.kind === 'set'}
 									<ul class="picks">
 										{#each f.choices ?? [] as c, i (c.value)}

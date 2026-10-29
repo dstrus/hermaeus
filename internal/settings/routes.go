@@ -66,6 +66,10 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("PUT /api/providers/{id}/key", httpapi.JSON(func(r *http.Request, e KeyEdit) (ProvidersResponse, error) {
 		return s.SetKey(r.PathValue("id"), e)
 	}))
+	// Plugins' own settings, as their schemas describe them.
+	mux.Handle("GET /api/plugin-settings", httpapi.JSON(func(*http.Request, httpapi.None) ([]PluginSchema, error) {
+		return s.PluginSchemas(), nil
+	}))
 	mux.Handle("GET /api/toggles", httpapi.JSON(func(*http.Request, httpapi.None) (ToggleList, error) {
 		return s.Toggles()
 	}))
