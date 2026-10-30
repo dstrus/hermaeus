@@ -29,7 +29,6 @@
 		{ label: 'Screenshots' },
 		{ label: 'Bard songs' }
 	];
-	const configuration = [{ label: 'Prompts', built: true }, { label: 'Plugins', built: true }, { label: 'Actions', built: true }, { label: 'Triggers', built: true }, { label: 'Content' }, { label: 'Overrides' }];
 	// A playthrough is named by its player, with its save ID only when
 	// another playthrough has the same player.
 	function playthroughLabel(p: Playthrough): string {
@@ -43,6 +42,8 @@
 	let pluginsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/plugins`));
 	let actionsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/actions`));
 	let triggersActive = $derived(!!save && page.url.pathname.startsWith(`${base}/triggers`));
+	let contentActive = $derived(!!save && page.url.pathname.startsWith(`${base}/content`));
+	let overridesActive = $derived(!!save && page.url.pathname.startsWith(`${base}/overrides`));
 	// The Settings group's pages, each current at or below its address.
 	const here = (path: string) => page.url.pathname === `${base}/settings/${path}` || page.url.pathname.startsWith(`${base}/settings/${path}/`);
 </script>
@@ -91,10 +92,8 @@
 				<li><a class="caps" href="{base}/plugins" aria-current={pluginsActive ? 'page' : undefined}>Plugins</a></li>
 				<li><a class="caps" href="{base}/actions" aria-current={actionsActive ? 'page' : undefined}>Actions</a></li>
 				<li><a class="caps" href="{base}/triggers" aria-current={triggersActive ? 'page' : undefined}>Triggers</a></li>
-			</ul>
-			<p class="later caps">Not built yet</p>
-			<ul class="soon" aria-label="Configuration, not built yet">
-				{#each configuration.filter((s) => !s.built) as s (s.label)}<li class="caps">{s.label}</li>{/each}
+				<li><a class="caps" href="{base}/content" aria-current={contentActive ? 'page' : undefined}>Content</a></li>
+				<li><a class="caps" href="{base}/overrides" aria-current={overridesActive ? 'page' : undefined}>Overrides</a></li>
 			</ul>
 			<p class="group caps">Settings</p>
 			<ul aria-label="Settings">

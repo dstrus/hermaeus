@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"hermaeus/internal/layers"
+	"hermaeus/internal/store"
 )
 
 func write(t *testing.T, path, content string) {
@@ -71,7 +72,7 @@ interrupt: true
 	if _, err := l.SetModDir(mod); err != nil {
 		t.Fatal(err)
 	}
-	r := New(l)
+	r := New(store.New("", func() bool { return false }), l)
 
 	acts := r.Actions().Actions
 	if len(acts) != 2 || acts[0].Name != "Bow" || acts[1].Name != "Wave" {

@@ -13,16 +13,18 @@ import (
 	"strings"
 
 	"hermaeus/internal/layers"
+	"hermaeus/internal/store"
 
 	"go.yaml.in/yaml/v3"
 )
 
 type Records struct {
+	store   *store.Store
 	library *layers.Library
 }
 
-func New(l *layers.Library) *Records {
-	return &Records{library: l}
+func New(s *store.Store, l *layers.Library) *Records {
+	return &Records{store: s, library: l}
 }
 
 // Origin is where a record comes from.

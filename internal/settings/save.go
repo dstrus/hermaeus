@@ -93,6 +93,13 @@ func apply(old []byte, name string, defs map[string]any, changes []Change) ([]by
 	})
 }
 
+// EditYAML changes a YAML file's document and returns the file written the
+// way it was: values swapped in place where only values changed, otherwise
+// the changed lines merged in, so comments and formatting stay.
+func EditYAML(old []byte, change func(doc *yaml.Node) error) ([]byte, error) {
+	return rewrite(old, "the file", change)
+}
+
 // rewrite returns the file with change made to its document, written the
 // way it was: values swapped in place where only values changed, otherwise
 // the changed lines merged in (see yaml.go).

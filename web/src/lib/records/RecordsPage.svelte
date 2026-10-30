@@ -1,9 +1,13 @@
 <!-- A list of SkyrimNet records (actions, triggers), grouped by where each
      comes from, in the Plugins page's order, with the selected one in the
-     pane. Read-only: which records apply is set by the plugins they come in. -->
+     pane. A record can be switched off here, which the player's own copy of
+     it records; its file is edited on the Content page. -->
 <script lang="ts" generics="T extends Origin & { name: string; description: string; enabled: boolean }">
 	import type { Snippet } from 'svelte';
 	import { fly } from 'svelte/transition';
+	import { invalidate } from '$app/navigation';
+	import { ApiError } from '#lib/api/client.ts';
+	import { live } from '#lib/api/live.svelte.ts';
 	import type { Origin } from '#lib/api/types/records.ts';
 	import { plural } from '#lib/format.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
@@ -12,9 +16,9 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { page } from '$app/state';
-	import { pluginHref } from '#lib/plugins/links.ts';
+	import { contentHref, pluginHref } from '#lib/plugins/links.ts';
 	import { param, setParams } from '#lib/ui/address.svelte.ts';
-	import { sourceLabel } from './api.ts';
+	import { recordsDependency, sourceLabel, switchRecord } from './api.ts';
 
 	let {
 		title,
@@ -48,12 +52,45 @@
 	let off = $derived(records.filter((r) => !r.enabled).length);
 	let sources = $derived(new Set(records.map((r) => r.layer)).size);
 
-	const selection = new Selection(() => shown, (r) => `${r.layer}/${r.id}`, { param: 'item' });
+	// Keyed by path, which stays the same when switching makes your copy.
+	const selection = new Selection(() => shown, (r) => r.path, { param: 'item' });
 	let current = $derived(selection.current);
+
+	let readOnly = $derived(live.gameRunning);
+	let saving = $state(false);
+	let error = $state('');
+	let notice = $state('');
+	let noticeFor = $state('');
+	$effect(() => {
+		if (current?.path !== noticeFor) {
+			error = '';
+			notice = '';
+		}
+	});
+
+	async function toggle() {
+		const r = current;
+		if (!r || saving || readOnly) return;
+		saving = true;
+		error = '';
+		notice = '';
+		noticeFor = r.path;
+		try {
+			await switchRecord(r.path, !r.enabled);
+			const made = r.layerKind === 'overlay' ? '' : ' Hermaeus made your own copy of it, with only its switch changed.';
+			notice = r.enabled ? `Switched off.${made} SkyrimNet ignores it from the next time it starts.` : `Switched on.${made} SkyrimNet uses it from the next time it starts.`;
+			await invalidate(recordsDependency);
+		} catch (e) {
+			error = e instanceof ApiError ? e.message : String(e);
+		} finally {
+			saving = false;
+		}
+	}
 
 	useShortcuts(() => [
 		{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) }
+		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
+		{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !current, disabled: readOnly || saving, run: toggle }
 	]);
 </script>
 
@@ -84,7 +121,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each shown as r, i (`${r.layer}/${r.id}`)}
+					{#each shown as r, i (r.path)}
 						{#if i === 0 || shown[i - 1]!.layer !== r.layer}
 							<tr class="group"><th colspan={columns.length + 2} class="caps" scope="rowgroup">{sourceLabel(r)}</th></tr>
 						{/if}
@@ -103,12 +140,18 @@
 	<aside class="pane" use:fitToViewport aria-label={noun[0]}>
 		{#if current}
 			{@const r = current}
-			{#key `${r.layer}/${r.id}`}
+			{#key r.path}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2 class="caps">{r.name}</h2>
 					<p class="muted small"><a href={pluginHref(save, r.layer)}>{sourceLabel(r)}</a> · <span class="id">{r.path}</span></p>
 					{#if !r.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
 					{#if r.replaces}<p class="muted small">Replaces the one from {r.replaces}.</p>{/if}
+					{#if error}<p class="notice error" role="alert">{error}</p>{/if}
+					{#if notice}<p class="notice" role="status">{notice}</p>{/if}
+					<div class="buttons">
+						<button type="button" class="button" onclick={toggle} disabled={readOnly || saving}>{r.enabled ? 'Switch off' : 'Switch on'}</button>
+						<a class="small" href={contentHref(save, r.path)}>Its file, on the Content page</a>
+					</div>
 					{@render pane(r)}
 				</div>
 			{/key}
@@ -231,6 +274,13 @@
 	}
 	.pane .notice {
 		margin: var(--space-3) 0;
+	}
+	.buttons {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--space-2) var(--space-4);
+		margin: var(--space-3) 0 var(--space-4);
 	}
 	@media (max-width: 60rem) {
 		.bar {

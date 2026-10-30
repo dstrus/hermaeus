@@ -41,7 +41,7 @@
 		{/if}
 	{/snippet}
 	{#snippet note()}
-		SkyrimNet also has a few actions built in, such as continuing a conversation, which aren’t files and aren’t listed. Switching an action off is done in SkyrimNet’s dashboard for now.
+		SkyrimNet also has a few actions built in, such as continuing a conversation, which aren’t files and aren’t listed. An action’s file can be edited on the Content page; making new ones is done in SkyrimNet’s dashboard for now.
 	{/snippet}
 </RecordsPage>
 

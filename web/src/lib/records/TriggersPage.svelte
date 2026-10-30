@@ -47,7 +47,7 @@
 		{/if}
 	{/snippet}
 	{#snippet note()}
-		Making, editing, and switching triggers off is done in SkyrimNet’s dashboard for now.
+		A trigger’s file can be edited on the Content page; making new ones is done in SkyrimNet’s dashboard for now.
 	{/snippet}
 </RecordsPage>
 

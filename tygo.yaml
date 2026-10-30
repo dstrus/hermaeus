@@ -64,9 +64,13 @@ packages:
     output_path: web/src/lib/api/types/plugins.ts
     fallback_type: unknown
   - path: hermaeus/internal/records
-    include_files: [records.go]
+    include_files: [records.go, content.go, save.go]
     output_path: web/src/lib/api/types/records.ts
     fallback_type: unknown
+    frontmatter: |
+      import type * as layers from './layers.ts';
+    type_mappings:
+      layers.Layer: layers.Layer
   - path: hermaeus/internal/layers
     include_files: [layers.go]
     output_path: web/src/lib/api/types/layers.ts
