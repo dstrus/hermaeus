@@ -26,7 +26,7 @@
 
 	// SkyrimNet limits each stage's settings, and what a sample can be, in
 	// ways that aren't published.
-	const limits = 'SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t show those limits or check them. An effect outside them may not work in the game. SkyrimNet’s own dashboard shows the limits as you edit.';
+	const limits = 'SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t show those limits or check them. An effect outside those limits may not work in the game. SkyrimNet’s own dashboard shows the limits as you edit.';
 
 	let list = $derived(loaded);
 	let save = $derived(page.params.save ?? '');

@@ -195,7 +195,7 @@
 			{#if formKinds[current.kind]}<button type="button" class="textbutton" onclick={() => setParams({ mode: 'edit' }, 'replace')}>Use the form</button>{/if}
 		</p>
 		{#if current.kind === 'voice_effects'}
-			<LimitsNotice title="Limits Hermaeus can’t check">SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t check them here. An effect outside them may not work in the game.</LimitsNotice>
+			<LimitsNotice title="Limits Hermaeus can’t check">SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t check them here. An effect outside those limits may not work in the game.</LimitsNotice>
 		{/if}
 		{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 	</header>
