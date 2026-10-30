@@ -2,7 +2,7 @@
 // for conversation, NPC thoughts, and the player's own reactions.
 import type { Feature } from './schema.ts';
 
-const wait = (key: string, label: string, what: string) => ({ key: `ttl_seconds.${key}`, label, what: `${what} At 0, it’s never dropped.`, kind: 'count' as const, min: 0, max: 3600, unit: 'seconds', zero: 'Never dropped' });
+const wait = (key: string, label: string, what: string) => ({ key: `ttl_seconds.${key}`, label, what: `${what} At 0, it’s never dropped.`, kind: 'count' as const, min: 0, max: 120, unit: 'seconds', zero: 'Never dropped' });
 
 export const conversation: Feature = {
 	id: 'conversation',
@@ -15,8 +15,8 @@ export const conversation: Feature = {
 			fields: [
 				{ key: 'max_chain_depth', label: 'Replies in a row', what: 'How many characters may answer one another after an opening line before the exchange ends.', kind: 'count', min: 0, max: 20, unit: 'replies' },
 				{ key: 'takeover_before_audio', label: 'Urgent lines go first', what: 'A more urgent reason to speak, such as you or a line said to someone, replaces a line still being made, before any of it is heard.', kind: 'switch' },
-				{ key: 'lead_seconds', label: 'Head start', what: 'How long before the current line ends the next one starts being made. At 0, SkyrimNet judges it from recent lines.', kind: 'number', min: 0, max: 60, zero: 'Auto' },
-				{ key: 'generation_timeout_seconds', label: 'Give up after', what: 'A line still being made after this long is abandoned, and the next may go.', kind: 'count', min: 1, max: 600, unit: 'seconds' }
+				{ key: 'lead_seconds', label: 'Head start', what: 'How long before the current line ends the next one starts being made. At 0, SkyrimNet judges it from recent lines.', kind: 'number', min: 0, max: 10, zero: 'Auto' },
+				{ key: 'generation_timeout_seconds', label: 'Give up after', what: 'A line still being made after this long is abandoned, and the next may go.', kind: 'count', min: 10, max: 300, unit: 'seconds' }
 			]
 		},
 		{
@@ -37,8 +37,8 @@ export const npcThoughts: Feature = {
 			title: 'General',
 			fields: [
 				{ key: 'enabled', label: 'NPC thoughts', what: 'Let characters have thoughts at all. When off, requests for thoughts are ignored.', kind: 'switch' },
-				{ key: 'perNPCCooldownSeconds', label: 'Between thoughts', what: 'A minimum wait time between two thoughts for a single character, so one character doesn’t take every turn.', kind: 'count', min: 0, max: 3600, unit: 'seconds' },
-				{ key: 'eventHistoryCount', label: 'Recent events considered', what: 'How many of the latest events a thought can draw on.', kind: 'count', min: 0, max: 500, unit: 'events' }
+				{ key: 'perNPCCooldownSeconds', label: 'Between thoughts', what: 'A minimum wait time between two thoughts for a single character, so one character doesn’t take every turn.', kind: 'count', min: 0, max: 600, unit: 'seconds' },
+				{ key: 'eventHistoryCount', label: 'Recent events considered', what: 'How many of the latest events a thought can draw on.', kind: 'count', min: 5, max: 200, unit: 'events' }
 			]
 		},
 		{
@@ -80,7 +80,7 @@ export const playerReactions: Feature = {
 							]
 						},
 						{ key: 'probability', label: 'Chance', kind: 'percent' },
-						{ key: 'cooldownSeconds', label: 'Cooldown', kind: 'count', unit: 's', min: 0, max: 86400 }
+						{ key: 'cooldownSeconds', label: 'Cooldown', kind: 'count', unit: 's', min: 0, max: 3600 }
 					]
 				}
 			]
@@ -120,8 +120,8 @@ export const bardSinging: Feature = {
 			fields: [
 				{ key: 'bard_singing.provider', label: 'Music service', what: 'Who composes new songs. Each costs credits there.', kind: 'choice', custom: true, choices: musicProviders },
 				{ key: 'bard_singing.backup_provider', label: 'Backup', what: 'Who composes when the music service fails.', kind: 'choice', custom: true, choices: [...musicProviders, { value: 'none', label: 'None', what: 'no backup' }] },
-				{ key: 'bard_singing.generation.interval_hours', label: 'How often', what: 'How many hours of game time pass between tries at a new song.', kind: 'count', min: 1, max: 720, unit: 'game hours' },
-				{ key: 'bard_singing.generation.max_cached_songs', label: 'Songs kept', what: 'How many composed songs each playthrough keeps. Past it, the oldest composed song’s audio is removed first; imported songs don’t count and are never removed.', kind: 'count', min: 1, max: 1000, unit: 'songs' },
+				{ key: 'bard_singing.generation.interval_hours', label: 'How often', what: 'How many hours of game time pass between tries at a new song.', kind: 'number', min: 1, max: 168, unit: 'game hours' },
+				{ key: 'bard_singing.generation.max_cached_songs', label: 'Songs kept', what: 'How many composed songs each playthrough keeps. Past it, the oldest composed song’s audio is removed first; imported songs don’t count and are never removed.', kind: 'count', min: 1, max: 100, unit: 'songs' },
 				{ key: 'bard_singing.generation.default_style', label: 'Style', what: 'Words for the kind of music wanted, separated by commas.', kind: 'text', placeholder: 'medieval bardic folk, acoustic lute, harp, tavern ambiance' },
 				{ key: 'bard_singing.generation.negative_tags', label: 'Avoid', what: 'Words for what the music shouldn’t be, separated by commas, such as modern genres.', kind: 'text', placeholder: 'electric guitar, synthesizer' },
 				{ key: 'bard_singing.generation.language', label: 'Sung in', what: 'The language songs are sung in, as a two-letter code. Only AceStep uses it.', kind: 'text', placeholder: 'en' }

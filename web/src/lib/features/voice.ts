@@ -51,7 +51,7 @@ export const speech: Feature = {
 					kind: 'choice',
 					choices: [...engines.map((e) => ({ value: e.value, label: e.label, what: e.local ? 'runs on a machine of yours' : 'a service you sign up for' })), { value: noVoice, label: 'None', what: 'lines are only shown, never spoken' }]
 				},
-				{ key: 'tts.maxSegmentWords', label: 'Words sent at once', what: 'Lines go to the engine a sentence at a time. Above 0, short sentences in a row are joined, up to this many words, before they’re sent. At 0, every sentence goes on its own.', kind: 'count', min: 0, max: 500, unit: 'words', zero: 'Each sentence' }
+				{ key: 'tts.maxSegmentWords', label: 'Words sent at once', what: 'Lines go to the engine a sentence at a time. Above 0, short sentences in a row are joined, up to this many words, before they’re sent. At 0, every sentence goes on its own.', kind: 'count', unit: 'words', zero: 'Each sentence' }
 			]
 		},
 		{
@@ -83,12 +83,12 @@ export const speech: Feature = {
 		},
 		{
 			title: 'Volume',
-			fields: [{ key: 'audio.universalMaxVolume', label: 'Loudest', what: 'The most any of SkyrimNet’s audio plays at. 1 is full volume.', kind: 'number', min: 0, max: 4 }]
+			fields: [{ key: 'audio.universalMaxVolume', label: 'Loudest', what: 'The most any of SkyrimNet’s audio plays at. 1 is full volume.', kind: 'number', min: 0, max: 1 }]
 		}
 	]
 };
 
-const seconds = (key: string, label: string, what: string): Field => ({ key, label, what, kind: 'count', min: 0, max: 3600, unit: 'seconds' });
+const seconds = (key: string, label: string, what: string): Field => ({ key, label, what, kind: 'count', unit: 'seconds' });
 const tune = (key: string, label: string, what: string, min?: number, max?: number): Field => ({ key, label, what, kind: 'number', min, max });
 
 // The connection settings every engine file has.
@@ -104,8 +104,8 @@ function connection(e: Engine): Section {
 			{ key: 'language', label: 'Language', what: 'The language lines are spoken in, as the engine names it.', kind: 'text', placeholder: 'en' },
 			seconds('timeout', 'Wait for a line', 'How long to wait for the engine to speak a line before giving up.'),
 			seconds('connect_timeout', 'Wait to connect', 'How long to wait to reach the engine.'),
-			{ key: 'max_parallel_requests', label: 'Lines at once', what: 'How many lines the engine may work on at the same time. More starts speech sooner but takes more of the machine or account.', kind: 'count', min: 1, max: 16, unit: 'lines' },
-			{ key: 'max_retries', label: 'Retries', what: 'How many times to ask again when the engine fails with a server error. At 0, a failed line isn’t retried.', kind: 'count', min: 0, max: 10, zero: 'None' },
+			{ key: 'max_parallel_requests', label: 'Lines at once', what: 'How many lines the engine may work on at the same time. More starts speech sooner but takes more of the machine or account.', kind: 'count', unit: 'lines' },
+			{ key: 'max_retries', label: 'Retries', what: 'How many times to ask again when the engine fails with a server error. At 0, a failed line isn’t retried.', kind: 'count', zero: 'None' },
 			{ key: 'stream_audio', label: 'Stream', what: 'Start playing a line while the rest of it is still being made, so speech begins sooner.', kind: 'switch' }
 		]
 	};
@@ -117,8 +117,8 @@ const own: Record<string, Section[]> = {
 		{
 			title: 'Voice',
 			fields: [
-				{ key: 'max_lsd_steps', label: 'Steps', what: 'How many passes go into each line. More sound better but take longer.', kind: 'count', min: 1, max: 64 },
-				tune('temperature', 'Variety', 'How much each line varies. Lower is steadier; higher is livelier.', 0, 2),
+				{ key: 'max_lsd_steps', label: 'Steps', what: 'How many passes go into each line. More sound better but take longer.', kind: 'count' },
+				tune('temperature', 'Variety', 'How much each line varies. Lower is steadier; higher is livelier.'),
 				{
 					key: 'model_precision',
 					label: 'Precision',
@@ -129,7 +129,7 @@ const own: Record<string, Section[]> = {
 						{ value: 'INT8', label: 'INT8', what: 'faster on the processor, a little rougher' }
 					]
 				},
-				{ key: 'device_index', label: 'Device', what: 'Which graphics card to use, counting from 0.', kind: 'count', min: 0, max: 16 }
+				{ key: 'device_index', label: 'Device', what: 'Which graphics card to use, counting from 0.', kind: 'count' }
 			]
 		}
 	],
@@ -141,8 +141,8 @@ const own: Record<string, Section[]> = {
 				tune('piper_settings.noise_scale', 'Expressiveness', 'How much feeling voices carry. 1 is normal; higher is more dramatic, lower is flatter.', 0, 5),
 				tune('piper_settings.noise_w', 'Rhythm', 'How natural the pacing sounds. 1 is normal; higher varies more, lower is more mechanical.', 0, 5),
 				tune('piper_settings.length_scale', 'Slowness', 'How drawn out speech is. 1 is normal; higher is slower, lower is faster.', 0.1, 5),
-				{ key: 'piper_settings.num_threads', label: 'Threads', what: 'How many of the processor’s threads Piper uses.', kind: 'count', min: 1, max: 64 },
-				{ key: 'speaker_id', label: 'Speaker', what: 'Which speaker to use in a model with several, counting from 0. The usual English models have one.', kind: 'count', min: 0, max: 1000 }
+				{ key: 'piper_settings.num_threads', label: 'Threads', what: 'How many of the processor’s threads Piper uses.', kind: 'count' },
+				{ key: 'speaker_id', label: 'Speaker', what: 'Which speaker to use in a model with several, counting from 0. The usual English models have one.', kind: 'count' }
 			]
 		}
 	],
@@ -169,9 +169,9 @@ const own: Record<string, Section[]> = {
 					]
 				},
 				tune('temperature', 'Variety', 'How much each line varies, from 0 to 2. Higher is more expressive.', 0, 2),
-				tune('speaking_rate', 'Speed', 'How fast lines are spoken. 1 is normal.', 0.5, 2),
+				tune('speaking_rate', 'Speed', 'How fast lines are spoken. 1 is normal.'),
 				{ key: 'sample_rate_hz', label: 'Sample rate', what: 'The quality of the audio Inworld sends back.', kind: 'count', min: 8000, max: 48000, unit: 'Hz' },
-				{ key: 'clone_cache.max_voices', label: 'Cloned voices kept', what: 'How many voices may be cloned into the account. Past it, the voice used longest ago is deleted first; voices cloned outside SkyrimNet count, but are never deleted. At 0, there’s no limit.', kind: 'count', min: 0, max: 10000, unit: 'voices', zero: 'No limit' }
+				{ key: 'clone_cache.max_voices', label: 'Cloned voices kept', what: 'How many voices may be cloned into the account. Past it, the voice used longest ago is deleted first; voices cloned outside SkyrimNet count, but are never deleted. At 0, there’s no limit.', kind: 'count', unit: 'voices', zero: 'No limit' }
 			]
 		}
 	],
@@ -181,7 +181,7 @@ const own: Record<string, Section[]> = {
 			fields: [
 				{ key: 'api_key', label: 'Key', what: 'Your ElevenLabs key.', kind: 'secret' },
 				{ key: 'clone_cache.shared_account', label: 'Shared account', what: 'Switch on when more than one SkyrimNet install uses the account, so they reuse each other’s cloned voices rather than cloning over them.', kind: 'switch' },
-				{ key: 'clone_cache.max_voices', label: 'Cloned voices kept', what: 'How many voices may be cloned into the account. Past it, the voice used longest ago is deleted first. At 0, there’s no limit.', kind: 'count', min: 0, max: 10000, unit: 'voices', zero: 'No limit' }
+				{ key: 'clone_cache.max_voices', label: 'Cloned voices kept', what: 'How many voices may be cloned into the account. Past it, the voice used longest ago is deleted first. At 0, there’s no limit.', kind: 'count', unit: 'voices', zero: 'No limit' }
 			]
 		},
 		{
@@ -225,11 +225,11 @@ const own: Record<string, Section[]> = {
 					]
 				},
 				tune('speaking_rate', 'Speed', 'How fast lines are spoken. Lower is slower.', 0.1, 50),
-				tune('pitch_std', 'Pitch variation', 'How much the pitch moves. Higher is more varied.', 0, 400),
+				tune('pitch_std', 'Pitch variation', 'How much the pitch moves. Higher is more varied.'),
 				tune('cfg_scale', 'Guidance', 'How closely speech follows the voice and mood it’s given.', 1, 20),
-				tune('vq_score', 'VQ score', 'Trades audio quality against speed.', 0, 1),
+				tune('vq_score', 'VQ score', 'Trades audio quality against speed.'),
 				tune('dnsmos_overall', 'Clarity target', 'The audio quality aimed for, from 1 to 5.', 1, 5),
-				{ key: 'fmax', label: 'Highest frequency', what: 'The highest frequency in the audio.', kind: 'count', min: 0, max: 48000, unit: 'Hz' },
+				{ key: 'fmax', label: 'Highest frequency', what: 'The highest frequency in the audio.', kind: 'count', unit: 'Hz' },
 				{ key: 'denoise_speaker', label: 'Clean the sample', what: 'Remove noise from a voice’s sample before cloning it.', kind: 'switch' },
 				{ key: 'randomize_seed', label: 'New seed each line', what: 'Vary every line, rather than repeating the same delivery.', kind: 'switch' },
 				{ key: 'unconditional_keys', label: 'Unconditioned', what: 'Conditions Zonos leaves for itself to decide, by name.', kind: 'lines', noun: ['condition', 'conditions'] }
@@ -239,11 +239,11 @@ const own: Record<string, Section[]> = {
 			title: 'Sampling',
 			fields: [
 				tune('top_p', 'Top P', 'A sampling setting. 0 leaves it off.', 0, 1),
-				tune('min_k', 'Min K', 'A sampling setting. 0 leaves it off.', 0, 1024),
+				tune('min_k', 'Min K', 'A sampling setting. 0 leaves it off.'),
 				tune('min_p', 'Min P', 'A sampling setting. 0 leaves it off.', 0, 1),
-				tune('linear', 'Linear', 'A sampling setting.', -2, 2),
-				tune('confidence', 'Confidence', 'A sampling setting.', -2, 2),
-				tune('quadratic', 'Quadratic', 'A sampling setting.', -2, 2)
+				tune('linear', 'Linear', 'A sampling setting.'),
+				tune('confidence', 'Confidence', 'A sampling setting.'),
+				tune('quadratic', 'Quadratic', 'A sampling setting.')
 			]
 		}
 	],
@@ -251,14 +251,14 @@ const own: Record<string, Section[]> = {
 		{
 			title: 'Voice',
 			fields: [
-				tune('exaggeration', 'Expressiveness', 'How dramatic emotions sound. Higher is more expressive.', 0, 2),
+				tune('exaggeration', 'Expressiveness', 'How dramatic emotions sound. Higher is more expressive.'),
 				tune('cfg_weight', 'Pace', 'How the pace of speech is held.', 0, 1),
 				tune('temperature', 'Variety', 'How much each line varies.', 0.05, 5),
-				{ key: 'seed', label: 'Seed', what: 'Repeat the same delivery for the same line. At -1, every line varies.', kind: 'count', min: -1, max: 2147483647 },
+				{ key: 'seed', label: 'Seed', what: 'Repeat the same delivery for the same line. At -1, every line varies.', kind: 'count' },
 				{ key: 'voice_sample_rate', label: 'Sample rate', what: 'The quality voice samples are sent at for cloning.', kind: 'count', min: 8000, max: 48000, unit: 'Hz' }
 			]
 		},
-		{ title: 'Sampling', fields: [tune('min_p', 'Min P', 'A sampling setting.', 0, 1), tune('top_p', 'Top P', 'A sampling setting.', 0, 1), tune('repetition_penalty', 'Repetition penalty', 'Discourages the same sounds repeating.', 1, 3)] }
+		{ title: 'Sampling', fields: [tune('min_p', 'Min P', 'A sampling setting.', 0, 1), tune('top_p', 'Top P', 'A sampling setting.', 0, 1), tune('repetition_penalty', 'Repetition penalty', 'Discourages the same sounds repeating.')] }
 	],
 	higgs: [
 		{
@@ -278,10 +278,10 @@ const own: Record<string, Section[]> = {
 			title: 'Voice',
 			fields: [
 				{ key: 'model', label: 'Model', what: 'Which model the service uses.', kind: 'text' },
-				tune('temperature', 'Variety', 'How much each line varies.', 0, 2),
+				tune('temperature', 'Variety', 'How much each line varies.'),
 				tune('speed', 'Speed', 'How fast lines are spoken. 1 is normal.', 0.25, 4),
-				tune('top_p', 'Top P', 'A sampling setting.', 0, 1),
-				{ key: 'top_k', label: 'Top K', what: 'A sampling setting.', kind: 'count', min: 0, max: 1000 },
+				tune('top_p', 'Top P', 'A sampling setting.'),
+				{ key: 'top_k', label: 'Top K', what: 'A sampling setting.', kind: 'count' },
 				{ key: 'transcribe_missing_reference_samples', label: 'Transcribe samples', what: 'When a voice’s sample has no transcript, make one with your speech recognition. Off, your own server gets an empty transcript.', kind: 'switch' },
 				{ key: 'enable_higgs_tags', label: 'Higgs tags', what: 'Turn SkyrimNet’s tags into Higgs’s own. Switch off for a model whose tags are written differently.', kind: 'switch' },
 				{ key: 'enable_tag_propagation', label: 'Carry tags on', what: 'A tag for emotion, style, or pace in one sentence of a reply carries on to the sentences after it.', kind: 'switch' }
@@ -376,9 +376,9 @@ export const speechToText: Feature = {
 				},
 				{ key: 'whisper.use_whisper_finetune', label: 'Skyrim’s version', what: 'Use a version of the model trained for the game’s words, where there is one.', kind: 'switch' },
 				{ key: 'whisper.use_gpu', label: 'Graphics card', what: 'Run on the graphics card rather than the processor.', kind: 'switch' },
-				{ key: 'whisper.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count', min: 0, max: 16 },
-				{ key: 'whisper.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count', min: 1, max: 64 },
-				{ key: 'whisper.input_sample_rate', label: 'Sample rate', what: 'The sample rate of the microphone’s audio as it reaches Whisper.', kind: 'count', min: 8000, max: 48000, unit: 'Hz' }
+				{ key: 'whisper.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count' },
+				{ key: 'whisper.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count' },
+				{ key: 'whisper.input_sample_rate', label: 'Sample rate', what: 'The sample rate of the microphone’s audio as it reaches Whisper.', kind: 'count', unit: 'Hz' }
 			]
 		},
 		{
@@ -399,8 +399,8 @@ export const speechToText: Feature = {
 					]
 				},
 				{ key: 'parakeet.use_gpu', label: 'Graphics card', what: 'Run on the graphics card rather than the processor.', kind: 'switch' },
-				{ key: 'parakeet.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count', min: 0, max: 16 },
-				{ key: 'parakeet.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count', min: 1, max: 64 }
+				{ key: 'parakeet.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count' },
+				{ key: 'parakeet.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count' }
 			]
 		},
 		{
@@ -410,7 +410,7 @@ export const speechToText: Feature = {
 				{ key: 'external_whisper.api_endpoint', label: 'Address', what: 'The service’s transcription address.', kind: 'text' },
 				{ key: 'external_whisper.api_key', label: 'Key', what: 'The service’s key. A server of your own may not need one.', kind: 'secret' },
 				{ key: 'external_whisper.model', label: 'Model', what: 'The model as the service names it, such as openai/whisper-1 on OpenRouter or whisper-1 on OpenAI.', kind: 'text' },
-				{ key: 'external_whisper.timeout_ms', label: 'Wait for text', what: 'How long to wait for the service before giving up.', kind: 'count', min: 0, max: 600000, unit: 'ms' }
+				{ key: 'external_whisper.timeout_ms', label: 'Wait for text', what: 'How long to wait for the service before giving up.', kind: 'count', unit: 'ms' }
 			]
 		},
 		{
@@ -418,8 +418,8 @@ export const speechToText: Feature = {
 			what: 'Listening without a key held down.',
 			fields: [
 				{ key: 'streaming.silence_threshold', label: 'Speech threshold', what: 'How sure the voice detector must be that a sound is speech, in your microphone and in characters’ voice files.', kind: 'percent' },
-				{ key: 'streaming.silence_duration', label: 'Pause that ends it', what: 'How long you must be quiet before what you said is sent.', kind: 'count', min: 0, max: 10000, unit: 'ms' },
-				{ key: 'streaming.chunks', label: 'Chunks held', what: 'How many pieces of audio are held at once for recognizing.', kind: 'count', min: 1, max: 100 },
+				{ key: 'streaming.silence_duration', label: 'Pause that ends it', what: 'How long you must be quiet before what you said is sent.', kind: 'count', unit: 'ms' },
+				{ key: 'streaming.chunks', label: 'Chunks held', what: 'How many pieces of audio are held at once for recognizing.', kind: 'count' },
 				{ key: 'streaming.openMicVerbose', label: 'Notices', what: 'Show a notice when open mic hears you and when it sends what you said.', kind: 'switch' }
 			]
 		}
@@ -435,8 +435,8 @@ export const voiceSamples: Feature = {
 		{
 			title: 'Which lines may be samples',
 			fields: [
-				{ key: 'filtering.min_duration_seconds', label: 'Shortest', what: 'Lines shorter than this aren’t used as samples.', kind: 'number', min: 0, max: 60 },
-				{ key: 'filtering.max_duration_seconds', label: 'Longest', what: 'Lines longer than this aren’t used as samples.', kind: 'number', min: 0, max: 120 },
+				{ key: 'filtering.min_duration_seconds', label: 'Shortest', what: 'Lines shorter than this aren’t used as samples.', kind: 'number' },
+				{ key: 'filtering.max_duration_seconds', label: 'Longest', what: 'Lines longer than this aren’t used as samples.', kind: 'number' },
 				{ key: 'filtering.banned_keywords', label: 'Left out by word', what: 'Lines whose file name has one of these words aren’t used, such as screams, music, and coughs.', kind: 'lines', noun: ['word', 'words'] },
 				{ key: 'filtering.banned_voice_types', label: 'Voice types left out', what: 'Voice types never cloned.', kind: 'lines', noun: ['voice type', 'voice types'] },
 				{ key: 'filtering.excluded_plugins', label: 'Plugins left out', what: 'Game plugins whose lines are left out of the new audio scan and found the older way instead.', kind: 'lines', noun: ['plugin', 'plugins'] }
