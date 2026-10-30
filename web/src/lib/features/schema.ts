@@ -71,6 +71,9 @@ export interface Feature {
 	file: string; // the settings file's name, as the settings API knows it
 	title: string;
 	what: string; // the page's lead
+	// A sentence after the lead that links to another page in the
+	// playthrough: before, the link's text, then after.
+	see?: { before: string; label: string; path: string; after: string };
 	sections: Section[];
 	lists?: 'memory' | 'actor'; // the filter lists of this kind, shown below the settings
 }

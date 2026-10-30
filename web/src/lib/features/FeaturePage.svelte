@@ -193,7 +193,7 @@
 	</span>
 	{#if extra}<span class="extra">{@render extra()}</span>{/if}
 </div>
-<p class="muted lead">{feature.what}</p>
+<p class="muted lead">{feature.what}{#if feature.see}{' '}{feature.see.before}<a href="/{encodeURIComponent(save)}/{feature.see.path}">{feature.see.label}</a>{feature.see.after}{/if}</p>
 {#if !file.file.exists}
 	<p class="notice">SkyrimNet hasn’t written <span class="id">{file.file.path}</span> yet; it will the next time it starts. Until then the defaults can be read but not changed.</p>
 {/if}

@@ -104,7 +104,8 @@ export const bardSinging: Feature = {
 	id: 'bard-singing',
 	file: 'BardSinging',
 	title: 'Bard singing',
-	what: 'Bards singing songs: new ones a music service composes from what’s been happening and what bards remember, and ones already made. The songs of each playthrough are under Bard songs.',
+	what: 'Bards singing songs: new ones a music service composes from what’s been happening and what bards remember, and ones already made.',
+	see: { before: 'The songs of each playthrough are under ', label: 'Bard songs', path: 'songs', after: '.' },
 	sections: [
 		{
 			title: 'General',
