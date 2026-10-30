@@ -1,6 +1,7 @@
 package records
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -310,4 +311,64 @@ func TestTriggersNameVoiceEffects(t *testing.T) {
 	// SkyrimNet refuses a trigger that switches on no effect in particular.
 	_, err := h.r.SaveRecord("triggers/bad.yaml", RecordEdit{Text: "name: bad\neventCriteria:\n  eventType: death\nresponse:\n  type: activate_voice_effect\n"})
 	kindOf(t, err, apperr.Invalid)
+}
+
+func TestRecordForms(t *testing.T) {
+	h := newHarness(t)
+	src := `customCategory: brawl
+name: AcceptBrawl
+description: "Use when dared."
+parameterMapping:
+  - type: dynamic
+    name: challenger
+    # optional is load-bearing: without it the action aborts.
+    optional: true
+defaultPriority: 5
+`
+	write(t, h.lib("a.pack", "actions", "acceptbrawl.yaml"), src)
+	write(t, h.lib("a.pack", "manifest.json"), `{"title": "Pack"}`)
+	write(t, filepath.Join(h.Dir, "content-registry.json"), `{"plugins": {"a.pack": {}}, "priority": ["a.pack"]}`)
+
+	f, err := h.r.Form("actions/acceptbrawl.yaml")
+	if err != nil || f.Data["name"] != "AcceptBrawl" {
+		t.Fatalf("form = %+v, %v", f, err)
+	}
+	b, _ := json.Marshal(f)
+	if !strings.Contains(string(b), `"data":{"customCategory":"brawl","name":"AcceptBrawl","description":"Use when dared.","parameterMapping"`) {
+		t.Errorf("fields aren't in the file's order: %s", b)
+	}
+
+	// The form's object, changed: a new description, a removed priority, an
+	// added field. Comments and untouched lines stay as written.
+	edit := `{"customCategory":"brawl","name":"AcceptBrawl","description":"Use when dared to fight.","parameterMapping":[{"type":"dynamic","name":"challenger","optional":true}],"enabled":false}`
+	if _, err := h.r.SaveForm("actions/acceptbrawl.yaml", FormEdit{Data: json.RawMessage(edit)}); err != nil {
+		t.Fatal(err)
+	}
+	got := h.mine("actions/acceptbrawl.yaml")
+	want := "customCategory: brawl\nname: AcceptBrawl\ndescription: \"Use when dared to fight.\"\nparameterMapping:\n  - type: dynamic\n    name: challenger\n    # optional is load-bearing: without it the action aborts.\n    optional: true\nenabled: false\n"
+	if got != want {
+		t.Errorf("saved =\n%s\nwant\n%s", got, want)
+	}
+
+	// A new record from a blank form.
+	trig := `{"name":"beast_form","description":"","eventCriteria":{"eventType":"transform"},"response":{"type":"activate_voice_effect","effectId":"werewolf","targetScope":"triggering_actor"},"audience":"player","enabled":true}`
+	if _, err := h.r.SaveForm("triggers/beast_form.yaml", FormEdit{Data: json.RawMessage(trig)}); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.mine("triggers/beast_form.yaml"); !strings.HasPrefix(got, "name: beast_form\n") || !strings.Contains(got, "  effectId: werewolf\n") || !strings.HasSuffix(got, "\n") {
+		t.Errorf("new trigger =\n%s", got)
+	}
+	// A new record with a name that's taken is refused.
+	_, err = h.r.SaveForm("actions/acceptbrawl.yaml", FormEdit{New: true, Data: json.RawMessage(`{"name":"acceptbrawl"}`)})
+	kindOf(t, err, apperr.Conflict)
+	// SkyrimNet's checks still apply: a name that isn't the file's, and a
+	// voice-effect trigger naming no effect.
+	for rel, data := range map[string]string{
+		"triggers/other.yaml": `{"name":"wrong","eventCriteria":{"eventType":"death"},"response":{"type":"player_thought"}}`,
+		"triggers/bad.yaml":   `{"name":"bad","eventCriteria":{"eventType":"death"},"response":{"type":"activate_voice_effect"}}`,
+		"triggers/list.yaml":  `[1, 2]`,
+	} {
+		_, err := h.r.SaveForm(rel, FormEdit{Data: json.RawMessage(data)})
+		kindOf(t, err, apperr.Invalid)
+	}
 }

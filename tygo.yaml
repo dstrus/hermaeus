@@ -64,7 +64,7 @@ packages:
     output_path: web/src/lib/api/types/plugins.ts
     fallback_type: unknown
   - path: hermaeus/internal/records
-    include_files: [records.go, content.go, save.go, voiceeffects.go]
+    include_files: [records.go, content.go, save.go, voiceeffects.go, form.go]
     output_path: web/src/lib/api/types/records.ts
     fallback_type: unknown
     frontmatter: |

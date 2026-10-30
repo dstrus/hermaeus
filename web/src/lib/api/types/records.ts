@@ -70,6 +70,27 @@ export interface Version extends Provider {
 }
 
 //////////
+// source: form.go
+
+/**
+ * RecordForm is a record for its form: its copies by layer, and the one in
+ * use as an object, or why it can't be read as one.
+ */
+export interface RecordForm {
+  versions: Version[];
+  data: { [key: string]: unknown } | null; // nil when it isn't a set of fields
+  error?: string;
+}
+/**
+ * FormEdit is a record as its form leaves it.
+ */
+export interface FormEdit {
+  modified: number /* int64 */; // the player's copy's time when read, 0 for none yet
+  data: { [key: string]: unknown };
+  new?: boolean; // a new record: refused if any layer has the file
+}
+
+//////////
 // source: records.go
 /*
 Package records reads SkyrimNet's actions and triggers: the YAML files in

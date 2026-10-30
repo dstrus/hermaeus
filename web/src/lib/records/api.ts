@@ -1,6 +1,6 @@
 import { request } from '#lib/api/client.ts';
 import type { Layer } from '#lib/api/types/layers.ts';
-import type { ActionList, ContentList, EffectEdit, Origin, OverrideList, RecordEdit, Revert, Switch, TriggerList, Version, VoiceEffectList } from '#lib/api/types/records.ts';
+import type { ActionList, ContentList, EffectEdit, FormEdit, Origin, RecordForm, OverrideList, RecordEdit, Revert, Switch, TriggerList, Version, VoiceEffectList } from '#lib/api/types/records.ts';
 
 export function getActions(fetchFn?: typeof fetch): Promise<ActionList> {
 	return request<ActionList>('GET', '/api/actions', undefined, fetchFn);
@@ -76,3 +76,15 @@ export function saveVoiceEffect(id: string, edit: EffectEdit): Promise<VoiceEffe
 	return request<VoiceEffectList>('PUT', `/api/voice-effects/${encodeURIComponent(id)}`, edit);
 }
 
+
+function formPath(path: string): string {
+	return '/api/content/form/' + path.split('/').map(encodeURIComponent).join('/');
+}
+
+export function getForm(path: string): Promise<RecordForm> {
+	return request<RecordForm>('GET', formPath(path));
+}
+
+export function saveForm(path: string, edit: FormEdit): Promise<RecordForm> {
+	return request<RecordForm>('PUT', formPath(path), edit);
+}

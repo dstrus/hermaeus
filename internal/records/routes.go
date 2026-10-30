@@ -23,6 +23,13 @@ func (r *Records) Routes(mux *http.ServeMux) {
 	mux.Handle("PUT /api/content/file/{path...}", httpapi.JSON(func(req *http.Request, e RecordEdit) ([]Version, error) {
 		return r.SaveRecord(req.PathValue("path"), e)
 	}))
+	// A record as its form edits it: an object, in the file's order.
+	mux.Handle("GET /api/content/form/{path...}", httpapi.JSON(func(req *http.Request, _ httpapi.None) (RecordForm, error) {
+		return r.Form(req.PathValue("path"))
+	}))
+	mux.Handle("PUT /api/content/form/{path...}", httpapi.JSON(func(req *http.Request, e FormEdit) (RecordForm, error) {
+		return r.SaveForm(req.PathValue("path"), e)
+	}))
 	mux.Handle("PUT /api/content/enabled/{path...}", httpapi.JSON(func(req *http.Request, s Switch) ([]Version, error) {
 		return r.SetEnabled(req.PathValue("path"), s)
 	}))

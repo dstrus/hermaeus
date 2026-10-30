@@ -5,7 +5,9 @@
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/state';
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
+	import RecordEditor from './RecordEditor.svelte';
+	import { formKinds } from './forms.ts';
 	import { fly } from 'svelte/transition';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
@@ -81,14 +83,23 @@
 	let error = $state('');
 	let notice = $state('');
 
-	// Editing is a state of the address (?mode=edit), so Back cancels it.
-	let mode = $derived<'read' | 'edit'>(param('mode') === 'edit' && current && using?.text !== undefined ? 'edit' : 'read');
+	// Editing is a state of the address, so Back cancels it: ?mode=edit opens
+	// a kind's form, or its YAML when it has none; ?mode=yaml its YAML; and
+	// ?mode=new a new record's form.
+	let mode = $derived.by<'read' | 'yaml' | 'form' | 'new'>(() => {
+		const m = param('mode');
+		if (m === 'new') return 'new';
+		if (!current) return 'read';
+		if (m === 'edit' && formKinds[current.kind]) return 'form';
+		if ((m === 'edit' || m === 'yaml') && using?.text !== undefined) return 'yaml';
+		return 'read';
+	});
 	$effect(() => {
 		if (mode === 'read' && param('mode') && versions) setParams({ mode: null }, 'replace');
 	});
 	let draft = $state('');
 	$effect(() => {
-		if (mode !== 'edit') return;
+		if (mode !== 'yaml') return;
 		untrack(() => {
 			draft = using?.text ?? '';
 			error = '';
@@ -141,6 +152,15 @@
 		if (current && using?.text !== undefined && !readOnly) setParams({ item: current.path, mode: 'edit' });
 	}
 
+	// A form saved: show the record, and say so.
+	async function saved(path: string, done: string) {
+		await setParams({ item: path, mode: null });
+		await invalidate(recordsDependency);
+		await tick();
+		loadedPath = path;
+		notice = done;
+	}
+
 	useShortcuts(() => {
 		const reading = mode === 'read';
 		return [
@@ -149,13 +169,20 @@
 			{ key: 'e', shown: 'E', label: mine ? 'Edit' : 'Edit as your copy', hidden: !reading || !current, disabled: readOnly || using?.text === undefined, run: startEdit },
 			{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !reading || !current?.switch, disabled: readOnly || saving || !versions, run: toggle },
 			...deleteShortcuts({ label: 'Remove your copy', hidden: !reading || !mine, disabled: readOnly || saving, run: remove }),
-			{ key: 'Enter', label: 'Save', command: true, hidden: reading, disabled: saving, run: submit },
-			{ key: 'Escape', shown: 'Esc', label: 'Cancel', hidden: reading, run: () => leave('mode') }
+			{ key: 'n', shown: 'N', label: 'New record', hidden: !reading, disabled: readOnly, run: () => setParams({ mode: 'new' }) },
+			{ key: 'Enter', label: 'Save', command: true, hidden: mode !== 'yaml', disabled: saving, run: submit },
+			{ key: 'Escape', shown: 'Esc', label: 'Cancel', hidden: mode !== 'yaml', run: () => leave('mode') }
 		];
 	});
 </script>
 
-{#if mode === 'edit' && current}
+{#if mode === 'form' && current}
+	{#key current.path}
+		<RecordEditor {list} path={current.path} {readOnly} onSaved={saved} onCancel={() => leave('mode')} onYaml={() => setParams({ mode: 'yaml' }, 'replace')} />
+	{/key}
+{:else if mode === 'new'}
+	<RecordEditor {list} {readOnly} onSaved={saved} onCancel={() => leave('mode')} onYaml={() => {}} />
+{:else if mode === 'yaml' && current}
 	<header class="editing">
 		<h1 class="caps">{current.name}</h1>
 		<p class="path">{current.path}</p>
@@ -165,6 +192,7 @@
 			{:else}
 				Starting from the copy from {layerName(layerOf(current))}. Saving makes your own copy, which replaces it in every playthrough.
 			{/if}
+			{#if formKinds[current.kind]}<button type="button" class="textbutton" onclick={() => setParams({ mode: 'edit' }, 'replace')}>Use the form</button>{/if}
 		</p>
 		{#if current.kind === 'voice_effects'}
 			<LimitsNotice title="Limits Hermaeus can’t check">SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t check them here. An effect outside them may not work in the game.</LimitsNotice>
@@ -182,6 +210,7 @@
 	<div class="bar">
 		<h1 class="caps">Content</h1>
 		<span class="muted n" use:clipped>{plural(list.records.length, 'record', 'records')}{yours ? ` · ${yours} yours` : ''}{off ? ` · ${off} off` : ''}</span>
+		<button type="button" class="button" onclick={() => setParams({ mode: 'new' })} disabled={readOnly}>New record</button>
 		<select aria-label="Kind" value={kind} onchange={(e) => setParams({ kind: e.currentTarget.value || null })}>
 			<option value="">All kinds</option>
 			{#each kinds as k (k.root)}<option value={k.root}>{k.label} · {k.n}</option>{/each}
@@ -285,8 +314,12 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 	}
-	.bar select {
+	.bar .button {
 		margin-left: auto;
+		flex: none;
+		white-space: nowrap;
+	}
+	.bar select {
 		flex: none;
 	}
 	.bar input {
