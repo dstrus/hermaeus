@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -180,6 +181,9 @@ func applyChange(doc *yaml.Node, file string, defs map[string]any, c Change) err
 		parent.Content = append(parent.Content, scalar(parts[len(parts)-1]), &fresh)
 		return nil
 	}
+	// Keep the keys of groups in the order the file had them: a value from
+	// the page arrives as JSON, whose order Go doesn't keep.
+	orderLike(&fresh, node)
 	// Keep a quoted string quoted, and comments where they were.
 	if node.Kind == yaml.ScalarNode && fresh.Kind == yaml.ScalarNode && node.Tag == fresh.Tag {
 		fresh.Style = node.Style
@@ -252,4 +256,47 @@ func matchKind(key string, v, like any) (any, error) {
 		}
 	}
 	return v, nil
+}
+
+// orderLike puts the keys of each group in fresh in the order they have in
+// old, the value it replaces; keys old doesn't have follow, as they were.
+// A list's entries follow old's entry at the same place, or its first.
+func orderLike(fresh, old *yaml.Node) {
+	if fresh == nil || old == nil {
+		return
+	}
+	switch {
+	case fresh.Kind == yaml.MappingNode && old.Kind == yaml.MappingNode:
+		at := map[string]int{}
+		for i := 0; i+1 < len(old.Content); i += 2 {
+			at[old.Content[i].Value] = i / 2
+		}
+		type pair struct{ k, v *yaml.Node }
+		pairs := make([]pair, 0, len(fresh.Content)/2)
+		for i := 0; i+1 < len(fresh.Content); i += 2 {
+			pairs = append(pairs, pair{fresh.Content[i], fresh.Content[i+1]})
+		}
+		rank := func(p pair) int {
+			if n, ok := at[p.k.Value]; ok {
+				return n
+			}
+			return len(at)
+		}
+		sort.SliceStable(pairs, func(i, j int) bool { return rank(pairs[i]) < rank(pairs[j]) })
+		fresh.Content = fresh.Content[:0]
+		for _, p := range pairs {
+			if n, ok := at[p.k.Value]; ok {
+				orderLike(p.v, old.Content[n*2+1])
+			}
+			fresh.Content = append(fresh.Content, p.k, p.v)
+		}
+	case fresh.Kind == yaml.SequenceNode && old.Kind == yaml.SequenceNode && len(old.Content) > 0:
+		for i, e := range fresh.Content {
+			like := old.Content[0]
+			if i < len(old.Content) {
+				like = old.Content[i]
+			}
+			orderLike(e, like)
+		}
+	}
 }

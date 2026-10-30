@@ -18,12 +18,25 @@ export type Kind =
 	| 'secret' // text that's written but never shown, like an API key
 	| 'lines' // a list of words or short phrases, one per line
 	| 'pairs' // a list of two-part entries, such as a word and how to say it
-	| 'map'; // the settings under the key, each a name and a value, edited together
+	| 'map' // the settings under the key, each a name and a value, edited together
+	| 'rows'; // a list of entries with the same fields, such as one rule per event
 
 export interface Choice {
 	value: string;
 	label: string;
 	what?: string;
+}
+
+// Column is one field of a rows field's entries.
+export interface Column {
+	key: string;
+	label: string;
+	kind: 'switch' | 'choice' | 'percent' | 'count' | 'text';
+	choices?: Choice[];
+	unit?: string;
+	min?: number;
+	max?: number;
+	placeholder?: string;
 }
 
 export interface Field {
@@ -44,6 +57,7 @@ export interface Field {
 	noun?: [string, string]; // lines, pairs, and map: one entry, and many, for counts
 	zero?: string; // a count or number of 0 shown as what it means, such as "No limit"
 	leaf?: string; // map: the setting under each name, when names hold groups, as voice_types.<type>.selected_sample does
+	cols?: Column[]; // rows: each entry's fields, the first naming it
 }
 
 export interface Section {
@@ -100,6 +114,13 @@ export function show(f: Field, v: unknown): string {
 			const n = Array.isArray(v) ? v.length : 0;
 			return n === 0 ? 'None' : `${n} ${n === 1 ? (f.noun?.[0] ?? 'entry') : (f.noun?.[1] ?? 'entries')}`;
 		}
+		case 'rows': {
+			const rows = Array.isArray(v) ? (v as Record<string, unknown>[]) : [];
+			const on = f.cols?.find((c) => c.kind === 'switch');
+			if (!rows.length) return 'None';
+			const label = `${rows.length} ${rows.length === 1 ? (f.noun?.[0] ?? 'entry') : (f.noun?.[1] ?? 'entries')}`;
+			return on ? `${label}, ${rows.filter((r) => r?.[on.key] === true).length} on` : label;
+		}
 		case 'map': {
 			const n = v && typeof v === 'object' ? Object.keys(v).length : 0;
 			return n === 0 ? 'None' : `${n} ${n === 1 ? (f.noun?.[0] ?? 'entry') : (f.noun?.[1] ?? 'entries')}`;
@@ -145,6 +166,85 @@ export function linesValue(draft: string): string[] {
 		.split('\n')
 		.map((l) => l.trim())
 		.filter(Boolean);
+}
+
+// cellText is one field of a rows entry, as the page shows it.
+export function cellText(c: Column, v: unknown): string {
+	if (v === undefined || v === null || v === '') return '—';
+	switch (c.kind) {
+		case 'switch':
+			return v === true ? 'on' : 'off';
+		case 'percent':
+			return typeof v === 'number' ? `${Number((v * 100).toFixed(1))}%` : String(v);
+		case 'choice':
+			return c.choices?.find((x) => x.value === String(v))?.label ?? String(v);
+		case 'count': {
+			const unit = c.unit && v === 1 && /[^s]s$/.test(c.unit) ? c.unit.slice(0, -1) : c.unit;
+			return `${v}${unit ? ` ${unit}` : ''}`;
+		}
+		default:
+			return String(v);
+	}
+}
+
+// Row is a rows entry as the form edits it: its fields as text, beside the
+// entry as the file has it, so fields the page doesn't show are kept.
+export interface Row {
+	was: Record<string, unknown>;
+	cells: Record<string, string | boolean>;
+}
+
+export function rowsOf(f: Field, v: unknown): Row[] {
+	if (!Array.isArray(v)) return [];
+	return v.map((e) => {
+		const was = e && typeof e === 'object' ? (e as Record<string, unknown>) : {};
+		const cells: Record<string, string | boolean> = {};
+		for (const c of f.cols ?? []) {
+			const x = was[c.key];
+			cells[c.key] = c.kind === 'switch' ? x === true : c.kind === 'percent' && typeof x === 'number' ? String(Number((x * 100).toFixed(2))) : x === undefined || x === null ? '' : String(x);
+		}
+		return { was, cells };
+	});
+}
+
+export function blankRow(f: Field): Row {
+	const cells: Record<string, string | boolean> = {};
+	for (const c of f.cols ?? []) cells[c.key] = c.kind === 'switch' ? true : c.kind === 'choice' ? (c.choices?.[0]?.value ?? '') : '';
+	return { was: {}, cells };
+}
+
+// rowsValue is the form's entries as the file keeps them, or throws with
+// what's wrong. Each entry keeps the fields the page doesn't show.
+export function rowsValue(f: Field, rows: Row[]): Record<string, unknown>[] {
+	const name = f.cols?.[0];
+	return rows.map((r, i) => {
+		const out: Record<string, unknown> = { ...r.was };
+		const what = (name && String(r.cells[name.key] ?? '').trim()) || `entry ${i + 1}`;
+		for (const c of f.cols ?? []) {
+			const v = r.cells[c.key];
+			if (c.kind === 'switch') {
+				out[c.key] = v === true;
+				continue;
+			}
+			const t = String(v ?? '').trim();
+			if (c.kind === 'text' || c.kind === 'choice') {
+				if (!t) throw new Error(`${what} needs its ${c.label.toLowerCase()}.`);
+				out[c.key] = t;
+				continue;
+			}
+			const n = Number(t);
+			if (t === '' || Number.isNaN(n)) throw new Error(`${what}: ${c.label.toLowerCase()} needs a number.`);
+			if (c.kind === 'percent') {
+				if (n < 0 || n > 100) throw new Error(`${what}: ${c.label.toLowerCase()} is a percentage, from 0 to 100.`);
+				out[c.key] = Math.round(n * 100) / 10000;
+				continue;
+			}
+			if (!Number.isInteger(n)) throw new Error(`${what}: ${c.label.toLowerCase()} is a whole number.`);
+			if ((c.min !== undefined && n < c.min) || (c.max !== undefined && n > c.max)) throw new Error(`${what}: ${c.label.toLowerCase()} is from ${c.min} to ${c.max}.`);
+			out[c.key] = n;
+		}
+		return out;
+	});
 }
 
 // pickedOf is a set's value as the list of choices it holds.

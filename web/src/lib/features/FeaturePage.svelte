@@ -19,7 +19,7 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { codeOf, keyName, mouseCodeOf, noKey } from '#lib/settings/keys.ts';
-	import { draftOf, linesOf, linesValue, pairsOf, pairsValue, parse, pickedOf, setValue, show, valueOf, type Feature, type Field, type Pair } from './schema.ts';
+	import { blankRow, cellText, draftOf, linesOf, linesValue, pairsOf, pairsValue, parse, pickedOf, rowsOf, rowsValue, setValue, show, valueOf, type Feature, type Field, type Pair, type Row as Entry } from './schema.ts';
 
 	let { save, feature, file, lists, extra }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse; extra?: Snippet } = $props();
 
@@ -69,6 +69,7 @@
 	let draft = $state('');
 	let picked = $state<string[]>([]); // a set's chosen values
 	let pairs = $state<Pair[]>([]); // a pairs field's rows, or a map's names and values
+	let entries = $state<Entry[]>([]); // a rows field's entries
 	let areaField = $state<HTMLTextAreaElement>();
 	let field = $state<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>();
 	$effect(() => {
@@ -78,6 +79,7 @@
 		picked = pickedOf(f, value);
 		const rows = f.kind === 'pairs' ? pairsOf(f, value) : f.kind === 'map' ? Object.entries((value as Record<string, unknown>) ?? {}).map(([a, b]) => ({ a, b: b == null ? '' : String(b) })) : [];
 		pairs = f.kind === 'pairs' && !rows.length ? [{ a: '', b: '' }] : rows;
+		entries = f.kind === 'rows' ? rowsOf(f, value) : [];
 		tick().then(() => (f.kind === 'lines' ? areaField : field)?.focus());
 	});
 	// A hotkey is set by pressing it in the capture box. Tab, Esc, and the
@@ -145,7 +147,7 @@
 		}
 		let v: unknown;
 		try {
-			v = f.kind === 'set' ? setValue(f, value, picked) : f.kind === 'lines' ? linesValue(draft) : f.kind === 'pairs' ? pairsValue(f, pairs) : parse(f, draft);
+			v = f.kind === 'set' ? setValue(f, value, picked) : f.kind === 'lines' ? linesValue(draft) : f.kind === 'pairs' ? pairsValue(f, pairs) : f.kind === 'rows' ? rowsValue(f, entries) : parse(f, draft);
 			// A plugin's hotkey goes back as the file keeps it: text when it's text,
 			// and unset as empty text or 0, as SkyrimNet's dashboard writes it.
 			if (current.field.pluginHotkey && typeof v === 'number') {
@@ -246,7 +248,7 @@
 					{#if editing}
 						<form onsubmit={submit}>
 							<label class="field">
-								<span class="caps label" class:sr={f.kind === 'pairs' || f.kind === 'map'}>{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : f.kind === 'hotkey' ? 'Key' : 'Value'}</span>
+								<span class="caps label" class:sr={f.kind === 'pairs' || f.kind === 'map' || f.kind === 'rows'}>{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : f.kind === 'hotkey' ? 'Key' : 'Value'}</span>
 								{#if f.kind === 'hotkey'}
 									<button
 										type="button"
@@ -264,6 +266,38 @@
 								{:else if f.kind === 'lines'}
 									<textarea bind:this={areaField} bind:value={draft} rows="8" spellcheck="false" placeholder="One per line"></textarea>
 									<span class="muted small">One per line. Blank lines are left out.</span>
+								{:else if f.kind === 'rows'}
+									<!-- One card per entry: its name and switch, then its other fields. -->
+									<ol class="cards">
+										{#each entries as r, i (i)}
+											<li>
+												<div class="cardhead">
+													{#each (f.cols ?? []).filter((c) => c.kind === 'text').slice(0, 1) as c (c.key)}
+														<input type="text" bind:value={r.cells[c.key]} placeholder={c.placeholder} aria-label="{c.label} {i + 1}" autocomplete="off" spellcheck="false" />
+													{/each}
+													{#each (f.cols ?? []).filter((c) => c.kind === 'switch') as c (c.key)}
+														<label class="check"><input type="checkbox" bind:checked={r.cells[c.key] as boolean} /><span>{c.label}</span></label>
+													{/each}
+													<button type="button" class="textbutton" onclick={() => (entries = entries.filter((_, j) => j !== i))} aria-label="Remove entry {i + 1}">Remove</button>
+												</div>
+												<div class="cardcells">
+													{#each (f.cols ?? []).filter((c, k) => c.kind !== 'switch' && !(c.kind === 'text' && k === (f.cols ?? []).findIndex((x) => x.kind === 'text'))) as c (c.key)}
+														<label>
+															<span class="caps">{c.label}{c.kind === 'percent' ? ' %' : c.unit ? ` (${c.unit})` : ''}</span>
+															{#if c.kind === 'choice'}
+																<select bind:value={r.cells[c.key]}>
+																	{#each c.choices ?? [] as ch (ch.value)}<option value={ch.value}>{ch.label}</option>{/each}
+																</select>
+															{:else}
+																<input type="text" inputmode={c.kind === 'text' ? undefined : 'decimal'} bind:value={r.cells[c.key]} autocomplete="off" />
+															{/if}
+														</label>
+													{/each}
+												</div>
+											</li>
+										{/each}
+									</ol>
+									<span class="muted small"><button type="button" class="textbutton" onclick={() => (entries = [...entries, blankRow(f)])}>Add {f.noun?.[0] ?? 'an entry'}</button></span>
 								{:else if f.kind === 'map' && f.leaf}
 									<ul class="entries">
 										{#each pairs as p (p.a)}
@@ -339,7 +373,21 @@
 							<dt class="caps">Now</dt>
 							<dd class:changed={s?.changed}>
 								{show(f, value)}{#if s && !s.set}<span class="muted"> · not in the file, so the default</span>{/if}
-								{#if f.kind === 'lines' && Array.isArray(value) && value.length}
+								{#if f.kind === 'rows' && Array.isArray(value) && value.length}
+									{@const cols = f.cols ?? []}
+									<ul class="entries small">
+										{#each value as e, i (i)}
+											{@const row = (e ?? {}) as Record<string, unknown>}
+											<li class:off={cols.some((c) => c.kind === 'switch' && row[c.key] === false)}>
+												<span class="id">{cellText(cols[0]!, row[cols[0]!.key])}</span>
+												<span class="muted">{cols
+														.slice(1)
+														.map((c) => (c.kind === 'switch' ? cellText(c, row[c.key]) : `${c.label.toLowerCase()} ${cellText(c, row[c.key])}`))
+														.join(' · ')}</span>
+											</li>
+										{/each}
+									</ul>
+								{:else if f.kind === 'lines' && Array.isArray(value) && value.length}
 									<ul class="setlist small">
 										{#each value as l, i (i)}<li>{String(l)}</li>{/each}
 									</ul>
@@ -638,6 +686,57 @@
 		width: 100%;
 		padding: var(--space-1) var(--space-2);
 		font-size: var(--step--1);
+	}
+	/* A rows field's entries, edited one card each. */
+	.cards {
+		list-style: none;
+		padding: 0;
+		margin: var(--space-2) 0;
+	}
+	.cards li {
+		padding: var(--space-2) 0 var(--space-3);
+		border-bottom: 1px solid var(--rule);
+	}
+	.cardhead {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+	.cardhead input[type='text'] {
+		flex: 1;
+		min-width: 0;
+		padding: var(--space-1) var(--space-2);
+	}
+	.cardhead .check {
+		display: flex;
+		gap: var(--space-1);
+		align-items: center;
+		font-size: var(--step--1);
+	}
+	.cardcells {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+	}
+	.cardcells label {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.cardcells .caps {
+		font-size: var(--step--1);
+		color: var(--muted);
+	}
+	.cardcells input,
+	.cardcells select {
+		width: 100%;
+		min-width: 0;
+		padding: var(--space-1) var(--space-2);
+	}
+	.entries li.off .id {
+		text-decoration: line-through;
+		text-decoration-color: var(--muted);
 	}
 	.sr {
 		position: absolute;

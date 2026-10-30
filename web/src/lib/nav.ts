@@ -20,7 +20,18 @@ export const groups: NavGroup[] = [
 	{
 		path: 'behavior',
 		label: 'Behavior',
-		pages: [{ path: 'prompts', label: 'Prompts' }, { path: 'actions', label: 'Actions' }, { path: 'triggers', label: 'Triggers' }, { path: 'translator', label: 'Translator' }, feature('gamemaster', 'GameMaster'), feature('narration', 'Narration'), feature('actor-filter', 'Actor filter')]
+		pages: [
+			{ path: 'prompts', label: 'Prompts' },
+			{ path: 'actions', label: 'Actions' },
+			{ path: 'triggers', label: 'Triggers' },
+			{ path: 'translator', label: 'Translator' },
+			feature('gamemaster', 'GameMaster'),
+			feature('narration', 'Narration'),
+			feature('conversation', 'Conversation'),
+			feature('npc-thoughts', 'NPC thoughts'),
+			feature('player-reactions', 'Player reactions'),
+			feature('actor-filter', 'Actor filter')
+		]
 	},
 	{ path: 'memory', label: 'Memory', pages: [feature('memories', 'Memories'), feature('memory-filter', 'Memory filter'), feature('diaries', 'Diaries'), feature('dynamic-bios', 'Dynamic bios')] },
 	{ path: 'voice', label: 'Voice', pages: [feature('speech', 'Speech'), { path: 'engines', label: 'Engines' }, { path: 'effects', label: 'Voice effects' }, feature('samples', 'Voice samples'), feature('speech-to-text', 'Speech to text')] },

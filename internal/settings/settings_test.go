@@ -582,3 +582,21 @@ func TestNumbersRecordedAsText(t *testing.T) {
 		}
 	}
 }
+
+// A list of groups from the page keeps each group's keys in the file's order.
+func TestListOfGroupsKeepsKeyOrder(t *testing.T) {
+	h := newHarness(t)
+	path := h.config("PlayerDialogue.yaml", "enabled: false\neventConfigs:\n  - eventType: combat\n    enabled: false\n    responseType: thought\n    probability: 0\n    cooldownSeconds: 120\n")
+	info, _ := os.Stat(path)
+	_, err := h.settings.Save("PlayerDialogue", Edit{Modified: info.ModTime().UnixMilli(), Changes: []Change{{Key: "eventConfigs", Value: []any{
+		map[string]any{"cooldownSeconds": 120.0, "enabled": true, "eventType": "combat", "probability": 0.5, "responseType": "thought"},
+		map[string]any{"cooldownSeconds": 60.0, "enabled": true, "eventType": "death", "probability": 1.0, "responseType": "audible"},
+	}}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "eventConfigs:\n  - eventType: combat\n    enabled: true\n    responseType: thought\n    probability: 0.5\n    cooldownSeconds: 120\n  - eventType: death\n    enabled: true\n    responseType: audible\n    probability: 1\n    cooldownSeconds: 60\n"
+	if got := h.read("PlayerDialogue.yaml"); !strings.Contains(got, want) {
+		t.Errorf("got\n%s", got)
+	}
+}
