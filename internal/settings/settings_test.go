@@ -569,3 +569,16 @@ clone_cache:
 		}
 	}
 }
+
+func TestNumbersRecordedAsText(t *testing.T) {
+	for _, c := range []struct {
+		a, b any
+		same bool
+	}{
+		{0, "0", true}, {"0", 0, true}, {1.5, "1.5", true}, {2, "3", false}, {0, "", false}, {"a", 0, false}, {0, " 0", false},
+	} {
+		if got := sameValue(c.a, c.b); got != c.same {
+			t.Errorf("sameValue(%#v, %#v) = %v", c.a, c.b, got)
+		}
+	}
+}

@@ -338,3 +338,113 @@ const shared: Section[] = [
 export function engineFeature(e: Engine): Feature {
 	return { id: `engines/${e.id}`, file: e.file, title: e.label, what: e.what, sections: [connection(e), ...(own[e.id] ?? []), ...shared] };
 }
+
+const sttBackends = [
+	{ value: 'whisper', label: 'Whisper', what: 'runs on your machine' },
+	{ value: 'parakeet', label: 'Parakeet', what: 'runs on your machine, and tells languages apart itself' },
+	{ value: 'external_whisper', label: 'Whisper service', what: 'any OpenAI-style transcription API; a hosted one needs a key' },
+	{ value: 'fateless', label: 'Fateless', what: 'fateless.ai, with an account there' },
+	{ value: 'none', label: 'None', what: 'no microphone; you can still type' }
+];
+
+export const speechToText: Feature = {
+	id: 'speech-to-text',
+	file: 'STT',
+	title: 'Speech to text',
+	what: 'How what you say into your microphone becomes text for characters to answer: which recognizer listens, and when it decides you’ve finished speaking.',
+	sections: [
+		{
+			title: 'Recognizer',
+			fields: [
+				{ key: 'backend', label: 'Recognizer', what: 'What turns your speech into text.', kind: 'choice', custom: true, choices: sttBackends },
+				{ key: 'language', label: 'Language', what: 'The language you speak, as a two-letter code.', kind: 'text', placeholder: 'en' },
+				{ key: 'name_hints', label: 'Name hints', what: 'Tell the recognizer the names of you, nearby and pinned characters, and nearby places, so they come back spelled right. The stt_hints prompt sets what’s sent.', kind: 'switch' },
+				{ key: 'enable_partial_results', label: 'Text as you speak', what: 'Show what’s been recognized so far while you’re still speaking.', kind: 'switch' }
+			]
+		},
+		{
+			title: 'Whisper',
+			what: 'When the recognizer is Whisper.',
+			fields: [
+				{
+					key: 'whisper.model',
+					label: 'Model',
+					what: 'Larger models are more accurate, and slower. A model is downloaded the first time it’s used.',
+					kind: 'choice',
+					custom: true,
+					choices: ['tiny', 'base', 'small', 'medium', 'large-v1', 'large-v2', 'large-v3', 'large-v3-turbo'].map((v) => ({ value: v, label: v }))
+				},
+				{ key: 'whisper.use_whisper_finetune', label: 'Skyrim’s version', what: 'Use a version of the model trained for the game’s words, where there is one.', kind: 'switch' },
+				{ key: 'whisper.use_gpu', label: 'Graphics card', what: 'Run on the graphics card rather than the processor.', kind: 'switch' },
+				{ key: 'whisper.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count', min: 0, max: 16 },
+				{ key: 'whisper.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count', min: 1, max: 64 },
+				{ key: 'whisper.input_sample_rate', label: 'Sample rate', what: 'The sample rate of the microphone’s audio as it reaches Whisper.', kind: 'count', min: 8000, max: 48000, unit: 'Hz' }
+			]
+		},
+		{
+			title: 'Parakeet',
+			what: 'When the recognizer is Parakeet.',
+			fields: [
+				{
+					key: 'parakeet.model',
+					label: 'Model',
+					what: 'Smaller versions are faster; larger ones are more accurate.',
+					kind: 'choice',
+					custom: true,
+					choices: [
+						{ value: 'q8_0', label: 'Q8_0', what: 'recommended' },
+						{ value: 'q4_k', label: 'Q4_K' },
+						{ value: 'q4_0', label: 'Q4_0' },
+						{ value: 'f16', label: 'F16', what: 'the largest' }
+					]
+				},
+				{ key: 'parakeet.use_gpu', label: 'Graphics card', what: 'Run on the graphics card rather than the processor.', kind: 'switch' },
+				{ key: 'parakeet.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count', min: 0, max: 16 },
+				{ key: 'parakeet.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count', min: 1, max: 64 }
+			]
+		},
+		{
+			title: 'Whisper service',
+			what: 'When the recognizer is a Whisper service.',
+			fields: [
+				{ key: 'external_whisper.api_endpoint', label: 'Address', what: 'The service’s transcription address.', kind: 'text', placeholder: 'https://openrouter.ai/api/v1/audio/transcriptions' },
+				{ key: 'external_whisper.api_key', label: 'Key', what: 'The service’s key. A server of your own may not need one.', kind: 'secret' },
+				{ key: 'external_whisper.model', label: 'Model', what: 'The model as the service names it, such as openai/whisper-1 on OpenRouter or whisper-1 on OpenAI.', kind: 'text' },
+				{ key: 'external_whisper.timeout_ms', label: 'Wait for text', what: 'How long to wait for the service before giving up.', kind: 'count', min: 0, max: 600000, unit: 'ms' }
+			]
+		},
+		{
+			title: 'Open mic',
+			what: 'Listening without a key held down.',
+			fields: [
+				{ key: 'streaming.silence_threshold', label: 'Speech threshold', what: 'How sure the voice detector must be that a sound is speech, in your microphone and in characters’ voice files.', kind: 'percent' },
+				{ key: 'streaming.silence_duration', label: 'Pause that ends it', what: 'How long you must be quiet before what you said is sent.', kind: 'count', min: 0, max: 10000, unit: 'ms' },
+				{ key: 'streaming.chunks', label: 'Chunks held', what: 'How many pieces of audio are held at once for recognizing.', kind: 'count', min: 1, max: 100 },
+				{ key: 'streaming.openMicVerbose', label: 'Notices', what: 'Show a notice when open mic hears you and when it sends what you said.', kind: 'switch' }
+			]
+		}
+	]
+};
+
+export const voiceSamples: Feature = {
+	id: 'samples',
+	file: 'VoiceSamples',
+	title: 'Voice samples',
+	what: 'The recordings voices are cloned from: which of the game’s own lines may serve as a voice type’s sample, and the sample each voice type uses.',
+	sections: [
+		{
+			title: 'Which lines may be samples',
+			fields: [
+				{ key: 'filtering.min_duration_seconds', label: 'Shortest', what: 'Lines shorter than this aren’t used as samples.', kind: 'number', min: 0, max: 60 },
+				{ key: 'filtering.max_duration_seconds', label: 'Longest', what: 'Lines longer than this aren’t used as samples.', kind: 'number', min: 0, max: 120 },
+				{ key: 'filtering.banned_keywords', label: 'Left out by word', what: 'Lines whose file name has one of these words aren’t used, such as screams, music, and coughs.', kind: 'lines', noun: ['word', 'words'] },
+				{ key: 'filtering.banned_voice_types', label: 'Voice types left out', what: 'Voice types never cloned.', kind: 'lines', noun: ['voice type', 'voice types'] },
+				{ key: 'filtering.excluded_plugins', label: 'Plugins left out', what: 'Game plugins whose lines are never used as samples.', kind: 'lines', noun: ['plugin', 'plugins'] }
+			]
+		},
+		{
+			title: 'Samples',
+			fields: [{ key: 'voice_types', leaf: 'selected_sample', label: 'Chosen samples', what: 'The recording each voice type is cloned from: a voice file in the game’s data, or an audio file of your own.', kind: 'map', columns: ['Voice type', 'Sample'], noun: ['voice type', 'voice types'] }]
+		}
+	]
+};

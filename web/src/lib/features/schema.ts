@@ -43,6 +43,7 @@ export interface Field {
 	pairKeys?: [string, string]; // pairs: each entry's two keys in the file
 	noun?: [string, string]; // lines, pairs, and map: one entry, and many, for counts
 	zero?: string; // a count or number of 0 shown as what it means, such as "No limit"
+	leaf?: string; // map: the setting under each name, when names hold groups, as voice_types.<type>.selected_sample does
 }
 
 export interface Section {

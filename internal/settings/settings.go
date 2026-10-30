@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -109,6 +110,8 @@ var ownPages = []OwnPage{
 	{Name: "Chatterbox", Label: "Chatterbox", Page: "voice/engines/chatterbox"},
 	{Name: "Higgs", Label: "Higgs", Page: "voice/engines/higgs"},
 	{Name: "OpenAICompatibleTTS", Label: "OpenAI-compatible", Page: "voice/engines/openai-compatible"},
+	{Name: "VoiceSamples", Label: "Voice samples", Page: "voice/samples"},
+	{Name: "STT", Label: "Speech to text", Page: "voice/speech-to-text"},
 }
 
 // withPage notes the page a file has of its own, if any.
@@ -362,7 +365,17 @@ func sameValue(a, b any) bool {
 	}
 	if x, ok := toNumber(a); ok {
 		y, ok := toNumber(b)
+		if !ok {
+			// SkyrimNet's defaults record a few numbers as text, such as a
+			// GPU index of "0", where the file has the number.
+			y, ok = numericText(b)
+		}
 		return ok && (x == y || float32(x) == float32(y))
+	}
+	if x, ok := numericText(a); ok {
+		if y, ok := toNumber(b); ok {
+			return x == y || float32(x) == float32(y)
+		}
 	}
 	switch x := a.(type) {
 	case []any:
@@ -404,6 +417,16 @@ func toNumber(v any) (float64, bool) {
 		return x, !math.IsNaN(x)
 	}
 	return 0, false
+}
+
+// numericText reads text that is a plain number, such as "0" or "1.5".
+func numericText(v any) (float64, bool) {
+	t, ok := v.(string)
+	if !ok || strings.TrimSpace(t) != t || t == "" {
+		return 0, false
+	}
+	f, err := strconv.ParseFloat(t, 64)
+	return f, err == nil && !math.IsNaN(f) && !math.IsInf(f, 0)
 }
 
 // ---------- secrets ----------

@@ -33,15 +33,21 @@
 	type Row = { field: Field; section: string; setting?: Setting; children?: Setting[] };
 	const childrenOf = (f: Field): Setting[] => {
 		const prefix = f.key.toLowerCase() + '.';
-		return file.values.filter((s) => s.key.toLowerCase().startsWith(prefix));
+		const leaf = f.leaf ? '.' + f.leaf.toLowerCase() : '';
+		return file.values.filter((s) => {
+			const k = s.key.toLowerCase();
+			return k.startsWith(prefix) && (leaf ? k.endsWith(leaf) && !k.slice(prefix.length, -leaf.length).includes('.') : true);
+		});
 	};
+	// nameOf is a map entry's name, from its setting's key.
+	const nameOf = (f: Field, key: string) => key.slice(f.key.length + 1, f.leaf ? -(f.leaf.length + 1) : undefined);
 	let rows = $derived<Row[]>(
 		feature.sections.flatMap((s) => s.fields.map((field) => (field.kind === 'map' ? { field, section: s.title, children: childrenOf(field) } : { field, section: s.title, setting: settingOf(field) })))
 	);
 	const isChanged = (r: Row) => (r.children ? r.children.some((c) => c.changed) : !!r.setting?.changed);
 	let changed = $derived(rows.filter(isChanged).length);
 	// valueOfRow is a row's value; a map's is its settings by name.
-	const valueOfRow = (r: Row): unknown => (r.children ? Object.fromEntries(r.children.map((c) => [c.key.slice(r.field.key.length + 1), valueOf(c)])) : valueOf(r.setting));
+	const valueOfRow = (r: Row): unknown => (r.children ? Object.fromEntries(r.children.map((c) => [nameOf(r.field, c.key), valueOf(c)])) : valueOf(r.setting));
 
 	const selection = new Selection(() => rows, (r) => r.field.key, { param: 'item' });
 	let current = $derived(selection.current);
@@ -128,12 +134,13 @@
 		// A map saves each name whose value changed, as its own setting.
 		if (f.kind === 'map') {
 			const was = (value as Record<string, unknown>) ?? {};
-			const changes = pairs.filter((p) => String(was[p.a] ?? '') !== p.b).map((p) => ({ key: `${f.key}.${p.a}`, value: p.b }));
-			if (!changes.length) {
+			const edited = pairs.filter((p) => String(was[p.a] ?? '') !== p.b);
+			if (!edited.length) {
 				leave('mode');
 				return;
 			}
-			apply(changes, `${f.label}: ${changes.length === 1 ? `${changes[0]!.key.slice(f.key.length + 1)} changed` : `${changes.length} changed`}.`);
+			const changes = edited.map((p) => ({ key: `${f.key}.${p.a}${f.leaf ? `.${f.leaf}` : ''}`, value: p.b }));
+			apply(changes, `${f.label}: ${edited.length === 1 ? `${edited[0]!.a} changed` : `${edited.length} changed`}.`);
 			return;
 		}
 		let v: unknown;
@@ -257,6 +264,17 @@
 								{:else if f.kind === 'lines'}
 									<textarea bind:this={areaField} bind:value={draft} rows="8" spellcheck="false" placeholder="One per line"></textarea>
 									<span class="muted small">One per line. Blank lines are left out.</span>
+								{:else if f.kind === 'map' && f.leaf}
+									<ul class="entries">
+										{#each pairs as p (p.a)}
+											<li>
+												<label>
+													<span class="id">{p.a}</span>
+													<input type="text" bind:value={p.b} autocomplete="off" spellcheck="false" />
+												</label>
+											</li>
+										{/each}
+									</ul>
 								{:else if f.kind === 'pairs' || f.kind === 'map'}
 									<table class="rows">
 										<thead><tr><th class="caps">{f.columns?.[0] ?? 'Name'}</th><th class="caps">{f.columns?.[1] ?? 'Value'}</th>{#if f.kind === 'pairs'}<th><span class="sr">Remove</span></th>{/if}</tr></thead>
@@ -327,7 +345,11 @@
 									</ul>
 								{:else if (f.kind === 'pairs' || f.kind === 'map') && value}
 									{@const list = f.kind === 'pairs' ? pairsOf(f, value) : Object.entries(value as Record<string, unknown>).map(([a, b]) => ({ a, b: b == null ? '' : String(b) }))}
-									{#if list.length}
+									{#if list.length && f.leaf}
+										<ul class="entries small">
+											{#each list as p, i (i)}<li><span class="id">{p.a}</span><span class="muted">{p.b}</span></li>{/each}
+										</ul>
+									{:else if list.length}
 										<table class="rows small">
 											<thead><tr><th class="caps">{f.columns?.[0] ?? 'Name'}</th><th class="caps">{f.columns?.[1] ?? 'Value'}</th></tr></thead>
 											<tbody>
@@ -590,6 +612,32 @@
 		width: 100%;
 		min-width: 0;
 		padding: var(--space-1) var(--space-2);
+	}
+	/* A map whose values are long, such as file paths: each entry's name,
+	   then its value beneath. */
+	.entries {
+		list-style: none;
+		padding: 0;
+		margin: var(--space-2) 0 0;
+	}
+	.entries li {
+		padding: var(--space-1) 0;
+		border-bottom: 1px solid var(--rule);
+	}
+	.entries li > span,
+	.entries label > span {
+		display: block;
+		overflow-wrap: anywhere;
+	}
+	.entries label {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+	.entries input {
+		width: 100%;
+		padding: var(--space-1) var(--space-2);
+		font-size: var(--step--1);
 	}
 	.sr {
 		position: absolute;
