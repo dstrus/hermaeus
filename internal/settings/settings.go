@@ -104,6 +104,7 @@ var ownPages = []OwnPage{
 	{Name: "Conversation", Label: "Conversation", Page: "behavior/conversation"},
 	{Name: "NpcThoughts", Label: "NPC thoughts", Page: "behavior/npc-thoughts"},
 	{Name: "PlayerDialogue", Label: "Player reactions", Page: "behavior/player-reactions"},
+	{Name: "BardSinging", Label: "Bard singing", Page: "behavior/bard-singing"},
 	{Name: "PocketTTS", Label: "PocketTTS", Page: "voice/engines/pockettts"},
 	{Name: "Piper", Label: "Piper", Page: "voice/engines/piper"},
 	{Name: "Inworld", Label: "Inworld", Page: "voice/engines/inworld"},

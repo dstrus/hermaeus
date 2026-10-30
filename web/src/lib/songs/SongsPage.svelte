@@ -17,6 +17,7 @@
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { audioPath, createdMs, deleteSong, parts, saveSong } from './api.ts';
 	import Player from './Player.svelte';
+	import { href } from '#lib/nav.ts';
 
 	let { list: loaded }: { list: List } = $props();
 
@@ -113,7 +114,7 @@
 	<span class="muted n" use:clipped>{plural(list.songs.length, 'song', 'songs')}{composers ? ` by ${plural(composers, 'bard', 'bards')}` : ''}</span>
 	<input type="search" bind:value={query} placeholder="Search songs" aria-label="Search songs" />
 </div>
-<p class="muted lead">Songs the bards of this playthrough composed and sang, from what was happening around them. A bard can sing any of them again.</p>
+<p class="muted lead">Songs the bards of this playthrough composed and sang, from what was happening around them. A bard can sing any of them again. How bards compose, and how often, is set under <a href={href(save, 'bard-singing')}>Bard singing</a>.</p>
 {#if readOnly}<p class="notice warn">Skyrim is running, so songs can only be listened to.</p>{/if}
 
 <div class="split">

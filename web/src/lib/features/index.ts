@@ -11,11 +11,11 @@ import { dynamicBio } from './dynamicbio.ts';
 import { memory } from './memory.ts';
 import { memoryFilter } from './memoryfilter.ts';
 import { speech, speechToText, voiceSamples } from './voice.ts';
-import { conversation, npcThoughts, playerReactions } from './behavior.ts';
+import { bardSinging, conversation, npcThoughts, playerReactions } from './behavior.ts';
 import type { Feature } from './schema.ts';
 import { href } from '#lib/nav.ts';
 
-export const features: Feature[] = [gameMaster, narration, conversation, npcThoughts, playerReactions, actorFilter, memory, memoryFilter, diary, dynamicBio, speech, voiceSamples, speechToText, hotkeys];
+export const features: Feature[] = [gameMaster, narration, conversation, npcThoughts, playerReactions, bardSinging, actorFilter, memory, memoryFilter, diary, dynamicBio, speech, voiceSamples, speechToText, hotkeys];
 
 export function featureById(id: string): Feature | undefined {
 	return features.find((f) => f.id === id);

@@ -30,6 +30,7 @@ export const groups: NavGroup[] = [
 			feature('conversation', 'Conversation'),
 			feature('npc-thoughts', 'NPC thoughts'),
 			feature('player-reactions', 'Player reactions'),
+			feature('bard-singing', 'Bard singing'),
 			feature('actor-filter', 'Actor filter')
 		]
 	},
