@@ -77,3 +77,18 @@ func MatchLineEndings(text, old string) string {
 	}
 	return text
 }
+
+// Remove deletes path, then each folder above it that's left empty, up to
+// but not including root.
+func Remove(path, root string) error {
+	if err := os.Remove(path); err != nil {
+		return err
+	}
+	root = filepath.Clean(root)
+	for dir := filepath.Dir(path); dir != root && strings.HasPrefix(dir, root+string(filepath.Separator)); dir = filepath.Dir(dir) {
+		if os.Remove(dir) != nil { // not empty
+			break
+		}
+	}
+	return nil
+}

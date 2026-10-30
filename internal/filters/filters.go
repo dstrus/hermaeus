@@ -227,7 +227,13 @@ func (f *Filters) Save(kind, id string, e ListEdit) (ListsResponse, error) {
 		} else {
 			path = filepath.Join(dir, id+".yaml")
 		}
-		text, err := encodeList(old, kind, e)
+		// A first copy starts from the list it replaces, keeping its other
+		// fields and its line endings.
+		from := old
+		if from == nil {
+			from = f.below(id)
+		}
+		text, err := encodeList(from, kind, e)
 		if err != nil {
 			return err
 		}
@@ -310,7 +316,7 @@ func (f *Filters) Remove(kind, id string, r Removal) (ListsResponse, error) {
 		if err := f.backup(path, old); err != nil {
 			return err
 		}
-		return os.Remove(path)
+		return textfile.Remove(path, filepath.Dir(dir))
 	})
 	if err != nil {
 		return ListsResponse{}, err
@@ -331,6 +337,24 @@ func (f *Filters) backup(path string, old []byte) error {
 
 // encodeList writes a list: kind, name, description, then the fields with
 // entries, in SkyrimNet's order. Keys this page doesn't manage are kept.
+// below is the list a first copy of yours replaces: the file of that id in
+// the highest layer under your edits, or nil when there's none.
+func (f *Filters) below(id string) []byte {
+	for _, l := range f.library.Layers() {
+		if l.Kind == "overlay" {
+			continue
+		}
+		if dir := layers.Lookup(l.Root, "filters"); dir != "" {
+			if path := layers.Lookup(dir, id+".yaml"); path != "" {
+				if b, err := os.ReadFile(path); err == nil {
+					return b
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func encodeList(old []byte, kind string, e ListEdit) (string, error) {
 	doc := &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map"}
 	if old != nil {

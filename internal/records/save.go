@@ -140,7 +140,7 @@ func (r *Records) RevertRecord(rel string, rv Revert) ([]Version, error) {
 		if err := r.backup(overlay, dest, old); err != nil {
 			return err
 		}
-		return os.Remove(dest)
+		return textfile.Remove(dest, overlay)
 	})
 	if err != nil {
 		return nil, err

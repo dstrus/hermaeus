@@ -59,3 +59,28 @@ func TestMatchLineEndings(t *testing.T) {
 		t.Errorf("empty file: %q", got)
 	}
 }
+
+func TestRemoveTakesEmptyFoldersWithIt(t *testing.T) {
+	root := t.TempDir()
+	lone := filepath.Join(root, "voice_effects", "ghost.yaml")
+	kept := filepath.Join(root, "triggers", "a.yaml")
+	for _, p := range []string{lone, kept, filepath.Join(root, "triggers", "b.yaml")} {
+		os.MkdirAll(filepath.Dir(p), 0o755)
+		os.WriteFile(p, []byte("x"), 0o644)
+	}
+	if err := Remove(lone, root); err != nil {
+		t.Fatal(err)
+	}
+	if err := Remove(kept, root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Dir(lone)); !os.IsNotExist(err) {
+		t.Error("the emptied folder is still there")
+	}
+	if _, err := os.Stat(filepath.Join(root, "triggers", "b.yaml")); err != nil {
+		t.Error("a folder that still holds a file was removed")
+	}
+	if _, err := os.Stat(root); err != nil {
+		t.Error("the root was removed")
+	}
+}

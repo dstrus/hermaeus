@@ -121,7 +121,7 @@ func (p *Prompts) RemoveCopy(path string, r Revert) (Document, error) {
 		if err := p.backup(overlay, dest, old); err != nil {
 			return fmt.Errorf("could not back up your copy, so nothing was changed: %w", err)
 		}
-		return os.Remove(dest)
+		return textfile.Remove(dest, overlay)
 	})
 	if err != nil {
 		return Document{}, err

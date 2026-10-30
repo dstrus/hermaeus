@@ -41,7 +41,7 @@ func newHarness(t *testing.T) *harness {
 	base := filepath.Join(mod, "SKSE", "Plugins", "SkyrimNet", "library", layers.BasePlugin)
 	write(t, filepath.Join(base, "manifest.json"), `{"version": "0.28"}`)
 	os.MkdirAll(filepath.Join(base, "prompts"), 0o755) // what marks SkyrimNet's defaults
-	write(t, filepath.Join(base, "filters", "animals_no_memories.yaml"), "kind: memory\nname: Animals form no memories\ndescription: Cats, dogs and wolves don't form memories.\nRaceBlacklist:\n  - ACLRaceCat\n  - DogRace\n  - WolfRace\n")
+	write(t, filepath.Join(base, "filters", "animals_no_memories.yaml"), "# Shipped with SkyrimNet.\r\nkind: memory\r\nname: Animals form no memories\r\ndescription: Cats, dogs and wolves don't form memories.\r\nRaceBlacklist:\r\n  - ACLRaceCat\r\n  - DogRace\r\n  - WolfRace\r\nnote: kept\r\n")
 	write(t, filepath.Join(base, "filters", "mannequins_no_memories.yaml"), "kind: memory\nname: Mannequins form no memories\nRaceBlacklist:\n  - ManakinRace\n")
 	write(t, filepath.Join(base, "filters", "animals_dont_speak.yaml"), "kind: actor\nname: Animals don't speak\nRaceBlacklist:\n  - DogRace\n")
 	write(t, filepath.Join(base, "filters", "combat_grunts.yaml"), "kind: dialogue_rule\nid: combat_grunts\npattern: x\n")
@@ -140,6 +140,9 @@ func TestYourListsAndCopies(t *testing.T) {
 	}
 	if copy.LayerKind != "overlay" || copy.Replaces != "SkyrimNet’s defaults" || len(copy.Entries["RaceBlacklist"]) != 2 {
 		t.Fatalf("copy = %+v", copy)
+	}
+	if b, _ := os.ReadFile(filepath.Join(mine, "animals_no_memories.yaml")); !strings.Contains(string(b), "\r\nnote: kept\r\n") || strings.Count(string(b), "\n") != strings.Count(string(b), "\r\n") {
+		t.Errorf("the copy didn't keep the original's other fields and line endings:\n%q", b)
 	}
 	for _, e := range r.InEffect["RaceBlacklist"] {
 		if e.Value == "ACLRaceCat" {
