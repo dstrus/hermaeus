@@ -325,18 +325,11 @@ func checkStages(stages []Stage) error {
 	return nil
 }
 
-// effectIDOf is the voice effect a trigger names, in its response or, as
-// some are written, at its top.
+// effectIDOf is the voice effect a trigger's response names.
 func effectIDOf(m map[string]any) string {
-	if rs, ok := m["response"].(map[string]any); ok {
-		if s, ok := rs["effectId"].(string); ok && strings.TrimSpace(s) != "" {
-			return strings.TrimSpace(s)
-		}
-	}
-	if s, ok := m["effectId"].(string); ok {
-		return strings.TrimSpace(s)
-	}
-	return ""
+	rs, _ := m["response"].(map[string]any)
+	s, _ := rs["effectId"].(string)
+	return strings.TrimSpace(s)
 }
 
 func toFloat(v any) (float64, bool) {

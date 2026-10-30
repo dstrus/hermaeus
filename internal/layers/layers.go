@@ -315,8 +315,8 @@ func (l *Library) Layers() []Layer {
 	return layers
 }
 
-// PluginIDs lists every plugin folder in the roots' library/ and external/
-// folders, whether or not the registry has it yet.
+// PluginIDs lists every plugin folder SkyrimNet reads in the roots' library/
+// and external/ folders, whether or not the registry has it yet.
 func (l *Library) PluginIDs() []string {
 	seen := map[string]bool{}
 	var out []string
@@ -324,7 +324,7 @@ func (l *Library) PluginIDs() []string {
 		for _, kind := range []string{"library", "external"} {
 			entries, _ := os.ReadDir(filepath.Join(root, kind))
 			for _, e := range entries {
-				if e.IsDir() && !seen[strings.ToLower(e.Name())] {
+				if e.IsDir() && installSource(filepath.Join(root, kind, e.Name()), kind) != "" && !seen[strings.ToLower(e.Name())] {
 					seen[strings.ToLower(e.Name())] = true
 					out = append(out, e.Name())
 				}
@@ -353,25 +353,68 @@ func (l *Library) RegistryPath() string {
 
 // pluginDir is the folder SkyrimNet uses for a plugin: of every copy in the
 // roots' library/ and external/ folders, the highest version, and on a tie a
-// library copy over an external one.
+// copy the player packaged, then an external one, then one from the Hub.
 func pluginDir(roots []string, id string) string {
 	type copy struct {
 		dir, version string
+		rank         int
 	}
+	rank := map[string]int{"local": 0, "external": 1}
 	var copies []copy
 	for _, kind := range []string{"library", "external"} {
 		for _, root := range roots {
-			if d := filepath.Join(root, kind, id); install.IsDir(d) {
-				mf, _ := readManifest(d)
-				copies = append(copies, copy{d, mf.Version})
+			d := filepath.Join(root, kind, id)
+			if !install.IsDir(d) {
+				continue
 			}
+			src := installSource(d, kind)
+			if src == "" {
+				continue
+			}
+			r, ok := rank[src]
+			if !ok {
+				r = 2
+			}
+			mf, _ := readManifest(d)
+			copies = append(copies, copy{d, mf.Version, r})
 		}
 	}
 	if len(copies) == 0 {
 		return ""
 	}
-	sort.SliceStable(copies, func(i, j int) bool { return compareVersions(copies[i].version, copies[j].version) > 0 })
+	sort.SliceStable(copies, func(i, j int) bool {
+		if c := compareVersions(copies[i].version, copies[j].version); c != 0 {
+			return c > 0
+		}
+		return copies[i].rank < copies[j].rank
+	})
 	return copies[0].dir
+}
+
+// installSource says where a plugin folder came from: "external" for one in
+// external/, and for one in library/ the source SkyrimNet recorded in its
+// install.json ("hub" or "local"). It's "" for a library/ folder SkyrimNet
+// didn't install, which SkyrimNet ignores. SkyrimNet's own defaults come
+// with it, without an install.json.
+func installSource(dir, kind string) string {
+	if kind == "external" {
+		return "external"
+	}
+	if strings.EqualFold(filepath.Base(dir), BasePlugin) {
+		return "base"
+	}
+	b, err := os.ReadFile(filepath.Join(dir, "install.json"))
+	if err != nil {
+		return ""
+	}
+	var in struct {
+		Source string `json:"source"`
+	}
+	json.Unmarshal(b, &in)
+	if in.Source == "" {
+		return "hub"
+	}
+	return in.Source
 }
 
 // Lookup finds rel (forward slashes) under root the way SkyrimNet does on

@@ -102,7 +102,7 @@ func (p *Prompts) List() (PromptList, error) {
 			if strings.HasPrefix(d.Name(), ".") || (d.IsDir() && d.Name() == "_history") {
 				return fs.SkipDir
 			}
-			if d.IsDir() || !strings.HasSuffix(strings.ToLower(d.Name()), suffix) {
+			if d.IsDir() || !strings.HasSuffix(d.Name(), suffix) { // SkyrimNet skips .PROMPT
 				return nil
 			}
 			rel, _ := filepath.Rel(root, path)
@@ -201,7 +201,7 @@ func (p *Prompts) Read(path string) (Document, error) {
 // check validates a prompt path from the page.
 func check(path string) (string, error) {
 	path = filepath.ToSlash(strings.TrimSpace(path))
-	ok := strings.HasSuffix(strings.ToLower(path), suffix) && !filepath.IsAbs(path)
+	ok := strings.HasSuffix(path, suffix) && !filepath.IsAbs(path)
 	for _, part := range strings.Split(path, "/") {
 		if part == "" || part == "." || part == ".." || strings.ContainsAny(part, `:\`) {
 			ok = false

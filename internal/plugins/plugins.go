@@ -151,8 +151,18 @@ func (p *Plugins) List() (List, error) {
 	base := p.describe(layers.BasePlugin, "base", p.library.PluginDir(layers.BasePlugin))
 	base.Title, base.Enabled = "SkyrimNet’s defaults", true
 	out.Plugins = append(out.Plugins, base)
-	// A plugin folder the registry doesn't have yet: SkyrimNet adds it, at
-	// the bottom of its order, the next time it starts.
+	for i := len(reg.priority) - 1; i >= 0; i-- {
+		id := reg.priority[i]
+		if id == layers.BasePlugin {
+			continue
+		}
+		pl := p.describe(id, "plugin", p.library.PluginDir(id))
+		pl.Enabled = reg.enabled(id)
+		pl.Source, _ = reg.plugins[id]["source"].(string)
+		out.Plugins = append(out.Plugins, pl)
+	}
+	// A plugin folder the registry doesn't have yet: SkyrimNet adds it at
+	// the top of its order, over every other plugin, the next time it starts.
 	listed := map[string]bool{strings.ToLower(layers.BasePlugin): true}
 	for _, id := range reg.priority {
 		listed[strings.ToLower(id)] = true
@@ -165,16 +175,6 @@ func (p *Plugins) List() (List, error) {
 			pl := p.describe(id, "new", p.library.PluginDir(id))
 			out.Plugins = append(out.Plugins, pl)
 		}
-	}
-	for i := len(reg.priority) - 1; i >= 0; i-- {
-		id := reg.priority[i]
-		if id == layers.BasePlugin {
-			continue
-		}
-		pl := p.describe(id, "plugin", p.library.PluginDir(id))
-		pl.Enabled = reg.enabled(id)
-		pl.Source, _ = reg.plugins[id]["source"].(string)
-		out.Plugins = append(out.Plugins, pl)
 	}
 	if lay := p.library.Layers(); len(lay) > 0 && lay[0].Kind == "overlay" {
 		ov := p.describe("overlay", "overlay", lay[0].Root)

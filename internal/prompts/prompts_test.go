@@ -79,6 +79,7 @@ func TestListEditAndRemove(t *testing.T) {
 	writeFile(t, filepath.Join(h.base, "_history", "old.prompt.backup.1"), "old")
 	writeFile(t, filepath.Join(h.Dir, "library", "diary.pack", "prompts", "Diary_Entry.prompt"), "pack diary")
 	writeFile(t, filepath.Join(h.Dir, "library", "diary.pack", "manifest.json"), `{"title": "Diary Pack"}`)
+	writeFile(t, filepath.Join(h.Dir, "library", "diary.pack", "install.json"), `{"source": "hub"}`)
 	writeFile(t, filepath.Join(h.Dir, layers.BasePlugin+"-unused"), "")
 	writeFile(t, filepath.Join(h.Dir, "content-registry.json"), `{"priority": ["diary.pack"]}`)
 

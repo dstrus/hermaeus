@@ -96,7 +96,7 @@ func (f *Filters) Lists(kind string) (ListsResponse, error) {
 		files, _ := os.ReadDir(dir)
 		for _, e := range files {
 			name := e.Name()
-			if e.IsDir() || !strings.EqualFold(filepath.Ext(name), ".yaml") {
+			if e.IsDir() || filepath.Ext(name) != ".yaml" { // SkyrimNet skips .YAML
 				continue
 			}
 			list, ok := readList(filepath.Join(dir, name), kind)

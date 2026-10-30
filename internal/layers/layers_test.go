@@ -26,6 +26,7 @@ func library(t *testing.T) (sky, mod string) {
 	writeFile(t, filepath.Join(mod, "SKSE", "Plugins", "SkyrimNet", "library", BasePlugin, "manifest.json"), `{"version": "0.25.3"}`)
 	writeFile(t, filepath.Join(sky, "library", "bios.pack", "prompts", "characters", "lydia_A2C.prompt"), "pack")
 	writeFile(t, filepath.Join(sky, "library", "bios.pack", "manifest.json"), `{"title": "Lydia Pack"}`)
+	writeFile(t, filepath.Join(sky, "library", "bios.pack", "install.json"), `{"source": "hub"}`)
 	writeFile(t, filepath.Join(sky, "library", "bios.off", "prompts", "characters", "ralof_2F6.prompt"), "off")
 	writeFile(t, filepath.Join(sky, "library", "bios.stray", "prompts", "characters", "aela_697.prompt"), "stray")
 	writeFile(t, filepath.Join(sky, "overlay", "prompts", "characters", "aela_697.prompt"), "overlay")
@@ -140,5 +141,45 @@ func TestPluginsInOtherMods(t *testing.T) {
 	writeFile(t, filepath.Join(root, "profiles", "Default", "modlist.txt"), "+Something Else\r\n-Another\r\n")
 	if l.PluginDir("a.off") == "" || l.PluginDir("a.sever") == "" || !l.HasDefaults() {
 		t.Error("a profile naming none of the mods hid them")
+	}
+}
+
+// Of several copies of a plugin, SkyrimNet uses the highest version; on a
+// tie, one the player packaged, then an external one, then one from the
+// Hub. A library/ folder SkyrimNet didn't install is ignored.
+func TestPluginCopies(t *testing.T) {
+	sky := t.TempDir()
+	copyOf := func(kind, id, version, source string) string {
+		dir := filepath.Join(sky, kind, id)
+		writeFile(t, filepath.Join(dir, "manifest.json"), `{"version": "`+version+`"}`)
+		if source != "" {
+			writeFile(t, filepath.Join(dir, "install.json"), `{"source": "`+source+`"}`)
+		}
+		return dir
+	}
+	l := New(func() string { return sky })
+	for _, c := range []struct {
+		id, libVersion, libSource, extVersion string
+		want                                  string
+	}{
+		{"a.tie_hub", "1.0", "hub", "1.0", "external"},
+		{"a.tie_local", "1.0", "local", "1.0", "library"},
+		{"a.newer_hub", "1.1", "hub", "1.0", "library"},
+		{"a.newer_external", "1.0", "local", "1.2", "external"},
+		{"a.uninstalled", "9.0", "", "1.0", "external"},
+	} {
+		lib := copyOf("library", c.id, c.libVersion, c.libSource)
+		ext := copyOf("external", c.id, c.extVersion, "")
+		want := map[string]string{"library": lib, "external": ext}[c.want]
+		if got := l.PluginDir(c.id); got != want {
+			t.Errorf("%s: PluginDir = %q, want the %s copy", c.id, got, c.want)
+		}
+	}
+	copyOf("library", "a.stray", "1.0", "")
+	if got := join(l.PluginIDs()); strings.Contains(got, "a.stray") {
+		t.Errorf("PluginIDs lists a library/ folder SkyrimNet didn't install: %s", got)
+	}
+	if l.PluginDir("a.stray") != "" {
+		t.Error("PluginDir found a library/ folder SkyrimNet didn't install")
 	}
 }

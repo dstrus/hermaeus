@@ -149,7 +149,7 @@ func (r *Records) Content() ContentList {
 				continue
 			}
 			for key, f := range layerFiles(dir, i) {
-				if !strings.HasSuffix(key, ".yaml") {
+				if !strings.HasSuffix(f.Path, recordSuffix(k.Root)) {
 					continue
 				}
 				f.Path = k.Root + "/" + f.Path

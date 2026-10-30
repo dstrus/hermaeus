@@ -233,6 +233,7 @@ func (h *harness) withLibrary() {
 	}
 	writeFile(h.t, filepath.Join(chars("library", "bios.pack"), "lydia_A2C.prompt"), bio("Pack Lydia"))
 	writeFile(h.t, filepath.Join(h.Dir, "library", "bios.pack", "manifest.json"), `{"title": "Lydia Pack"}`)
+	writeFile(h.t, filepath.Join(h.Dir, "library", "bios.pack", "install.json"), `{"source": "hub"}`)
 	writeFile(h.t, filepath.Join(chars("library", "bios.off"), "ralof_2F6.prompt"), bio("Disabled Ralof"))
 	writeFile(h.t, filepath.Join(chars("library", "bios.stray"), "aela_697.prompt"), bio("Stray Aela"))
 	writeFile(h.t, filepath.Join(chars("overlay"), "aela_697.prompt"), bio("Overlay Aela"))
@@ -376,6 +377,7 @@ func TestCatalogListsEveryLayersBios(t *testing.T) {
 	writeFile(t, filepath.Join(base, "prompts", "characters", "dynamic", "lydia_A2C.dynamic.prompt"), "not a default")
 	writeFile(t, filepath.Join(h.Dir, "library", "bios.pack", "prompts", "characters", "Lydia_A2C.prompt"), "pack")
 	writeFile(t, filepath.Join(h.Dir, "library", "bios.pack", "manifest.json"), `{"title": "Lydia Pack"}`)
+	writeFile(t, filepath.Join(h.Dir, "library", "bios.pack", "install.json"), `{"source": "hub"}`)
 	writeFile(t, filepath.Join(h.Dir, "content-registry.json"), `{"priority": ["bios.pack"]}`)
 	if _, err := h.library.SetModDir(mod); err != nil {
 		t.Fatal(err)

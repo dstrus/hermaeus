@@ -71,12 +71,15 @@ func newHarness(t *testing.T) *harness {
 	write(t, filepath.Join(base, "filters", "a.yaml"), "kind: memory")
 	lib := filepath.Join(h.Dir, "library")
 	write(t, filepath.Join(lib, "author.low", "manifest.json"), `{"title": "Low", "version": "1.0", "author": "author", "tags": ["x"], "type": "bundle"}`)
+	write(t, filepath.Join(lib, "author.low", "install.json"), `{"source": "hub"}`)
 	write(t, filepath.Join(lib, "author.low", "prompts", "Dialogue.prompt"), "low") // replaces the base's, in another case
 	write(t, filepath.Join(lib, "author.high", "manifest.json"), `{"title": "High", "version": "2.0"}`)
+	write(t, filepath.Join(lib, "author.high", "install.json"), `{"source": "hub"}`)
 	write(t, filepath.Join(lib, "author.high", "prompts", "dialogue.prompt"), "high")
 	write(t, filepath.Join(lib, "author.high", "knowledge", "k.yaml"), "k")
 	write(t, filepath.Join(lib, "author.high", "prompts", "characters", "lydia_a2c.prompt"), "a bio")
 	write(t, filepath.Join(lib, "author.off", "manifest.json"), `{"title": "Off"}`)
+	write(t, filepath.Join(lib, "author.off", "install.json"), `{"source": "hub"}`)
 	write(t, filepath.Join(lib, "author.off", "prompts", "dialogue.prompt"), "off")
 	write(t, filepath.Join(h.Dir, "overlay", "prompts", "dialogue.prompt"), "mine")
 	write(t, filepath.Join(h.Dir, "external", "author.new", "manifest.json"), `{"title": "New", "version": "0.1"}`) // not registered yet
@@ -111,13 +114,13 @@ func TestListLowestFirst(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := ids(l); got != "skyrimnet.base author.new author.low author.off author.high overlay" {
+	if got := ids(l); got != "skyrimnet.base author.low author.off author.high author.new overlay" {
 		t.Fatalf("order = %s", got)
 	}
-	if n := l.Plugins[1]; n.Kind != "new" || n.Title != "New" || n.Enabled {
+	if n := l.Plugins[len(l.Plugins)-2]; n.Kind != "new" || n.Title != "New" || n.Enabled {
 		t.Errorf("unregistered = %+v", n)
 	}
-	base, low, off, high, mine := l.Plugins[0], l.Plugins[2], l.Plugins[3], l.Plugins[4], l.Plugins[5]
+	base, low, off, high, mine := l.Plugins[0], l.Plugins[1], l.Plugins[2], l.Plugins[3], l.Plugins[5]
 	if base.Kind != "base" || !base.Enabled || base.Title != "SkyrimNet’s defaults" {
 		t.Errorf("base = %+v", base)
 	}
@@ -170,7 +173,7 @@ func TestOrderAndSwitch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := ids(l); got != "skyrimnet.base author.new author.off author.high author.low overlay" {
+	if got := ids(l); got != "skyrimnet.base author.off author.high author.low author.new overlay" {
 		t.Errorf("order = %s", got)
 	}
 	want := strings.Replace(registryJSON, `"author.high",
@@ -194,8 +197,8 @@ func TestOrderAndSwitch(t *testing.T) {
     }`) {
 		t.Errorf("after switching off:\n%s", b)
 	}
-	if l.Plugins[4].ID != "author.low" || l.Plugins[4].Enabled {
-		t.Errorf("low = %+v", l.Plugins[4])
+	if l.Plugins[3].ID != "author.low" || l.Plugins[3].Enabled {
+		t.Errorf("low = %+v", l.Plugins[3])
 	}
 
 	// What's refused.

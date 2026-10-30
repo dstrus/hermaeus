@@ -68,8 +68,10 @@ func TestOverridesListWhatReplacesWhat(t *testing.T) {
 	write(t, filepath.Join(h.base, "prompts", "tags.prompt"), "shipped tags")
 	write(t, h.lib("bios.pack", "prompts", "tags.prompt"), "pack tags")
 	write(t, h.lib("bios.pack", "manifest.json"), `{"title": "Lydia Pack"}`)
+	write(t, h.lib("bios.pack", "install.json"), `{"source": "hub"}`)
 	write(t, h.lib("bios.two", "prompts", "tags.prompt"), "other pack tags")
 	write(t, h.lib("bios.two", "manifest.json"), `{"title": "Second Pack"}`)
+	write(t, h.lib("bios.two", "install.json"), `{"source": "hub"}`)
 	write(t, h.lib("bios.two", "install.json"), `{}`)
 	write(t, h.lib("bios.two", "knowledge", "new.sknpack"), "\x00binary")
 	write(t, filepath.Join(h.Dir, "content-registry.json"), `{"plugins": {"bios.pack": {}, "bios.two": {}, "bios.off": {"enabled": false}}, "priority": ["bios.off", "bios.pack", "bios.two"]}`)
@@ -127,6 +129,7 @@ func TestRecordsSaveSwitchAndRevert(t *testing.T) {
 	write(t, filepath.Join(h.base, "voice_effects", "draugr.yaml"), "id: draugr\r\nname: Draugr\r\nstages:\r\n  - type: pitch_shift\r\n    params:\r\n      semitones: -6.0\r\n")
 	write(t, filepath.Join(h.base, "filters", "animals.yaml"), "kind: memory\nname: Animals\nRaceBlacklist:\n  - DogRace\n")
 	write(t, h.lib("a.pack", "manifest.json"), `{"title": "Pack"}`)
+	write(t, h.lib("a.pack", "install.json"), `{"source": "hub"}`)
 	src := `customCategory: brawl
 name: AcceptBrawl
 description: "Use when dared."
@@ -197,9 +200,22 @@ eligibilityRules:
 		"triggers/y.yaml":        "name: [unclosed\n",
 		"../x.yaml":              "a: 1\n",
 		"prompts/x.yaml":         "a: 1\n",
+		"triggers/z.YAML":        "name: z\n",           // SkyrimNet skips .YAML
+		"entities/ghost.yaml":    "entityName: Ghost\n", // and an entity not in .entity.yaml
+		"triggers/top.yaml":      "name: top\neventCriteria:\n  eventType: death\nresponse:\n  type: activate_voice_effect\neffectId: x\n",
 	} {
 		_, err := h.r.SaveRecord(rel, RecordEdit{Text: text})
 		kindOf(t, err, apperr.Invalid)
+	}
+	// What SkyrimNet's dashboard writes is accepted.
+	for rel, text := range map[string]string{
+		"actions/pick.yaml":                   "name: pick\nparameterMapping:\n  - type: dynamic_uuid\n    name: target\n    description: who\n",
+		"dialogue_actions/DialogueTIF01.yaml": "kind: instruction\nkey: DialogueTIF01\ncategory: trade\n",
+		"entities/ghost.entity.yaml":          "entityName: Ghost\nconversationMode: private\n",
+	} {
+		if _, err := h.r.SaveRecord(rel, RecordEdit{Text: text}); err != nil {
+			t.Errorf("%s: %v", rel, err)
+		}
 	}
 	// A new record goes into your edits.
 	if _, err := h.r.SaveRecord("triggers/new.yaml", RecordEdit{Text: "name: new\neventCriteria:\n  eventType: death\nresponse:\n  type: player_thought\n"}); err != nil {
@@ -308,7 +324,7 @@ func TestTriggersNameVoiceEffects(t *testing.T) {
 			t.Errorf("beast_form names %q", tr.EffectID)
 		}
 	}
-	// SkyrimNet refuses a trigger that switches on no effect in particular.
+	// SkyrimNet's dashboard refuses a trigger that switches on no effect in particular.
 	_, err := h.r.SaveRecord("triggers/bad.yaml", RecordEdit{Text: "name: bad\neventCriteria:\n  eventType: death\nresponse:\n  type: activate_voice_effect\n"})
 	kindOf(t, err, apperr.Invalid)
 }
@@ -327,6 +343,7 @@ defaultPriority: 5
 `
 	write(t, h.lib("a.pack", "actions", "acceptbrawl.yaml"), src)
 	write(t, h.lib("a.pack", "manifest.json"), `{"title": "Pack"}`)
+	write(t, h.lib("a.pack", "install.json"), `{"source": "hub"}`)
 	write(t, filepath.Join(h.Dir, "content-registry.json"), `{"plugins": {"a.pack": {}}, "priority": ["a.pack"]}`)
 
 	f, err := h.r.Form("actions/acceptbrawl.yaml")

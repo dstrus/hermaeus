@@ -224,9 +224,9 @@ const own: Record<string, Section[]> = {
 						{ value: 'Zyphra/Zonos-v0.1-transformer', label: 'Transformer' }
 					]
 				},
-				tune('speaking_rate', 'Speed', 'How fast lines are spoken. Lower is slower.', 0, 40),
+				tune('speaking_rate', 'Speed', 'How fast lines are spoken. Lower is slower.', 0.1, 50),
 				tune('pitch_std', 'Pitch variation', 'How much the pitch moves. Higher is more varied.', 0, 400),
-				tune('cfg_scale', 'Guidance', 'How closely speech follows the voice and mood it’s given.', 1, 10),
+				tune('cfg_scale', 'Guidance', 'How closely speech follows the voice and mood it’s given.', 1, 20),
 				tune('vq_score', 'VQ score', 'Trades audio quality against speed.', 0, 1),
 				tune('dnsmos_overall', 'Clarity target', 'The audio quality aimed for, from 1 to 5.', 1, 5),
 				{ key: 'fmax', label: 'Highest frequency', what: 'The highest frequency in the audio.', kind: 'count', min: 0, max: 48000, unit: 'Hz' },
@@ -253,7 +253,7 @@ const own: Record<string, Section[]> = {
 			fields: [
 				tune('exaggeration', 'Expressiveness', 'How dramatic emotions sound. Higher is more expressive.', 0, 2),
 				tune('cfg_weight', 'Pace', 'How the pace of speech is held.', 0, 1),
-				tune('temperature', 'Variety', 'How much each line varies.', 0, 2),
+				tune('temperature', 'Variety', 'How much each line varies.', 0.05, 5),
 				{ key: 'seed', label: 'Seed', what: 'Repeat the same delivery for the same line. At -1, every line varies.', kind: 'count', min: -1, max: 2147483647 },
 				{ key: 'voice_sample_rate', label: 'Sample rate', what: 'The quality voice samples are sent at for cloning.', kind: 'count', min: 8000, max: 48000, unit: 'Hz' }
 			]
@@ -263,7 +263,7 @@ const own: Record<string, Section[]> = {
 	higgs: [
 		{
 			title: 'Voice',
-			fields: [{ key: 'model', label: 'Model', what: 'Which model the server uses.', kind: 'text' }, tune('temperature', 'Variety', 'How much each line varies.', 0, 2), { key: 'enable_tag_propagation', label: 'Carry tags on', what: 'A tag for emotion, style, or pace in one sentence of a reply carries on to the sentences after it.', kind: 'switch' }]
+			fields: [{ key: 'model', label: 'Model', what: 'Which model the server uses.', kind: 'text' }, tune('temperature', 'Variety', 'How much each line varies.', 0.05, 5), { key: 'enable_tag_propagation', label: 'Carry tags on', what: 'A tag for emotion, style, or pace in one sentence of a reply carries on to the sentences after it.', kind: 'switch' }]
 		}
 	],
 	'openai-compatible': [

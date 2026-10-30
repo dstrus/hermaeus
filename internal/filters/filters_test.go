@@ -47,6 +47,7 @@ func newHarness(t *testing.T) *harness {
 	write(t, filepath.Join(base, "filters", "combat_grunts.yaml"), "kind: dialogue_rule\nid: combat_grunts\npattern: x\n")
 	plugin := filepath.Join(h.Dir, "library", "someone.dogs")
 	write(t, filepath.Join(plugin, "manifest.json"), `{"version": "1.0", "title": "Dogs Remember"}`)
+	write(t, filepath.Join(plugin, "install.json"), `{"source": "hub"}`)
 	write(t, filepath.Join(plugin, "filters", "dog_memories.yaml"), "kind: memory\nname: Dogs remember\nRaceWhitelist:\n  - DogRace\n")
 	write(t, filepath.Join(h.Dir, "content-registry.json"), `{"schema_version": 1, "plugins": {"someone.dogs": {"enabled": true}}, "priority": ["someone.dogs"]}`)
 	lib := layers.New(s.Dir)

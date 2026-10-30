@@ -66,7 +66,7 @@
 						{@const v = getAt(draft, f.key)}
 						{#if f.type === 'check'}
 							<label class="check">
-								<input type="checkbox" checked={v === true} onchange={(e) => setAt(draft, f.key, e.currentTarget.checked)} />
+								<input type="checkbox" checked={f.on ? v !== false : v === true} onchange={(e) => setAt(draft, f.key, f.on && e.currentTarget.checked ? undefined : e.currentTarget.checked)} />
 								<span>{f.label}</span>
 							</label>
 						{:else}

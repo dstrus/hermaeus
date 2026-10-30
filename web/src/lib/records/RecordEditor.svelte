@@ -29,7 +29,9 @@
 
 	// The editor is made for one record (or one new one), so these are read once.
 	const isNew = untrack(() => !path);
-	const stemOf = (p: string) => p.slice(p.lastIndexOf('/') + 1).replace(/\.yaml$/i, '');
+	const stemOf = (p: string) => p.slice(p.lastIndexOf('/') + 1).replace(/(\.entity)?\.yaml$/, '');
+	// SkyrimNet reads an entity only from a .entity.yaml file.
+	const suffixOf = (k: string) => (k === 'entities' ? '.entity.yaml' : '.yaml');
 
 	let form = $state<RecordForm | null>(null);
 	let loadError = $state('');
@@ -91,7 +93,7 @@
 	let usable = $derived(isNew || (form !== null && fits(kind, form.data ?? null)));
 	let mine = $derived(form?.versions.find((v) => v.kind === 'overlay'));
 	let below = $derived(form?.versions.find((v) => v.kind !== 'overlay'));
-	let target = $derived(isNew ? `${kind}/${fileName.trim()}.yaml` : (path ?? ''));
+	let target = $derived(isNew ? `${kind}/${fileName.trim()}${suffixOf(kind)}` : (path ?? ''));
 
 	async function submit() {
 		if (saving || readOnly || !fk) return;
@@ -147,7 +149,7 @@
 		<label>
 			<span class="caps">File name</span>
 			<input type="text" value={fileName} oninput={(e) => rename(e.currentTarget.value.trim())} placeholder="beast_form" autocomplete="off" spellcheck="false" />
-			<span class="muted small">Saved as {kind}/{fileName.trim() || '…'}.yaml{identity(draft) ? `, and its ${identity(draft)} is the same` : ''}.</span>
+			<span class="muted small">Saved as {kind}/{fileName.trim() || '…'}{suffixOf(kind)}{identity(draft) ? `, and its ${identity(draft)} is the same` : ''}.</span>
 		</label>
 	</div>
 {/if}

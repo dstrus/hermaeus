@@ -38,7 +38,10 @@ func (b *Bios) CatalogOf() (Catalog, error) {
 	for i, l := range lay {
 		dir := filepath.Join(l.Root, "prompts", "characters")
 		for _, f := range install.FilesWithSuffix(dir, ".prompt") {
-			t := strings.TrimSuffix(f, f[len(f)-len(".prompt"):])
+			t, ok := strings.CutSuffix(f, ".prompt") // SkyrimNet skips .PROMPT
+			if !ok {
+				continue
+			}
 			key := strings.ToLower(t)
 			if seen[key] || !templateRe.MatchString(t) {
 				continue

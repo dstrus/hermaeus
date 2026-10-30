@@ -20,6 +20,7 @@ export interface FieldSpec {
 	hint?: string;
 	readonly?: boolean; // the field that names the file
 	keep?: boolean; // text: empty stays as empty text, rather than removing the field
+	on?: boolean; // check: on when the field is absent, and left out when on
 	rows?: number; // area: its height
 	wide?: boolean; // spans the block's width
 }
@@ -318,16 +319,22 @@ const actions: FormKind = {
 				blank: () => ({ type: 'dynamic', name: '', description: '' }),
 				item: (p) => {
 					const t = getAt(d, `${p}.type`);
+					const dyn = t === 'dynamic' || t === 'dynamic_uuid';
 					return [
 						{
 							fields: [
-								{ key: `${p}.type`, label: 'From', type: 'select', choices: options(['speaker', 'dynamic', 'static'], { speaker: 'The speaker', dynamic: 'The AI fills it in', static: 'A fixed value' }) },
+								{
+									key: `${p}.type`,
+									label: 'From',
+									type: 'select',
+									choices: options(['speaker', 'dynamic', 'dynamic_uuid', 'static'], { speaker: 'The speaker', dynamic: 'The AI fills it in', dynamic_uuid: 'The AI picks a character, passed as its UUID', static: 'A fixed value' })
+								},
 								{ key: `${p}.name`, label: 'Name' },
 								t === 'static' && { key: `${p}.value`, label: 'Value', type: 'any' },
-								{ key: `${p}.description`, label: 'Description', type: 'area', rows: 2, wide: true, hint: t === 'dynamic' ? 'Tells the AI what to put here.' : undefined },
-								t === 'dynamic' && { key: `${p}.optional`, label: 'The AI may leave it out', type: 'check' },
-								t === 'dynamic' && 'default' in ((getAt(d, p) as Obj) ?? {}) && { key: `${p}.default`, label: 'Default', type: 'any' },
-								t === 'dynamic' && { key: `${p}.useNearbyActors`, label: 'Choose from characters nearby', type: 'check' }
+								{ key: `${p}.description`, label: 'Description', type: 'area', rows: 2, wide: true, hint: dyn ? 'Tells the AI what to put here.' : undefined },
+								dyn && { key: `${p}.optional`, label: 'The AI may leave it out', type: 'check' },
+								dyn && 'default' in ((getAt(d, p) as Obj) ?? {}) && { key: `${p}.default`, label: 'Default', type: 'any' },
+								dyn && { key: `${p}.useNearbyActors`, label: 'Choose from characters nearby', type: 'check', on: true }
 							]
 						}
 					];
@@ -433,7 +440,7 @@ const dialogueActions: FormKind = {
 
 const entities: FormKind = {
 	noun: 'entity',
-	blank: (name) => ({ entityName: name, displayName: name, voiceId: '', ttsOverride: '', language: '', conversationMode: 'system', enabled: true }),
+	blank: (name) => ({ entityName: name, displayName: name, voiceId: '', ttsOverride: '', language: '', conversationMode: 'private', enabled: true }),
 	blocks: () => [
 		{
 			fields: [
@@ -443,7 +450,16 @@ const entities: FormKind = {
 				{ key: 'voiceId', label: 'Voice', hint: 'A voice type from your voice setup.' },
 				{ key: 'ttsOverride', label: 'Voice engine', keep: true },
 				{ key: 'language', label: 'Language', keep: true },
-				{ key: 'conversationMode', label: 'Conversation mode', keep: true }
+				{
+					key: 'conversationMode',
+					label: 'Conversation mode',
+					type: 'select',
+					choices: [
+						{ value: 'private', label: 'Private' },
+						{ value: 'public', label: 'Public' }
+					],
+					hint: 'Private: only you hear it. Public: characters nearby hear it and react too.'
+				}
 			]
 		}
 	]

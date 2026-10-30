@@ -3,10 +3,10 @@ package settings
 import (
 	"os"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/textfile"
@@ -172,8 +172,6 @@ func (s *Settings) voiceSilentNPCs() (Dependency, error) {
 	return dep, nil
 }
 
-var entityIDRe = regexp.MustCompile(`^[A-Za-z0-9_.|-]+$`)
-
 func (r Rule) check() error {
 	if !entityTypes[r.EntityType] {
 		return apperr.New(apperr.Invalid, "A rule is for an NPC, a faction, or a race, not %q", r.EntityType)
@@ -181,7 +179,7 @@ func (r Rule) check() error {
 	if r.EntityID == "" {
 		return apperr.New(apperr.Invalid, "A rule needs the NPC, faction, or race it's for")
 	}
-	if !entityIDRe.MatchString(r.EntityID) {
+	if strings.ContainsFunc(r.EntityID, unicode.IsControl) {
 		return apperr.New(apperr.Invalid, "Invalid entity ID %q", r.EntityID)
 	}
 	return nil
@@ -197,7 +195,12 @@ func (s *Settings) SetTranslator(e TranslatorEdit) (Translator, error) {
 	seen := map[string]bool{}
 	for i := range e.Rules {
 		r := &e.Rules[i]
-		r.EntityID = strings.ToLower(strings.TrimSpace(r.EntityID))
+		r.EntityID = strings.TrimSpace(r.EntityID)
+		if !strings.Contains(r.EntityID, "|") {
+			// A bio template or faction or race ID is lowercase; a record,
+			// "Plugin.esp|0x01BDB1", keeps its plugin's spelling.
+			r.EntityID = strings.ToLower(r.EntityID)
+		}
 		r.Name = strings.TrimSpace(r.Name)
 		r.Pattern = strings.TrimSpace(textfile.Normalize(r.Pattern))
 		if err := r.check(); err != nil {
@@ -297,7 +300,12 @@ func (s *Settings) ImportRules(imp Import) (ImportResult, error) {
 			continue
 		}
 		r := ruleOf(n)
-		r.EntityID = strings.ToLower(strings.TrimSpace(r.EntityID))
+		r.EntityID = strings.TrimSpace(r.EntityID)
+		if !strings.Contains(r.EntityID, "|") {
+			// A bio template or faction or race ID is lowercase; a record,
+			// "Plugin.esp|0x01BDB1", keeps its plugin's spelling.
+			r.EntityID = strings.ToLower(r.EntityID)
+		}
 		if err := r.check(); err != nil {
 			return ImportResult{}, err
 		}

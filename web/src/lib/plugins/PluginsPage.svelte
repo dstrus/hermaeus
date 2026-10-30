@@ -30,7 +30,8 @@
 	let shown = $derived(list.plugins);
 	let installed = $derived(shown.filter((p) => p.kind === 'plugin'));
 	let off = $derived(installed.filter((p) => !p.enabled).length);
-	// Plugins on disk the registry doesn't have yet, listed after the defaults.
+	// Plugins on disk the registry doesn't have yet, listed after the installed
+	// ones, where SkyrimNet adds them.
 	let pending = $derived(shown.filter((p) => p.kind === 'new').length);
 
 	const selection = new Selection(() => shown, (p) => p.id, { param: 'item' });
@@ -117,7 +118,7 @@
 				{#each shown as p, i (p.id)}
 					<tr aria-selected={selection.is(p)} class:off={!p.enabled} class:fixed={p.kind !== 'plugin'} onclick={() => selection.select(p)}>
 						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
-						<td class="at n">{p.kind === 'overlay' ? '∞' : p.kind === 'base' ? 0 : p.kind === 'new' ? '' : i - pending}</td>
+						<td class="at n">{p.kind === 'overlay' ? '∞' : p.kind === 'base' ? 0 : p.kind === 'new' ? '' : i}</td>
 						<td class="name" use:clipped>
 							{p.title}
 							{#if p.kind === 'new'}<span class="flag">not added yet</span>{:else if !p.enabled}<span class="flag">off</span>{/if}
@@ -148,7 +149,7 @@
 						</div>
 					{/if}
 					{#if p.kind === 'new'}
-						<p class="notice">Found on disk, but SkyrimNet hasn’t added it to its plugins yet. It will the next time it starts, at the top of this list, and it can be moved and switched here then.</p>
+						<p class="notice">Found on disk, but SkyrimNet hasn’t added it to its plugins yet. It will the next time it starts, at the bottom of this list, over every other plugin, and it can be moved and switched here then.</p>
 					{:else if !p.enabled}
 						<p class="notice">Switched off: SkyrimNet doesn’t load it, so nothing in it applies.</p>
 					{/if}

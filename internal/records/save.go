@@ -30,17 +30,26 @@ type Revert struct {
 	Modified int64 `json:"modified"`
 }
 
-// recordPath checks a record's path: <kind>/<…>.yaml.
+// recordPath checks a record's path: <kind>/<…>.yaml, or for an entity
+// <…>.entity.yaml. SkyrimNet skips any other file, .YAML included.
 func recordPath(rel string) (string, error) {
 	rel, err := checkPath(rel)
 	if err != nil {
 		return "", err
 	}
 	root, rest, _ := strings.Cut(rel, "/")
-	if !isKind(root) || rest == "" || !strings.HasSuffix(strings.ToLower(rel), ".yaml") {
+	if !isKind(root) || rest == "" || !strings.HasSuffix(rel, recordSuffix(root)) {
 		return "", apperr.New(apperr.Invalid, "Invalid record path %q", rel)
 	}
 	return rel, nil
+}
+
+// recordSuffix is how a kind's record files end.
+func recordSuffix(root string) string {
+	if root == "entities" {
+		return ".entity.yaml"
+	}
+	return ".yaml"
 }
 
 // SaveRecord saves a record's YAML as the player's copy, which replaces the
@@ -279,8 +288,8 @@ func checkRecord(rel, text string) error {
 		params, _ := m["parameterMapping"].([]any)
 		for i, p := range params {
 			pm, _ := p.(map[string]any)
-			if t := fmt.Sprint(pm["type"]); pm == nil || (t != "speaker" && t != "dynamic" && t != "static") {
-				return apperr.New(apperr.Invalid, "Parameter %d's type must be speaker, dynamic, or static", i+1)
+			if t := fmt.Sprint(pm["type"]); pm == nil || (t != "speaker" && t != "dynamic" && t != "dynamic_uuid" && t != "static") {
+				return apperr.New(apperr.Invalid, "Parameter %d's type must be speaker, dynamic, dynamic_uuid, or static", i+1)
 			}
 		}
 	case "entities":
@@ -328,10 +337,7 @@ func checkRecord(rel, text string) error {
 	case "dialogue_actions":
 		switch kind {
 		case "instruction":
-			if err := ident("key"); err != nil {
-				return err
-			}
-			return need("text")
+			return ident("key") // its text, its category, or both
 		case "lists":
 		default:
 			return apperr.New(apperr.Invalid, "A dialogue action's kind must be lists or instruction")

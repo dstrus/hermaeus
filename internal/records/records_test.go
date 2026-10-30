@@ -27,6 +27,7 @@ func TestActionsAndTriggersAcrossLayers(t *testing.T) {
 	write(t, filepath.Join(sky, "content-registry.json"), `{"plugins": {"a.pack": {"enabled": true}}, "priority": ["a.pack"]}`)
 	pack := filepath.Join(sky, "library", "a.pack")
 	write(t, filepath.Join(pack, "manifest.json"), `{"title": "Pack"}`)
+	write(t, filepath.Join(pack, "install.json"), `{"source": "hub"}`)
 	write(t, filepath.Join(pack, "actions", "sub", "wave.yaml"), `name: Wave
 description: "Wave at {{ player.name }}."
 customCategory: greetings

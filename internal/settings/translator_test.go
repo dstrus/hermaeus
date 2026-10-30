@@ -156,3 +156,24 @@ func TestTranslatorImportsRules(t *testing.T) {
 	_, err = h.settings.ImportRules(Import{Modified: 1, YAML: "- entityType: npc\n  entityId: x\n"})
 	kindOf(t, err, apperr.Conflict)
 }
+
+// SkyrimNet's dashboard makes an NPC rule for records, each
+// "Plugin.esp|0x01BDB1"; a plugin's name can have spaces and capitals,
+// and saving keeps the rule as it is.
+func TestTranslatorKeepsRecordRules(t *testing.T) {
+	h := newHarness(t)
+	h.config("UniversalTranslator.yaml", "enabled: true\r\npluginFilterMode: blacklist\r\npluginFilterPlugins: ~\r\nrules:\r\n"+
+		"  - id: rule_9\r\n    entityType: npc\r\n    entityId: My Followers.esp|0x01BDB1\r\n    entityDisplayName: Aya\r\n    records:\r\n      - My Followers.esp|0x01BDB1\r\n    speechPattern: Slow.\r\n")
+	tr, err := h.settings.Translator()
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := TranslatorEdit{Modified: tr.Modified, Enabled: tr.Enabled, Rules: tr.Rules, FilterMode: tr.FilterMode}
+	e.Rules[0].Pattern = "Slower."
+	if tr, err = h.settings.SetTranslator(e); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.read("UniversalTranslator.yaml"); !strings.Contains(got, "entityId: My Followers.esp|0x01BDB1\r\n") || !strings.Contains(got, "      - My Followers.esp|0x01BDB1\r\n    speechPattern: Slower.\r\n") {
+		t.Errorf("after saving:\n%s", got)
+	}
+}

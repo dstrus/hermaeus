@@ -111,7 +111,7 @@ func (r *Records) files(folder string, read func(o Origin, b []byte)) {
 			continue
 		}
 		filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-			if err != nil || d.IsDir() || !strings.EqualFold(filepath.Ext(path), ".yaml") {
+			if err != nil || d.IsDir() || filepath.Ext(path) != ".yaml" { // SkyrimNet skips .YAML
 				return nil
 			}
 			id := strings.TrimSuffix(d.Name(), filepath.Ext(d.Name()))
