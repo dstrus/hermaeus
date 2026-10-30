@@ -177,7 +177,7 @@ func (r *Records) Content() ContentList {
 				}
 				if e, ok := m["enabled"].(bool); ok {
 					rec.Enabled, rec.Switch = e, true
-				} else if kind == "triggers" || kind == "actions" {
+				} else if kind == "triggers" || kind == "actions" || kind == "voice_effects" {
 					rec.Switch = true // on unless it says otherwise; switching adds the key
 				}
 			}

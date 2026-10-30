@@ -15,6 +15,7 @@
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import CodeArea from '#lib/ui/CodeArea.svelte';
+	import LimitsNotice from './LimitsNotice.svelte';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
@@ -165,6 +166,9 @@
 				Starting from the copy from {layerName(layerOf(current))}. Saving makes your own copy, which replaces it in every playthrough.
 			{/if}
 		</p>
+		{#if current.kind === 'voice_effects'}
+			<LimitsNotice title="Limits Hermaeus can’t check">SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t check them here. An effect outside them may not work in the game.</LimitsNotice>
+		{/if}
 		{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 	</header>
 	<div class="raw" use:fitToViewport>

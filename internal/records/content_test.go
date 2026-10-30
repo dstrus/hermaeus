@@ -123,7 +123,7 @@ func TestOverridesListWhatReplacesWhat(t *testing.T) {
 
 func TestRecordsSaveSwitchAndRevert(t *testing.T) {
 	h := newHarness(t)
-	write(t, filepath.Join(h.base, "voice_effects", "draugr.yaml"), "id: draugr\r\nname: Draugr\r\nstages:\r\n  - type: pitch_shift\r\n")
+	write(t, filepath.Join(h.base, "voice_effects", "draugr.yaml"), "id: draugr\r\nname: Draugr\r\nstages:\r\n  - type: pitch_shift\r\n    params:\r\n      semitones: -6.0\r\n")
 	write(t, filepath.Join(h.base, "filters", "animals.yaml"), "kind: memory\nname: Animals\nRaceBlacklist:\n  - DogRace\n")
 	write(t, h.lib("a.pack", "manifest.json"), `{"title": "Pack"}`)
 	src := `customCategory: brawl
@@ -175,11 +175,11 @@ eligibilityRules:
 	}
 
 	// Saving your copy keeps the line endings of what it replaces.
-	v, err := h.r.SaveRecord("voice_effects/draugr.yaml", RecordEdit{Text: "id: draugr\nname: Draugr lord\nstages:\n  - type: pitch_shift\n"})
+	v, err := h.r.SaveRecord("voice_effects/draugr.yaml", RecordEdit{Text: "id: draugr\nname: Draugr lord\nstages:\n  - type: pitch_shift\n    params:\n      semitones: -6.0\n"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := h.mine("voice_effects/draugr.yaml"); got != "id: draugr\r\nname: Draugr lord\r\nstages:\r\n  - type: pitch_shift\r\n" || len(v) != 2 {
+	if got := h.mine("voice_effects/draugr.yaml"); got != "id: draugr\r\nname: Draugr lord\r\nstages:\r\n  - type: pitch_shift\r\n    params:\r\n      semitones: -6.0\r\n" || len(v) != 2 {
 		t.Errorf("voice effect = %q (%d versions)", got, len(v))
 	}
 	// A second save needs the copy's time.
@@ -219,4 +219,69 @@ eligibilityRules:
 	h.running = true
 	_, err = h.r.SetEnabled("actions/acceptbrawl.yaml", Switch{Enabled: true})
 	kindOf(t, err, apperr.Conflict)
+}
+
+func TestVoiceEffects(t *testing.T) {
+	h := newHarness(t)
+	src := "id: ghost\nname: Ghost\n# Kept for the dashboard.\nsample: null\nstages:\n  - type: pitch_shift\n    params:\n      semitones: -1.0\n  - type: reverb\n    params:\n      room_size: 0.9\n      decay: 0.85\n      wet: 0.55\n"
+	write(t, filepath.Join(h.base, "voice_effects", "ghost.yaml"), src)
+
+	l := h.r.VoiceEffects()
+	if len(l.Effects) != 1 || l.Effects[0].Name != "Ghost" || len(l.Effects[0].Stages) != 2 || !l.Effects[0].Enabled || l.Effects[0].Stages[1].Params["wet"] != 0.55 {
+		t.Fatalf("effects = %+v", l.Effects)
+	}
+	if len(l.Kinds) != len(StageKinds) {
+		t.Error("the kinds of stage aren't listed")
+	}
+
+	// Saving your copy rewrites the stages, keeping the rest of the file.
+	l, err := h.r.SaveEffect("ghost", EffectEdit{Name: "Restless ghost", Stages: []Stage{
+		{Type: "pitch_shift", Params: map[string]any{"semitones": -2.0}},
+		{Type: "chorus", Params: map[string]any{"voices": 2.0, "rate_hz": 0.8, "depth_ms": 5.0}},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := h.mine("voice_effects/ghost.yaml")
+	for _, want := range []string{"id: ghost", "name: Restless ghost", "# Kept for the dashboard.", "semitones: -2.0", "rate_hz: 0.8\n      depth_ms: 5.0\n      voices: 2\n"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, "reverb") {
+		t.Errorf("a removed stage is still there:\n%s", got)
+	}
+
+	// A new effect starts from its id.
+	if _, err := h.r.SaveEffect("frost_atronach", EffectEdit{Name: "Frost atronach", Sample: "voices/frost.wav", Stages: []Stage{{Type: "gain", Params: map[string]any{"gain_db": 2.0}}}}); err != nil {
+		t.Fatal(err)
+	}
+	if got := h.mine("voice_effects/frost_atronach.yaml"); !strings.HasPrefix(got, "id: frost_atronach\nname: Frost atronach\nsample: voices/frost.wav\nstages:\n") {
+		t.Errorf("new effect =\n%s", got)
+	}
+
+	// The id, a name, and each stage's type are checked before anything is
+	// written; the limits on a stage's settings aren't published, so they
+	// aren't.
+	for _, c := range []struct {
+		id string
+		e  EffectEdit
+	}{
+		{"Bad Id", EffectEdit{Name: "x"}},
+		{"x", EffectEdit{Name: " "}},
+		{"x", EffectEdit{Name: "x", Stages: []Stage{{Type: " "}}}},
+	} {
+		_, err := h.r.SaveEffect(c.id, c.e)
+		kindOf(t, err, apperr.Invalid)
+	}
+	if _, err := os.Stat(filepath.Join(h.Dir, "overlay", "voice_effects", "x.yaml")); err == nil {
+		t.Error("a refused effect was written")
+	}
+	// A stage of a type Hermaeus doesn't know is kept, for a newer SkyrimNet.
+	if _, err := h.r.SaveEffect("future", EffectEdit{Name: "Future", Stages: []Stage{{Type: "flanger", Params: map[string]any{"rate_hz": 0.5}}}}); err != nil {
+		t.Errorf("an unknown stage type: %v", err)
+	}
+	// The raw editor on Content applies the same check.
+	_, err = h.r.SaveRecord("voice_effects/ghost.yaml", RecordEdit{Modified: l.Effects[0].Providers[0].Modified, Text: "id: ghost\nstages:\n  - params:\n      wet: 0.3\n"})
+	kindOf(t, err, apperr.Invalid)
 }

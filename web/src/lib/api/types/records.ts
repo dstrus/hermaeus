@@ -168,3 +168,64 @@ export interface Switch {
 export interface Revert {
   modified: number /* int64 */;
 }
+
+//////////
+// source: voiceeffects.go
+
+/**
+ * StageParam is one setting of a kind of stage.
+ */
+export interface StageParam {
+  name: string; // as the recipe has it
+  label: string;
+  unit?: string;
+  whole?: boolean; // written as a whole number, as SkyrimNet's recipes write it
+  suggest?: string[]; // text, with these values seen in SkyrimNet's recipes and dashboard
+  default: unknown;
+}
+/**
+ * StageKind is a kind of stage, with its settings. The types, their
+ * settings, and their defaults are those SkyrimNet's dashboard offers when
+ * a stage is added; the limits SkyrimNet puts on each setting aren't
+ * published, so Hermaeus neither shows nor checks them.
+ */
+export interface StageKind {
+  type: string;
+  label: string;
+  what: string;
+  params: StageParam[];
+}
+/**
+ * Stage is one step of a recipe.
+ */
+export interface Stage {
+  type: string;
+  params: { [key: string]: unknown};
+}
+/**
+ * VoiceEffect is a recipe, as the highest layer that has it says.
+ */
+export interface VoiceEffect {
+  id: string;
+  path: string;
+  name: string;
+  enabled: boolean;
+  sample: string; // "" for none
+  stages: Stage[];
+  providers: Provider[]; // highest priority first
+  error?: string;
+}
+export interface VoiceEffectList {
+  layers: layers.Layer[];
+  effects: VoiceEffect[]; // by name
+  kinds: StageKind[];
+}
+/**
+ * EffectEdit is a recipe as the player's copy should have it.
+ */
+export interface EffectEdit {
+  modified: number /* int64 */; // the copy's time when read, 0 for none yet
+  name: string;
+  sample: string; // "" for none
+  stages: Stage[];
+}

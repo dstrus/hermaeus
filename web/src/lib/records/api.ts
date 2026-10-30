@@ -1,6 +1,6 @@
 import { request } from '#lib/api/client.ts';
 import type { Layer } from '#lib/api/types/layers.ts';
-import type { ActionList, ContentList, Origin, OverrideList, RecordEdit, Revert, Switch, TriggerList, Version } from '#lib/api/types/records.ts';
+import type { ActionList, ContentList, EffectEdit, Origin, OverrideList, RecordEdit, Revert, Switch, TriggerList, Version, VoiceEffectList } from '#lib/api/types/records.ts';
 
 export function getActions(fetchFn?: typeof fetch): Promise<ActionList> {
 	return request<ActionList>('GET', '/api/actions', undefined, fetchFn);
@@ -66,4 +66,12 @@ export async function switchRecord(path: string, enabled: boolean): Promise<Vers
 export function layerName(l: Layer | undefined): string {
 	if (!l) return 'an unknown layer';
 	return l.kind === 'overlay' ? 'Your edits' : l.kind === 'base' ? 'SkyrimNet’s defaults' : l.source;
+}
+
+export function getVoiceEffects(fetchFn?: typeof fetch): Promise<VoiceEffectList> {
+	return request<VoiceEffectList>('GET', '/api/voice-effects', undefined, fetchFn);
+}
+
+export function saveVoiceEffect(id: string, edit: EffectEdit): Promise<VoiceEffectList> {
+	return request<VoiceEffectList>('PUT', `/api/voice-effects/${encodeURIComponent(id)}`, edit);
 }

@@ -25,3 +25,23 @@ export function fitToViewport(node: HTMLElement) {
 		}
 	};
 }
+
+// aboveHints is a Svelte action for a footer that sticks to the bottom of the
+// window as the page scrolls (a long form's Save): it sticks just above the
+// hint strip, whose height changes as its hints wrap.
+export function aboveHints(node: HTMLElement) {
+	function place() {
+		node.style.bottom = `${document.querySelector<HTMLElement>('.hints')?.offsetHeight ?? 0}px`;
+	}
+	place();
+	window.addEventListener('resize', place);
+	const watch = new ResizeObserver(place);
+	const hints = document.querySelector<HTMLElement>('.hints');
+	if (hints) watch.observe(hints);
+	return {
+		destroy() {
+			window.removeEventListener('resize', place);
+			watch.disconnect();
+		}
+	};
+}

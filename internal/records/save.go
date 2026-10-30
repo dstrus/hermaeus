@@ -286,11 +286,21 @@ func checkRecord(rel, text string) error {
 		if err := ident("id"); err != nil {
 			return err
 		}
-		stages, _ := m["stages"].([]any)
-		for i, st := range stages {
-			if sm, _ := st.(map[string]any); sm == nil || sm["type"] == nil || fmt.Sprint(sm["type"]) == "" {
-				return apperr.New(apperr.Invalid, "Stage %d needs a type", i+1)
+		raw, _ := m["stages"].([]any)
+		var stages []Stage
+		for i, st := range raw {
+			sm, _ := st.(map[string]any)
+			if sm == nil {
+				return apperr.New(apperr.Invalid, "Stage %d isn't a set of fields", i+1)
 			}
+			params, _ := sm["params"].(map[string]any)
+			stages = append(stages, Stage{Type: fmt.Sprint(sm["type"]), Params: params})
+			if sm["type"] == nil {
+				stages[i].Type = ""
+			}
+		}
+		if err := checkStages(stages); err != nil {
+			return err
 		}
 	case "filters":
 		switch kind {
