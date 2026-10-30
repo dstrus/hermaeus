@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { href } from '#lib/nav.ts';
 import type { Layer } from '#lib/api/types/layers.ts';
 import type { Document, Edit, Matches, PinsResponse, PromptList, Revert, Saved } from '#lib/api/types/prompts.ts';
 
@@ -41,7 +42,7 @@ export function setPromptPinned(path: string, pinned: boolean): Promise<PinsResp
 
 // promptHref is the page for a prompt in a playthrough.
 export function promptHref(save: string, path: string): string {
-	return `/${encodeURIComponent(save)}/prompts/` + path.split('/').map(encodeURIComponent).join('/');
+	return href(save, 'prompts', '/' + path.split('/').map(encodeURIComponent).join('/'));
 }
 
 // promptName is a prompt's file name without its extension.

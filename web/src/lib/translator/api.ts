@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { href } from '#lib/nav.ts';
 import type { Catalog } from '#lib/api/types/bios.ts';
 import type { Character } from '#lib/api/types/characters.ts';
 import type { Import, ImportResult, Rule, Translator, TranslatorEdit } from '#lib/api/types/settings.ts';
@@ -22,7 +23,7 @@ export function importRules(imp: Import): Promise<ImportResult> {
 }
 
 export function translatorHref(save: string): string {
-	return `/${encodeURIComponent(save)}/settings/translator`;
+	return href(save, 'translator');
 }
 
 // Where the model that rewrites the lines is chosen: the translator's task

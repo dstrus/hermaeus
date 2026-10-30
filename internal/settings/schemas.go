@@ -167,6 +167,6 @@ func (s *Settings) loadDefaults(configDir string) defaults {
 // markPluginPage notes a plugin settings file's page, from its schema.
 func (s *Settings) markPluginPage(f *File, schemas []PluginSchema) {
 	if ps := s.schemaFor(f.Name, schemas); ps != nil {
-		f.Page, f.PageLabel = "settings/plugin/"+ps.Folder, ps.Title
+		f.Page, f.PageLabel = "plugin-settings/"+ps.Folder, ps.Title
 	}
 }

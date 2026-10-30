@@ -1,6 +1,7 @@
 // The feature pages: settings files shown in their feature's own terms,
-// under settings/<id>. Adding one is a definition here and an entry in
-// the Go side's own-page list, so the Settings page points to it.
+// under their sidebar group (#lib/nav.ts). Adding one is a definition here,
+// a page in its group, and an entry in the Go side's own-page list, so the
+// Other page leaves its file out.
 import { actorFilter } from './actorfilter.ts';
 import { diary } from './diary.ts';
 import { gameMaster } from './gamemaster.ts';
@@ -10,6 +11,7 @@ import { dynamicBio } from './dynamicbio.ts';
 import { memory } from './memory.ts';
 import { memoryFilter } from './memoryfilter.ts';
 import type { Feature } from './schema.ts';
+import { href } from '#lib/nav.ts';
 
 export const features: Feature[] = [gameMaster, narration, actorFilter, memory, memoryFilter, diary, dynamicBio, hotkeys];
 
@@ -18,6 +20,6 @@ export function featureById(id: string): Feature | undefined {
 }
 
 export function featureHref(save: string, f: Feature, key?: string): string {
-	const base = `/${encodeURIComponent(save)}/settings/${f.id}`;
+	const base = href(save, f.id);
 	return key ? `${base}?item=${encodeURIComponent(key)}` : base;
 }

@@ -71,7 +71,7 @@ schema:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if f.File.Page != "settings/plugin/SeverActions" || f.File.PageLabel != "SeverActions" {
+	if f.File.Page != "plugin-settings/SeverActions" || f.File.PageLabel != "SeverActions" {
 		t.Errorf("file = %+v", f.File)
 	}
 	got := map[string]Setting{}

@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { href } from '#lib/nav.ts';
 import type { KeyEdit, ProviderDetails, ProviderEdit, ProvidersResponse } from '#lib/api/types/settings.ts';
 
 export const providersDependency = 'app:providers';
@@ -26,7 +27,7 @@ export function setKey(id: string, edit: KeyEdit): Promise<ProvidersResponse> {
 }
 
 export function providersHref(save: string, id?: string): string {
-	const base = `/${encodeURIComponent(save)}/settings/providers`;
+	const base = href(save, 'providers');
 	return id ? `${base}?item=${encodeURIComponent(id)}` : base;
 }
 

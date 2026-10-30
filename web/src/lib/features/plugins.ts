@@ -9,7 +9,7 @@ export function getPluginSchemas(fetchFn?: typeof fetch): Promise<PluginSchema[]
 }
 
 export function pluginSettingsHref(save: string, folder: string): string {
-	return `/${encodeURIComponent(save)}/settings/plugin/${encodeURIComponent(folder)}`;
+	return `/${encodeURIComponent(save)}/plugin-settings/${encodeURIComponent(folder)}`;
 }
 
 function fieldOf(f: SchemaField): Field {

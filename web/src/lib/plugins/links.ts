@@ -1,19 +1,21 @@
 // Links between a plugin and what it brings: the Plugins page names a
-// plugin by its layer's id, and the Prompts, Actions, and Triggers pages
-// narrow to one plugin with ?from=<that id>.
+// plugin by its layer's id, and the Prompts, Actions, Triggers, and bios
+// pages narrow to one plugin with ?from=<that id>.
+import { href } from '#lib/nav.ts';
 
 export function pluginHref(save: string, id: string): string {
-	return `/${encodeURIComponent(save)}/plugins?item=${encodeURIComponent(id)}`;
+	return href(save, 'plugins', `?item=${encodeURIComponent(id)}`);
 }
 
 // fromHref is a content page narrowed to what one plugin brings.
 export function fromHref(save: string, page: 'prompts' | 'actions' | 'triggers' | 'bios', id: string): string {
-	return `/${encodeURIComponent(save)}/${page}?from=${encodeURIComponent(id)}`;
+	const from = `?from=${encodeURIComponent(id)}`;
+	return page === 'bios' ? `/${encodeURIComponent(save)}/bios${from}` : href(save, page, from);
 }
 
 // contentHref is a record on the Content page, by its path.
 export function contentHref(save: string, path: string): string {
-	return `/${encodeURIComponent(save)}/content?item=${encodeURIComponent(path)}`;
+	return href(save, 'content', `?item=${encodeURIComponent(path)}`);
 }
 
 const recordKinds = ['triggers/', 'actions/', 'filters/', 'voice_effects/', 'entities/', 'dialogue_actions/', 'translator/', 'items/', 'spells/', 'furniture/', 'identity/'];
@@ -26,7 +28,7 @@ export function editHref(save: string, path: string): { href: string; page: stri
 	if (bio) return { href: `${s}/bios/${encodeURIComponent(bio[1]!)}`, page: 'Bio' };
 	if (/^prompts\/.+\.prompt$/i.test(path))
 		return {
-			href: `${s}/prompts/` + path.slice('prompts/'.length).split('/').map(encodeURIComponent).join('/'),
+			href: href(save, 'prompts', '/' + path.slice('prompts/'.length).split('/').map(encodeURIComponent).join('/')),
 			page: 'Prompt'
 		};
 	if (recordKinds.some((k) => path.toLowerCase().startsWith(k))) return { href: contentHref(save, path), page: 'Content' };

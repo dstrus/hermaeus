@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { href } from '#lib/nav.ts';
 import type { Models, Provider, Slot, Task, TaskEdit } from '#lib/api/types/settings.ts';
 
 export const modelsDependency = 'app:models';
@@ -14,7 +15,7 @@ export function saveTask(id: string, edit: TaskEdit): Promise<Models> {
 }
 
 export function modelsHref(save: string, task?: string): string {
-	const base = `/${encodeURIComponent(save)}/settings/models`;
+	const base = href(save, 'models');
 	return task ? `${base}?item=${encodeURIComponent(task)}` : base;
 }
 

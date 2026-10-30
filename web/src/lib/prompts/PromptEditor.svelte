@@ -2,6 +2,7 @@
      versions behind a switch, and editing that saves the player's own copy. -->
 <script lang="ts">
 	import { goto, invalidate } from '$app/navigation';
+	import { href } from '#lib/nav.ts';
 	import { untrack } from 'svelte';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
@@ -43,7 +44,7 @@
 	let notice = $state('');
 	let warnings = $state<string[]>([]);
 
-	let list = $derived(`/${encodeURIComponent(save)}/prompts`);
+	let list = $derived(href(save, 'prompts'));
 
 	function startEdit() {
 		if (version && !readOnly) setParams({ mode: 'edit' });

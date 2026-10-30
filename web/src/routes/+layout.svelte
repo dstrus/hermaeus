@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fitToViewport } from '#lib/ui/fit.ts';
-	import { settingsPages } from '#lib/settings/section.ts';
+	import { groups } from '#lib/nav.ts';
+	import { pluginSettingsHref } from '#lib/features/plugins.ts';
 	import '#lib/ui/theme.css';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -32,14 +33,8 @@
 	let historyActive = $derived(!!save && page.url.pathname.startsWith(`${base}/history`));
 	let screenshotsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/screenshots`));
 	let songsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/songs`));
-	let promptsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/prompts`));
-	let pluginsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/plugins`));
-	let actionsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/actions`));
-	let triggersActive = $derived(!!save && page.url.pathname.startsWith(`${base}/triggers`));
-	let contentActive = $derived(!!save && page.url.pathname.startsWith(`${base}/content`));
-	let overridesActive = $derived(!!save && page.url.pathname.startsWith(`${base}/overrides`));
-	// The Settings group's pages, each current at or below its address.
-	const here = (path: string) => page.url.pathname === `${base}/settings/${path}` || page.url.pathname.startsWith(`${base}/settings/${path}/`);
+	// A group's page is current at its URL or below it.
+	const here = (path: string) => page.url.pathname === `${base}/${path}` || page.url.pathname.startsWith(`${base}/${path}/`);
 </script>
 
 <svelte:window onkeydown={handleKey} />
@@ -78,26 +73,19 @@
 				<li><a class="caps" href="{base}/screenshots" aria-current={screenshotsActive ? 'page' : undefined}>Screenshots</a></li>
 				<li><a class="caps" href="{base}/songs" aria-current={songsActive ? 'page' : undefined}>Bard songs</a></li>
 			</ul>
-			<p class="group caps">Configuration</p>
-			<ul aria-label="Configuration">
-				<li><a class="caps" href="{base}/prompts" aria-current={promptsActive ? 'page' : undefined}>Prompts</a></li>
-				<li><a class="caps" href="{base}/plugins" aria-current={pluginsActive ? 'page' : undefined}>Plugins</a></li>
-				<li><a class="caps" href="{base}/actions" aria-current={actionsActive ? 'page' : undefined}>Actions</a></li>
-				<li><a class="caps" href="{base}/triggers" aria-current={triggersActive ? 'page' : undefined}>Triggers</a></li>
-				<li><a class="caps" href="{base}/content" aria-current={contentActive ? 'page' : undefined}>Content</a></li>
-				<li><a class="caps" href="{base}/overrides" aria-current={overridesActive ? 'page' : undefined}>Overrides</a></li>
-			</ul>
-			<p class="group caps">Settings</p>
-			<ul aria-label="Settings">
-				{#each settingsPages as s (s.path)}
-					<li><a class="caps" href="{base}/settings/{s.path}" aria-current={here(s.path) ? 'page' : undefined}>{s.label}</a></li>
-				{/each}
-			</ul>
+			{#each groups as g (g.path)}
+				<p class="group caps">{g.label}</p>
+				<ul aria-label={g.label}>
+					{#each g.pages as p (p.path)}
+						<li><a class="caps" href="{base}/{g.path}/{p.path}" aria-current={here(`${g.path}/${p.path}`) ? 'page' : undefined}>{p.label}</a></li>
+					{/each}
+				</ul>
+			{/each}
 			{#if data.pluginSettings.length}
 				<p class="group caps">Plugin settings</p>
 				<ul aria-label="Plugin settings">
 					{#each data.pluginSettings as p (p.folder)}
-						<li><a class="caps" href="{base}/settings/plugin/{encodeURIComponent(p.folder)}" aria-current={here(`plugin/${p.folder}`) ? 'page' : undefined}>{p.title}</a></li>
+						<li><a class="caps" href={pluginSettingsHref(save, p.folder)} aria-current={here(`plugin-settings/${encodeURIComponent(p.folder)}`) ? 'page' : undefined}>{p.title}</a></li>
 					{/each}
 				</ul>
 			{/if}

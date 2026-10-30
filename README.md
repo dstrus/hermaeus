@@ -62,6 +62,7 @@ make types              # regenerate the API's TypeScript types after changing t
 | `internal/testenv/` | SkyrimNet folders with a real schema, for tests |
 | `assets/` | The drawings behind the app icon and the mark in the top bar; `make icons` renders the icon files from them |
 | `web/src/routes/` | The app's pages; each folder is a URL |
+| `web/src/lib/nav.ts` | The sidebar's groups and their pages, and every page's URL: `/<save>/<group>/<page>` |
 | `web/src/lib/ui/` | The look and its shared parts: theme tokens (`theme.css`), the keyboard-shortcut hint strip, sortable heads, row selection |
 | `web/src/lib/<domain>/` | Each domain's API calls and components, mirroring `internal/<domain>/` |
 | `web/src/lib/api/` | The API client, and TypeScript types generated from Go (`types/`, don't edit) |

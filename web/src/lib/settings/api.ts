@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { href } from '#lib/nav.ts';
 import type { Edit, File, FileList, FileValues, PinsResponse, SecretValue, Setting, SpeechEdit, SpeechRule, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
 
 // What load functions depend on for the quick toggles and the settings
@@ -38,8 +39,7 @@ export const changedPage = 'changed';
 
 // settingsHref is the Other page's list of settings files, or one file.
 export function settingsHref(save: string, name?: string): string {
-	const base = `/${encodeURIComponent(save)}/settings/other`;
-	return name ? `${base}/${encodeURIComponent(name)}` : base;
+	return href(save, 'other', name ? `/${encodeURIComponent(name)}` : '');
 }
 
 // fileLabel is a settings file as people know it: by its file name, with a
@@ -97,7 +97,10 @@ export function editable(v: unknown): string {
 // words turns a key's part such as locationAnalysis or bard_singing into
 // "Location analysis", for a group heading.
 export function words(part: string): string {
-	const spaced = part.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase();
+	const spaced = part
+		.replace(/_/g, ' ')
+		.replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+		.toLowerCase();
 	return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 

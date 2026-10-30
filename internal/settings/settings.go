@@ -91,15 +91,15 @@ type OwnPage struct {
 }
 
 var ownPages = []OwnPage{
-	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "settings/translator"},
-	{Name: "OpenRouter", Label: "Models", Page: "settings/models"},
-	{Name: "Providers", Label: "Providers", Page: "settings/providers"},
-	{Name: "Memory", Label: "Memories", Page: "settings/memories"},
-	{Name: "MemoryFilter", Label: "Memory filter", Page: "settings/memory-filter"},
-	{Name: "ActorFilter", Label: "Actor filter", Page: "settings/actor-filter"},
-	{Name: "Diary", Label: "Diaries", Page: "settings/diaries"},
-	{Name: "DynamicBio", Label: "Dynamic bios", Page: "settings/dynamic-bios"},
-	{Name: "Hotkey", Label: "Hotkeys", Page: "settings/hotkeys"},
+	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "behavior/translator"},
+	{Name: "OpenRouter", Label: "Models", Page: "ai/models"},
+	{Name: "Providers", Label: "Providers", Page: "ai/providers"},
+	{Name: "Memory", Label: "Memories", Page: "memory/memories"},
+	{Name: "MemoryFilter", Label: "Memory filter", Page: "memory/memory-filter"},
+	{Name: "ActorFilter", Label: "Actor filter", Page: "behavior/actor-filter"},
+	{Name: "Diary", Label: "Diaries", Page: "memory/diaries"},
+	{Name: "DynamicBio", Label: "Dynamic bios", Page: "memory/dynamic-bios"},
+	{Name: "Hotkey", Label: "Hotkeys", Page: "general/hotkeys"},
 }
 
 // withPage notes the page a file has of its own, if any.

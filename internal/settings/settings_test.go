@@ -84,14 +84,14 @@ func TestComparedWithDefaults(t *testing.T) {
 	}
 	// A file with a page of its own says so, as listed and as read by name.
 	for _, f := range list.Files {
-		if f.File.Name == "UniversalTranslator" && (f.File.Page != "settings/translator" || f.File.PageLabel != "Universal Translator") {
+		if f.File.Name == "UniversalTranslator" && (f.File.Page != "behavior/translator" || f.File.PageLabel != "Universal Translator") {
 			t.Errorf("the translator's page = %+v", f.File)
 		}
-		if f.File.Name == "Memory" && f.File.Page != "settings/memories" {
+		if f.File.Name == "Memory" && f.File.Page != "memory/memories" {
 			t.Errorf("Memory's page = %+v", f.File)
 		}
 	}
-	if f, err := h.settings.Read("UniversalTranslator"); err != nil || !f.File.Exists || f.File.Page != "settings/translator" {
+	if f, err := h.settings.Read("UniversalTranslator"); err != nil || !f.File.Exists || f.File.Page != "behavior/translator" {
 		t.Errorf("read by name: %+v, %v", f.File, err)
 	}
 	// OpenRouter.yaml and Providers.yaml have pages of their own, so their

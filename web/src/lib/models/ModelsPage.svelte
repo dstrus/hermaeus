@@ -181,7 +181,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<p class="muted small">Fetching a provider’s models asks it over the Internet, with your key. Providers and their keys are on the <a href={providersHref(save)}>Providers</a> page; the rest of <span class="id">{models.path}</span> is under <a href={settingsHref(save, 'OpenRouter')}>OpenRouter</a> in Settings.</p>
+		<p class="muted small">Fetching a provider’s models asks it over the Internet, with your key. Providers and their keys are on the <a href={providersHref(save)}>Providers</a> page; the rest of <span class="id">{models.path}</span> is under <a href={settingsHref(save, 'OpenRouter')}>OpenRouter</a> in Other settings.</p>
 	</div>
 
 	<aside class="pane" use:fitToViewport aria-label="Task">
