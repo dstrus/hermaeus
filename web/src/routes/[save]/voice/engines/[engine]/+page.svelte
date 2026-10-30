@@ -1,29 +1,30 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import EngineHead from '#lib/features/EngineHead.svelte';
 	import FeaturePage from '#lib/features/FeaturePage.svelte';
-	import CloneList from '#lib/features/CloneList.svelte';
-	import { engines } from '#lib/features/voice.ts';
 	import { href } from '#lib/nav.ts';
+	import Tabs from '#lib/ui/Tabs.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	let save = $derived(data.playthrough.id);
+	let base = $derived(href(save, 'engines', `/${data.engine.id}`));
 </script>
 
 {#key data.engine.id}
 	<FeaturePage {save} feature={data.feature} file={data.file}>
 		{#snippet extra()}
-			{#if data.inUse?.id === data.engine.id}
-				<span class="muted">In use</span>
-			{:else}
-				<span class="muted">Not in use · <a href="{href(save, 'speech')}?item=tts.engine">Choose the engine</a></span>
-			{/if}
-			<select aria-label="Engine" value={data.engine.id} onchange={(e) => goto(href(save, 'engines', `/${e.currentTarget.value}`))}>
-				{#each engines as e (e.id)}<option value={e.id}>{e.label}{data.inUse?.id === e.id ? ' · in use' : ''}</option>{/each}
-			</select>
+			<EngineHead {save} engine={data.engine} inUse={data.inUse} />
 		{/snippet}
-		{#snippet after()}
-			{#if data.clones}<CloneList cache={data.clones} label={data.engine.label} />{/if}
+		{#snippet tabs()}
+			{#if data.clones}
+				<Tabs
+					label={data.engine.label}
+					tabs={[
+						{ href: base, label: 'Settings' },
+						{ href: `${base}/clones`, label: 'Cloned voices', count: data.clones.voices.length + data.clones.unnamed }
+					]}
+				/>
+			{/if}
 		{/snippet}
 	</FeaturePage>
 {/key}

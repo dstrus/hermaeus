@@ -21,7 +21,7 @@
 	import { codeOf, keyName, mouseCodeOf, noKey } from '#lib/settings/keys.ts';
 	import { blankRow, cellText, draftOf, linesOf, linesValue, pairsOf, pairsValue, parse, pickedOf, rowsOf, rowsValue, setValue, show, valueOf, type Feature, type Field, type Pair, type Row as Entry } from './schema.ts';
 
-	let { save, feature, file, lists, extra, after }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse; extra?: Snippet; after?: Snippet } = $props();
+	let { save, feature, file, lists, extra, tabs }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse; extra?: Snippet; tabs?: Snippet } = $props();
 
 	let readOnly = $derived(live.gameRunning);
 	let can = $derived(file.file.exists && !readOnly);
@@ -194,6 +194,7 @@
 	{#if extra}<span class="extra">{@render extra()}</span>{/if}
 </div>
 <p class="muted lead">{feature.what}{#if feature.see}{' '}{feature.see.before}<a href="/{encodeURIComponent(save)}/{feature.see.path}">{feature.see.label}</a>{feature.see.after}{/if}</p>
+{#if tabs}<div class="tabs">{@render tabs()}</div>{/if}
 {#if !file.file.exists}
 	<p class="notice">SkyrimNet hasn’t written <span class="id">{file.file.path}</span> yet; it will the next time it starts. Until then the defaults can be read but not changed.</p>
 {/if}
@@ -229,7 +230,6 @@
 		{#if feature.lists && lists}
 			<FilterLists kind={feature.lists} {lists} canEdit={file.file.exists} />
 		{/if}
-		{#if after}{@render after()}{/if}
 	</div>
 
 	<aside class="pane" use:fitToViewport aria-label="Setting">
@@ -628,6 +628,9 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-2);
+	}
+	.tabs {
+		margin-bottom: var(--space-4);
 	}
 	.extra {
 		margin-left: auto;

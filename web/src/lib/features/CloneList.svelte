@@ -10,7 +10,6 @@
 </script>
 
 <section class="clones">
-	<h2 class="caps">Cloned voices</h2>
 	{#if !cache.voices.length && !cache.unnamed}
 		<p class="muted small">None yet. SkyrimNet clones a voice type into your {label} account when it first needs it, or all at once with its dashboard’s bulk clone.</p>
 	{:else}
@@ -42,12 +41,8 @@
 
 <style>
 	.clones {
-		margin-top: var(--space-6);
-	}
-	h2 {
-		font-size: var(--step-1);
-		font-weight: 600;
-		margin-bottom: var(--space-2);
+		margin-top: var(--space-4);
+		max-width: 64rem;
 	}
 	.small {
 		font-size: var(--step--1);
