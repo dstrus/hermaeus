@@ -53,7 +53,7 @@
 		{/if}
 	{/snippet}
 	{#snippet note()}
-		A trigger’s file can be edited on the Content page; making new ones is done in SkyrimNet’s dashboard for now.
+		Triggers are edited and made on the Content page.
 	{/snippet}
 </RecordsPage>
 

@@ -99,7 +99,7 @@
 		error = '';
 		try {
 			await setPackEnabled(save, p.id, !p.enabled);
-			notice = `${p.name} switched ${p.enabled ? 'off' : 'on'}. SkyrimNet reads packs when it starts.`;
+			notice = `${p.name} switched ${p.enabled ? 'off' : 'on'}.`;
 			await invalidate(knowledgeDependency);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -212,7 +212,7 @@
 							{#if current.tags.length}<dt class="caps">Tags</dt><dd>{current.tags.join(', ')}</dd>{/if}
 							{#if current.condition}<dt class="caps">Only while</dt><dd><code>{current.condition}</code></dd>{/if}
 							<dt class="caps">Recall</dt><dd>{current.alwaysInject ? 'always included, not only when relevant' : 'when relevant'}</dd>
-							<dt class="caps">Search</dt><dd>{current.embedded ? 'vector built' : 'vector pending; SkyrimNet builds it when it starts'}</dd>
+							<dt class="caps">Search</dt><dd>{current.embedded ? 'vector built' : 'vector pending; SkyrimNet builds it in the background while a save is loaded'}</dd>
 							{#if !current.active}<dt class="caps">State</dt><dd>inactive: SkyrimNet doesn’t use it</dd>{/if}
 						</dl>
 						{#if mode === 'delete'}

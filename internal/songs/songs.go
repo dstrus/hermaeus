@@ -38,8 +38,8 @@ type List struct {
 	Folder string `json:"folder"` // where the audio is, for people
 }
 
-// Columns SkyrimNet added after the table first appeared, with what an
-// older database has instead.
+// Columns a playthrough's database may not have, with what to read in
+// their place.
 var later = map[string]string{"composer_uuid": "0", "composer_name": "''", "source": "'generated'", "instrumental": "0"}
 
 func columns(db store.DB) (map[string]string, error) {

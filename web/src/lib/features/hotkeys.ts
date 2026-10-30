@@ -40,7 +40,7 @@ export const hotkeys: Feature = {
 			title: 'Actions',
 			fields: [
 				{ key: 'continueNarration', label: 'Continue', what: 'Have a character speak up, to react to something or pick a stalled conversation back up.', kind: 'hotkey' },
-				{ key: 'captureCrosshair', label: 'Capture', what: 'A quick press captures the character or furniture in your crosshairs; hold for a second to capture your own character. With a book open, it captures the book.', kind: 'hotkey' },
+				{ key: 'captureCrosshair', label: 'Capture', what: 'Opens the capture window, for the character or furniture in your crosshairs, yourself, or where you are. With Ctrl, it captures straight away: a quick press for what’s in your crosshairs, or hold for a second for yourself. With a book open, it captures the book.', kind: 'hotkey' },
 				{ key: 'generateDiaryBio', label: 'Diary and bio now', what: 'Write diary entries and update bios now, for you, those nearby, those pinned, or whoever is in your crosshairs.', kind: 'hotkey' },
 				{ key: 'interruptDialogue', label: 'Interrupt', what: 'Stop every character speaking, and clear what’s waiting to be said.', kind: 'hotkey' }
 			]

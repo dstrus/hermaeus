@@ -99,9 +99,9 @@ var knownTasks = []struct{ id, label, what string }{
 	{"gamemaster_evaluation", "GameMaster", "Reading a scene and deciding who speaks or acts."},
 	{"action_evaluation", "Action evaluation", "Which actions an NPC may take in response to an event."},
 	{"meta", "Meta", "Quick sorting and routing: a fast, cheap model."},
-	{"decisions", "Decisions", "Typed questions (an NPC’s mood, who speaks next) answered with probabilities. Needs a provider with the Decisions API style; sampling settings don’t apply."},
+	{"decisions", "Decisions", "Typed questions (an NPC’s mood, who speaks next) answered with probabilities. Needs a provider with the Decisions or System One API style; sampling settings don’t apply."},
 	{"vision", "Vision", "Describing screenshots for OmniSight."},
-	{"vision_quality", "Vision (quality)", "OmniSight’s closer look, when it needs one."},
+	{"vision_quality", "Vision (quality)", "Describing the OmniSight captures you take yourself, with a stronger model."},
 	{"UniversalTranslator", "Universal Translator", "Rewriting NPCs’ lines in their speech patterns."},
 	{"AgentDefault", "AI assistant", "The dashboard’s tool-calling assistant."},
 }

@@ -267,7 +267,7 @@
 							{#if current.tags.length}<dt class="caps">Tags</dt><dd>{current.tags.join(', ')}</dd>{/if}
 							{#if current.condition}<dt class="caps">Only while</dt><dd><code>{current.condition}</code></dd>{/if}
 							{#if current.diaryEntry !== undefined}<dt class="caps">Copy of</dt><dd>diary entry {current.diaryEntry}</dd>{/if}
-							<dt class="caps">Search</dt><dd>{current.embedded ? 'vector built' : 'vector pending; SkyrimNet builds it when it starts'}</dd>
+							<dt class="caps">Search</dt><dd>{current.embedded ? 'vector built' : 'vector pending; SkyrimNet builds it in the background while a save is loaded'}</dd>
 							{#if current.alwaysInject}<dt class="caps">Recall</dt><dd>always included, not only when relevant</dd>{/if}
 							{#if !current.active}<dt class="caps">State</dt><dd>inactive: SkyrimNet doesn’t recall it</dd>{/if}
 						</dl>

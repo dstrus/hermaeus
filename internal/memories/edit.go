@@ -35,7 +35,7 @@ type MemoryChanges struct {
 // SaveResult says what a save did besides the change asked for.
 type SaveResult struct {
 	ID      int64  `json:"id"`
-	Reembed bool   `json:"reembed"`           // the text changed, so SkyrimNet rebuilds the search vector when it starts
+	Reembed bool   `json:"reembed"`           // the text changed, so SkyrimNet makes a new search vector
 	Diary   *int64 `json:"diary,omitempty"`   // the diary entry also updated to match a memory
 	Memory  *int64 `json:"memory,omitempty"`  // the memory also updated to match a diary entry
 	Warning string `json:"warning,omitempty"` // something the user should know about what wasn't done
@@ -109,7 +109,7 @@ func tagsJSON(tags []string) string {
 }
 
 // UpdateMemory changes a memory. Changing its text or title clears its search
-// vector, which SkyrimNet rebuilds when it next starts. If the memory copies
+// vector, which SkyrimNet makes again in the background. If the memory copies
 // a diary entry, syncDiary keeps the entry's text in step.
 func UpdateMemory(tx store.DB, id int64, c MemoryChanges, syncDiary bool) (SaveResult, error) {
 	res := SaveResult{ID: id}
@@ -153,8 +153,8 @@ func UpdateMemory(tx store.DB, id int64, c MemoryChanges, syncDiary bool) (SaveR
 	return res, nil
 }
 
-// clearEmbedding drops a memory's search vector. SkyrimNet rebuilds missing
-// vectors when it starts, the same way its own migrations do.
+// clearEmbedding drops a memory's search vector. SkyrimNet makes missing
+// vectors in the background while a save is loaded.
 func clearEmbedding(tx store.DB, memoryID int64) error {
 	if _, err := tx.Exec(`delete from memory_embeddings where memory_id = ?`, memoryID); err != nil {
 		return err

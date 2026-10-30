@@ -90,12 +90,12 @@
 			</label>
 		{/if}
 		<label class="field">
-			<span class="caps label">Keep answers for</span>
+			<span class="caps label">Prompt cache</span>
 			<select bind:value={cacheTTL}>
 				<option value="5m">5 minutes</option>
 				<option value="1h">An hour</option>
 			</select>
-			<span class="muted small">How long the provider's cache holds a prompt's answer.</span>
+			<span class="muted small">How long the provider keeps the cached start of a prompt. An hour lasts through longer pauses, but costs more with providers that charge for caching.</span>
 		</label>
 		<label class="field">
 			<span class="caps label">Provider settings, as JSON</span>

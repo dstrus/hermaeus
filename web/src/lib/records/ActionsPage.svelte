@@ -28,7 +28,7 @@
 			<dt class="caps">Who may</dt><dd>{a.rules ? `${a.rules} eligibility ${a.rules === 1 ? 'rule' : 'rules'}` : 'Anyone, at any time'}</dd>
 			{#if a.function}<dt class="caps">Runs</dt><dd class="id">{a.script}.{a.function}</dd>{/if}
 			{#if a.quest}<dt class="caps">Quest</dt><dd class="id">{a.quest}</dd>{/if}
-			{#if a.event}<dt class="caps">Sends</dt><dd class="id">{a.event}</dd>{/if}
+			{#if a.event}<dt class="caps">Event text</dt><dd class="id">{a.event}</dd>{/if}
 			{#if a.confirm}<dt class="caps">Confirm</dt><dd>Asks you first</dd>{/if}
 		</dl>
 		{#if a.params.length}
@@ -41,7 +41,7 @@
 		{/if}
 	{/snippet}
 	{#snippet note()}
-		SkyrimNet also has a few actions built in, such as continuing a conversation, which aren’t files and aren’t listed. An action’s file can be edited on the Content page; making new ones is done in SkyrimNet’s dashboard for now.
+		SkyrimNet also has a few actions built in, such as continuing a conversation, which aren’t files and aren’t listed. Actions are edited and made on the Content page.
 	{/snippet}
 </RecordsPage>
 

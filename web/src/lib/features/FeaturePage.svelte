@@ -148,12 +148,10 @@
 		let v: unknown;
 		try {
 			v = f.kind === 'set' ? setValue(f, value, picked) : f.kind === 'lines' ? linesValue(draft) : f.kind === 'pairs' ? pairsValue(f, pairs) : f.kind === 'rows' ? rowsValue(f, entries) : parse(f, draft);
-			// A plugin's hotkey goes back as the file keeps it: text when it's text,
-			// and unset as empty text or 0, as SkyrimNet's dashboard writes it.
-			if (current.field.pluginHotkey && typeof v === 'number') {
-				if (typeof value === 'string') v = v === noKey ? '' : String(v);
-				else if (v === noKey) v = 0;
-			}
+			// A plugin's hotkey goes back as the file keeps it: as text when it's
+			// text, unset as empty text, the way SkyrimNet writes it; otherwise as
+			// the key code, -1 when unset, as SkyrimNet's dashboard writes it.
+			if (current.field.pluginHotkey && typeof v === 'number' && typeof value === 'string') v = v === noKey ? '' : String(v);
 		} catch (err) {
 			error = err instanceof Error ? err.message : String(err);
 			return;

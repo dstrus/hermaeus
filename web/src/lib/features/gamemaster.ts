@@ -6,12 +6,12 @@ export const gameMaster: Feature = {
 	id: 'gamemaster',
 	file: 'game',
 	title: 'GameMaster',
-	what: 'The GameMaster reads the scene around you and decides when characters speak up or act, without being asked.',
+	what: 'The GameMaster reads the scene around you and decides when characters speak up or act.',
 	sections: [
 		{
 			title: 'General',
 			fields: [
-				{ key: 'gamemaster.enabled', label: 'GameMaster', what: 'Let the GameMaster shape scenes at all.', kind: 'switch' },
+				{ key: 'gamemaster.enabled', label: 'GameMaster', what: 'The GameMaster altogether, which also handles replies to what you say.', kind: 'switch' },
 				{ key: 'gamemaster.agentEnabled', label: 'Act on its own', what: 'Let the GameMaster start scenes by itself, prompting characters to speak now and then.', kind: 'switch' },
 				{ key: 'gamemaster.excludeActorsInScenes', label: 'Leave scenes alone', what: 'Don’t choose characters who are busy in one of the game’s own scenes, such as scripted events or vanilla dialogue.', kind: 'switch' }
 			]

@@ -330,7 +330,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 			</form>
 		{:else if mode === 'import'}
 			<h2 class="caps">Import rules</h2>
-			<p class="muted small">From a YAML file: one SkyrimNet’s dashboard exported, or UniversalTranslator.yaml from another install. A rule for an entity already listed replaces its pattern; the others go last, before everyone else.</p>
+			<p class="muted small">From a YAML file, such as UniversalTranslator.yaml from another install. A rule for an entity already listed replaces its pattern; the others go last, before everyone else.</p>
 			<form class="import" onsubmit={runImport}>
 				<input bind:this={file} type="file" accept=".yaml,.yml,text/yaml" aria-label="YAML file" />
 				<div class="buttons">

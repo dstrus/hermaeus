@@ -393,7 +393,7 @@ const filters: FormKind = {
 						{ key: 'id', label: 'Id', readonly: true },
 						{ key: 'priority', label: 'Priority', type: 'num', hint: 'Lower runs first; 100 when empty.' },
 						{ key: 'pattern', label: 'Pattern', type: 'area', rows: 2, wide: true, hint: 'A regular expression.' },
-						{ key: 'replacement', label: 'Replacement', keep: true, wide: true, hint: 'Empty removes what matches.' }
+						{ key: 'replacement', label: 'Replacement', keep: true, wide: true, hint: d.kind === 'dialogue_rule' ? 'Empty skips the whole line; otherwise it replaces what matches.' : 'Empty removes what matches.' }
 					]
 				}
 			];

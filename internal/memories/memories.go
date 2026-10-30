@@ -30,7 +30,7 @@ type Memory struct {
 	AlwaysInject bool               `json:"alwaysInject"`         // included in every prompt, not only when relevant
 	Condition    string             `json:"condition"`            // only used while this is true, if set
 	DiaryEntry   *int64             `json:"diaryEntry,omitempty"` // the diary entry this memory is a copy of
-	Embedded     bool               `json:"embedded"`             // has a search vector; SkyrimNet rebuilds missing ones when it starts
+	Embedded     bool               `json:"embedded"`             // has a search vector; SkyrimNet makes missing ones in the background
 	Retired      *string            `json:"retired,omitempty"`    // stored under a retired identity with this name ("" if unnamed)
 	Date         *calendar.GameDate `json:"date,omitempty"`
 	Written      *int64             `json:"written,omitempty"` // when SkyrimNet wrote it, Unix ms

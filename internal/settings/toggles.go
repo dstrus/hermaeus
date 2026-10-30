@@ -10,8 +10,8 @@ import (
 // Quick toggles switch SkyrimNet's main features on and off, as the quick
 // toggles in SkyrimNet's dashboard do. Each is one setting; switching it
 // goes through Save, so the file is backed up and nothing changes while
-// Skyrim runs. The dashboard also has one for actions, but where it keeps
-// that switch isn't known, so it's left out here.
+// Skyrim runs. The dashboard also has one for actions, but that switch isn't
+// kept in a file and resets when the game restarts, so it's left out here.
 
 type Toggle struct {
 	ID     string `json:"id"`
@@ -33,7 +33,7 @@ var toggles = []Toggle{
 	{ID: "player_reactions", Label: "Player reactions", What: "AI-written lines spoken by your own character.", File: "PlayerDialogue", Key: "enabled"},
 	{ID: "narration", Label: "Narration", What: "A narrator describing what happens.", File: "game", Key: "narration.enabled"},
 	{ID: "bard_singing", Label: "Bards", What: "Bards singing AI-written songs.", File: "BardSinging", Key: "bard_singing.enabled"},
-	{ID: "universal_translator", Label: "Translator", What: "The Universal Translator, for speaking with NPCs in other languages.", File: "UniversalTranslator", Key: "enabled"},
+	{ID: "universal_translator", Label: "Translator", What: "The Universal Translator, which replaces NPCs’ recorded lines with AI-written ones in their speech patterns.", File: "UniversalTranslator", Key: "enabled"},
 	{ID: "dynamic_bios", Label: "Dynamic bios", What: "SkyrimNet rewriting characters’ dynamic bios as you play.", File: "DynamicBio", Key: "enabled"},
 	{ID: "memory_generation", Label: "Memories", What: "Making new memories from events, in the background.", File: "Memory", Key: "performance.enable_background_processing"},
 	{ID: "omnisight", Label: "OmniSight", What: "OmniSight: NPCs seeing what’s on screen.", File: "OmniSight", Key: "omnisight.enabled"},

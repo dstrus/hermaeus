@@ -121,8 +121,8 @@ export const bardSinging: Feature = {
 				{ key: 'bard_singing.provider', label: 'Music service', what: 'Who composes new songs. Each costs credits there.', kind: 'choice', custom: true, choices: musicProviders },
 				{ key: 'bard_singing.backup_provider', label: 'Backup', what: 'Who composes when the music service fails.', kind: 'choice', custom: true, choices: [...musicProviders, { value: 'none', label: 'None', what: 'no backup' }] },
 				{ key: 'bard_singing.generation.interval_hours', label: 'How often', what: 'How many hours of game time pass between tries at a new song.', kind: 'count', min: 1, max: 720, unit: 'game hours' },
-				{ key: 'bard_singing.generation.max_cached_songs', label: 'Songs kept', what: 'How many composed songs each playthrough keeps. Past it, the oldest goes first; imported songs don’t count and are never removed.', kind: 'count', min: 1, max: 1000, unit: 'songs' },
-				{ key: 'bard_singing.generation.default_style', label: 'Style', what: 'Words for the kind of music wanted, separated by commas.', kind: 'text', placeholder: 'tavern music, bardic, medieval folk' },
+				{ key: 'bard_singing.generation.max_cached_songs', label: 'Songs kept', what: 'How many composed songs each playthrough keeps. Past it, the oldest composed song’s audio is removed first; imported songs don’t count and are never removed.', kind: 'count', min: 1, max: 1000, unit: 'songs' },
+				{ key: 'bard_singing.generation.default_style', label: 'Style', what: 'Words for the kind of music wanted, separated by commas.', kind: 'text', placeholder: 'medieval bardic folk, acoustic lute, harp, tavern ambiance' },
 				{ key: 'bard_singing.generation.negative_tags', label: 'Avoid', what: 'Words for what the music shouldn’t be, separated by commas, such as modern genres.', kind: 'text', placeholder: 'electric guitar, synthesizer' },
 				{ key: 'bard_singing.generation.language', label: 'Sung in', what: 'The language songs are sung in, as a two-letter code. Only AceStep uses it.', kind: 'text', placeholder: 'en' }
 			]
@@ -132,7 +132,7 @@ export const bardSinging: Feature = {
 			title: 'Suno',
 			fields: [
 				providerKey('suno', 'sunoapi.org', 'sunoapi.org'),
-				{ key: 'bard_singing.suno.base_url', label: 'Address', what: 'Where Suno’s service is reached. Change it only to go through a proxy of your own.', kind: 'text', placeholder: 'https://api.sunoapi.org/api/v1' },
+				{ key: 'bard_singing.suno.base_url', label: 'Address', what: 'Where Suno’s service is reached. Change it only to go through a proxy of your own.', kind: 'text' },
 				providerModel('suno', 'Suno', 'V5')
 			]
 		},

@@ -60,7 +60,7 @@ export function savedNote(r: SaveResult, what: string): string {
 	const notes = [`${what} saved.`];
 	if (r.diary !== undefined) notes.push(`Diary entry ${r.diary} was updated to match.`);
 	if (r.memory !== undefined) notes.push(`Its memory copy was updated to match.`);
-	if (r.reembed) notes.push('SkyrimNet rebuilds the search vector the next time it starts.');
+	if (r.reembed) notes.push('SkyrimNet makes a new search vector in the background the next time a save is loaded.');
 	return notes.join(' ');
 }
 

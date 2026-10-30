@@ -23,7 +23,7 @@ export const memoryFilter: Feature = {
 						{ value: 'WhitelistOnly', label: 'Whitelist', what: 'Only those listed' }
 					]
 				},
-				{ key: 'AllowOnlyActorsCapableOfSpeech', label: 'Only those who can speak', what: 'Characters who can’t speak form no memories.', kind: 'switch' },
+				{ key: 'AllowOnlyActorsCapableOfSpeech', label: 'Only those who can speak', what: 'Characters who can’t speak form no memories, unless a whitelist names them.', kind: 'switch' },
 				{ key: 'AllowPlayerMemories', label: 'Your character too', what: 'Your own character forms memories.', kind: 'switch' }
 			]
 		}

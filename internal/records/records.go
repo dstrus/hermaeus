@@ -58,7 +58,7 @@ type Action struct {
 	Quest       string              `json:"quest,omitempty"`
 	Script      string              `json:"script,omitempty"`
 	Function    string              `json:"function,omitempty"`
-	Event       string              `json:"event,omitempty"` // a mod event sent instead of calling a script
+	Event       string              `json:"event,omitempty"` // the event text recorded when it runs
 	Confirm     bool                `json:"confirm,omitempty"`
 }
 

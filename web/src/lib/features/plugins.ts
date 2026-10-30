@@ -30,10 +30,15 @@ function fieldOf(f: SchemaField): Field {
 	}
 }
 
+// SkyrimNet's dashboard leaves out a plugin's LLM overrides, since the
+// Models page sets them.
+const hidden = new Set(['llm overrides']);
+
 export function featureOf(ps: PluginSchema): Feature {
 	const sections: Section[] = [];
 	for (const f of ps.fields) {
-		const title = f.category || 'Settings';
+		if (hidden.has((f.category ?? '').trim().toLowerCase())) continue;
+		const title = f.category || 'General';
 		let s = sections.find((x) => x.title === title);
 		if (!s) sections.push((s = { title, fields: [] }));
 		s.fields.push(fieldOf(f));

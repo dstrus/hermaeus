@@ -38,8 +38,9 @@ export function blankSlot(provider: string): Slot {
 }
 
 export const reasoningEfforts = [
-	{ value: '', label: 'Provider’s default' },
+	{ value: '', label: 'Inherited' },
 	{ value: 'off', label: 'Off' },
+	{ value: 'default', label: 'Model’s default' },
 	{ value: 'minimal', label: 'Minimal' },
 	{ value: 'low', label: 'Low' },
 	{ value: 'medium', label: 'Medium' },

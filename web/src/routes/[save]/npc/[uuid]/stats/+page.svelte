@@ -20,7 +20,7 @@
 		[
 			mem.inactive && `${count(mem.inactive)} inactive`,
 			mem.alwaysInject && `${count(mem.alwaysInject)} always included`,
-			mem.pendingEmbedding && `${count(mem.pendingEmbedding)} not yet searchable (SkyrimNet builds the vectors when it starts)`,
+			mem.pendingEmbedding && `${count(mem.pendingEmbedding)} not yet searchable (SkyrimNet builds the vectors in the background while a save is loaded)`,
 			mem.unembeddable && `${count(mem.unembeddable)} unsearchable`
 		].filter((x): x is string => !!x)
 	);

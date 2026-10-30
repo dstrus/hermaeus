@@ -72,7 +72,7 @@ export interface MemoryChanges {
  */
 export interface SaveResult {
   id: number /* int64 */;
-  reembed: boolean; // the text changed, so SkyrimNet rebuilds the search vector when it starts
+  reembed: boolean; // the text changed, so SkyrimNet makes a new search vector
   diary?: number /* int64 */; // the diary entry also updated to match a memory
   memory?: number /* int64 */; // the memory also updated to match a diary entry
   warning?: string; // something the user should know about what wasn't done
@@ -143,7 +143,7 @@ export interface Memory {
   alwaysInject: boolean; // included in every prompt, not only when relevant
   condition: string; // only used while this is true, if set
   diaryEntry?: number /* int64 */; // the diary entry this memory is a copy of
-  embedded: boolean; // has a search vector; SkyrimNet rebuilds missing ones when it starts
+  embedded: boolean; // has a search vector; SkyrimNet makes missing ones in the background
   retired?: string; // stored under a retired identity with this name ("" if unnamed)
   date?: calendar.GameDate;
   written?: number /* int64 */; // when SkyrimNet wrote it, Unix ms

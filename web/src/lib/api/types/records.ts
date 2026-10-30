@@ -136,7 +136,7 @@ export interface Action extends Origin {
   quest?: string;
   script?: string;
   function?: string;
-  event?: string; // a mod event sent instead of calling a script
+  event?: string; // the event text recorded when it runs
   confirm?: boolean;
 }
 /**

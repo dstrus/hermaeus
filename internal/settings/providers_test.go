@@ -133,7 +133,7 @@ func TestProvidersChange(t *testing.T) {
 		t.Fatalf("after adding: %+v, %v", r.Providers, err)
 	}
 	got = h.read("Providers.yaml")
-	if !strings.Contains(got, "  - id: my_local_llm\n    name: My Local LLM\n    endpoint: http://localhost:1234/v1/chat/completions\n    api_key: \"\"\n    api_style: chat\n    use_sse: true\n") || !strings.Contains(got, "    provider_settings: ~\n    provider_sorting: default\n    upstream_order_mode: fleet\n    cache_ttl: 5m\n    builtin: false\n") {
+	if !strings.Contains(got, "  - id: my_local_llm\n    name: My Local LLM\n    endpoint: http://localhost:1234/v1/chat/completions\n    api_key: \"\"\n    api_style: chat\n    use_sse: true\n") || !strings.Contains(got, "    provider_settings: ~\n    provider_sorting: default\n    cache_ttl: 5m\n    builtin: false\n") {
 		t.Errorf("added =\n%s", got)
 	}
 	e = edit(r.Providers[3])

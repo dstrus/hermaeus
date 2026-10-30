@@ -95,7 +95,6 @@ func (s *Settings) TestModel(taskID string, t ModelTest) (ModelTestResult, error
 	if err != nil || (endpoint.Scheme != "http" && endpoint.Scheme != "https") || endpoint.Host == "" {
 		return ModelTestResult{}, apperr.New(apperr.Invalid, "%s’s endpoint isn’t a web address", p.Name)
 	}
-	openRouter := strings.EqualFold(endpoint.Hostname(), "openrouter.ai")
 
 	// The request, as SkyrimNet's chat requests are made: the slot's
 	// temperature, or the task's; the task's other sampling settings.
@@ -130,9 +129,6 @@ func (s *Settings) TestModel(taskID string, t ModelTest) (ModelTestResult, error
 	}
 	if len(task.Params.StopSequences) > 0 {
 		body["stop"] = task.Params.StopSequences
-	}
-	if openRouter {
-		body["usage"] = map[string]bool{"include": true} // so the reply says what it cost
 	}
 
 	timeout := 60 * time.Second

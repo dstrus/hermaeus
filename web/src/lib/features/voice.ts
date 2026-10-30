@@ -68,7 +68,7 @@ export const speech: Feature = {
 			title: 'Silent characters',
 			what: 'Characters with no voice lines of their own, voiced through DBVO.',
 			fields: [
-				{ key: 'dbvo.enabled', label: 'Use DBVO', what: 'Work with DBVO, the mod that voices lines the game has no recording for.', kind: 'switch' },
+				{ key: 'dbvo.enabled', label: 'Voice over', what: 'Speak the lines you choose in dialogue. Needs DBVO installed, with its DBVO.esp disabled or deleted.', kind: 'switch' },
 				{ key: 'dbvo.voiceSilentNPCs', label: 'Voice silent characters', what: 'Speak the game’s own lines for characters who have no recording of them. Universal Translator depends on it.', kind: 'switch' },
 				{ key: 'dbvo.fixSubtitleDuringTTS', label: 'Subtitle fix', what: 'SkyrimNet’s fix for the game’s subtitle while such a line is spoken.', kind: 'switch' }
 			]
@@ -96,7 +96,7 @@ function connection(e: Engine): Section {
 	const endpoint: Field =
 		e.id === 'inworld'
 			? { key: 'endpoint', label: 'Address', what: 'Where Inworld’s service is reached. It can name your account, so it’s kept like a key: Hermaeus never shows it.', kind: 'secret' }
-			: { key: 'endpoint', label: 'Address', what: e.id === 'piper' || e.id === 'pockettts' ? 'Left empty, the engine runs inside SkyrimNet itself.' : 'Where the server is reached.', kind: 'text', placeholder: 'http://localhost:7860' };
+			: { key: 'endpoint', label: 'Address', what: e.id === 'piper' || e.id === 'pockettts' ? 'Left empty for the engine that comes with SkyrimNet.' : 'Where the server is reached.', kind: 'text', placeholder: 'http://localhost:7860' };
 	return {
 		title: 'Connection',
 		fields: [
@@ -297,7 +297,7 @@ const shared: Section[] = [
 		what: 'Tags the model writes into a line, such as [sighs], for how it’s spoken.',
 		fields: [
 			{ key: 'enable_audio_tags', label: 'Use tags', what: 'Pass tags on to the engine. Only engines that understand them do anything with them.', kind: 'switch' },
-			{ key: 'allowed_audio_tags', label: 'Allowed tags', what: 'The tags passed on; others are taken out of the line. With none listed, every tag is passed on.', kind: 'lines', noun: ['tag', 'tags'] }
+			{ key: 'allowed_audio_tags', label: 'Allowed tags', what: 'The tags passed on; others are taken out of the line.', kind: 'lines', noun: ['tag', 'tags'] }
 		]
 	},
 	{
@@ -357,7 +357,7 @@ export const speechToText: Feature = {
 			title: 'Recognizer',
 			fields: [
 				{ key: 'backend', label: 'Recognizer', what: 'What turns your speech into text.', kind: 'choice', custom: true, choices: sttBackends },
-				{ key: 'language', label: 'Language', what: 'The language you speak, as a two-letter code.', kind: 'text', placeholder: 'en' },
+				{ key: 'language', label: 'Language', what: 'The language you speak, as a two-letter code. Whisper also takes auto-detect.', kind: 'text', placeholder: 'en' },
 				{ key: 'name_hints', label: 'Name hints', what: 'Tell the recognizer the names of you, nearby and pinned characters, and nearby places, so they come back spelled right. The stt_hints prompt sets what’s sent.', kind: 'switch' },
 				{ key: 'enable_partial_results', label: 'Text as you speak', what: 'Show what’s been recognized so far while you’re still speaking.', kind: 'switch' }
 			]
@@ -407,7 +407,7 @@ export const speechToText: Feature = {
 			title: 'Whisper service',
 			what: 'When the recognizer is a Whisper service.',
 			fields: [
-				{ key: 'external_whisper.api_endpoint', label: 'Address', what: 'The service’s transcription address.', kind: 'text', placeholder: 'https://openrouter.ai/api/v1/audio/transcriptions' },
+				{ key: 'external_whisper.api_endpoint', label: 'Address', what: 'The service’s transcription address.', kind: 'text' },
 				{ key: 'external_whisper.api_key', label: 'Key', what: 'The service’s key. A server of your own may not need one.', kind: 'secret' },
 				{ key: 'external_whisper.model', label: 'Model', what: 'The model as the service names it, such as openai/whisper-1 on OpenRouter or whisper-1 on OpenAI.', kind: 'text' },
 				{ key: 'external_whisper.timeout_ms', label: 'Wait for text', what: 'How long to wait for the service before giving up.', kind: 'count', min: 0, max: 600000, unit: 'ms' }
@@ -439,7 +439,7 @@ export const voiceSamples: Feature = {
 				{ key: 'filtering.max_duration_seconds', label: 'Longest', what: 'Lines longer than this aren’t used as samples.', kind: 'number', min: 0, max: 120 },
 				{ key: 'filtering.banned_keywords', label: 'Left out by word', what: 'Lines whose file name has one of these words aren’t used, such as screams, music, and coughs.', kind: 'lines', noun: ['word', 'words'] },
 				{ key: 'filtering.banned_voice_types', label: 'Voice types left out', what: 'Voice types never cloned.', kind: 'lines', noun: ['voice type', 'voice types'] },
-				{ key: 'filtering.excluded_plugins', label: 'Plugins left out', what: 'Game plugins whose lines are never used as samples.', kind: 'lines', noun: ['plugin', 'plugins'] }
+				{ key: 'filtering.excluded_plugins', label: 'Plugins left out', what: 'Game plugins whose lines are left out of the new audio scan and found the older way instead.', kind: 'lines', noun: ['plugin', 'plugins'] }
 			]
 		},
 		{

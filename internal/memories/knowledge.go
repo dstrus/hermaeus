@@ -132,7 +132,7 @@ func AddKnowledge(tx store.DB, e NewEntry) (SaveResult, error) {
 	}
 	r, err := tx.Exec(`insert into memories (actor_uuid, content, game_time, creation_time, related_event_ids, related_actors,
 			memory_type, importance_score, tags, always_inject, is_active, pack_id)
-		values (0, '', ?, `+nowSQL+`, '[]', '[]', 'KNOWLEDGE', 0.8, '[]', 0, 1, ?)`, t, pack)
+		values (0, '', ?, `+nowSQL+`, '[]', '[]', 'KNOWLEDGE', 0.7, '[]', 0, 1, ?)`, t, pack)
 	if err != nil {
 		return SaveResult{}, err
 	}

@@ -2,6 +2,7 @@ package settings
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -171,7 +172,7 @@ func (e *ProviderEdit) check() error {
 		return apperr.New(apperr.Invalid, "Unknown provider sorting %q", e.Sorting)
 	}
 	if !cacheTTLs[e.CacheTTL] {
-		return apperr.New(apperr.Invalid, "The cache keeps answers for 5m or 1h, not %q", e.CacheTTL)
+		return apperr.New(apperr.Invalid, "A cached prompt is kept for 5m or 1h, not %q", e.CacheTTL)
 	}
 	if e.Settings != "" {
 		var v map[string]any
@@ -205,7 +206,7 @@ func (s *Settings) AddProvider(e ProviderEdit) (ProvidersResponse, error) {
 	return s.editProviders("Added the provider "+e.Name, e.Modified, func(list *yaml.Node) error {
 		id := slug(e.Name)
 		for i := 2; providerNode(list, id) != nil; i++ {
-			id = slug(e.Name) + "_" + string(rune('0'+i%10))
+			id = fmt.Sprintf("%s_%d", slug(e.Name), i)
 		}
 		n := &yaml.Node{Kind: yaml.MappingNode, Tag: "!!map", Content: []*yaml.Node{
 			scalar("id"), scalar(id),
@@ -218,7 +219,6 @@ func (s *Settings) AddProvider(e ProviderEdit) (ProvidersResponse, error) {
 			scalar("reasoning"), boolNode(e.Reasoning),
 			scalar("provider_settings"), settingsNode(e.Settings),
 			scalar("provider_sorting"), scalar(orDefault(e.Sorting, "default")),
-			scalar("upstream_order_mode"), scalar("fleet"),
 			scalar("cache_ttl"), scalar(orDefault(e.CacheTTL, "5m")),
 			scalar("builtin"), boolNode(false),
 		}}

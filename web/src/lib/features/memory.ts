@@ -24,7 +24,7 @@ export const memory: Feature = {
 				{
 					key: 'embedding.model',
 					label: 'Model',
-					what: 'Bekko has the best recall, in English and other languages, and embeds about half as fast. all-MiniLM-L6-v2 is lighter and English only. A custom model goes in SkyrimNet’s models/embedding/custom folder, by its folder’s name.',
+					what: 'Bekko has the best recall, in English and other languages, and embeds about half as fast. all-MiniLM-L6-v2 is lighter and English only. A custom model goes in a folder of its own, holding its model.onnx and tokenizer.json, in SkyrimNet’s folder for custom models, and is chosen by its folder’s name.',
 					kind: 'choice',
 					custom: true,
 					choices: [

@@ -51,8 +51,8 @@ type List struct {
 	Folder      string       `json:"folder"`      // where the images are, for people
 }
 
-// Columns SkyrimNet added after the table first appeared, with what an
-// older database has instead.
+// Columns a playthrough's database may not have, with what to read in
+// their place.
 var later = map[string]string{"suggested_name": "''", "description_locked": "0", "manual_capture": "0"}
 
 func columns(db store.DB) (map[string]string, error) {
@@ -137,7 +137,7 @@ func Update(tx store.DB, id int64, c Changes) error {
 			return err
 		}
 		if !ok {
-			return apperr.New(apperr.Invalid, "This playthrough’s SkyrimNet is too old to keep a description from being rewritten")
+			return apperr.New(apperr.Invalid, "This playthrough’s database has no way to keep a description from being rewritten")
 		}
 		sets, args = append(sets, "description_locked = ?"), append(args, *c.Locked)
 	}

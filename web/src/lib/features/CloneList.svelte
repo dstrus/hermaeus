@@ -11,12 +11,12 @@
 
 <section class="clones">
 	{#if !cache.voices.length && !cache.unnamed}
-		<p class="muted small">None yet. SkyrimNet clones a voice type into your {label} account when it first needs it, or all at once with its dashboard’s bulk clone.</p>
+		<p class="muted small">None yet. SkyrimNet’s dashboard can clone voice types into your {label} account all at once with its bulk clone.</p>
 	{:else}
 		<p class="muted small">
-			{plural(cache.voices.length + cache.unnamed, 'voice', 'voices')} in your {label} account{cache.maxVoices > 0 ? `, of up to ${cache.maxVoices.toLocaleString()} kept` : ''}. SkyrimNet clones a voice type when it first needs it{cache.maxVoices > 0 ? ', and past the limit, deletes the voice used longest ago first' : ''}.
+			{plural(cache.voices.length + cache.unnamed, 'voice', 'voices')} in your {label} account{cache.maxVoices > 0 ? `, of up to ${cache.maxVoices.toLocaleString()} kept` : ''}{cache.maxVoices > 0 ? '. Before cloning past the limit, SkyrimNet deletes the voice used longest ago' : ''}.
 		</p>
-		{#if over}<p class="notice warn small">More than the limit: SkyrimNet deletes the extra ones as it clones new voices.</p>{/if}
+		{#if over}<p class="notice warn small">More than the limit. Each time SkyrimNet clones another voice, it first deletes the one used longest ago, but never one cloned outside SkyrimNet.</p>{/if}
 		<table>
 			<thead>
 				<tr>
