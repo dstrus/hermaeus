@@ -10,10 +10,11 @@ import { hotkeys } from './hotkeys.ts';
 import { dynamicBio } from './dynamicbio.ts';
 import { memory } from './memory.ts';
 import { memoryFilter } from './memoryfilter.ts';
+import { speech } from './voice.ts';
 import type { Feature } from './schema.ts';
 import { href } from '#lib/nav.ts';
 
-export const features: Feature[] = [gameMaster, narration, actorFilter, memory, memoryFilter, diary, dynamicBio, hotkeys];
+export const features: Feature[] = [gameMaster, narration, actorFilter, memory, memoryFilter, diary, dynamicBio, speech, hotkeys];
 
 export function featureById(id: string): Feature | undefined {
 	return features.find((f) => f.id === id);

@@ -2,6 +2,7 @@ package settings
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -516,4 +517,55 @@ func TestSpeechPatterns(t *testing.T) {
 	h.running = true
 	_, err = h.settings.SetSpeech("ria_6D8", SpeechEdit{Modified: r.Modified, Pattern: "x"})
 	kindOf(t, err, apperr.Conflict)
+}
+
+// A voice engine's file: its pronunciation list replaced whole, several of
+// its fallback voices in one save, and its key and clone cache left alone.
+func TestVoiceEngineLists(t *testing.T) {
+	h := newHarness(t)
+	path := h.config("Inworld.yaml", `endpoint: https://example.invalid
+pronunciation_dictionary:
+  - original: Jarl
+    replacement: Yarl
+  - original: " - "
+    replacement: ", "
+allowed_audio_tags:
+  []
+api_key_base64: SECRET
+voice_fallback:
+  race_gender_fallbacks:
+    nord_female: femalecommoner
+    nord_male: malecommoner
+clone_cache:
+  entries:
+    - clone_key: CLONE
+      last_used_epoch: 1
+`)
+	info, _ := os.Stat(path)
+	f, err := h.settings.Save("Inworld", Edit{Modified: info.ModTime().UnixMilli(), Changes: []Change{
+		{Key: "pronunciation_dictionary", Value: []any{map[string]any{"original": "Jarl", "replacement": "Yarl"}, map[string]any{"original": "draugr", "replacement": "drawgur"}}},
+		{Key: "allowed_audio_tags", Value: []any{"sigh", "laugh"}},
+		{Key: "voice_fallback.race_gender_fallbacks.nord_female", Value: "femalenord"},
+		{Key: "voice_fallback.race_gender_fallbacks.nord_male", Value: "malenord"},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := h.read("Inworld.yaml")
+	for _, want := range []string{"original: draugr", "replacement: drawgur", "nord_female: femalenord", "nord_male: malenord", "- sigh", "api_key_base64: SECRET", "clone_key: CLONE"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("missing %q in\n%s", want, got)
+		}
+	}
+	if strings.Contains(got, `" - "`) {
+		t.Errorf("a removed pronunciation is still there:\n%s", got)
+	}
+	// A list holding keys still can't be replaced, and secrets aren't sent.
+	_, err = h.settings.Save("Inworld", Edit{Modified: f.File.Modified, Changes: []Change{{Key: "clone_cache.entries", Value: []any{}}}})
+	kindOf(t, err, apperr.Invalid)
+	for _, v := range f.Values {
+		if s := fmt.Sprint(v.Value); strings.Contains(s, "SECRET") || strings.Contains(s, "CLONE") || strings.Contains(s, "example.invalid") {
+			t.Errorf("%s is sent: %v", v.Key, s)
+		}
+	}
 }

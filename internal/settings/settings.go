@@ -100,6 +100,15 @@ var ownPages = []OwnPage{
 	{Name: "Diary", Label: "Diaries", Page: "memory/diaries"},
 	{Name: "DynamicBio", Label: "Dynamic bios", Page: "memory/dynamic-bios"},
 	{Name: "Hotkey", Label: "Hotkeys", Page: "general/hotkeys"},
+	{Name: "PocketTTS", Label: "PocketTTS", Page: "voice/engines/pockettts"},
+	{Name: "Piper", Label: "Piper", Page: "voice/engines/piper"},
+	{Name: "Inworld", Label: "Inworld", Page: "voice/engines/inworld"},
+	{Name: "ElevenLabs", Label: "ElevenLabs", Page: "voice/engines/elevenlabs"},
+	{Name: "XTTS", Label: "XTTS", Page: "voice/engines/xtts"},
+	{Name: "Zonos", Label: "Zonos", Page: "voice/engines/zonos"},
+	{Name: "Chatterbox", Label: "Chatterbox", Page: "voice/engines/chatterbox"},
+	{Name: "Higgs", Label: "Higgs", Page: "voice/engines/higgs"},
+	{Name: "OpenAICompatibleTTS", Label: "OpenAI-compatible", Page: "voice/engines/openai-compatible"},
 }
 
 // withPage notes the page a file has of its own, if any.

@@ -8,7 +8,8 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { ListsResponse } from '#lib/api/types/filters.ts';
-	import type { FileValues, Setting } from '#lib/api/types/settings.ts';
+	import type { Snippet } from 'svelte';
+	import type { Change, FileValues, Setting } from '#lib/api/types/settings.ts';
 	import FilterLists from './FilterLists.svelte';
 	import { count } from '#lib/format.ts';
 	import { saveSettings, settingsDependency, settingsHref, togglesDependency } from '#lib/settings/api.ts';
@@ -18,23 +19,33 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { codeOf, keyName, mouseCodeOf, noKey } from '#lib/settings/keys.ts';
-	import { draftOf, parse, pickedOf, setValue, show, valueOf, type Feature, type Field } from './schema.ts';
+	import { draftOf, linesOf, linesValue, pairsOf, pairsValue, parse, pickedOf, setValue, show, valueOf, type Feature, type Field, type Pair } from './schema.ts';
 
-	let { save, feature, file, lists }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse } = $props();
+	let { save, feature, file, lists, extra }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse; extra?: Snippet } = $props();
 
 	let readOnly = $derived(live.gameRunning);
 	let can = $derived(file.file.exists && !readOnly);
 	let settings = $derived(new Map(file.values.map((s) => [s.key.toLowerCase(), s])));
 	const settingOf = (f: Field): Setting | undefined => settings.get(f.key.toLowerCase());
 
-	// The page's rows: every field, in its section.
-	type Row = { field: Field; section: string; setting?: Setting };
-	let rows = $derived<Row[]>(feature.sections.flatMap((s) => s.fields.map((field) => ({ field, section: s.title, setting: settingOf(field) }))));
-	let changed = $derived(rows.filter((r) => r.setting?.changed).length);
+	// The page's rows: every field, in its section. A map field stands for
+	// the settings under its key, each its own setting in the file.
+	type Row = { field: Field; section: string; setting?: Setting; children?: Setting[] };
+	const childrenOf = (f: Field): Setting[] => {
+		const prefix = f.key.toLowerCase() + '.';
+		return file.values.filter((s) => s.key.toLowerCase().startsWith(prefix));
+	};
+	let rows = $derived<Row[]>(
+		feature.sections.flatMap((s) => s.fields.map((field) => (field.kind === 'map' ? { field, section: s.title, children: childrenOf(field) } : { field, section: s.title, setting: settingOf(field) })))
+	);
+	const isChanged = (r: Row) => (r.children ? r.children.some((c) => c.changed) : !!r.setting?.changed);
+	let changed = $derived(rows.filter(isChanged).length);
+	// valueOfRow is a row's value; a map's is its settings by name.
+	const valueOfRow = (r: Row): unknown => (r.children ? Object.fromEntries(r.children.map((c) => [c.key.slice(r.field.key.length + 1), valueOf(c)])) : valueOf(r.setting));
 
 	const selection = new Selection(() => rows, (r) => r.field.key, { param: 'item' });
 	let current = $derived(selection.current);
-	let value = $derived(current ? valueOf(current.setting) : undefined);
+	let value = $derived(current ? valueOfRow(current) : undefined);
 	let resettable = $derived(!!current?.setting?.hasDefault && (current.setting.changed || !current.setting.set));
 
 	let notice = $state('');
@@ -51,12 +62,17 @@
 	let listForm = $derived(param('mode') === 'list' || param('mode') === 'list-new');
 	let draft = $state('');
 	let picked = $state<string[]>([]); // a set's chosen values
+	let pairs = $state<Pair[]>([]); // a pairs field's rows, or a map's names and values
+	let areaField = $state<HTMLTextAreaElement>();
 	let field = $state<HTMLInputElement | HTMLSelectElement | HTMLButtonElement>();
 	$effect(() => {
 		if (!editing) return;
-		draft = draftOf(current!.field, value);
-		picked = pickedOf(current!.field, value);
-		tick().then(() => field?.focus());
+		const f = current!.field;
+		draft = f.kind === 'lines' ? linesOf(value) : draftOf(f, value);
+		picked = pickedOf(f, value);
+		const rows = f.kind === 'pairs' ? pairsOf(f, value) : f.kind === 'map' ? Object.entries((value as Record<string, unknown>) ?? {}).map(([a, b]) => ({ a, b: b == null ? '' : String(b) })) : [];
+		pairs = f.kind === 'pairs' && !rows.length ? [{ a: '', b: '' }] : rows;
+		tick().then(() => (f.kind === 'lines' ? areaField : field)?.focus());
 	});
 	// A hotkey is set by pressing it in the capture box. Tab, Esc, and the
 	// save shortcut keep their jobs; a mouse button other than the left one
@@ -78,13 +94,13 @@
 		picked = on ? [...picked, v] : picked.filter((p) => p !== v);
 	}
 
-	async function apply(change: { key: string; value?: unknown; reset?: boolean }, done: string) {
+	async function apply(change: Change | Change[], done: string) {
 		if (saving) return;
 		saving = true;
 		error = '';
 		notice = '';
 		try {
-			await saveSettings(feature.file, { modified: file.file.modified, changes: [change] });
+			await saveSettings(feature.file, { modified: file.file.modified, changes: Array.isArray(change) ? change : [change] });
 			notice = done;
 			await leave('mode'); // settles before the reload, which it would cancel
 			await Promise.all([invalidate(settingsDependency), invalidate(togglesDependency)]);
@@ -108,9 +124,21 @@
 	function submit(e: SubmitEvent) {
 		e.preventDefault();
 		if (!current) return;
+		const f = current.field;
+		// A map saves each name whose value changed, as its own setting.
+		if (f.kind === 'map') {
+			const was = (value as Record<string, unknown>) ?? {};
+			const changes = pairs.filter((p) => String(was[p.a] ?? '') !== p.b).map((p) => ({ key: `${f.key}.${p.a}`, value: p.b }));
+			if (!changes.length) {
+				leave('mode');
+				return;
+			}
+			apply(changes, `${f.label}: ${changes.length === 1 ? `${changes[0]!.key.slice(f.key.length + 1)} changed` : `${changes.length} changed`}.`);
+			return;
+		}
 		let v: unknown;
 		try {
-			v = current.field.kind === 'set' ? setValue(current.field, value, picked) : parse(current.field, draft);
+			v = f.kind === 'set' ? setValue(f, value, picked) : f.kind === 'lines' ? linesValue(draft) : f.kind === 'pairs' ? pairsValue(f, pairs) : parse(f, draft);
 			// A plugin's hotkey goes back as the file keeps it: text when it's text,
 			// and unset as empty text or 0, as SkyrimNet's dashboard writes it.
 			if (current.field.pluginHotkey && typeof v === 'number') {
@@ -154,6 +182,7 @@
 			Nothing differs from the defaults
 		{/if}
 	</span>
+	{#if extra}<span class="extra">{@render extra()}</span>{/if}
 </div>
 <p class="muted lead">{feature.what}</p>
 {#if !file.file.exists}
@@ -181,7 +210,7 @@
 					<tr aria-selected={selection.is(r)} onclick={() => !editing && selection.select(r)} ondblclick={startEdit}>
 						<td class="mark">{#if selection.is(r)}<Diamond />{/if}</td>
 						<td class="name">{r.field.label}</td>
-						<td class="value" class:changed={r.setting?.changed}>{show(r.field, valueOf(r.setting))}</td>
+						<td class="value" class:changed={isChanged(r)}>{show(r.field, valueOfRow(r))}</td>
 						<td class="value muted">{r.setting?.hasDefault ? show(r.field, r.setting.default) : ''}</td>
 					</tr>
 				{/each}
@@ -203,14 +232,14 @@
 					<p class="small what">{f.what}</p>
 					{#if f.kind === 'choice' && f.choices?.length}
 						<ul class="choices small">
-							{#each f.choices as c (c.value)}<li><span class="id">{c.value}</span>{#if c.what}<span class="muted what-choice">· {c.what}</span>{/if}</li>{/each}
+							{#each f.choices as c (c.value)}<li>{#if c.label !== c.value}{c.label}<span class="id muted what-choice">{c.value}</span>{:else}<span class="id">{c.value}</span>{/if}{#if c.what}<span class="muted what-choice">· {c.what}</span>{/if}</li>{/each}
 						</ul>
 					{/if}
 					<p class="muted small"><span class="id">{f.key}</span> in {file.file.path}</p>
 					{#if editing}
 						<form onsubmit={submit}>
 							<label class="field">
-								<span class="caps label">{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : f.kind === 'hotkey' ? 'Key' : 'Value'}</span>
+								<span class="caps label" class:sr={f.kind === 'pairs' || f.kind === 'map'}>{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : f.kind === 'hotkey' ? 'Key' : 'Value'}</span>
 								{#if f.kind === 'hotkey'}
 									<button
 										type="button"
@@ -224,7 +253,31 @@
 									<span class="muted small">Press a key, or click the box with a mouse button. <button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>No key</button></span>
 								{:else if f.kind === 'secret'}
 									<input bind:this={field} type="password" bind:value={draft} placeholder={show(f, value) === 'Set' ? 'Type a new one to replace it' : ''} autocomplete="off" spellcheck="false" />
-									<span class="muted small">Saved into the plugin’s settings file. Hermaeus never shows it again; save it empty to clear it.</span>
+									<span class="muted small">Saved into {file.file.path}. Hermaeus never shows it again; save it empty to clear it.</span>
+								{:else if f.kind === 'lines'}
+									<textarea bind:this={areaField} bind:value={draft} rows="8" spellcheck="false" placeholder="One per line"></textarea>
+									<span class="muted small">One per line. Blank lines are left out.</span>
+								{:else if f.kind === 'pairs' || f.kind === 'map'}
+									<table class="rows">
+										<thead><tr><th class="caps">{f.columns?.[0] ?? 'Name'}</th><th class="caps">{f.columns?.[1] ?? 'Value'}</th>{#if f.kind === 'pairs'}<th><span class="sr">Remove</span></th>{/if}</tr></thead>
+										<tbody>
+											{#each pairs as p, i (i)}
+												<tr>
+													{#if f.kind === 'map'}
+														<td class="id">{p.a}</td>
+														<td><input type="text" bind:value={p.b} aria-label="{f.columns?.[1] ?? 'Value'} for {p.a}" autocomplete="off" spellcheck="false" /></td>
+													{:else}
+														<td><input type="text" bind:value={p.a} aria-label="{f.columns?.[0] ?? 'Name'} {i + 1}" autocomplete="off" spellcheck="false" /></td>
+														<td><input type="text" bind:value={p.b} aria-label="{f.columns?.[1] ?? 'Value'} {i + 1}" autocomplete="off" spellcheck="false" /></td>
+														<td><button type="button" class="textbutton" onclick={() => (pairs = pairs.filter((_, j) => j !== i))} aria-label="Remove {p.a || `entry ${i + 1}`}">Remove</button></td>
+													{/if}
+												</tr>
+											{/each}
+										</tbody>
+									</table>
+									{#if f.kind === 'pairs'}
+										<span class="muted small"><button type="button" class="textbutton" onclick={() => (pairs = [...pairs, { a: '', b: '' }])}>Add {f.noun?.[0] ?? 'an entry'}</button> · Spaces count, so a phrase like “ - ” matches only with its spaces.</span>
+									{/if}
 								{:else if f.kind === 'set'}
 									<ul class="picks">
 										{#each f.choices ?? [] as c, i (c.value)}
@@ -268,6 +321,21 @@
 							<dt class="caps">Now</dt>
 							<dd class:changed={s?.changed}>
 								{show(f, value)}{#if s && !s.set}<span class="muted"> · not in the file, so the default</span>{/if}
+								{#if f.kind === 'lines' && Array.isArray(value) && value.length}
+									<ul class="setlist small">
+										{#each value as l, i (i)}<li>{String(l)}</li>{/each}
+									</ul>
+								{:else if (f.kind === 'pairs' || f.kind === 'map') && value}
+									{@const list = f.kind === 'pairs' ? pairsOf(f, value) : Object.entries(value as Record<string, unknown>).map(([a, b]) => ({ a, b: b == null ? '' : String(b) }))}
+									{#if list.length}
+										<table class="rows small">
+											<thead><tr><th class="caps">{f.columns?.[0] ?? 'Name'}</th><th class="caps">{f.columns?.[1] ?? 'Value'}</th></tr></thead>
+											<tbody>
+												{#each list as p, i (i)}<tr><td class:id={f.kind === 'map'}>{p.a}</td><td>{p.b}</td></tr>{/each}
+											</tbody>
+										</table>
+									{/if}
+								{/if}
 								{#if f.kind === 'set'}
 									{@const on = pickedOf(f, value)}
 									<!-- Every choice, with the ones left out struck through, so what isn't chosen shows at a glance. -->
@@ -489,6 +557,46 @@
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-2);
+	}
+	.extra {
+		margin-left: auto;
+	}
+	.field textarea {
+		resize: vertical;
+		line-height: 1.5;
+	}
+	/* A pairs or map field's entries: two columns, read or edited in place. */
+	.rows {
+		width: 100%;
+		margin-top: var(--space-2);
+		border-collapse: collapse;
+		table-layout: auto;
+	}
+	.rows th {
+		padding: var(--space-1) var(--space-2) var(--space-1) 0;
+		border-bottom: 1px solid var(--rule);
+	}
+	.rows td {
+		padding: var(--space-1) var(--space-2) var(--space-1) 0;
+		border-bottom: 0;
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+	.rows td:last-child:has(.textbutton) {
+		width: 1%;
+		white-space: nowrap;
+	}
+	.rows input {
+		width: 100%;
+		min-width: 0;
+		padding: var(--space-1) var(--space-2);
+	}
+	.sr {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
 	}
 	.setlist {
 		list-style: none;
