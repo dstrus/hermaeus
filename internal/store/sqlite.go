@@ -63,3 +63,11 @@ func sqliteURI(path string, params url.Values) string {
 	}
 	return (&url.URL{Scheme: "file", Path: p, RawQuery: params.Encode()}).String()
 }
+
+// HasColumn reports whether the table has the column. SkyrimNet adds
+// columns to its tables over time, so older databases lack some.
+func HasColumn(db DB, table, column string) (bool, error) {
+	var ok bool
+	err := db.QueryRow(`select count(*) > 0 from pragma_table_info(?) where name = ?`, table, column).Scan(&ok)
+	return ok, err
+}

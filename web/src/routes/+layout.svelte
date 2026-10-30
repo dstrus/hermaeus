@@ -21,14 +21,6 @@
 	let save = $derived(page.params.save);
 	let base = $derived(save ? `/${encodeURIComponent(save)}` : '');
 
-	// The sections of a playthrough. Those not built yet are listed so the
-	// shape of Hermaeus is clear, but can't be opened.
-	const sections = [
-		{ label: 'Characters', built: true },
-		{ label: 'History', built: true },
-		{ label: 'Screenshots' },
-		{ label: 'Bard songs' }
-	];
 	// A playthrough is named by its player, with its save ID only when
 	// another playthrough has the same player.
 	function playthroughLabel(p: Playthrough): string {
@@ -38,6 +30,8 @@
 	}
 	let charactersActive = $derived(!!save && (page.url.pathname === base || page.url.pathname.startsWith(`${base}/npc/`) || page.url.pathname.startsWith(`${base}/bios`)));
 	let historyActive = $derived(!!save && page.url.pathname.startsWith(`${base}/history`));
+	let screenshotsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/screenshots`));
+	let songsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/songs`));
 	let promptsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/prompts`));
 	let pluginsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/plugins`));
 	let actionsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/actions`));
@@ -81,10 +75,8 @@
 			<ul aria-label="This playthrough">
 				<li><a class="caps" href={base} aria-current={charactersActive ? 'page' : undefined}>Characters</a></li>
 				<li><a class="caps" href="{base}/history/events" aria-current={historyActive ? 'page' : undefined}>History</a></li>
-			</ul>
-			<p class="later caps">Not built yet</p>
-			<ul class="soon" aria-label="This playthrough, not built yet">
-				{#each sections.filter((s) => !s.built) as s (s.label)}<li class="caps">{s.label}</li>{/each}
+				<li><a class="caps" href="{base}/screenshots" aria-current={screenshotsActive ? 'page' : undefined}>Screenshots</a></li>
+				<li><a class="caps" href="{base}/songs" aria-current={songsActive ? 'page' : undefined}>Bard songs</a></li>
 			</ul>
 			<p class="group caps">Configuration</p>
 			<ul aria-label="Configuration">
@@ -192,14 +184,11 @@
 		margin: 0 0 var(--space-5);
 		padding: 0;
 	}
-	.sections a,
-	.sections .soon li {
+	.sections a {
 		display: block;
 		padding: var(--space-1) 0;
 		font-size: var(--step-1);
 		text-decoration: none;
-	}
-	.sections a {
 		color: var(--muted);
 	}
 	.sections a:hover {
@@ -213,16 +202,6 @@
 	.group {
 		margin-top: var(--space-4);
 		font-size: var(--step--1);
-		color: var(--muted);
-	}
-	.later {
-		font-size: var(--step--1);
-		color: var(--muted);
-		padding-bottom: var(--space-1);
-		margin-bottom: var(--space-1);
-		border-bottom: 1px solid var(--rule);
-	}
-	.soon {
 		color: var(--muted);
 	}
 	main {
@@ -244,9 +223,7 @@
 			flex-wrap: wrap;
 			gap: var(--space-2) var(--space-4);
 		}
-		.later,
-		.group,
-		.soon {
+		.group {
 			display: none;
 		}
 		.sections {

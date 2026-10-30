@@ -83,3 +83,15 @@ packages:
       import type * as layers from './layers.ts';
     type_mappings:
       layers.Layer: layers.Layer
+  - path: hermaeus/internal/screenshots
+    include_files: [screenshots.go]
+    output_path: web/src/lib/api/types/screenshots.ts
+    fallback_type: unknown
+    frontmatter: |
+      import type * as calendar from './calendar.ts';
+    type_mappings:
+      calendar.GameDate: calendar.GameDate
+  - path: hermaeus/internal/songs
+    include_files: [songs.go]
+    output_path: web/src/lib/api/types/songs.ts
+    fallback_type: unknown

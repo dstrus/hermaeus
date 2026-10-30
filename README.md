@@ -51,6 +51,8 @@ make types              # regenerate the API's TypeScript types after changing t
 | `internal/characters/` | The player and NPCs: who's listed, pins, each one's overview and stats |
 | `internal/events/` | What SkyrimNet records happening in the game |
 | `internal/memories/` | Each character's memories and diary entries |
+| `internal/screenshots/` | OmniSight's screenshots: their descriptions, images, and thumbnails |
+| `internal/songs/` | Bard songs: their words, and their audio |
 | `internal/bios/` | Each character's bios: the save's dynamic and baseline bios, the default, history, and restore |
 | `internal/layers/` | SkyrimNet's content layers: dashboard edits, enabled plugins in order, shipped defaults; the MO2 mod folder |
 | `internal/prompts/` | SkyrimNet's prompts from every content layer, edited as the player's own copies |

@@ -50,3 +50,35 @@ export async function request<T>(
 export function playthroughPath(save: string, ...parts: string[]): string {
 	return '/api/playthroughs/' + [save, ...parts].map(encodeURIComponent).join('/');
 }
+
+// Media (images, audio) needs the token too, which an <img> or <audio> can't
+// send, so it's fetched here and shown from a blob URL. The most recent are
+// kept, so going back to one doesn't fetch it again.
+const kept = new Map<string, Promise<string>>();
+const keep = 80;
+
+// mediaURL is a blob URL for the API path's file. A failed fetch isn't kept,
+// so it can be tried again.
+export function mediaURL(path: string): Promise<string> {
+	const had = kept.get(path);
+	if (had) {
+		kept.delete(path); // to the newest end
+		kept.set(path, had);
+		return had;
+	}
+	const p = fetch(path, { headers: { [TokenHeader]: token() } }).then(async (res) => {
+		if (!res.ok) {
+			const reply = (await res.json().catch(() => null)) as ErrorBody | null;
+			throw new ApiError(reply?.error ?? `GET ${path} failed (${res.status})`, res.status);
+		}
+		return URL.createObjectURL(await res.blob());
+	});
+	p.catch(() => kept.delete(path));
+	kept.set(path, p);
+	while (kept.size > keep) {
+		const [oldest, url] = kept.entries().next().value!;
+		kept.delete(oldest);
+		url.then(URL.revokeObjectURL, () => {});
+	}
+	return p;
+}

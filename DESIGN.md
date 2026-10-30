@@ -269,7 +269,7 @@ The core of every list screen.
 - Forms inside the pane keep their buttons in a sticky footer with a `rule` top edge.
 
 ### Navigation
-- **Sections column:** title-size caps in muted ink; the current section and hover turn ink. Unbuilt sections are listed in muted caps under a small "Not built yet" label with a hairline under it; the Configuration group label is muted label caps, never as bright as the current section.
+- **Sections column:** title-size caps in muted ink; the current section and hover turn ink. The playthrough's own sections come first, unlabeled; then the Configuration, Settings, and Plugin settings groups, each under a muted label-caps name, never as bright as the current section.
 - **Tabs:** title-size caps in muted ink, spaced 2rem apart over a `rule` baseline; the current tab is ink at weight 600 with a 2px accent underline. A tab's count follows in muted Jost.
 - **Theme switch, and any segmented choice:** a 3px-radius outlined group of caps options; the chosen one fills with the accent, in accent-ink text at weight 600. The game's menus mark the chosen item plainly, and so do these.
 
