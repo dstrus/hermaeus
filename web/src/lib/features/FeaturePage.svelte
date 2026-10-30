@@ -21,7 +21,7 @@
 	import { codeOf, keyName, mouseCodeOf, noKey } from '#lib/settings/keys.ts';
 	import { blankRow, cellText, draftOf, linesOf, linesValue, pairsOf, pairsValue, parse, pickedOf, rowsOf, rowsValue, setValue, show, valueOf, type Feature, type Field, type Pair, type Row as Entry } from './schema.ts';
 
-	let { save, feature, file, lists, extra }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse; extra?: Snippet } = $props();
+	let { save, feature, file, lists, extra, after }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse; extra?: Snippet; after?: Snippet } = $props();
 
 	let readOnly = $derived(live.gameRunning);
 	let can = $derived(file.file.exists && !readOnly);
@@ -229,6 +229,7 @@
 		{#if feature.lists && lists}
 			<FilterLists kind={feature.lists} {lists} canEdit={file.file.exists} />
 		{/if}
+		{#if after}{@render after()}{/if}
 	</div>
 
 	<aside class="pane" use:fitToViewport aria-label="Setting">

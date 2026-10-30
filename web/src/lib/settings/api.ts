@@ -1,6 +1,6 @@
 import { request } from '#lib/api/client.ts';
 import { href } from '#lib/nav.ts';
-import type { Edit, File, FileList, FileValues, PinsResponse, SecretValue, Setting, SpeechEdit, SpeechRule, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
+import type { CloneCache, Edit, File, FileList, FileValues, PinsResponse, SecretValue, Setting, SpeechEdit, SpeechRule, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
 
 // What load functions depend on for the quick toggles and the settings
 // files; invalidate them after changing either, since the toggles are
@@ -181,4 +181,10 @@ export function getSpeech(template: string, fetchFn?: typeof fetch): Promise<Spe
 // setSpeech sets the pattern; an empty one removes the NPC's rule.
 export function setSpeech(template: string, edit: SpeechEdit): Promise<SpeechRule> {
 	return request<SpeechRule>('PUT', `/api/speech/${encodeURIComponent(template)}`, edit);
+}
+
+// getClones lists the voices a cloud voice engine has cloned into the
+// player's account: voice type, language, and when each was last used.
+export function getClones(engine: string, fetchFn?: typeof fetch): Promise<CloneCache> {
+	return request<CloneCache>('GET', `/api/voice/clones/${encodeURIComponent(engine)}`, undefined, fetchFn);
 }

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import FeaturePage from '#lib/features/FeaturePage.svelte';
+	import CloneList from '#lib/features/CloneList.svelte';
 	import { engines } from '#lib/features/voice.ts';
 	import { href } from '#lib/nav.ts';
 	import type { PageProps } from './$types';
@@ -20,6 +21,9 @@
 			<select aria-label="Engine" value={data.engine.id} onchange={(e) => goto(href(save, 'engines', `/${e.currentTarget.value}`))}>
 				{#each engines as e (e.id)}<option value={e.id}>{e.label}{data.inUse?.id === e.id ? ' · in use' : ''}</option>{/each}
 			</select>
+		{/snippet}
+		{#snippet after()}
+			{#if data.clones}<CloneList cache={data.clones} label={data.engine.label} />{/if}
 		{/snippet}
 	</FeaturePage>
 {/key}

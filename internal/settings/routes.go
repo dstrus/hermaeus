@@ -50,6 +50,10 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("PUT /api/models/{task}", httpapi.JSON(func(r *http.Request, e TaskEdit) (Models, error) {
 		return s.SetTask(r.PathValue("task"), e)
 	}))
+	// The voices a cloud voice engine has cloned into the player's account.
+	mux.Handle("GET /api/voice/clones/{engine}", httpapi.JSON(func(r *http.Request, _ httpapi.None) (CloneCache, error) {
+		return s.Clones(r.PathValue("engine"))
+	}))
 	// One prompt sent to one of a task's models, on request.
 	mux.Handle("POST /api/models/{task}/test", httpapi.JSON(func(r *http.Request, t ModelTest) (ModelTestResult, error) {
 		return s.TestModel(r.PathValue("task"), t)
