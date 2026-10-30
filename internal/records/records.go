@@ -85,6 +85,7 @@ type Trigger struct {
 	Priority     *int                `json:"priority,omitempty"`
 	Probability  *float64            `json:"probability,omitempty"`
 	Interrupt    bool                `json:"interrupt,omitempty"`
+	EffectID     string              `json:"effectId,omitempty"` // the voice effect an activate_voice_effect response switches on
 }
 
 type ActionList struct {
@@ -241,6 +242,7 @@ func (r *Records) Triggers() TriggerList {
 		if rs, ok := m["response"].(map[string]any); ok {
 			t.ResponseType, t.Content, t.TargetScope = str(rs["type"]), str(rs["content"]), str(rs["targetScope"])
 		}
+		t.EffectID = effectIDOf(m)
 		out.Triggers = append(out.Triggers, t)
 	})
 	rank := r.order()

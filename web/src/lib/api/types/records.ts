@@ -143,6 +143,7 @@ export interface Trigger extends Origin {
   priority?: number /* int */;
   probability?: number /* float64 */;
   interrupt?: boolean;
+  effectId?: string; // the voice effect an activate_voice_effect response switches on
 }
 export interface ActionList {
   actions: Action[]; // by layer, highest last as the dashboard shows plugins, then by name
@@ -214,6 +215,20 @@ export interface VoiceEffect {
   stages: Stage[];
   providers: Provider[]; // highest priority first
   error?: string;
+  /**
+   * Triggers that switch the effect on or, naming it, off.
+   */
+  triggers: EffectTrigger[];
+}
+/**
+ * EffectTrigger is a trigger that names a voice effect.
+ */
+export interface EffectTrigger {
+  path: string;
+  name: string;
+  source: string;
+  activates: boolean; // or deactivates
+  enabled: boolean;
 }
 export interface VoiceEffectList {
   layers: layers.Layer[];

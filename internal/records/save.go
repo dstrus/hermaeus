@@ -269,6 +269,9 @@ func checkRecord(rel, text string) error {
 		if m["eventCriteria"] == nil {
 			return apperr.New(apperr.Invalid, "A trigger needs an event to respond to")
 		}
+		if fmt.Sprint(resp["type"]) == "activate_voice_effect" && effectIDOf(m) == "" {
+			return apperr.New(apperr.Invalid, "A trigger that switches on a voice effect needs its effectId")
+		}
 	case "actions":
 		if err := ident("name"); err != nil {
 			return err

@@ -5,6 +5,8 @@
 	import Inja from '#lib/ui/Inja.svelte';
 	import RecordsPage from './RecordsPage.svelte';
 	import { words } from './api.ts';
+	import { page } from '$app/state';
+	import { href } from '#lib/nav.ts';
 
 	let { list }: { list: TriggerList } = $props();
 	const seconds = (s: number) => (s >= 60 && s % 60 === 0 ? `${s / 60} min` : `${s} s`);
@@ -36,6 +38,10 @@
 			{/if}
 			{#if t.probability !== undefined}<dt class="caps">Chance</dt><dd>{Math.round(t.probability * 100)}%</dd>{/if}
 			{#if t.responseType}<dt class="caps">Then</dt><dd>{words(t.responseType)}{t.targetScope ? `, for ${words(t.targetScope)}` : ''}</dd>{/if}
+			{#if t.responseType === 'activate_voice_effect' || t.responseType === 'deactivate_voice_effect'}
+				<dt class="caps">Effect</dt>
+				<dd>{#if t.effectId}<a href={href(page.params.save ?? '', 'effects', `?item=${encodeURIComponent(t.effectId)}`)}>{t.effectId}</a>{:else}Whichever the target has{/if}</dd>
+			{/if}
 			{#if t.audience}<dt class="caps">Who hears</dt><dd>{words(t.audience)}</dd>{/if}
 			{#if t.cooldown !== undefined}<dt class="caps">Cooldown</dt><dd>{seconds(t.cooldown)}</dd>{/if}
 			{#if t.priority !== undefined}<dt class="caps">Priority</dt><dd>{t.priority}</dd>{/if}

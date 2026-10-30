@@ -75,3 +75,4 @@ export function getVoiceEffects(fetchFn?: typeof fetch): Promise<VoiceEffectList
 export function saveVoiceEffect(id: string, edit: EffectEdit): Promise<VoiceEffectList> {
 	return request<VoiceEffectList>('PUT', `/api/voice-effects/${encodeURIComponent(id)}`, edit);
 }
+

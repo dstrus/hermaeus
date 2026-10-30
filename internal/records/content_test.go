@@ -285,3 +285,29 @@ func TestVoiceEffects(t *testing.T) {
 	_, err = h.r.SaveRecord("voice_effects/ghost.yaml", RecordEdit{Modified: l.Effects[0].Providers[0].Modified, Text: "id: ghost\nstages:\n  - params:\n      wet: 0.3\n"})
 	kindOf(t, err, apperr.Invalid)
 }
+
+func TestTriggersNameVoiceEffects(t *testing.T) {
+	h := newHarness(t)
+	write(t, filepath.Join(h.base, "voice_effects", "werewolf.yaml"), "id: werewolf\nname: Werewolf\nstages: []\n")
+	write(t, filepath.Join(h.base, "triggers", "beast_form.yaml"), "name: beast_form\neventCriteria:\n  eventType: transform\nresponse:\n  type: activate_voice_effect\n  effectId: werewolf\n")
+	write(t, filepath.Join(h.base, "triggers", "human_form.yaml"), "name: human_form\neventCriteria:\n  eventType: transform\nresponse:\n  type: deactivate_voice_effect\n  effectId: werewolf\nenabled: false\n")
+	write(t, filepath.Join(h.base, "triggers", "other.yaml"), "name: other\neventCriteria:\n  eventType: death\nresponse:\n  type: player_thought\n")
+
+	var ww VoiceEffect
+	for _, e := range h.r.VoiceEffects().Effects {
+		if e.ID == "werewolf" {
+			ww = e
+		}
+	}
+	if len(ww.Triggers) != 2 || !ww.Triggers[0].Activates || ww.Triggers[1].Activates || ww.Triggers[1].Enabled || ww.Triggers[0].Path != "triggers/beast_form.yaml" {
+		t.Errorf("triggers = %+v", ww.Triggers)
+	}
+	for _, tr := range h.r.Triggers().Triggers {
+		if tr.Name == "beast_form" && tr.EffectID != "werewolf" {
+			t.Errorf("beast_form names %q", tr.EffectID)
+		}
+	}
+	// SkyrimNet refuses a trigger that switches on no effect in particular.
+	_, err := h.r.SaveRecord("triggers/bad.yaml", RecordEdit{Text: "name: bad\neventCriteria:\n  eventType: death\nresponse:\n  type: activate_voice_effect\n"})
+	kindOf(t, err, apperr.Invalid)
+}

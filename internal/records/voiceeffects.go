@@ -18,7 +18,11 @@ import (
 // Voice effects are recipes that change how a voice sounds, such as a
 // draugr's or a ghost's: a chain of stages applied to speech in order, and
 // optionally a sample that replaces the speaker's own for cloning. Each is
-// a record in voice_effects/, named by its id.
+// a record in voice_effects/, named by its id. A recipe doesn't say whom
+// it's for: a trigger whose response is activate_voice_effect puts it on
+// the trigger's target, a mod's script can with SkyrimNet's SetVoiceEffect,
+// and SkyrimNet itself uses narrator_effect and player_thought_effect. The
+// assignments live in SkyrimNet's save data, not in these files.
 
 // StageParam is one setting of a kind of stage.
 type StageParam struct {
@@ -96,6 +100,17 @@ type VoiceEffect struct {
 	Stages    []Stage    `json:"stages"`
 	Providers []Provider `json:"providers"` // highest priority first
 	Error     string     `json:"error,omitempty"`
+	// Triggers that switch the effect on or, naming it, off.
+	Triggers []EffectTrigger `json:"triggers"`
+}
+
+// EffectTrigger is a trigger that names a voice effect.
+type EffectTrigger struct {
+	Path      string `json:"path"`
+	Name      string `json:"name"`
+	Source    string `json:"source"`
+	Activates bool   `json:"activates"` // or deactivates
+	Enabled   bool   `json:"enabled"`
 }
 
 type VoiceEffectList struct {
@@ -108,12 +123,22 @@ type VoiceEffectList struct {
 func (r *Records) VoiceEffects() VoiceEffectList {
 	c := r.Content()
 	out := VoiceEffectList{Layers: c.Layers, Effects: []VoiceEffect{}, Kinds: StageKinds}
+	byEffect := map[string][]EffectTrigger{}
+	for _, t := range r.Triggers().Triggers {
+		if t.EffectID == "" || (t.ResponseType != "activate_voice_effect" && t.ResponseType != "deactivate_voice_effect") {
+			continue
+		}
+		byEffect[t.EffectID] = append(byEffect[t.EffectID], EffectTrigger{Path: t.Path, Name: t.Name, Source: t.Source, Activates: t.ResponseType == "activate_voice_effect", Enabled: t.Enabled})
+	}
 	for _, rec := range c.Records {
 		if rec.Kind != "voice_effects" {
 			continue
 		}
 		id := strings.TrimSuffix(filepath.Base(rec.Path), filepath.Ext(rec.Path))
-		e := VoiceEffect{ID: id, Path: rec.Path, Name: rec.Name, Enabled: rec.Enabled, Stages: []Stage{}, Providers: rec.Providers, Error: rec.Error}
+		e := VoiceEffect{ID: id, Path: rec.Path, Name: rec.Name, Enabled: rec.Enabled, Stages: []Stage{}, Providers: rec.Providers, Error: rec.Error, Triggers: byEffect[id]}
+		if e.Triggers == nil {
+			e.Triggers = []EffectTrigger{}
+		}
 		top := rec.Providers[0]
 		if b, err := os.ReadFile(layers.Lookup(c.Layers[top.Layer].Root, top.Path)); err == nil && e.Error == "" {
 			var doc struct {
@@ -167,7 +192,7 @@ var effectID = regexp.MustCompile(`^[a-z0-9][a-z0-9_]{0,63}$`)
 // comments among them, stays as it was.
 func (r *Records) SaveEffect(id string, e EffectEdit) (VoiceEffectList, error) {
 	if !effectID.MatchString(id) {
-		return VoiceEffectList{}, apperr.New(apperr.Invalid, "An effect’s id is lowercase letters, digits, and underscores, such as frost_atronach")
+		return VoiceEffectList{}, apperr.New(apperr.Invalid, "An effect’s id is up to 64 lowercase letters, digits, and underscores, starting with a letter or digit, such as frost_atronach")
 	}
 	if strings.TrimSpace(e.Name) == "" {
 		return VoiceEffectList{}, apperr.New(apperr.Invalid, "An effect needs a name")
@@ -182,7 +207,7 @@ func (r *Records) SaveEffect(id string, e EffectEdit) (VoiceEffectList, error) {
 		}
 		out, err := settings.EditYAML(from, func(doc *yaml.Node) error {
 			if doc.Kind != yaml.MappingNode {
-				return apperr.New(apperr.Invalid, "%s isn't a set of fields", rel)
+				return apperr.New(apperr.Invalid, "%s isn’t a set of fields", rel)
 			}
 			set := func(key string, value any) error {
 				var n yaml.Node
@@ -298,6 +323,20 @@ func checkStages(stages []Stage) error {
 		}
 	}
 	return nil
+}
+
+// effectIDOf is the voice effect a trigger names, in its response or, as
+// some are written, at its top.
+func effectIDOf(m map[string]any) string {
+	if rs, ok := m["response"].(map[string]any); ok {
+		if s, ok := rs["effectId"].(string); ok && strings.TrimSpace(s) != "" {
+			return strings.TrimSpace(s)
+		}
+	}
+	if s, ok := m["effectId"].(string); ok {
+		return strings.TrimSpace(s)
+	}
+	return ""
 }
 
 func toFloat(v any) (float64, bool) {

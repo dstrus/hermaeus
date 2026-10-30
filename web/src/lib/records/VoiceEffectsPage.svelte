@@ -19,6 +19,7 @@
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { contentHref } from '#lib/plugins/links.ts';
 	import LimitsNotice from './LimitsNotice.svelte';
+	import { href } from '#lib/nav.ts';
 	import { layerName, recordsDependency, removeRecordCopy, saveVoiceEffect, switchRecord } from './api.ts';
 
 	let { list: loaded }: { list: VoiceEffectList } = $props();
@@ -222,7 +223,7 @@
 				<label>
 					<span class="caps">Id</span>
 					<input type="text" bind:value={draftId} placeholder="frost_atronach" autocomplete="off" spellcheck="false" />
-					<span class="muted small">Its file’s name, and how other records refer to it. Lowercase letters, digits, and underscores; it can’t change later.</span>
+					<span class="muted small">The id of the effect, which is how triggers and scripts refer to it when assigning it to a character. This will also be used in the name of the yaml file for the effect. Lowercase letters, digits, and underscores only. It can’t change later.</span>
 				</label>
 			{/if}
 			<label>
@@ -230,9 +231,9 @@
 				<input type="text" bind:value={draftName} placeholder="Frost atronach" autocomplete="off" />
 			</label>
 			<label>
-				<span class="caps">Sample</span>
+				<span class="caps">Replacement voice sample</span>
 				<input type="text" bind:value={draftSample} placeholder="None" autocomplete="off" spellcheck="false" />
-				<span class="muted small">A recording that replaces the speaker’s own voice sample for cloning while the effect is on. Leave it empty to keep theirs.</span>
+				<span class="muted small">The file name of a .wav recording cloned in place of the speaker’s usual voice while the effect is on. Upload the recording with SkyrimNet’s dashboard. Leave it empty to keep the speaker’s voice.</span>
 			</label>
 		</div>
 
@@ -296,7 +297,7 @@
 		<button type="button" class="button" onclick={startNew} disabled={readOnly}>New effect</button>
 		<input type="search" bind:value={query} placeholder="Search effects" aria-label="Search effects" />
 	</div>
-	<p class="muted lead">Recipes that change how a voice sounds, such as a draugr’s or a ghost’s, applied to speech one stage at a time. Each applies wherever SkyrimNet assigns it, such as to your thoughts or the narrator.</p>
+	<p class="muted lead">Recipes that change how a voice sounds, such as a draugr’s or a ghost’s, applied to speech one stage at a time. A recipe doesn’t say whom it’s for: a trigger puts it on a character, a mod’s script can, and SkyrimNet uses two itself, for the narrator and your thoughts. Each names the recipe by its id.</p>
 	<LimitsNotice title="Limits Hermaeus can’t check">{limits}</LimitsNotice>
 	{#if readOnly}<p class="notice warn">Skyrim is running, so effects can only be read.</p>{/if}
 
@@ -364,7 +365,17 @@
 							<p class="muted small">None: the voice is left as it is.</p>
 						{/if}
 						<h3 class="caps">Sample</h3>
-						<p class="small" class:muted={!e.sample}>{#if e.sample}<span class="id">{e.sample}</span>{:else}None: the speaker’s own sample is used.{/if}</p>
+						<p class="small" class:muted={!e.sample}>{#if e.sample}<span class="id">{e.sample}</span>{:else}None: the speaker’s own voice is cloned.{/if}</p>
+						<h3 class="caps">Used by</h3>
+						<ul class="uses small">
+							{#if e.id === 'narrator_effect'}<li>The narrator, when <a href="{href(save, 'speech')}?item=tts.enableNarratorAudioEffect">Narrator effect</a> is on.</li>{/if}
+							{#if e.id === 'player_thought_effect'}<li>Your thoughts, when <a href="{href(save, 'speech')}?item=tts.enablePlayerThoughtAudioEffect">Thoughts effect</a> is on.</li>{/if}
+							{#each e.triggers as t (t.path)}
+								<li>{t.activates ? 'Switched on' : 'Switched off'} by <a href={href(save, 'triggers', `?item=${encodeURIComponent(t.path)}`)}>{t.name}</a><span class="muted"> · {t.source}{t.enabled ? '' : ' · off'}</span></li>
+							{/each}
+							{#if !e.triggers.length && e.id !== 'narrator_effect' && e.id !== 'player_thought_effect'}<li class="muted">No trigger switches it on.</li>{/if}
+						</ul>
+						<p class="muted small">A mod’s script can also put it on a character, with SkyrimNet’s SetVoiceEffect and the id <span class="id">{e.id}</span>. Who has an effect is kept in your saves, so it isn’t listed here.</p>
 					</div>
 				{/key}
 			{/if}
@@ -533,6 +544,14 @@
 	}
 	.chainlist .label {
 		font-size: var(--step--1);
+	}
+	.uses {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 var(--space-2);
+	}
+	.uses li {
+		padding: var(--space-1) 0;
 	}
 	.pane > div > p.small:last-child {
 		padding-bottom: var(--space-5);
