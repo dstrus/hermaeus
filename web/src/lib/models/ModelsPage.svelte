@@ -22,6 +22,7 @@
 	import type { PluginSchema } from '#lib/api/types/settings.ts';
 	import { pluginHref } from '#lib/plugins/links.ts';
 	import TaskForm from './TaskForm.svelte';
+	import ModelTest from './ModelTest.svelte';
 
 	let { save, models }: { save: string; models: Models } = $props();
 
@@ -225,6 +226,7 @@
 						{#if can}
 							<div class="actions"><button type="button" class="button" onclick={() => setParams({ mode: 'edit' })}>Edit</button></div>
 						{/if}
+						{#if current.id !== 'decisions'}<ModelTest task={current} providers={models.providers} />{/if}
 					{/if}
 				</div>
 			{/key}

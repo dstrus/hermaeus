@@ -50,6 +50,10 @@ func (s *Settings) Routes(mux *http.ServeMux) {
 	mux.Handle("PUT /api/models/{task}", httpapi.JSON(func(r *http.Request, e TaskEdit) (Models, error) {
 		return s.SetTask(r.PathValue("task"), e)
 	}))
+	// One prompt sent to one of a task's models, on request.
+	mux.Handle("POST /api/models/{task}/test", httpapi.JSON(func(r *http.Request, t ModelTest) (ModelTestResult, error) {
+		return s.TestModel(r.PathValue("task"), t)
+	}))
 	// The providers tasks can be sent to; a key is set or cleared, never read.
 	mux.Handle("GET /api/providers", httpapi.JSON(func(*http.Request, httpapi.None) (ProvidersResponse, error) {
 		return s.Providers()

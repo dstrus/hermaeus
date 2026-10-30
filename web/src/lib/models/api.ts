@@ -1,6 +1,6 @@
 import { request } from '#lib/api/client.ts';
 import { href } from '#lib/nav.ts';
-import type { Models, Provider, Slot, Task, TaskEdit } from '#lib/api/types/settings.ts';
+import type { Models, ModelTest, ModelTestResult, Provider, Slot, Task, TaskEdit } from '#lib/api/types/settings.ts';
 
 export const modelsDependency = 'app:models';
 
@@ -45,3 +45,9 @@ export const reasoningEfforts = [
 	{ value: 'medium', label: 'Medium' },
 	{ value: 'high', label: 'High' }
 ];
+
+// testModel sends one prompt to one of a task's models, through the
+// provider SkyrimNet would use, and returns the reply and what it cost.
+export function testModel(task: string, t: ModelTest): Promise<ModelTestResult> {
+	return request<ModelTestResult>('POST', `/api/models/${encodeURIComponent(task)}/test`, t);
+}

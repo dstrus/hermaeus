@@ -195,6 +195,7 @@ type providerDetail struct {
 	Provider
 	Endpoint string
 	Key      string
+	KeyFrom  string // the provider whose key it borrows while its own is blank
 }
 
 func (s *Settings) providerDetails() ([]providerDetail, error) {
@@ -208,7 +209,7 @@ func (s *Settings) providerDetails() ([]providerDetail, error) {
 	}
 	out := make([]providerDetail, 0, len(nodes))
 	for _, p := range nodes {
-		out = append(out, providerDetail{Provider: providerOf(p), Endpoint: ruleField(p, "endpoint"), Key: strings.TrimSpace(ruleField(p, "api_key"))})
+		out = append(out, providerDetail{Provider: providerOf(p), Endpoint: ruleField(p, "endpoint"), Key: strings.TrimSpace(ruleField(p, "api_key")), KeyFrom: strings.TrimSpace(ruleField(p, "api_key_from"))})
 	}
 	return out, nil
 }

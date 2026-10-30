@@ -96,6 +96,36 @@ export interface TaskEdit {
 }
 
 //////////
+// source: modeltest.go
+
+/**
+ * ModelTest is a test to send: the slot, by its place in the task's
+ * rotation, and the prompt.
+ */
+export interface ModelTest {
+  slot: number /* int */;
+  system?: string; // instructions, sent before the prompt
+  prompt: string;
+}
+/**
+ * ModelTestResult is what came back.
+ */
+export interface ModelTestResult {
+  model: string; // as asked for
+  answered?: string; // the model that answered, when the provider says
+  upstream?: string; // OpenRouter's upstream provider, when it says
+  reply: string;
+  reasoning?: string;
+  finishReason?: string;
+  promptTokens: number /* int */;
+  completionTokens: number /* int */;
+  cost?: number /* float64 */; // in US dollars
+  costFrom?: string; // provider: as billed; prices: from its model list's prices
+  millis: number /* int64 */;
+  maxTokens: number /* int */; // the cap the test was sent with
+}
+
+//////////
 // source: pins.go
 
 export interface PinsResponse {
