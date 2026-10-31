@@ -467,6 +467,11 @@
         "name": "modal-lift",
         "value": "0 1.5rem 3rem rgb(0 0 0 / 0.45)",
         "purpose": "Only for the quick-find dialog, which floats over the page; its backdrop is rgb(0 0 0 / 0.45)."
+      },
+      {
+        "name": "tip-lift",
+        "value": "0 0.5rem 1.25rem rgb(0 0 0 / 0.35)",
+        "purpose": "Only for the tip that shows clipped text whole, which floats over whatever is beneath it."
       }
     ],
     "motion": [
@@ -650,7 +655,7 @@
     "donts": [
       "**Don't** use cards, gray sidebars, filled tiles, or a blue (or any second) accent color.",
       "**Don't** use the accent for decoration or large fills; it means selection, action, or a list's group heading.",
-      "**Don't** add shadows to rows, panes, or the shell; the only shadow is the floating quick-find dialog.",
+      "**Don't** add shadows to rows, panes, or the shell; the only shadows are under things that float: the quick-find dialog and the tip for clipped text.",
       "**Don't** show a hint in the strip that isn't backed by a working shortcut.",
       "**Don't** make a group label as bright as the current section."
     ]

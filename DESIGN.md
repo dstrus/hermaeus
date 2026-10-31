@@ -159,7 +159,7 @@ The mark is the eye of Hermaeus Mora among his tentacles (`assets/`). In the top
 A near-monochrome palette, off-white on near-black (or near-black on pale smoke), with one accent role that changes material with the theme: verdigris, the green of old bronze, in dark; frost blue, Skyrim's cold light, in light. Each role has a dark value and a `-light` counterpart; the light set applies under `data-theme="light"` or when the theme is "system" and the OS prefers light.
 
 ### Primary
-- **Verdigris** (`accent` / `accent-light`): the selection and action color: verdigris in dark, frost blue in light. The diamond marker, the primary button fill, the sorted column head and its hover, the active tab's underline, focus rings, text selection, the caret, checkbox accents, inline text buttons, link underlines (mixed 75% into the ground at rest so a page of links stays quiet but clears 3:1, full on hover), the stats bars (at 55% opacity), and the group headings in tables and stat lists (a day in the memory table, a plugin group, a stat section's title). Both pass WCAG AA on their worst-case ground.
+- **Verdigris** (`accent` / `accent-light`): the selection and action color: verdigris in dark, frost blue in light. The diamond marker, the primary button fill, the sorted column head and its hover, the current section in the sections column, the active tab's underline, focus rings, text selection, the caret, checkbox accents, inline text buttons, link underlines (mixed 75% into the ground at rest so a page of links stays quiet but clears 3:1, full on hover), the stats bars (at 55% opacity), and the group headings in tables and stat lists (a day in the memory table, a plugin group, a stat section's title). Both pass WCAG AA on their worst-case ground.
 - **Accent Ink** (`on-accent` / `on-accent-light`): text on an accent fill, used for the primary button and selected text.
 
 ### Neutral
@@ -225,6 +225,7 @@ The world is flat. Depth comes from the smoked-glass gradient behind everything,
 
 ### Shadow Vocabulary
 - **Modal lift** (`box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 0.45)`, backdrop `rgb(0 0 0 / 0.45)`): only for the quick-find dialog, which floats over the page.
+- **Tip lift** (`box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 0.35)`): only for the tip that shows clipped text whole, which floats over whatever is beneath it.
 
 ### Named Rules
 **The Template Markup Rule.** A prompt or bio shows its Inja markup set apart from its prose: statements (`{% if %}`, `{% block %}`) in the accent, since they're the structure that acts; expressions (`{{ npc.name }}`) in a heavier ink, since they're what gets filled in; comments muted and italic; strings muted; delimiters muted. Prose stays as it is. The same marks show while the text is edited.
@@ -261,7 +262,7 @@ The core of every list screen.
 - Column heads are sort buttons in label caps, muted, accent-colored when sorted or hovered, with a `rule-strong` underline. Counts and dates sort largest or newest first.
 - Group heading rows (a day, a plugin) are label caps in the accent with generous top padding (1.5rem) and a `rule-strong` underline.
 - A selectable row tints `glass` under the pointer and `select` when selected; heading rows don't react.
-- Memory and diary rows enter with a short fly-in (6px rise, 180ms).
+- When the selection changes, the details pane's content enters with a short fly-in (6px rise, 180ms); the rows themselves don't move.
 
 ### Details Pane
 - Opaque `panel` fill, a `rule-strong` left edge, 1.5rem padding, sticky at the top, sized to end at the hint strip.
@@ -270,8 +271,8 @@ The core of every list screen.
 - Every list has one, the Playthroughs list included: there the pane previews the selected playthrough, with a primary Open beside its name.
 
 ### Navigation
-- **Sections column:** title-size caps in muted ink; the current section and hover turn ink. The playthrough's own sections come first, unlabeled: Overview (the playthrough's own URL, its home), then Characters, History, Screenshots, and Bard songs; then the Behavior, Memory, Voice, AI, Library, General, and Plugin settings groups, each under a muted label-caps name, never as bright as the current section. A page's URL nests under its group's.
-- **Tabs:** title-size caps in muted ink, spaced 2rem apart over a `rule` baseline; the current tab is ink at weight 600 with a 2px accent underline. A tab's count follows in muted Jost.
+- **Sections column:** title-size caps in muted ink; hover turns ink, and the current section is the selected item, in the accent at weight 600. The playthrough's own sections come first, unlabeled: Overview (the playthrough's own URL, its home), then Characters, History, Screenshots, and Bard songs; then the Behavior, Memory, Voice, AI, Library, General, and Plugin settings groups, each under a muted label-caps name, never as bright as the current section. A page's URL nests under its group's.
+- **Tabs:** title-size caps in muted ink, spaced 1.5rem apart over a `rule` baseline; the current tab is ink at weight 600 with a 2px accent underline. A tab's count follows in muted Jost.
 - **Theme switch, and any segmented choice:** a 3px-radius outlined group of caps options; the chosen one fills with the accent, in accent-ink text at weight 600. The game's menus mark the chosen item plainly, and so do these.
 
 ### Button-Hint Strip (signature)
@@ -301,6 +302,6 @@ A dialog (28rem max, 18vh from the top) on the smoke surface with a strong hairl
 ### Don't:
 - **Don't** use cards, gray sidebars, filled tiles, or a blue (or any second) accent color.
 - **Don't** use the accent for decoration or large fills; it means selection, action, or a list's group heading.
-- **Don't** add shadows to rows, panes, or the shell; the only shadow is the floating quick-find dialog.
+- **Don't** add shadows to rows, panes, or the shell; the only shadows are under things that float: the quick-find dialog and the tip for clipped text.
 - **Don't** show a hint in the strip that isn't backed by a working shortcut.
 - **Don't** make a group label as bright as the current section.
