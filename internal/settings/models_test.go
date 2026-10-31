@@ -213,3 +213,38 @@ func TestModelsSaveMinimally(t *testing.T) {
 	_, err = h.settings.SetTask("default", edit(m.Tasks[0]))
 	kindOf(t, err, apperr.Conflict)
 }
+
+// From Beta 29, SkyrimNet makes Fateless's providers itself from its
+// sign-in: a task may use them although Providers.yaml doesn't list them,
+// and Hermaeus says why it can't test or list them.
+func TestFatelessProviders(t *testing.T) {
+	h := newHarness(t)
+	h.config("OpenRouter.yaml", modelsYAML)
+	h.config("Providers.yaml", providersYAML)
+	m, _ := h.settings.Models()
+	for _, p := range m.Providers {
+		if p.SignIn {
+			t.Fatalf("Fateless listed for a SkyrimNet that doesn't know it: %+v", p)
+		}
+	}
+
+	h.config("defaults_manifest.json", `{"fields": {"FatelessTTS": {"model": "fateless/speech-plus"}}}`)
+	m, _ = h.settings.Models()
+	var ids []string
+	for _, p := range m.Providers {
+		ids = append(ids, p.ID)
+	}
+	if got := strings.Join(ids, " "); got != "openrouter nanogpt fateless fateless_decisions" {
+		t.Fatalf("providers = %s", got)
+	}
+	task := m.Tasks[0]
+	slots := append([]Slot{}, task.Slots...)
+	slots[0].Provider, slots[0].Model = "fateless", "fateless/dialogue"
+	if _, err := h.settings.SetTask("default", TaskEdit{Modified: m.Modified, Slots: slots, Params: task.Params, Timeout: task.Timeout, RotationMode: task.RotationMode}); err != nil {
+		t.Fatalf("a task on Fateless was refused: %v", err)
+	}
+	_, err := h.settings.ModelList("fateless", false)
+	kindOf(t, err, apperr.Invalid)
+	_, err = h.settings.TestModel("default", ModelTest{Slot: 0, Prompt: "Hello."})
+	kindOf(t, err, apperr.Invalid)
+}

@@ -18,6 +18,7 @@ export const engines: Engine[] = [
 	{ id: 'piper', value: 'piper', file: 'Piper', label: 'Piper', what: 'Fast voices made on your own machine from voice model files, which are installed as a mod of their own.', local: true },
 	{ id: 'inworld', value: 'inworld', file: 'Inworld', label: 'Inworld', what: 'Inworld’s service, with voices cloned from each voice type’s sample. It needs an Inworld account and key.', local: false },
 	{ id: 'elevenlabs', value: 'elevenlabs', file: 'ElevenLabs', label: 'ElevenLabs', what: 'ElevenLabs’s service, with voices cloned from each voice type’s sample. It needs an ElevenLabs key.', local: false },
+	{ id: 'fateless', value: 'fateless', file: 'FatelessTTS', label: 'Fateless', what: 'Fateless’s service, from SkyrimNet Beta 29: characters speak in their own in-game voices, with no server or key to set up. It needs a Fateless subscription, signed in from SkyrimNet’s dashboard.', local: false },
 	{ id: 'xtts', value: 'xtts', file: 'XTTS', label: 'XTTS', what: 'Cloned voices from an XTTS server you run, on your own machine or rented through VastAI.', local: true },
 	{ id: 'zonos', value: 'zonos', file: 'Zonos', label: 'Zonos', what: 'Voices that follow a character’s mood, from a Zonos server you run, on your own machine or rented through VastAI.', local: true },
 	{ id: 'chatterbox', value: 'chatterbox', file: 'Chatterbox', label: 'Chatterbox', what: 'Expressive voices that take emotion tags, from a Chatterbox server you run.', local: true },
@@ -65,12 +66,12 @@ export const speech: Feature = {
 			]
 		},
 		{
-			title: 'Silent characters',
-			what: 'Characters with no voice lines of their own, voiced through DBVO.',
+			title: 'Game dialogue',
+			what: 'The game’s own dialogue: the lines you pick, and characters with no recording of a line.',
 			fields: [
-				{ key: 'dbvo.enabled', label: 'Voice over', what: 'Speak the lines you choose in dialogue. Needs DBVO installed, with its DBVO.esp disabled or deleted.', kind: 'switch' },
-				{ key: 'dbvo.voiceSilentNPCs', label: 'Voice silent characters', what: 'Speak the game’s own lines for characters who have no recording of them. Universal Translator depends on it.', kind: 'switch' },
-				{ key: 'dbvo.fixSubtitleDuringTTS', label: 'Subtitle fix', what: 'SkyrimNet’s fix for the game’s subtitle while such a line is spoken.', kind: 'switch' }
+				{ key: 'vanillaDialogue.voicePlayerChoices', was: 'dbvo.enabled', label: 'Voice your choices', what: 'Speak the line you pick in the dialogue menu in your character’s voice before the NPC answers.', kind: 'switch' },
+				{ key: 'vanillaDialogue.voiceSilentNPCs', was: 'dbvo.voiceSilentNPCs', label: 'Voice silent characters', what: 'Speak the game’s own lines for characters who have no recording of them. Universal Translator depends on it.', kind: 'switch' },
+				{ key: 'vanillaDialogue.fixSubtitleDuringTTS', was: 'dbvo.fixSubtitleDuringTTS', label: 'Subtitle fix', what: 'SkyrimNet’s fix for the game’s subtitle while such a line is spoken.', kind: 'switch' }
 			]
 		},
 		{
@@ -100,7 +101,8 @@ function connection(e: Engine): Section {
 	return {
 		title: 'Connection',
 		fields: [
-			endpoint,
+			// Fateless speaks through the gateway SkyrimNet's sign-in pairs with.
+			...(e.id === 'fateless' ? [] : [endpoint]),
 			{ key: 'language', label: 'Language', what: 'The language lines are spoken in, as the engine names it.', kind: 'text', placeholder: 'en' },
 			seconds('timeout', 'Wait for a line', 'How long to wait for the engine to speak a line before giving up.'),
 			seconds('connect_timeout', 'Wait to connect', 'How long to wait to reach the engine.'),
@@ -143,6 +145,26 @@ const own: Record<string, Section[]> = {
 				tune('piper_settings.length_scale', 'Slowness', 'How drawn out speech is. 1 is normal; higher is slower, lower is faster.', 0.1, 5),
 				{ key: 'piper_settings.num_threads', label: 'Threads', what: 'How many of the processor’s threads Piper uses.', kind: 'count' },
 				{ key: 'speaker_id', label: 'Speaker', what: 'Which speaker to use in a model with several, counting from 0. The usual English models have one.', kind: 'count' }
+			]
+		}
+	],
+	fateless: [
+		{
+			title: 'Voice',
+			fields: [
+				{
+					key: 'model',
+					label: 'Model',
+					what: 'Which of Fateless’s speech models speaks. Directions such as [say bitterly in a low voice] need fateless/speech-plus; fateless/speech is faster and cheaper, and plays only sounds such as [sigh].',
+					kind: 'choice',
+					custom: true,
+					choices: [
+						{ value: 'fateless/speech-plus', label: 'Speech Plus', what: 'the default, with directions' },
+						{ value: 'fateless/speech', label: 'Speech', what: 'faster and cheaper, sounds only' }
+					]
+				},
+				tune('speed', 'Speed', 'How fast lines are spoken. 1 is normal.', 0.5, 1.5),
+				tune('temperature', 'Variety', 'How much each line varies.', 0, 2)
 			]
 		}
 	],
@@ -358,7 +380,7 @@ export const speechToText: Feature = {
 			fields: [
 				{ key: 'backend', label: 'Recognizer', what: 'What turns your speech into text.', kind: 'choice', custom: true, choices: sttBackends },
 				{ key: 'language', label: 'Language', what: 'The language you speak, as a two-letter code. Whisper also takes auto-detect.', kind: 'text', placeholder: 'en' },
-				{ key: 'name_hints', label: 'Name hints', what: 'Tell the recognizer the names of you, nearby and pinned characters, and nearby places, so they come back spelled right. The stt_hints prompt sets what’s sent.', kind: 'switch' },
+				{ key: 'name_hints', label: 'Name hints', what: 'Tell the recognizer the names of you, nearby and pinned characters, and nearby places, so they come back spelled right. The stt_hints prompt sets what’s sent. Whisper on your machine has its own switch, under Whisper.', kind: 'switch' },
 				{ key: 'enable_partial_results', label: 'Text as you speak', what: 'Show what’s been recognized so far while you’re still speaking.', kind: 'switch' }
 			]
 		},
@@ -366,6 +388,7 @@ export const speechToText: Feature = {
 			title: 'Whisper',
 			what: 'When the recognizer is Whisper.',
 			fields: [
+				{ key: 'whisper.name_hints', label: 'Name hints', what: 'Send Whisper the names, as above. Off unless set: with the names sent, Whisper can sometimes turn a whole message into a stray word.', kind: 'switch' },
 				{
 					key: 'whisper.model',
 					label: 'Model',
@@ -401,6 +424,14 @@ export const speechToText: Feature = {
 				{ key: 'parakeet.use_gpu', label: 'Graphics card', what: 'Run on the graphics card rather than the processor.', kind: 'switch' },
 				{ key: 'parakeet.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count' },
 				{ key: 'parakeet.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count' }
+			]
+		},
+		{
+			title: 'Fateless',
+			what: 'When the recognizer is Fateless, through SkyrimNet’s Fateless sign-in.',
+			fields: [
+				{ key: 'fateless_model', label: 'Model', what: 'Which of Fateless’s transcription models listens.', kind: 'text', placeholder: 'fateless/transcribe' },
+				{ key: 'fateless_streaming', label: 'Stream while talking', what: 'With push-to-talk, send your voice while you hold the key, once it hears you speak, so the text is ready moments after you let go. It costs a little more per minute.', kind: 'switch' }
 			]
 		},
 		{

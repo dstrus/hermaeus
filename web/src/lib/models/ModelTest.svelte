@@ -10,7 +10,13 @@
 	let { task, providers }: { task: Task; providers: Provider[] } = $props();
 
 	// Chat providers only: the others answer typed questions, not prompts.
-	const testable = (id: string) => (providers.find((p) => p.id === id)?.style ?? 'chat') === 'chat';
+	// Fateless is reached through SkyrimNet's own sign-in, which Hermaeus
+	// doesn't have.
+	const testable = (id: string) => {
+		const p = providers.find((x) => x.id === id);
+		return (p?.style ?? 'chat') === 'chat' && !p?.signIn;
+	};
+	let onFateless = $derived(task.slots.some((s) => providers.find((p) => p.id === s.provider)?.signIn));
 	let slots = $derived(task.slots.map((s, i) => ({ s, i })).filter(({ s }) => s.model && testable(s.provider)));
 	let slot = $state(-1);
 	$effect(() => {
@@ -74,7 +80,13 @@
 <section class="test">
 	<h3 class="caps">Try it</h3>
 	{#if slot < 0}
-		<p class="muted small">{task.slots.length ? 'None of its models is on a chat provider, so there’s nothing a test can send to.' : 'It has no model of its own to try.'}</p>
+		<p class="muted small">
+			{#if onFateless}
+				Its models are on Fateless, which SkyrimNet reaches through its own sign-in. Hermaeus doesn’t have that sign-in, so SkyrimNet’s dashboard is where to test them.
+			{:else}
+				{task.slots.length ? 'None of its models is on a chat provider, so there’s nothing a test can send to.' : 'It has no model of its own to try.'}
+			{/if}
+		</p>
 	{:else}
 		<form onsubmit={(e) => (e.preventDefault(), send())}>
 			{#if slots.length > 1}

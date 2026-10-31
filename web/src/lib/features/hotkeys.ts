@@ -23,6 +23,7 @@ export const hotkeys: Feature = {
 			title: 'Dashboard and menus',
 			fields: [
 				{ key: 'wheelMenu', label: 'Wheel menu', what: 'Open the wheel of every SkyrimNet action.', kind: 'hotkey' },
+				{ key: 'openLabelPanel', label: 'Labelling panel', what: 'Pause the game and open the labelling panel over the last recorded outputs. It needs request recording on, in SkyrimNet’s developer settings.', kind: 'hotkey' },
 				{ key: 'toggleDashboard', label: 'Dashboard', what: 'Open or close SkyrimNet’s dashboard in game.', kind: 'hotkey' }
 			]
 		},

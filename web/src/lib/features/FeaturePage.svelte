@@ -27,6 +27,9 @@
 	let can = $derived(file.file.exists && !readOnly);
 	let settings = $derived(new Map(file.values.map((s) => [s.key.toLowerCase(), s])));
 	const settingOf = (f: Field): Setting | undefined => settings.get(f.key.toLowerCase());
+	// A field whose key SkyrimNet renamed reads and writes the old one where
+	// only the old one is known.
+	const resolved = (f: Field): Field => (f.was && !settings.has(f.key.toLowerCase()) && settings.has(f.was.toLowerCase()) ? { ...f, key: f.was } : f);
 
 	// The page's rows: every field, in its section. A map field stands for
 	// the settings under its key, each its own setting in the file.
@@ -42,7 +45,7 @@
 	// nameOf is a map entry's name, from its setting's key.
 	const nameOf = (f: Field, key: string) => key.slice(f.key.length + 1, f.leaf ? -(f.leaf.length + 1) : undefined);
 	let rows = $derived<Row[]>(
-		feature.sections.flatMap((s) => s.fields.map((field) => (field.kind === 'map' ? { field, section: s.title, children: childrenOf(field) } : { field, section: s.title, setting: settingOf(field) })))
+		feature.sections.flatMap((s) => s.fields.map(resolved).map((field) => (field.kind === 'map' ? { field, section: s.title, children: childrenOf(field) } : { field, section: s.title, setting: settingOf(field) })))
 	);
 	const isChanged = (r: Row) => (r.children ? r.children.some((c) => c.changed) : !!r.setting?.changed);
 	let changed = $derived(rows.filter(isChanged).length);

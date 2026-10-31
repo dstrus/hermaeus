@@ -95,6 +95,11 @@ export interface Provider {
   style: string; // chat, decisions, and so on
   hasKey: boolean;
   builtin: boolean;
+  /**
+   * Reached through SkyrimNet's own sign-in rather than a key in
+   * Providers.yaml, so Hermaeus can't list its models or test them.
+   */
+  signIn?: boolean;
 }
 export interface Models {
   found: boolean; // OpenRouter.yaml exists
@@ -397,8 +402,9 @@ export interface Translator {
   filterMode: string; // blacklist or whitelist
   filterPlugins: string[];
   /**
-   * SkyrimNet voicing silent NPCs (dbvo.voiceSilentNPCs in SkyrimNet.yaml),
-   * without which the translator has nothing to speak with.
+   * SkyrimNet voicing silent NPCs (vanillaDialogue.voiceSilentNPCs in
+   * SkyrimNet.yaml, dbvo.voiceSilentNPCs before Beta 29), without which the
+   * translator has nothing to speak with.
    */
   voiceSilentNPCs: Dependency;
 }
@@ -409,6 +415,7 @@ export interface Dependency {
   available: boolean; // its file exists
   on: boolean;
   modified: number /* int64 */; // the file's time, for changing it
+  key: string; // where the file keeps it
 }
 /**
  * TranslatorEdit is the configuration as it should be, except the

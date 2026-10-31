@@ -109,6 +109,7 @@ var ownPages = []OwnPage{
 	{Name: "Piper", Label: "Piper", Page: "voice/engines/piper"},
 	{Name: "Inworld", Label: "Inworld", Page: "voice/engines/inworld"},
 	{Name: "ElevenLabs", Label: "ElevenLabs", Page: "voice/engines/elevenlabs"},
+	{Name: "FatelessTTS", Label: "Fateless", Page: "voice/engines/fateless"},
 	{Name: "XTTS", Label: "XTTS", Page: "voice/engines/xtts"},
 	{Name: "Zonos", Label: "Zonos", Page: "voice/engines/zonos"},
 	{Name: "Chatterbox", Label: "Chatterbox", Page: "voice/engines/chatterbox"},
@@ -195,6 +196,11 @@ func (d defaults) of(name string) (map[string]any, bool) {
 	return nil, false
 }
 
+// notSettings are files in config/ that hold SkyrimNet's own state rather
+// than settings, so they aren't listed: Auth.yaml is the Fateless sign-in,
+// from Beta 29.
+var notSettings = map[string]bool{"auth": true}
+
 // names lists every settings file there is or has defaults. Names match
 // regardless of case, as on Windows (the defaults call MCP.yaml "mcp"), and
 // a file's own spelling wins.
@@ -215,7 +221,7 @@ func names(configDir string, defs defaults) []string {
 	}
 	out := make([]string, 0, len(found))
 	for _, n := range found {
-		if validName(n) {
+		if validName(n) && !notSettings[strings.ToLower(n)] {
 			out = append(out, n)
 		}
 	}

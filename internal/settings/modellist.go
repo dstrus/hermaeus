@@ -57,6 +57,9 @@ func (s *Settings) ModelList(provider string, refresh bool) (ModelList, error) {
 			return list, nil
 		}
 	}
+	if sp, ok := signInProvider(provider); ok {
+		return ModelList{}, apperr.New(apperr.Invalid, "%s is reached through SkyrimNet’s own Fateless sign-in, which Hermaeus doesn’t have, so its models can’t be listed here", sp.Name)
+	}
 	providers, err := s.providerDetails()
 	if err != nil {
 		return ModelList{}, err

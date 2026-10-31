@@ -167,7 +167,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 		error = '';
 		notice = '';
 		try {
-			await saveSettings('game', { modified: dep.modified, changes: [{ key: 'dbvo.voiceSilentNPCs', value: !dep.on }] });
+			await saveSettings('game', { modified: dep.modified, changes: [{ key: dep.key, value: !dep.on }] });
 			notice = dep.on ? 'SkyrimNet no longer voices silent NPCs.' : 'SkyrimNet voices silent NPCs again.';
 			await Promise.all([invalidate(translatorDependency), invalidate(settingsDependency)]);
 		} catch (e) {
@@ -246,11 +246,11 @@ import type { Character } from '#lib/api/types/characters.ts';
 		<span class="mark" aria-hidden="true"><svg viewBox="0 0 10 10" width="10" height="10"><path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
 		<span class="caps">Universal Translator</span>
 	</button>
-	<button type="button" role="switch" aria-checked={translator.voiceSilentNPCs.on} disabled={!translator.voiceSilentNPCs.available || readOnly || saving} onclick={switchVoices} title="dbvo.voiceSilentNPCs in SkyrimNet.yaml">
+	<button type="button" role="switch" aria-checked={translator.voiceSilentNPCs.on} disabled={!translator.voiceSilentNPCs.available || readOnly || saving} onclick={switchVoices} title="{translator.voiceSilentNPCs.key} in SkyrimNet.yaml">
 		<span class="mark" aria-hidden="true"><svg viewBox="0 0 10 10" width="10" height="10"><path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
 		<span class="caps">Voice silent NPCs</span>
 	</button>
-	<span class="muted small">The translator speaks through SkyrimNet’s voicing of silent NPCs, which needs DBVO installed with DBVO.esp disabled.</span>
+	<span class="muted small">The translator speaks through SkyrimNet’s voicing of silent NPCs.</span>
 </div>
 {#if translator.found && translator.enabled && !translator.voiceSilentNPCs.on}
 	<p class="notice warn">Universal Translator is on, but SkyrimNet isn’t voicing silent NPCs, so nothing it rewrites can be heard.</p>

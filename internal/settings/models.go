@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -70,6 +71,27 @@ type Provider struct {
 	Style   string `json:"style"` // chat, decisions, and so on
 	HasKey  bool   `json:"hasKey"`
 	Builtin bool   `json:"builtin"`
+	// Reached through SkyrimNet's own sign-in rather than a key in
+	// Providers.yaml, so Hermaeus can't list its models or test them.
+	SignIn bool `json:"signIn,omitempty"`
+}
+
+// signInProviders are the providers SkyrimNet makes itself from its Fateless
+// sign-in, from Beta 29: they're named in OpenRouter.yaml but aren't in
+// Providers.yaml.
+var signInProviders = []Provider{
+	{ID: "fateless", Name: "Fateless", Style: "chat", Builtin: true, SignIn: true},
+	{ID: "fateless_decisions", Name: "Fateless (Decisions)", Style: "decisions", Builtin: true, SignIn: true},
+}
+
+// signInProvider is the sign-in provider with this id, if it is one.
+func signInProvider(id string) (Provider, bool) {
+	for _, p := range signInProviders {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return Provider{}, false
 }
 
 type Models struct {
@@ -294,9 +316,24 @@ func (s *Settings) providers() ([]Provider, error) {
 	if err != nil {
 		return nil, err
 	}
-	out := make([]Provider, 0, len(nodes))
+	out := make([]Provider, 0, len(nodes)+len(signInProviders))
 	for _, p := range nodes {
 		out = append(out, providerOf(p))
+	}
+	// SkyrimNet makes Fateless's providers itself when it knows Fateless:
+	// its defaults have Fateless's speech settings, or a task already uses
+	// one of them.
+	_, known := loadDefaults(dir)["FatelessTTS"]
+	if !known {
+		b, _ := os.ReadFile(filePath(dir, "OpenRouter"))
+		known = strings.Contains(string(b), "fateless")
+	}
+	if known {
+		for _, sp := range signInProviders {
+			if !slices.ContainsFunc(out, func(p Provider) bool { return p.ID == sp.ID }) {
+				out = append(out, sp)
+			}
+		}
 	}
 	return out, nil
 }

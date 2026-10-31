@@ -97,8 +97,9 @@
 
 	// The row above the tasks shows the providers a task can use: those with
 	// a key. The rest wait on the Providers page.
-	let ready = $derived(models.providers.filter((p) => p.hasKey && p.style === 'chat'));
-	let waiting = $derived(models.providers.filter((p) => !p.hasKey && p.style === 'chat'));
+	// Fateless needs no key here: SkyrimNet reaches it through its own sign-in.
+	let ready = $derived(models.providers.filter((p) => p.hasKey && p.style === 'chat' && !p.signIn));
+	let waiting = $derived(models.providers.filter((p) => !p.hasKey && p.style === 'chat' && !p.signIn));
 	// A provider's model list, as a few words.
 	function listState(id: string): string {
 		if (modelLists.loading[id]) return 'asking…';

@@ -147,10 +147,14 @@ func TestComparedWithDefaults(t *testing.T) {
 		v, _ := files[file][key].Value.(SecretValue)
 		return v.Secret
 	}
-	for _, k := range [][2]string{{"OpenRouter", "openrouter.api_key"}, {"OpenRouter", "openrouter.apiKey"}, {"Auth", "access_token"}} {
+	for _, k := range [][2]string{{"OpenRouter", "openrouter.api_key"}, {"OpenRouter", "openrouter.apiKey"}} {
 		if !secret(k[0], k[1]) {
 			t.Errorf("%s %s isn't masked", k[0], k[1])
 		}
+	}
+	// Auth.yaml is the Fateless sign-in, not settings, so it isn't listed.
+	if _, listed := files["Auth"]; listed {
+		t.Error("Auth.yaml is listed among the settings")
 	}
 	if secret("OpenRouter", "openrouter.max_tokens") || secret("Plugin_Sever", "llm.toggleMuteHotkey") {
 		t.Error("an ordinary setting was masked")

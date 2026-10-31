@@ -43,16 +43,18 @@ type Translator struct {
 	Global        string   `json:"global"`
 	FilterMode    string   `json:"filterMode"` // blacklist or whitelist
 	FilterPlugins []string `json:"filterPlugins"`
-	// SkyrimNet voicing silent NPCs (dbvo.voiceSilentNPCs in SkyrimNet.yaml),
-	// without which the translator has nothing to speak with.
+	// SkyrimNet voicing silent NPCs (vanillaDialogue.voiceSilentNPCs in
+	// SkyrimNet.yaml, dbvo.voiceSilentNPCs before Beta 29), without which the
+	// translator has nothing to speak with.
 	VoiceSilentNPCs Dependency `json:"voiceSilentNPCs"`
 }
 
 // Dependency is a setting in another file the translator needs.
 type Dependency struct {
-	Available bool  `json:"available"` // its file exists
-	On        bool  `json:"on"`
-	Modified  int64 `json:"modified"` // the file's time, for changing it
+	Available bool   `json:"available"` // its file exists
+	On        bool   `json:"on"`
+	Modified  int64  `json:"modified"` // the file's time, for changing it
+	Key       string `json:"key"`      // where the file keeps it
 }
 
 // TranslatorEdit is the configuration as it should be, except the
@@ -149,7 +151,12 @@ func ruleOf(r *yaml.Node) Rule {
 	}
 }
 
-// voiceSilentNPCs reads the setting the translator depends on.
+// silentNPCKeys are where SkyrimNet.yaml keeps whether silent NPCs are
+// voiced: its current key, then the one before Beta 29.
+var silentNPCKeys = []string{"vanillaDialogue.voiceSilentNPCs", "dbvo.voiceSilentNPCs"}
+
+// voiceSilentNPCs reads the setting the translator depends on, under
+// whichever key this SkyrimNet knows.
 func (s *Settings) voiceSilentNPCs() (Dependency, error) {
 	dir, err := s.configDir()
 	if err != nil {
@@ -159,14 +166,17 @@ func (s *Settings) voiceSilentNPCs() (Dependency, error) {
 	if err != nil {
 		return Dependency{}, err
 	}
-	dep := Dependency{Available: f.File.Exists, Modified: f.File.Modified}
-	for _, v := range f.Values {
-		if strings.EqualFold(v.Key, "dbvo.voiceSilentNPCs") {
-			val := v.Default
-			if v.Set {
-				val = v.Value
+	dep := Dependency{Available: f.File.Exists, Modified: f.File.Modified, Key: silentNPCKeys[0]}
+	for _, key := range silentNPCKeys {
+		for _, v := range f.Values {
+			if strings.EqualFold(v.Key, key) {
+				val := v.Default
+				if v.Set {
+					val = v.Value
+				}
+				dep.On, dep.Key = val == true, v.Key
+				return dep, nil
 			}
-			dep.On = val == true
 		}
 	}
 	return dep, nil

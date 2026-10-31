@@ -183,4 +183,42 @@ CREATE TABLE embedding_producer (
   dimension INTEGER NOT NULL
 );
 
+-- SkyrimNet's own bookkeeping, which Hermaeus doesn't read.
+CREATE TABLE schema_migrations (
+  version INTEGER PRIMARY KEY
+);
+
+CREATE TABLE dialogue (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  speaker TEXT NOT NULL,
+  text TEXT NOT NULL,
+  timestamp REAL DEFAULT (julianday('now'))
+);
+
+CREATE TABLE traces (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  timestamp REAL,
+  depth INTEGER,
+  label TEXT,
+  duration_us REAL,
+  parent_label TEXT,
+  session_id TEXT
+);
+
+CREATE TABLE counters (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  label TEXT,
+  value INTEGER,
+  session_id TEXT,
+  UNIQUE (label, session_id)
+);
+
+CREATE TABLE errors (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  label TEXT,
+  value INTEGER,
+  session_id TEXT,
+  UNIQUE (label, session_id)
+);
+
 CREATE UNIQUE INDEX idx_knowledge_packs_source_path ON knowledge_packs(source_path) WHERE source_path IS NOT NULL;

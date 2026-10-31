@@ -27,7 +27,7 @@ type Kind struct {
 var Kinds = []Kind{
 	{"triggers", "Triggers"}, {"actions", "Actions"}, {"filters", "Filters"}, {"voice_effects", "Voice effects"},
 	{"entities", "Entities"}, {"dialogue_actions", "Dialogue actions"}, {"translator", "Speech rules"},
-	{"items", "Items"}, {"spells", "Spells"}, {"furniture", "Furniture names"}, {"identity", "Identity links"},
+	{"items", "Items"}, {"spells", "Spells"}, {"furniture", "Furniture names"}, {"identity", "Identity links"}, {"places", "Named places"},
 }
 
 func isKind(root string) bool {

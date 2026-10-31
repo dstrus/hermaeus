@@ -41,6 +41,7 @@ export interface Column {
 
 export interface Field {
 	key: string; // the setting's dotted key in the file
+	was?: string; // the key in older SkyrimNet versions, used when the file and its defaults don't know the current one
 	label: string;
 	what: string; // what it does, as a sentence
 	kind: Kind;

@@ -271,7 +271,7 @@
 			{#each used as p (p.id)}
 				{@const list = listOf(p.id)}
 				<div class="list">
-					<button type="button" class="textbutton" onclick={() => modelLists.fetch(p.id, !!list)} disabled={modelLists.loading[p.id] || p.style !== 'chat'}>
+					<button type="button" class="textbutton" onclick={() => modelLists.fetch(p.id, !!list)} disabled={modelLists.loading[p.id] || p.style !== 'chat' || p.signIn}>
 						{modelLists.loading[p.id] ? `Asking ${p.name}…` : list ? `Fetch ${p.name}’s models again` : `Fetch ${p.name}’s models`}
 					</button>
 					<span class="muted small">
@@ -279,6 +279,8 @@
 							<span class="error">{modelLists.errors[p.id]}</span>
 						{:else if list}
 							{list.models.length} models, offered as you type.
+						{:else if p.signIn}
+							{p.name} is reached through SkyrimNet’s own sign-in, so Hermaeus can’t fetch its list.
 						{:else if p.style !== 'chat'}
 							{p.name} has no list to fetch.
 						{:else}

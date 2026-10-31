@@ -35,8 +35,13 @@ func TestTranslatorReadsTheFile(t *testing.T) {
 	if tr.Global != "" || len(tr.FilterPlugins) != 0 {
 		t.Errorf("global = %q, plugins = %v", tr.Global, tr.FilterPlugins)
 	}
-	if !tr.VoiceSilentNPCs.Available || tr.VoiceSilentNPCs.On {
-		t.Errorf("voiceSilentNPCs = %+v", tr.VoiceSilentNPCs)
+	if !tr.VoiceSilentNPCs.Available || tr.VoiceSilentNPCs.On || tr.VoiceSilentNPCs.Key != "dbvo.voiceSilentNPCs" {
+		t.Errorf("voiceSilentNPCs before Beta 29 = %+v", tr.VoiceSilentNPCs)
+	}
+	// Beta 29 keeps it under vanillaDialogue.
+	h.config("SkyrimNet.yaml", "vanillaDialogue:\n  voicePlayerChoices: true\n  voiceSilentNPCs: true\n")
+	if tr, _ = h.settings.Translator(); !tr.VoiceSilentNPCs.On || tr.VoiceSilentNPCs.Key != "vanillaDialogue.voiceSilentNPCs" {
+		t.Errorf("voiceSilentNPCs on Beta 29 = %+v", tr.VoiceSilentNPCs)
 	}
 }
 

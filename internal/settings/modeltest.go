@@ -74,6 +74,9 @@ func (s *Settings) TestModel(taskID string, t ModelTest) (ModelTestResult, error
 	if strings.TrimSpace(slot.Model) == "" {
 		return ModelTestResult{}, apperr.New(apperr.Invalid, "That slot names no model")
 	}
+	if sp, ok := signInProvider(slot.Provider); ok {
+		return ModelTestResult{}, apperr.New(apperr.Invalid, "%s is reached through SkyrimNet’s own Fateless sign-in, which Hermaeus doesn’t have, so its models can’t be tested here. SkyrimNet’s dashboard can test them.", sp.Name)
+	}
 	providers, err := s.providerDetails()
 	if err != nil {
 		return ModelTestResult{}, err
