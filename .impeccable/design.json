@@ -1,540 +1,589 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-28T00:29:11+00:00",
+  "generatedAt": "2026-10-31T01:33:24+00:00",
   "title": "Design System: Hermaeus",
   "extensions": {
     "colorMeta": {
       "accent": {
         "role": "primary",
         "displayName": "Verdigris",
+        "canonical": "#7fb8a0",
         "tonalRamp": [
-          "#2a1f08",
-          "#4a3710",
-          "#6b5016",
-          "#8d6a1f",
-          "#b0882f",
-          "#7fb8a0",
-          "#dcc184",
-          "#f1e4c4"
+          "#050d09",
+          "#162a22",
+          "#244b3c",
+          "#396d59",
+          "#589079",
+          "#7eb29c",
+          "#abd4c2",
+          "#def5ea"
         ]
       },
       "on-accent": {
         "role": "primary",
         "displayName": "Accent Ink",
+        "canonical": "#0e1a15",
         "tonalRamp": [
-          "#2a1f08",
-          "#4a3710",
-          "#6b5016",
-          "#8d6a1f",
-          "#b0882f",
-          "#7fb8a0",
-          "#dcc184",
-          "#f1e4c4"
+          "#090c0b",
+          "#212624",
+          "#3b4540",
+          "#58655f",
+          "#788680",
+          "#9ba9a2",
+          "#c1ccc7",
+          "#eaf0ed"
         ]
       },
       "ground": {
         "role": "neutral",
         "displayName": "Menu Black",
+        "canonical": "#0b0b0b",
         "tonalRamp": [
           "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
         ]
       },
       "smoke": {
         "role": "neutral",
         "displayName": "Smoke Heart",
+        "canonical": "#1c1c1c",
         "tonalRamp": [
           "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
         ]
       },
       "panel": {
         "role": "neutral",
         "displayName": "Pane Glass",
+        "canonical": "#121212",
         "tonalRamp": [
           "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
         ]
       },
       "glass-strong": {
         "role": "neutral",
         "displayName": "Smoked Field",
+        "canonical": "rgb(0 0 0 / 0.38)",
         "tonalRamp": [
           "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
         ]
       },
       "select": {
         "role": "neutral",
         "displayName": "Selected Row Haze",
+        "canonical": "rgb(242 239 230 / 0.07)",
         "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#64615a",
+          "#85827a",
+          "#a7a59d",
+          "#cbc9c3",
+          "#efeeeb"
         ]
       },
       "ink": {
         "role": "neutral",
         "displayName": "Parchment Ink",
+        "canonical": "#f2efe6",
         "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#64615a",
+          "#85827a",
+          "#a7a59d",
+          "#cbc9c3",
+          "#efeeeb"
         ]
       },
       "muted": {
         "role": "neutral",
         "displayName": "Weathered Ink",
+        "canonical": "#a8a293",
         "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#0c0b09",
+          "#272520",
+          "#464238",
+          "#666154",
+          "#888273",
+          "#aaa597",
+          "#cdc9be",
+          "#f1eee8"
         ]
       },
       "rule": {
         "role": "neutral",
         "displayName": "Hairline",
+        "canonical": "#2a2a2a",
         "tonalRamp": [
           "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
         ]
       },
       "rule-strong": {
         "role": "neutral",
         "displayName": "Strong Hairline",
+        "canonical": "#3a3a3a",
         "tonalRamp": [
           "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
         ]
       },
       "warn": {
         "role": "status",
         "displayName": "Amber Warning",
+        "canonical": "#d9a441",
         "tonalRamp": [
-          "#2b1d03",
-          "#4d3405",
-          "#6e4b06",
-          "#8a5a00",
-          "#b07a1c",
-          "#d9a441",
-          "#e8c27f",
-          "#f6e3bf"
+          "#120900",
+          "#332201",
+          "#583c00",
+          "#7f5900",
+          "#a97801",
+          "#cc9c43",
+          "#eac382",
+          "#ffeccd"
         ]
       },
       "danger": {
         "role": "status",
         "displayName": "Ember Error",
+        "canonical": "#e57368",
         "tonalRamp": [
-          "#3a0c09",
-          "#5e1510",
-          "#841f17",
-          "#b3261e",
-          "#cc4a40",
-          "#e57368",
-          "#efa59e",
-          "#f8d6d3"
-        ]
-      },
-      "accent-light": {
-        "role": "primary",
-        "displayName": "Frost Blue",
-        "tonalRamp": [
-          "#2a1f08",
-          "#4a3710",
-          "#6b5016",
-          "#8d6a1f",
-          "#b0882f",
-          "#7fb8a0",
-          "#dcc184",
-          "#f1e4c4"
-        ]
-      },
-      "on-accent-light": {
-        "role": "primary",
-        "displayName": "Accent Ink (light)",
-        "tonalRamp": [
-          "#2a1f08",
-          "#4a3710",
-          "#6b5016",
-          "#8d6a1f",
-          "#b0882f",
-          "#7fb8a0",
-          "#dcc184",
-          "#f1e4c4"
-        ]
-      },
-      "ground-light": {
-        "role": "neutral",
-        "displayName": "Menu Black (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "smoke-light": {
-        "role": "neutral",
-        "displayName": "Smoke Heart (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "panel-light": {
-        "role": "neutral",
-        "displayName": "Pane Glass (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "glass-strong-light": {
-        "role": "neutral",
-        "displayName": "Smoked Field (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "select-light": {
-        "role": "neutral",
-        "displayName": "Selected Row Haze (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "ink-light": {
-        "role": "neutral",
-        "displayName": "Parchment Ink (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "muted-light": {
-        "role": "neutral",
-        "displayName": "Weathered Ink (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "rule-light": {
-        "role": "neutral",
-        "displayName": "Hairline (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "rule-strong-light": {
-        "role": "neutral",
-        "displayName": "Strong Hairline (light)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#1c1c1c",
-          "#2a2a2a",
-          "#3a3a3a",
-          "#5d5a52",
-          "#a8a293",
-          "#cdcbc4",
-          "#f2efe6"
-        ]
-      },
-      "warn-light": {
-        "role": "status",
-        "displayName": "Amber Warning (light)",
-        "tonalRamp": [
-          "#2b1d03",
-          "#4d3405",
-          "#6e4b06",
-          "#8a5a00",
-          "#b07a1c",
-          "#d9a441",
-          "#e8c27f",
-          "#f6e3bf"
-        ]
-      },
-      "danger-light": {
-        "role": "status",
-        "displayName": "Ember Error (light)",
-        "tonalRamp": [
-          "#3a0c09",
-          "#5e1510",
-          "#841f17",
-          "#b3261e",
-          "#cc4a40",
-          "#e57368",
-          "#efa59e",
-          "#f8d6d3"
+          "#180504",
+          "#3f1713",
+          "#712520",
+          "#a03b34",
+          "#ca5b51",
+          "#ed8277",
+          "#ffb3a9",
+          "#ffe9e6"
         ]
       },
       "changed": {
         "role": "secondary",
         "displayName": "Copper Changed",
+        "canonical": "#d2996b",
         "tonalRamp": [
-          "#2b1708",
-          "#4b2810",
-          "#6e3a17",
-          "#9a4a20",
-          "#b8744a",
-          "#d2996b",
-          "#e7bf9c",
-          "#f5e1cc"
+          "#120903",
+          "#342010",
+          "#5d3818",
+          "#85542a",
+          "#ab7447",
+          "#cd986e",
+          "#eabf9e",
+          "#ffeadb"
+        ]
+      },
+      "accent-light": {
+        "role": "primary",
+        "displayName": "Frost Blue",
+        "canonical": "#2a5f86",
+        "tonalRamp": [
+          "#040c13",
+          "#142736",
+          "#204661",
+          "#35668b",
+          "#5388b1",
+          "#7aabd3",
+          "#a7cfef",
+          "#e1f1ff"
+        ]
+      },
+      "on-accent-light": {
+        "role": "primary",
+        "displayName": "Accent Ink (light)",
+        "canonical": "#eef4f9",
+        "tonalRamp": [
+          "#080c0f",
+          "#212629",
+          "#3e4347",
+          "#5d6266",
+          "#7e8388",
+          "#a0a6aa",
+          "#c4cacf",
+          "#e9eff4"
+        ]
+      },
+      "ground-light": {
+        "role": "neutral",
+        "displayName": "Menu Black (light)",
+        "canonical": "#e4e3df",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262522",
+          "#43423f",
+          "#62615e",
+          "#83827f",
+          "#a6a5a1",
+          "#cac9c5",
+          "#efeeea"
+        ]
+      },
+      "smoke-light": {
+        "role": "neutral",
+        "displayName": "Smoke Heart (light)",
+        "canonical": "#f3f2ef",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262523",
+          "#43423f",
+          "#62615f",
+          "#83827f",
+          "#a6a5a2",
+          "#cac9c6",
+          "#efeeeb"
+        ]
+      },
+      "panel-light": {
+        "role": "neutral",
+        "displayName": "Pane Glass (light)",
+        "canonical": "#eceae6",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#43423f",
+          "#63615e",
+          "#84827e",
+          "#a7a5a1",
+          "#cbc9c5",
+          "#f0eeea"
+        ]
+      },
+      "glass-strong-light": {
+        "role": "neutral",
+        "displayName": "Smoked Field (light)",
+        "canonical": "rgb(255 255 255 / 0.55)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "select-light": {
+        "role": "neutral",
+        "displayName": "Selected Row Haze (light)",
+        "canonical": "rgb(27 26 23 / 0.06)",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#43423e",
+          "#62615d",
+          "#83827e",
+          "#a6a5a1",
+          "#cac9c5",
+          "#f0eeea"
+        ]
+      },
+      "ink-light": {
+        "role": "neutral",
+        "displayName": "Parchment Ink (light)",
+        "canonical": "#1b1a17",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#43423e",
+          "#62615d",
+          "#83827e",
+          "#a6a5a1",
+          "#cac9c5",
+          "#f0eeea"
+        ]
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Weathered Ink (light)",
+        "canonical": "#5d5a52",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#646159",
+          "#85827a",
+          "#a8a59d",
+          "#cbc9c2",
+          "#f0eeeb"
+        ]
+      },
+      "rule-light": {
+        "role": "neutral",
+        "displayName": "Hairline (light)",
+        "canonical": "#cdcbc4",
+        "tonalRamp": [
+          "#0c0b07",
+          "#272520",
+          "#44423c",
+          "#63615b",
+          "#84827c",
+          "#a7a59e",
+          "#cbc9c2",
+          "#f0eee7"
+        ]
+      },
+      "rule-strong-light": {
+        "role": "neutral",
+        "displayName": "Strong Hairline (light)",
+        "canonical": "#b3b0a7",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#646159",
+          "#85827a",
+          "#a8a59d",
+          "#cbc9c2",
+          "#f0eeeb"
+        ]
+      },
+      "warn-light": {
+        "role": "status",
+        "displayName": "Amber Warning (light)",
+        "canonical": "#8a5a00",
+        "tonalRamp": [
+          "#120901",
+          "#332107",
+          "#5b3a01",
+          "#845708",
+          "#a9772e",
+          "#cb9b5b",
+          "#e9c290",
+          "#ffebd3"
+        ]
+      },
+      "danger-light": {
+        "role": "status",
+        "displayName": "Ember Error (light)",
+        "canonical": "#b3261e",
+        "tonalRamp": [
+          "#1a0302",
+          "#44110d",
+          "#7a1611",
+          "#ac2a21",
+          "#d84c3f",
+          "#fb7767",
+          "#feb3a8",
+          "#ffe9e5"
         ]
       },
       "changed-light": {
         "role": "secondary",
         "displayName": "Copper Changed (light)",
+        "canonical": "#9a4a20",
         "tonalRamp": [
-          "#2b1708",
-          "#4b2810",
-          "#6e3a17",
-          "#9a4a20",
-          "#b8744a",
-          "#d2996b",
-          "#e7bf9c",
-          "#f5e1cc"
+          "#150702",
+          "#3a1c0d",
+          "#683012",
+          "#944923",
+          "#bc6940",
+          "#df8e68",
+          "#fab89a",
+          "#feeae1"
         ]
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Page title only, uppercase."
+        "spec": "Barlow Condensed 600, 2.5rem, line-height 1, uppercase",
+        "purpose": "the page title only (Characters, Playthroughs, a character's name, the player's name on a playthrough's Overview)."
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "Selected item's name in the details pane; app name in the top bar."
+        "spec": "Barlow Condensed 600, 1.375rem, uppercase",
+        "purpose": "the selected item's name in the details pane, and the app name in the top bar."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Sections column links and character tabs, uppercase."
+        "spec": "Barlow Condensed 500, 1.125rem, uppercase",
+        "purpose": "category links in the sections column and the tabs under a character."
       },
       "body": {
         "displayName": "Body",
-        "purpose": "Table cells, values and prose, tabular figures."
+        "spec": "Jost 400, 0.9375rem, line-height 1.5, tabular figures",
+        "purpose": "table cells, values, prose. Long text in the pane runs at line-height 1.6 with a 65ch measure."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Column heads, group headings, small caps labels."
+        "spec": "Barlow Condensed 500, 0.8125rem, 0.12em tracking, uppercase",
+        "purpose": "column heads, group headings, definition terms in caps, the playthrough and game-state labels, and the theme switch."
       },
       "button": {
         "displayName": "Button",
-        "purpose": "Buttons and the hint strip."
+        "spec": "Barlow Condensed 500, 0.9375rem, 0.12em tracking, uppercase",
+        "purpose": "buttons and the hint strip."
       },
       "file": {
         "displayName": "File",
-        "purpose": "A whole file as SkyrimNet stores it, shown or edited character for character."
+        "spec": "DM Mono 400, 0.8125rem, line-height 1.55",
+        "purpose": "a whole file as stored, in the raw bio editor and earlier versions."
       }
     },
     "shadows": [
       {
         "name": "modal-lift",
         "value": "0 1.5rem 3rem rgb(0 0 0 / 0.45)",
-        "purpose": "Quick-find dialog only; its backdrop is rgb(0 0 0 / 0.45)."
+        "purpose": "Only for the quick-find dialog, which floats over the page; its backdrop is rgb(0 0 0 / 0.45)."
       }
     ],
     "motion": [
       {
-        "name": "row-fly-in",
-        "value": "fly y 6px, 180ms (Svelte default easing)",
-        "purpose": "Memory and diary rows entering the table."
+        "name": "fly-in",
+        "value": "Svelte fly: y 6px, 180ms, default easing (cubicOut)",
+        "purpose": "A short fly-in (6px rise, 180ms). In the code it plays on the details pane's content each time the selection changes, on every list screen (memory and diary tables included)."
       },
       {
         "name": "reduced-motion",
-        "value": "transition and animation durations 0s",
-        "purpose": "Honors prefers-reduced-motion everywhere."
+        "value": "transition-duration: 0s; animation-duration: 0s",
+        "purpose": "Under prefers-reduced-motion: reduce, every transition and animation is instant."
       }
     ],
     "breakpoints": [
       {
         "name": "stack",
-        "value": "60rem"
+        "value": "60rem",
+        "purpose": "max-width: the sections column becomes a horizontal row under the top bar, the pane stacks below the table with a top rule, and less important columns hide."
       },
       {
         "name": "compact",
-        "value": "70rem"
+        "value": "70rem",
+        "purpose": "max-width: wide columns drop, two-column overview grids stack, and the memory and diary panes narrow to minmax(18rem, 22rem)."
+      },
+      {
+        "name": "wide",
+        "value": "90rem",
+        "purpose": "The Playthroughs list widens to 90rem so its table and pane sit side by side; under max-width 90rem a filter bar takes the pane's width too."
       }
-    ],
-    "background": {
-      "name": "smoked-glass",
-      "value": "radial-gradient(ellipse 70% 60% at 65% 25%, var(--smoke), var(--ground) 75%) fixed",
-      "purpose": "The body ground in both themes."
-    },
-    "focus": {
-      "value": "outline: 2px solid var(--accent); outline-offset: 2px",
-      "purpose": "All focus-visible states."
-    }
+    ]
   },
   "components": [
     {
       "name": "Button",
       "kind": "button",
       "refersTo": "button",
-      "description": "Outlined caps button; the border takes the accent on hover.",
-      "html": "<button class=\"ds-btn\">Cancel</button>",
-      "css": ".ds-btn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn:hover{border-color:var(--accent);} .ds-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}"
+      "description": "Quiet outlined caps; the border lights up in the accent on hover.",
+      "html": "<button type=\"button\" class=\"ds-btn\">Cancel</button> <button type=\"button\" class=\"ds-btn\" disabled>Restore</button>",
+      "css": ".ds-btn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn:hover:not(:disabled){border-color:var(--accent);} .ds-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-btn:disabled{opacity:0.5;cursor:not-allowed;}"
     },
     {
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one accent-filled action in a group, such as Save.",
-      "html": "<button class=\"ds-btn-primary\">Save</button>",
-      "css": ".ds-btn-primary{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:var(--accent);color:var(--on-accent);border:1px solid var(--accent);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn-primary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-btn-primary:disabled{opacity:.5;cursor:not-allowed;}"
+      "description": "Accent fill and border, accent-ink text. Used once per action group (Save, confirm).",
+      "html": "<button type=\"button\" class=\"ds-btn-primary\">Save</button>",
+      "css": ".ds-btn-primary{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);background:var(--accent);color:var(--on-accent);border:1px solid var(--accent);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-btn-primary:hover:not(:disabled){border-color:var(--accent);} .ds-btn-primary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-btn-primary:disabled{opacity:0.5;cursor:not-allowed;}"
     },
     {
       "name": "Text Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Smoked-glass field with a strong hairline and a accent caret.",
-      "html": "<input class=\"ds-input\" placeholder=\"Search memories\">",
-      "css": ".ds-input{font:400 var(--step-0)/1.5 var(--font-text);color:var(--ink);background:var(--glass-strong);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-2) var(--space-3);caret-color:var(--accent);} .ds-input::placeholder{color:var(--muted);} .ds-input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}"
+      "description": "Smoked-field fill, strong hairline, 3px radius; muted label above, muted placeholder, accent caret.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Find a character</span><input class=\"ds-input\" type=\"text\" placeholder=\"Name or ID\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:var(--space-1);max-width:16rem;} .ds-field-label{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step--1);color:var(--muted);} .ds-input{font:400 var(--step-0)/1.5 var(--font-text);color:var(--ink);background:var(--glass-strong);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-2) var(--space-3);caret-color:var(--accent);} .ds-input::placeholder{color:var(--muted);} .ds-input:hover{border-color:var(--rule-strong);} .ds-input:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}"
     },
     {
-      "name": "Item Table",
+      "name": "Item Table Row",
       "kind": "custom",
       "refersTo": "table-row-selected",
-      "description": "Sortable item list with the diamond marking the selected row and an accent group heading.",
-      "html": "<table class=\"ds-table\"><thead><tr><th class=\"ds-mark\"></th><th><button class=\"ds-sort ds-on\">When &#9662;</button></th><th><button class=\"ds-sort\">Memory</button></th><th class=\"ds-n\"><button class=\"ds-sort\">Imp.</button></th></tr></thead><tbody><tr class=\"ds-group\"><th colspan=\"4\">Fredas, 11th of Hearthfire</th></tr><tr class=\"ds-sel\"><td class=\"ds-mark\"><svg width=\"9\" height=\"9\" viewBox=\"0 0 10 10\"><path d=\"M5 0 10 5 5 10 0 5Z\" fill=\"var(--accent)\"/></svg></td><td>11:08 AM</td><td>A selected row</td><td class=\"ds-n\">0.55</td></tr><tr><td class=\"ds-mark\"></td><td>10:17 AM</td><td>Another row</td><td class=\"ds-n\">0.95</td></tr></tbody></table>",
-      "css": ".ds-table{width:100%;border-collapse:collapse;font:400 var(--step-0)/1.5 var(--font-text);font-variant-numeric:tabular-nums;color:var(--ink);} .ds-table th{text-align:left;padding:0;border-bottom:1px solid var(--rule-strong);font-weight:inherit;} .ds-sort{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:none;border:0;padding:var(--space-2) var(--space-3);font-size:var(--step--1);color:var(--muted);cursor:pointer;width:100%;text-align:inherit;} .ds-sort:hover,.ds-sort.ds-on{color:var(--accent);} .ds-table td{padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--rule);} .ds-mark{width:1.5rem;padding-right:0!important;} .ds-n{text-align:right!important;} .ds-table tbody tr:not(.ds-group):not(.ds-sel):hover td{background:var(--glass);} .ds-sel td{background:var(--select);} .ds-group th{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-5) var(--space-3) var(--space-1);color:var(--accent);font-size:var(--step--1);}"
+      "description": "The core of every list screen: a 1.5rem marker column holds the diamond on the selected row, which takes the select haze; rows tint glass under the pointer; group headings are accent label caps.",
+      "html": "<table class=\"ds-table\"><thead><tr><th class=\"ds-mark\"></th><th class=\"ds-head ds-head-sorted\">Name</th><th class=\"ds-head ds-num\">Memories</th></tr></thead><tbody><tr class=\"ds-group\"><th colspan=\"3\">Skyrim.esm</th></tr><tr class=\"ds-row ds-row-selected\"><td class=\"ds-mark\"><svg class=\"ds-diamond\" width=\"9\" height=\"9\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><path d=\"M5 0 10 5 5 10 0 5Z\"/></svg></td><td><a class=\"ds-row-link\" href=\"#\">Lydia</a></td><td class=\"ds-num\">1,204</td></tr><tr class=\"ds-row\"><td class=\"ds-mark\"></td><td><a class=\"ds-row-link\" href=\"#\">Faendal</a></td><td class=\"ds-num\">318</td></tr><tr class=\"ds-row ds-row-inactive\"><td class=\"ds-mark\"></td><td><a class=\"ds-row-link\" href=\"#\">Sven</a></td><td class=\"ds-num\">42</td></tr></tbody></table>",
+      "css": ".ds-table{width:100%;border-collapse:collapse;font:400 var(--step-0)/1.5 var(--font-text);font-variant-numeric:tabular-nums;color:var(--ink);} .ds-table td{padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--rule);} .ds-mark{width:1.5rem;padding-right:0 !important;} .ds-head{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step--1);color:var(--muted);text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px solid var(--rule-strong);cursor:pointer;} .ds-table thead .ds-mark{border-bottom:1px solid var(--rule-strong);} .ds-head:hover,.ds-head-sorted{color:var(--accent);} .ds-num{text-align:right;width:7rem;} .ds-group th{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step--1);color:var(--accent);text-align:left;padding:var(--space-5) var(--space-3) var(--space-1);border-bottom:1px solid var(--rule-strong);} .ds-row{cursor:default;} .ds-row:not(.ds-row-selected):hover td{background:var(--glass);} .ds-row-selected td{background:var(--select);} .ds-row-inactive td{color:var(--muted);} .ds-row-link{color:inherit;text-decoration:none;} .ds-row-link:hover{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:0.2em;} .ds-row-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-diamond{display:block;fill:var(--accent);}"
     },
     {
-      "name": "Details Pane",
-      "kind": "card",
-      "refersTo": "details-pane",
-      "description": "Opaque full-height zone beside the list holding the selected item.",
-      "html": "<aside class=\"ds-pane\"><h2>Serana</h2><dl><dt>Plugin</dt><dd>dawnguard.esm</dd><dt>Memories</dt><dd>51</dd></dl><button class=\"ds-pbtn\">Edit</button></aside>",
-      "css": ".ds-pane{width:22rem;padding:var(--space-5);background:var(--panel);border-left:1px solid var(--rule-strong);color:var(--ink);font:400 var(--step-0)/1.5 var(--font-text);} .ds-pane h2{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-weight:600;font-size:var(--step-2);margin:0 0 var(--space-1);} .ds-pane dl{display:grid;grid-template-columns:7.5rem 1fr;gap:var(--space-1) var(--space-3);margin:var(--space-4) 0;} .ds-pane dt{color:var(--muted);font-size:var(--step--1);} .ds-pane dd{margin:0;} .ds-pbtn{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:transparent;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:var(--space-1) var(--space-3);cursor:pointer;} .ds-pbtn:hover{border-color:var(--accent);}"
+      "name": "Stat List",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "A name-and-count list under an accent label-caps heading; a 2px accent bar at 55% opacity under each name, scaled to the count; counts muted and right-aligned.",
+      "html": "<section class=\"ds-stats\"><h2 class=\"ds-stats-head\">Who they talk to</h2><table class=\"ds-stats-table\"><tbody><tr><td class=\"ds-stats-name\"><a href=\"#\">Lydia</a><span class=\"ds-stats-bar\" style=\"width:100%\"></span></td><td class=\"ds-stats-n\">212</td></tr><tr><td class=\"ds-stats-name\"><a href=\"#\">Farengar Secret-Fire</a><span class=\"ds-stats-bar\" style=\"width:58%\"></span></td><td class=\"ds-stats-n\">123</td></tr><tr><td class=\"ds-stats-name\"><a href=\"#\">Belethor</a><span class=\"ds-stats-bar\" style=\"width:21%\"></span></td><td class=\"ds-stats-n\">44</td></tr></tbody></table></section>",
+      "css": ".ds-stats{max-width:22rem;font:400 var(--step-0)/1.5 var(--font-text);font-variant-numeric:tabular-nums;color:var(--ink);} .ds-stats-head{margin:0;font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);color:var(--accent);padding-bottom:var(--space-1);border-bottom:1px solid var(--rule-strong);} .ds-stats-table{width:100%;border-collapse:collapse;} .ds-stats-table td{padding:var(--space-1) 0;border-bottom:1px solid var(--rule);vertical-align:top;} .ds-stats-name{position:relative;padding-bottom:calc(var(--space-1) + 3px) !important;} .ds-stats-name a{color:inherit;text-decoration:none;} .ds-stats-name a:hover{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:0.2em;} .ds-stats-name a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-stats-bar{position:absolute;left:0;bottom:2px;height:2px;background:var(--accent);opacity:0.55;} .ds-stats-n{text-align:right;padding-left:var(--space-4) !important;color:var(--muted);width:1%;white-space:nowrap;}"
+    },
+    {
+      "name": "Stored Doorways",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "The Numbers Are Doors Rule: a stat list whose names open their section. Title-size caps links, muted at rest, beside a 1.25rem marker column; the diamond and select haze mark the row the arrow keys reach, and hover and focus move them.",
+      "html": "<ul class=\"ds-doors\" aria-label=\"Sections\"><li class=\"ds-door ds-door-current\"><span class=\"ds-door-mark\"><svg class=\"ds-diamond\" width=\"9\" height=\"9\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><path d=\"M5 0 10 5 5 10 0 5Z\"/></svg></span><a class=\"ds-door-link\" href=\"#\">Characters</a><span class=\"ds-door-n\">86</span><span class=\"ds-door-bar\" style=\"width:calc((100% - 1.25rem) * 0.42)\"></span></li><li class=\"ds-door\"><span class=\"ds-door-mark\"></span><a class=\"ds-door-link\" href=\"#\">Events</a><span class=\"ds-door-n\">2,048</span><span class=\"ds-door-bar\" style=\"width:calc(100% - 1.25rem)\"></span></li><li class=\"ds-door\"><span class=\"ds-door-mark\"></span><a class=\"ds-door-link\" href=\"#\">Memories</a><span class=\"ds-door-n\">731</span><span class=\"ds-door-bar\" style=\"width:calc((100% - 1.25rem) * 0.36)\"></span></li><li class=\"ds-door\"><span class=\"ds-door-mark\"></span><a class=\"ds-door-link\" href=\"#\">Diary</a><span class=\"ds-door-n\">57</span><span class=\"ds-door-bar\" style=\"width:calc((100% - 1.25rem) * 0.03)\"></span></li></ul>",
+      "css": ".ds-doors{list-style:none;margin:0;padding:0;max-width:22rem;font:400 var(--step-0)/1.5 var(--font-text);font-variant-numeric:tabular-nums;} .ds-door{position:relative;display:grid;grid-template-columns:1.25rem 1fr auto;align-items:baseline;padding:0.125rem 0 calc(0.125rem + 3px);border-bottom:1px solid var(--rule);} .ds-door-current,.ds-door:hover,.ds-door:focus-within{background:var(--select);} .ds-door-mark{display:inline-flex;justify-content:center;} .ds-door-link{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-1);color:var(--muted);text-decoration:none;} .ds-door-current .ds-door-link,.ds-door-link:hover{color:var(--ink);} .ds-door-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px;color:var(--ink);} .ds-door-n{color:var(--muted);padding-right:var(--space-2);} .ds-door-bar{position:absolute;left:1.25rem;bottom:2px;height:2px;background:var(--accent);opacity:0.55;} .ds-diamond{display:block;fill:var(--accent);}"
+    },
+    {
+      "name": "Diary Dateline",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The line above a diary excerpt: the author as a muted label-caps link, then day, place, and mood in muted label caps joined by middots, then the action as a text button at the right end; the excerpt keeps a 65ch measure and shows three lines.",
+      "html": "<article class=\"ds-diary\"><p class=\"ds-dateline\"><a class=\"ds-dateline-who\" href=\"#\">Lydia</a><span class=\"ds-dateline-when\">Sundas, 17th of Last Seed · Breezehome · Wistful</span><a class=\"ds-textbutton\" href=\"#\">Read it in History</a></p><p class=\"ds-entry\">The Thane came home late again, smelling of the barrow. I kept the fire going and said nothing, as a housecarl should.\nTomorrow we ride for Riverwood, and I have sharpened the blade twice already.\nI do not think I will sleep.\nThe wind off the Throat of the World is cold tonight.</p></article>",
+      "css": ".ds-diary{font:400 var(--step-0)/1.5 var(--font-text);color:var(--ink);} .ds-dateline{display:flex;align-items:baseline;gap:var(--space-3);font-size:var(--step--1);margin:0 0 var(--space-1);} .ds-dateline-who{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step--1);color:var(--muted);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:0.25em;text-decoration-color:color-mix(in srgb, var(--accent) 75%, var(--ground));} .ds-dateline-who:hover{color:var(--ink);text-decoration-color:var(--accent);} .ds-dateline-when{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);} .ds-textbutton{white-space:nowrap;color:var(--accent);text-decoration:underline;text-underline-offset:0.2em;} .ds-textbutton:hover{text-decoration-thickness:2px;} .ds-dateline a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-entry{margin:0;max-width:65ch;line-height:1.6;white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}"
     },
     {
       "name": "Button-Hint Strip",
       "kind": "custom",
       "refersTo": "hint-bar",
-      "description": "The signature: bottom strip of real keyboard shortcuts, each clickable.",
-      "html": "<nav class=\"ds-hints\"><button class=\"ds-hint\"><kbd>/</kbd>Find</button><button class=\"ds-hint\"><kbd>E</kbd>Edit</button><button class=\"ds-hint\" disabled><kbd>Del</kbd>Delete</button></nav>",
-      "css": ".ds-hints{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--space-2) var(--space-5);padding:var(--space-2) var(--space-6);background:var(--ground);border-top:1px solid var(--rule);} .ds-hint{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);display:flex;align-items:center;gap:var(--space-2);background:none;border:0;padding:0;color:var(--muted);font-size:var(--step-0);cursor:pointer;} .ds-hint:hover:not(:disabled){color:var(--ink);} .ds-hint:disabled{opacity:.45;cursor:not-allowed;} .ds-hint kbd{font:inherit;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:0 .4em;min-width:1.6em;text-align:center;}"
+      "description": "The signature: the game's button hints along the bottom of the viewport (shown here in place). Each hint is a button, a key cap followed by the action in muted caps; hover turns it ink, unavailable hints fade to 45%.",
+      "html": "<nav class=\"ds-hints\" aria-label=\"Keyboard shortcuts\"><button type=\"button\" class=\"ds-hint\"><kbd class=\"ds-key\">/</kbd>Find</button><button type=\"button\" class=\"ds-hint\"><kbd class=\"ds-key\">E</kbd>Edit</button><button type=\"button\" class=\"ds-hint\" disabled><kbd class=\"ds-key\">Del</kbd>Delete</button><button type=\"button\" class=\"ds-hint\"><kbd class=\"ds-key\">Enter</kbd>Open Lydia</button></nav>",
+      "css": ".ds-hints{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--space-2) var(--space-5);padding:var(--space-2) var(--space-6);background:var(--ground);border-top:1px solid var(--rule);} .ds-hint{display:flex;align-items:center;gap:var(--space-2);background:none;border:0;padding:0;font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);color:var(--muted);cursor:pointer;} .ds-hint:hover:not(:disabled){color:var(--ink);} .ds-hint:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-hint:disabled{opacity:0.45;cursor:not-allowed;} .ds-key{font:inherit;color:var(--ink);border:1px solid var(--rule-strong);border-radius:var(--radius);padding:0 0.4em;min-width:1.6em;text-align:center;}"
     },
     {
-      "name": "Tabs",
+      "name": "Sections Nav",
       "kind": "nav",
-      "refersTo": "tab-active",
-      "description": "Caps tabs over a hairline; the current tab is ink with an accent underline.",
-      "html": "<nav class=\"ds-tabs\"><a href=\"#\">Overview</a><a href=\"#\">Stats</a><a href=\"#\" aria-current=\"page\">Memories<span>51</span></a></nav>",
-      "css": ".ds-tabs{display:flex;gap:var(--space-6);border-bottom:1px solid var(--rule);} .ds-tabs a{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);padding:var(--space-2) 0;font-size:var(--step-1);color:var(--muted);text-decoration:none;margin-bottom:-1px;border-bottom:1px solid transparent;} .ds-tabs a:hover{color:var(--ink);} .ds-tabs a[aria-current=page]{color:var(--ink);font-weight:600;border-bottom:2px solid var(--accent);} .ds-tabs span{margin-left:var(--space-2);font-family:var(--font-text);font-size:var(--step--1);letter-spacing:0;color:var(--muted);}"
+      "refersTo": null,
+      "description": "The categories column: title-size caps in muted ink, the playthrough's own sections first and unlabeled, then settings groups under muted label-caps names; hover turns ink, and the current section (as built) is accent at weight 600.",
+      "html": "<nav class=\"ds-sections\" aria-label=\"Sections\"><ul class=\"ds-sections-list\"><li><a class=\"ds-section\" href=\"#\" aria-current=\"page\">Overview</a></li><li><a class=\"ds-section\" href=\"#\">Characters</a></li><li><a class=\"ds-section\" href=\"#\">History</a></li></ul><p class=\"ds-sections-group\">Memory settings</p><ul class=\"ds-sections-list\"><li><a class=\"ds-section\" href=\"#\">Recall</a></li><li><a class=\"ds-section\" href=\"#\">Diary</a></li></ul></nav>",
+      "css": ".ds-sections{width:13rem;padding:var(--space-5) var(--space-4) var(--space-5) var(--space-6);border-right:1px solid var(--rule);} .ds-sections-list{list-style:none;margin:0 0 var(--space-5);padding:0;} .ds-section{display:block;padding:var(--space-1) 0;font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-1);color:var(--muted);text-decoration:none;} .ds-section:hover{color:var(--ink);} .ds-section:focus-visible{outline:2px solid var(--accent);outline-offset:2px;} .ds-section[aria-current=\"page\"]{color:var(--accent);font-weight:600;} .ds-sections-group{margin:var(--space-4) 0 0;font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step--1);color:var(--muted);}"
     },
     {
-      "name": "Theme Switch",
+      "name": "Segmented Choice",
       "kind": "chip",
-      "refersTo": "button",
-      "description": "Outlined three-way radio group; the checked option gets the selection haze.",
-      "html": "<div class=\"ds-switch\" role=\"radiogroup\"><button role=\"radio\" aria-checked=\"false\">Auto</button><button role=\"radio\" aria-checked=\"true\">Dark</button><button role=\"radio\" aria-checked=\"false\">Light</button></div>",
-      "css": ".ds-switch{display:inline-flex;border:1px solid var(--rule-strong);border-radius:var(--radius);overflow:hidden;} .ds-switch button{font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);background:none;border:0;padding:0 var(--space-2);color:var(--muted);font-size:var(--step--1);cursor:pointer;} .ds-switch button[aria-checked=true]{background:var(--select);color:var(--ink);} .ds-switch button:hover{color:var(--ink);}"
+      "refersTo": null,
+      "description": "The theme switch and any segmented choice: a 3px-radius outlined group of caps options; the chosen one fills with the accent, in accent-ink text at weight 600.",
+      "html": "<div class=\"ds-segments\" role=\"radiogroup\" aria-label=\"Theme\"><button type=\"button\" class=\"ds-segment\" role=\"radio\" aria-checked=\"false\">Dark</button><button type=\"button\" class=\"ds-segment\" role=\"radio\" aria-checked=\"false\">Light</button><button type=\"button\" class=\"ds-segment\" role=\"radio\" aria-checked=\"true\">System</button></div>",
+      "css": ".ds-segments{display:inline-flex;border:1px solid var(--rule-strong);border-radius:var(--radius);overflow:hidden;} .ds-segment{background:none;border:0;padding:var(--space-1) var(--space-3);font-family:var(--font-label);font-weight:500;text-transform:uppercase;letter-spacing:var(--track);font-size:var(--step-0);color:var(--muted);white-space:nowrap;cursor:pointer;} .ds-segment + .ds-segment{border-left:1px solid var(--rule-strong);} .ds-segment[aria-checked=\"true\"] + .ds-segment,.ds-segment[aria-checked=\"true\"]{border-left-color:var(--accent);} .ds-segment[aria-checked=\"true\"]{background:var(--accent);color:var(--on-accent);font-weight:600;} .ds-segment:hover:not([aria-checked=\"true\"]){color:var(--ink);} .ds-segment:focus-visible{outline:2px solid var(--accent);outline-offset:2px;outline-offset:-2px;}"
     }
   ],
   "narrative": {
     "northStar": "The Game's Own Menus",
-    "overview": "Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and only one more color, copper, kept for what the player changed.\n\nThe world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. The accent is scarce and means \"this is selected\" or \"this is what you can do\". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.\n\nThe signature is the bottom button-hint strip: every hint is a real keyboard shortcut, and clicking the hint does the same thing. The SVG diamond marks the selected row, as it does in the game.",
+    "overview": "Hermaeus is one more menu of the game you just closed. Every screen is a categories column, a sortable item table, and a full-height details pane, set on smoked glass with hairline rules and driven from the keyboard. It deliberately refuses the admin-dashboard default of gray sidebar, cards, and a blue button: there are no cards, no filled surfaces beyond the details pane, and only one more color, copper, kept for what the player changed.\n\nThe world is dense and quiet. Text is Jost at a compact 15px with tabular figures so counts, times, and importance scores line up in columns; anything that labels rather than reads (categories, headings, column heads, keys, and buttons) is set in tracked, uppercase Barlow Condensed. The accent is scarce and means \"this is selected\" or \"this is what you can do\". Dark mode is the game's near-black menus; light mode is the same world in pale smoke, built from one token set with the same roles.\n\nThe signature is the bottom button-hint strip: every hint is a real keyboard shortcut, and clicking the hint does the same thing. The SVG diamond marks the selected row, as it does in the game.\n\nThe mark is the eye of Hermaeus Mora among his tentacles (`assets/`). In the top bar it sits before the wordmark in the text color, with the eye cut out so the ground shows through; as the app icon and favicon it is verdigris on the game's near-black, in a rounded square, with a tighter frame on the eye at 16 pixels.",
     "keyCharacteristics": [
       "Smoked-glass ground: a fixed radial gradient from a lighter smoke heart to the ground color.",
       "Hairline 1px rules (two strengths) instead of boxes, cards, or shadows.",
@@ -570,9 +619,24 @@
         "section": "typography"
       },
       {
+        "name": "The Template Markup Rule",
+        "body": "A prompt or bio shows its Inja markup set apart from its prose: statements (`{% if %}`, `{% block %}`) in the accent, since they're the structure that acts; expressions (`{{ npc.name }}`) in a heavier ink, since they're what gets filled in; comments muted and italic; strings muted; delimiters muted. Prose stays as it is. The same marks show while the text is edited.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Clipped Text Rule",
+        "body": "Text cut short with an ellipsis shows its whole self in a tip beneath it when the pointer rests there: the pane's material with a hairline edge, lifted by a soft shadow, never the browser's own tooltip. Text that fits shows nothing.",
+        "section": "elevation"
+      },
+      {
         "name": "The Hairline Rule",
         "body": "Separate with a 1px rule, never a box or a shadow. Use `rule` between rows and shell zones, `rule-strong` under column heads and group headings and around controls.",
         "section": "elevation"
+      },
+      {
+        "name": "The Numbers Are Doors Rule",
+        "body": "When a stat list's rows are the page's navigation (the Overview's Stored list), each name is a title-size caps link, muted at rest, beside a 1.25rem marker column. The diamond and the `select` haze mark the row the arrow keys reach; hover and focus move them, and Enter opens it, with the hint naming the row. Where a table beside it owns the arrow keys (the Playthroughs preview), the rows are plain links with no marker.",
+        "section": "components"
       }
     ],
     "dos": [
