@@ -51,7 +51,8 @@ type Action struct {
 	Name        string              `json:"name"`
 	Description string              `json:"description"` // a template, read by the model
 	Category    string              `json:"category,omitempty"`
-	Enabled     bool                `json:"enabled"`
+	Enabled     bool                `json:"enabled"`            // its switch in content-registry.json, or else its file
+	Override    string              `json:"override,omitempty"` // that switch, "enabled" or "disabled", when it has one
 	Priority    *int                `json:"priority,omitempty"`
 	Params      []Param             `json:"params"`
 	Rules       int                 `json:"rules"` // eligibility rules: who may take it, and when
@@ -74,7 +75,8 @@ type Trigger struct {
 	Origin       `tstype:",extends"` // its fields sent flat, as JSON embeds them
 	Name         string              `json:"name"`
 	Description  string              `json:"description"`
-	Enabled      bool                `json:"enabled"`
+	Enabled      bool                `json:"enabled"`            // its switch in content-registry.json, or else its file
+	Override     string              `json:"override,omitempty"` // that switch, when it has one
 	EventType    string              `json:"eventType"`
 	Conditions   []Condition         `json:"conditions"`
 	Audience     string              `json:"audience,omitempty"`
@@ -179,14 +181,16 @@ func on(v any) bool {
 // Actions lists every action in a file.
 func (r *Records) Actions() ActionList {
 	out := ActionList{Actions: []Action{}}
+	acts := r.library.Activations()
 	r.files("actions", func(o Origin, b []byte) {
 		var m map[string]any
 		if yaml.Unmarshal(b, &m) != nil || m == nil {
 			return
 		}
-		a := Action{Origin: o, Name: str(m["name"]), Description: str(m["description"]), Category: str(m["customCategory"]), Enabled: on(m["enabled"]),
+		a := Action{Origin: o, Name: str(m["name"]), Description: str(m["description"]), Category: str(m["customCategory"]), Override: acts[strings.ToLower(o.Path)],
 			Priority: intPtr(m["defaultPriority"]), Params: []Param{}, Quest: str(m["questEditorId"]), Script: str(m["scriptName"]), Function: str(m["executionFunctionName"]),
 			Event: str(m["eventString"])}
+		a.Enabled = layers.Activation(a.Override, on(m["enabled"]))
 		if a.Name == "" {
 			a.Name = o.ID
 		}
@@ -216,13 +220,15 @@ func (r *Records) Actions() ActionList {
 // Triggers lists every trigger.
 func (r *Records) Triggers() TriggerList {
 	out := TriggerList{Triggers: []Trigger{}}
+	acts := r.library.Activations()
 	r.files("triggers", func(o Origin, b []byte) {
 		var m map[string]any
 		if yaml.Unmarshal(b, &m) != nil || m == nil {
 			return
 		}
-		t := Trigger{Origin: o, Name: str(m["name"]), Description: str(m["description"]), Enabled: on(m["enabled"]), Conditions: []Condition{},
+		t := Trigger{Origin: o, Name: str(m["name"]), Description: str(m["description"]), Override: acts[strings.ToLower(o.Path)], Conditions: []Condition{},
 			Audience: str(m["audience"]), Cooldown: floatPtr(m["cooldownSeconds"]), Priority: intPtr(m["priority"]), Probability: floatPtr(m["probability"])}
+		t.Enabled = layers.Activation(t.Override, on(m["enabled"]))
 		if t.Name == "" {
 			t.Name = o.ID
 		}

@@ -373,16 +373,9 @@ func (p *Plugins) change(what string, modified int64, edit func(*registry) error
 		if err := edit(&reg); err != nil {
 			return err
 		}
-		var buf bytes.Buffer
-		enc := json.NewEncoder(&buf)
-		enc.SetEscapeHTML(false)
-		enc.SetIndent("", "  ")
-		if err := enc.Encode(reg.raw); err != nil {
+		out, err := layers.EncodeRegistry(reg.raw, old)
+		if err != nil {
 			return err
-		}
-		out := buf.Bytes()
-		if !bytes.HasSuffix(old, []byte("\n")) {
-			out = bytes.TrimRight(out, "\n")
 		}
 		if _, err := textfile.Backup(filepath.Join(p.store.BackupDir(), "content-registry.json"), old, 0o644); err != nil {
 			return apperr.New(apperr.Conflict, "Could not back up content-registry.json, so nothing was changed: %v", err)

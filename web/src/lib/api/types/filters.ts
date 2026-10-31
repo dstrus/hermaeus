@@ -27,6 +27,12 @@ export interface List {
   source: string; // the layer, for people
   replaces?: string; // the source of the list this copy replaces
   modified: number /* int64 */;
+  /**
+   * Enabled is whether SkyrimNet uses the list: its switch in
+   * content-registry.json, or else its file's enabled:. A list switched
+   * off adds nothing.
+   */
+  enabled: boolean;
 }
 /**
  * Source is one list an entry in effect comes from.

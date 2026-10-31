@@ -27,8 +27,15 @@ export interface Record {
   path: string; // e.g. triggers/PlayerDiaryExample.yaml
   kind: string;
   name: string;
-  enabled: boolean;
-  switch: boolean; // it says whether it's on, so it can be switched
+  enabled: boolean; // whether SkyrimNet uses it: its switch, or else its file
+  /**
+   * FileEnabled is what its file says (on without an enabled: line), and
+   * Override its switch in content-registry.json, "enabled" or "disabled",
+   * when it has one.
+   */
+  fileEnabled: boolean;
+  override?: string;
+  switch: boolean; // it can be switched: its file is a set of fields
   providers: Provider[]; // highest priority first; the first is used
   error?: string;
 }
@@ -129,7 +136,8 @@ export interface Action extends Origin {
   name: string;
   description: string; // a template, read by the model
   category?: string;
-  enabled: boolean;
+  enabled: boolean; // its switch in content-registry.json, or else its file
+  override?: string; // that switch, "enabled" or "disabled", when it has one
   priority?: number /* int */;
   params: Param[];
   rules: number /* int */; // eligibility rules: who may take it, and when
@@ -153,7 +161,8 @@ export interface Condition {
 export interface Trigger extends Origin {
   name: string;
   description: string;
-  enabled: boolean;
+  enabled: boolean; // its switch in content-registry.json, or else its file
+  override?: string; // that switch, when it has one
   eventType: string;
   conditions: Condition[];
   audience?: string;
@@ -183,9 +192,13 @@ export interface RecordEdit {
   modified: number /* int64 */; // the copy's time when read, 0 for none yet
   text: string;
 }
+/**
+ * Switch switches a record on or off in content-registry.json, or back to
+ * following its file.
+ */
 export interface Switch {
-  modified: number /* int64 */;
   enabled: boolean;
+  follow?: boolean; // drop the switch, so the record's file decides
 }
 export interface Revert {
   modified: number /* int64 */;
@@ -232,6 +245,7 @@ export interface VoiceEffect {
   path: string;
   name: string;
   enabled: boolean;
+  override?: string; // its switch in content-registry.json, when it has one
   sample: string; // "" for none
   stages: Stage[];
   providers: Provider[]; // highest priority first

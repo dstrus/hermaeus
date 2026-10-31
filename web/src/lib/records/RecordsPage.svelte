@@ -1,8 +1,8 @@
 <!-- A list of SkyrimNet records (actions, triggers), grouped by where each
      comes from, in the Plugins page's order, with the selected one in the
-     pane. A record can be switched off here, which the player's own copy of
-     it records; its file is edited on the Content page. -->
-<script lang="ts" generics="T extends Origin & { name: string; description: string; enabled: boolean }">
+     pane. A record can be switched on or off here, in content-registry.json
+     as SkyrimNet's dashboard does; its file is edited on the Content page. -->
+<script lang="ts" generics="T extends Origin & { name: string; description: string; enabled: boolean; override?: string }">
 	import type { Snippet } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import { invalidate } from '$app/navigation';
@@ -18,7 +18,8 @@
 	import { page } from '$app/state';
 	import { contentHref, pluginHref } from '#lib/plugins/links.ts';
 	import { param, setParams } from '#lib/ui/address.svelte.ts';
-	import { recordsDependency, sourceLabel, switchRecord } from './api.ts';
+	import { recordsDependency, sourceLabel, switchRecord, switched } from './api.ts';
+	import Overridden from './Overridden.svelte';
 
 	let {
 		title,
@@ -68,7 +69,7 @@
 		}
 	});
 
-	async function toggle() {
+	async function toggle(follow = false) {
 		const r = current;
 		if (!r || saving || readOnly) return;
 		saving = true;
@@ -76,9 +77,8 @@
 		notice = '';
 		noticeFor = r.path;
 		try {
-			await switchRecord(r.path, !r.enabled);
-			const made = r.layerKind === 'overlay' ? '' : ' Hermaeus made your own copy of it, with only its switch changed.';
-			notice = r.enabled ? `Switched off.${made} SkyrimNet ignores it from the next time it starts.` : `Switched on.${made} SkyrimNet uses it from the next time it starts.`;
+			await switchRecord(r.path, !r.enabled, follow);
+			notice = switched(!r.enabled, follow);
 			await invalidate(recordsDependency);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -90,7 +90,7 @@
 	useShortcuts(() => [
 		{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
 		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-		{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !current, disabled: readOnly || saving, run: toggle }
+		{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !current, disabled: readOnly || saving, run: () => toggle() }
 	]);
 </script>
 
@@ -145,11 +145,12 @@
 					<h2 class="caps">{r.name}</h2>
 					<p class="muted small"><a href={pluginHref(save, r.layer)}>{sourceLabel(r)}</a> · <span class="id">{r.path}</span></p>
 					{#if !r.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
+					<Overridden override={r.override} disabled={readOnly || saving} onfollow={() => toggle(true)} />
 					{#if r.replaces}<p class="muted small">Replaces the one from {r.replaces}.</p>{/if}
 					{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 					{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 					<div class="buttons">
-						<button type="button" class="button" onclick={toggle} disabled={readOnly || saving}>{r.enabled ? 'Switch off' : 'Switch on'}</button>
+						<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{r.enabled ? 'Switch off' : 'Switch on'}</button>
 						<a class="small" href={contentHref(save, r.path)}>Its file, on the Content page</a>
 					</div>
 					{@render pane(r)}

@@ -1,7 +1,8 @@
 <!-- Every record file SkyrimNet reads (actions, triggers, filters, voice
      effects, and the rest), grouped by kind, with the selected one's file in
-     the pane. A record can be switched, or edited as the player's own copy,
-     which replaces the plugin's or SkyrimNet's in every playthrough. -->
+     the pane. A record can be switched on or off in content-registry.json,
+     as SkyrimNet's dashboard does, or edited as the player's own copy, which
+     replaces the plugin's or SkyrimNet's in every playthrough. -->
 <script lang="ts">
 	import { invalidate } from '$app/navigation';
 	import { page } from '$app/state';
@@ -22,7 +23,8 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
-	import { getVersions, layerName, recordsDependency, removeRecordCopy, saveRecord, switchRecord } from './api.ts';
+	import { getVersions, layerName, recordsDependency, removeRecordCopy, saveRecord, switchRecord, switched } from './api.ts';
+	import Overridden from './Overridden.svelte';
 
 	let { list }: { list: ContentList } = $props();
 
@@ -125,11 +127,10 @@
 		}
 	}
 
-	function toggle() {
+	function toggle(follow = false) {
 		const r = current;
 		if (!r?.switch) return;
-		const made = mine ? '' : ' Hermaeus made your own copy of it, with only its switch changed.';
-		act(() => switchRecord(r.path, !r.enabled), r.enabled ? `Switched off.${made} SkyrimNet ignores it from the next time it starts.` : `Switched on.${made} SkyrimNet uses it from the next time it starts.`);
+		act(() => switchRecord(r.path, !r.enabled, follow), switched(!r.enabled, follow));
 	}
 
 	async function submit() {
@@ -167,7 +168,7 @@
 			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !reading, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !reading, run: () => selection.move(-1) },
 			{ key: 'e', shown: 'E', label: mine ? 'Edit' : 'Edit as your copy', hidden: !reading || !current, disabled: readOnly || using?.text === undefined, run: startEdit },
-			{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !reading || !current?.switch, disabled: readOnly || saving || !versions, run: toggle },
+			{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !reading || !current?.switch, disabled: readOnly || saving, run: () => toggle() },
 			...deleteShortcuts({ label: 'Remove your copy', hidden: !reading || !mine, disabled: readOnly || saving, run: remove }),
 			{ key: 'n', shown: 'N', label: 'New record', hidden: !reading, disabled: readOnly, run: () => setParams({ mode: 'new' }) },
 			{ key: 'Enter', label: 'Save', command: true, hidden: mode !== 'yaml', disabled: saving, run: submit },
@@ -269,10 +270,11 @@
 						</p>
 						{#if r.error}<p class="notice error">SkyrimNet can’t read this file: {r.error}</p>{/if}
 						{#if !r.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
+						<Overridden override={r.override} disabled={readOnly || saving} onfollow={() => toggle(true)} />
 						{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 						{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 						<div class="buttons">
-							{#if r.switch}<button type="button" class="button" onclick={toggle} disabled={readOnly || saving || !versions}>{r.enabled ? 'Switch off' : 'Switch on'}</button>{/if}
+							{#if r.switch}<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{r.enabled ? 'Switch off' : 'Switch on'}</button>{/if}
 							<button type="button" class="button" onclick={startEdit} disabled={readOnly || using?.text === undefined}>{mine ? 'Edit' : 'Edit as your copy'}</button>
 							{#if mine}<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>Remove your copy</button>{/if}
 						</div>

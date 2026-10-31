@@ -49,13 +49,18 @@ type Provider struct {
 
 // Record is one record, the highest layer's copy in use.
 type Record struct {
-	Path      string     `json:"path"` // e.g. triggers/PlayerDiaryExample.yaml
-	Kind      string     `json:"kind"`
-	Name      string     `json:"name"`
-	Enabled   bool       `json:"enabled"`
-	Switch    bool       `json:"switch"`    // it says whether it's on, so it can be switched
-	Providers []Provider `json:"providers"` // highest priority first; the first is used
-	Error     string     `json:"error,omitempty"`
+	Path    string `json:"path"` // e.g. triggers/PlayerDiaryExample.yaml
+	Kind    string `json:"kind"`
+	Name    string `json:"name"`
+	Enabled bool   `json:"enabled"` // whether SkyrimNet uses it: its switch, or else its file
+	// FileEnabled is what its file says (on without an enabled: line), and
+	// Override its switch in content-registry.json, "enabled" or "disabled",
+	// when it has one.
+	FileEnabled bool       `json:"fileEnabled"`
+	Override    string     `json:"override,omitempty"`
+	Switch      bool       `json:"switch"`    // it can be switched: its file is a set of fields
+	Providers   []Provider `json:"providers"` // highest priority first; the first is used
+	Error       string     `json:"error,omitempty"`
 }
 
 type ContentList struct {
@@ -158,6 +163,7 @@ func (r *Records) Content() ContentList {
 		}
 	}
 	out := ContentList{Layers: lay, Kinds: Kinds, Records: make([]Record, 0, len(byPath))}
+	acts := r.library.Activations()
 	for _, providers := range byPath {
 		top := providers[0]
 		kind, _, _ := strings.Cut(top.Path, "/")
@@ -175,12 +181,12 @@ func (r *Records) Content() ContentList {
 						break
 					}
 				}
-				if e, ok := m["enabled"].(bool); ok {
-					rec.Enabled, rec.Switch = e, true
-				} else if kind == "triggers" || kind == "actions" || kind == "voice_effects" {
-					rec.Switch = true // on unless it says otherwise; switching adds the key
-				}
+				rec.FileEnabled, rec.Switch = on(m["enabled"]), m != nil
 			}
+		}
+		if rec.Error == "" {
+			rec.Override = acts[strings.ToLower(rec.Path)]
+			rec.Enabled = layers.Activation(rec.Override, rec.FileEnabled)
 		}
 		out.Records = append(out.Records, rec)
 	}

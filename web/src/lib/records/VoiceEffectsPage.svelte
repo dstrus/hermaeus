@@ -20,7 +20,8 @@
 	import { contentHref } from '#lib/plugins/links.ts';
 	import LimitsNotice from './LimitsNotice.svelte';
 	import { href } from '#lib/nav.ts';
-	import { layerName, recordsDependency, removeRecordCopy, saveVoiceEffect, switchRecord } from './api.ts';
+	import { layerName, recordsDependency, removeRecordCopy, saveVoiceEffect, switchRecord, switched } from './api.ts';
+	import Overridden from './Overridden.svelte';
 
 	let { list: loaded }: { list: VoiceEffectList } = $props();
 
@@ -92,11 +93,10 @@
 		}
 	}
 
-	function toggle() {
+	function toggle(follow = false) {
 		const e = current;
 		if (!e) return;
-		const made = mineOf(e) ? '' : ' Hermaeus made your own copy of it, with only its switch changed.';
-		run(e.id, () => switchRecord(e.path, !e.enabled), e.enabled ? `Switched off.${made} SkyrimNet stops using it from the next time it starts.` : `Switched on.${made}`);
+		run(e.id, () => switchRecord(e.path, !e.enabled, follow), switched(!e.enabled, follow));
 	}
 
 	function remove() {
@@ -198,7 +198,7 @@
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !reading, run: () => selection.move(-1) },
 			{ key: 'n', shown: 'N', label: 'New effect', hidden: !reading, disabled: readOnly, run: startNew },
 			{ key: 'e', shown: 'E', label: mine ? 'Edit' : 'Edit as your copy', hidden: !reading || !current, disabled: readOnly, run: startEdit },
-			{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !reading || !current, disabled: readOnly || saving, run: toggle },
+			{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !reading || !current, disabled: readOnly || saving, run: () => toggle() },
 			...deleteShortcuts({ label: 'Remove your copy', hidden: !reading || !mine, disabled: readOnly || saving, run: remove }),
 			{ key: 'Enter', label: 'Save', command: true, hidden: reading, disabled: saving, run: submit },
 			{ key: 'Escape', shown: 'Esc', label: 'Cancel', hidden: reading, run: () => leave('mode') }
@@ -347,10 +347,11 @@
 						</p>
 						{#if e.error}<p class="notice error">SkyrimNet can’t read this file: {e.error}</p>{/if}
 						{#if !e.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
+						<Overridden override={e.override} disabled={readOnly || saving} onfollow={() => toggle(true)} />
 						{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 						{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 						<div class="buttons">
-							<button type="button" class="button" onclick={toggle} disabled={readOnly || saving}>{e.enabled ? 'Switch off' : 'Switch on'}</button>
+							<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{e.enabled ? 'Switch off' : 'Switch on'}</button>
 							<button type="button" class="button" onclick={startEdit} disabled={readOnly || !!e.error}>{mineOf(e) ? 'Edit' : 'Edit as your copy'}</button>
 							{#if mineOf(e)}<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>Remove your copy</button>{/if}
 						</div>

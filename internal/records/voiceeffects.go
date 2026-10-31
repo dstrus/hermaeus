@@ -96,7 +96,8 @@ type VoiceEffect struct {
 	Path      string     `json:"path"`
 	Name      string     `json:"name"`
 	Enabled   bool       `json:"enabled"`
-	Sample    string     `json:"sample"` // "" for none
+	Override  string     `json:"override,omitempty"` // its switch in content-registry.json, when it has one
+	Sample    string     `json:"sample"`             // "" for none
 	Stages    []Stage    `json:"stages"`
 	Providers []Provider `json:"providers"` // highest priority first
 	Error     string     `json:"error,omitempty"`
@@ -135,7 +136,7 @@ func (r *Records) VoiceEffects() VoiceEffectList {
 			continue
 		}
 		id := strings.TrimSuffix(filepath.Base(rec.Path), filepath.Ext(rec.Path))
-		e := VoiceEffect{ID: id, Path: rec.Path, Name: rec.Name, Enabled: rec.Enabled, Stages: []Stage{}, Providers: rec.Providers, Error: rec.Error, Triggers: byEffect[id]}
+		e := VoiceEffect{ID: id, Path: rec.Path, Name: rec.Name, Enabled: rec.Enabled, Override: rec.Override, Stages: []Stage{}, Providers: rec.Providers, Error: rec.Error, Triggers: byEffect[id]}
 		if e.Triggers == nil {
 			e.Triggers = []EffectTrigger{}
 		}

@@ -158,25 +158,62 @@ eligibilityRules:
 	if a := c.Records[1]; !a.Switch || !a.Enabled {
 		t.Errorf("an action without enabled = %+v", a)
 	}
-	if f := c.Records[2]; f.Switch {
-		t.Errorf("a filter list has no switch: %+v", f)
+	if f := c.Records[2]; !f.Switch {
+		t.Errorf("a filter list can be switched too: %+v", f)
 	}
 
-	// Switching an action off copies it into your edits, changing one line
-	// and keeping its comments.
+	// Switching is SkyrimNet's dashboard's way: an entry in the registry's
+	// items, the file left alone and no copy made.
+	registry := func() string {
+		b, _ := os.ReadFile(filepath.Join(h.Dir, "content-registry.json"))
+		return string(b)
+	}
 	if _, err := h.r.SetEnabled("actions/acceptbrawl.yaml", Switch{Enabled: false}); err != nil {
 		t.Fatal(err)
 	}
-	if got := h.mine("actions/acceptbrawl.yaml"); got != src+"enabled: false\n" {
-		t.Errorf("switched off =\n%s", got)
+	if got := registry(); !strings.Contains(got, `"items": {
+    "actions/acceptbrawl.yaml": "disabled"
+  },`) || !strings.Contains(got, `"priority": [`) {
+		t.Errorf("registry after switching off =\n%s", got)
 	}
-	// The trigger's own enabled is changed in place, its quoting kept.
-	if _, err := h.r.SetEnabled("triggers/wave.yaml", Switch{Enabled: false}); err != nil {
+	if h.mine("actions/acceptbrawl.yaml") != "" {
+		t.Error("switching made a copy")
+	}
+	if a := h.r.Content().Records[1]; a.Enabled || !a.FileEnabled || a.Override != "disabled" {
+		t.Errorf("switched-off action = %+v", a)
+	}
+	for _, a := range h.r.Actions().Actions {
+		if a.Name == "AcceptBrawl" && (a.Enabled || a.Override != "disabled") {
+			t.Errorf("Actions lists it as %+v", a)
+		}
+	}
+	// Switching it back to what its file says drops the entry, as the
+	// dashboard does.
+	if _, err := h.r.SetEnabled("actions/acceptbrawl.yaml", Switch{Enabled: true}); err != nil {
 		t.Fatal(err)
 	}
-	if got := h.mine("triggers/wave.yaml"); !strings.Contains(got, "enabled: false\n") || !strings.Contains(got, `content: "Time to rest."`) {
-		t.Errorf("trigger = %q", got)
+	if strings.Contains(registry(), "acceptbrawl") {
+		t.Errorf("registry still has the action:\n%s", registry())
 	}
+	// Following the file drops a switch too.
+	h.r.SetEnabled("triggers/wave.yaml", Switch{Enabled: false})
+	for _, tr := range h.r.Triggers().Triggers {
+		if tr.Name == "wave" && tr.Enabled {
+			t.Error("the switched-off trigger is listed as on")
+		}
+	}
+	if _, err := h.r.SetEnabled("triggers/wave.yaml", Switch{Follow: true}); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(registry(), "wave") {
+		t.Errorf("registry still has the trigger:\n%s", registry())
+	}
+	// SkyrimNet's own spelling of a record's path is found whatever its case.
+	write(t, filepath.Join(h.Dir, "content-registry.json"), `{"items": {"Triggers/Wave.yaml": "disabled"}, "plugins": {"a.pack": {}}, "priority": ["a.pack"]}`)
+	if tr := h.r.Content().Records[0]; tr.Enabled || tr.Override != "disabled" {
+		t.Errorf("a switch in another case is missed: %+v", tr)
+	}
+	write(t, filepath.Join(h.Dir, "content-registry.json"), `{"plugins": {"a.pack": {}}, "priority": ["a.pack"]}`)
 
 	// Saving your copy keeps the line endings of what it replaces.
 	v, err := h.r.SaveRecord("voice_effects/draugr.yaml", RecordEdit{Text: "id: draugr\nname: Draugr lord\nstages:\n  - type: pitch_shift\n    params:\n      semitones: -6.0\n"})
@@ -222,10 +259,10 @@ eligibilityRules:
 		t.Fatal(err)
 	}
 
-	// Reverting removes your copy, bringing back the plugin's.
-	v, _ = h.r.Versions("triggers/wave.yaml")
-	v, err = h.r.RevertRecord("triggers/wave.yaml", Revert{Modified: v[0].Modified})
-	if err != nil || len(v) != 1 || h.mine("triggers/wave.yaml") != "" {
+	// Reverting removes your copy, bringing back the one below.
+	v, _ = h.r.Versions("voice_effects/draugr.yaml")
+	v, err = h.r.RevertRecord("voice_effects/draugr.yaml", Revert{Modified: v[0].Modified})
+	if err != nil || len(v) != 1 || h.mine("voice_effects/draugr.yaml") != "" {
 		t.Errorf("after reverting: %+v, %v", v, err)
 	}
 	// Reverting a record only you have leaves nothing.

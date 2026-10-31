@@ -1,6 +1,8 @@
 package records
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,7 +11,6 @@ import (
 
 	"hermaeus/internal/apperr"
 	"hermaeus/internal/layers"
-	"hermaeus/internal/settings"
 	"hermaeus/internal/textfile"
 
 	"go.yaml.in/yaml/v3"
@@ -21,9 +22,11 @@ type RecordEdit struct {
 	Text     string `json:"text"`
 }
 
+// Switch switches a record on or off in content-registry.json, or back to
+// following its file.
 type Switch struct {
-	Modified int64 `json:"modified"`
-	Enabled  bool  `json:"enabled"`
+	Enabled bool `json:"enabled"`
+	Follow  bool `json:"follow,omitempty"` // drop the switch, so the record's file decides
 }
 
 type Revert struct {
@@ -70,44 +73,75 @@ func (r *Records) SaveRecord(rel string, e RecordEdit) ([]Version, error) {
 	return r.Versions(rel)
 }
 
-// SetEnabled switches a record on or off in the player's copy, changing
-// only that line of the version it replaces.
+// SetEnabled switches a record on or off the way SkyrimNet's dashboard
+// does, in content-registry.json, leaving its file alone. The registry keeps
+// a switch only while it differs from the file, so switching a record to
+// what its file says, or asking to follow the file, drops it.
 func (r *Records) SetEnabled(rel string, s Switch) ([]Version, error) {
 	rel, err := recordPath(rel)
 	if err != nil {
 		return nil, err
 	}
 	what := "Switched on " + rel
-	if !s.Enabled {
+	switch {
+	case s.Follow:
+		what = rel + " follows its file again"
+	case !s.Enabled:
 		what = "Switched off " + rel
 	}
-	err = r.saveCopy(rel, s.Modified, what, func(from []byte) (string, error) {
-		if len(from) == 0 {
-			return "", apperr.New(apperr.NotFound, "No layer has %s", rel)
+	err = r.store.ChangeFiles(what, func() error {
+		path, from := r.winning(rel)
+		if from == nil {
+			return apperr.New(apperr.NotFound, "No layer has %s", rel)
 		}
-		out, err := settings.EditYAML(from, func(doc *yaml.Node) error {
-			if doc.Kind != yaml.MappingNode {
-				return apperr.New(apperr.Invalid, "%s isn't a set of fields, so it can't be switched here", rel)
+		var m map[string]any
+		yaml.Unmarshal(from, &m)
+		word := ""
+		if !s.Follow && s.Enabled != on(m["enabled"]) {
+			word = layers.Disabled
+			if s.Enabled {
+				word = layers.Enabled
 			}
-			v := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!bool", Value: fmt.Sprint(s.Enabled)}
-			for i := 0; i+1 < len(doc.Content); i += 2 {
-				if doc.Content[i].Value == "enabled" {
-					doc.Content[i+1] = v
-					return nil
-				}
-			}
-			doc.Content = append(doc.Content, &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "enabled"}, v)
-			return nil
-		})
+		}
+		regPath := r.library.RegistryPath()
+		old, err := os.ReadFile(regPath)
 		if err != nil {
-			return "", err
+			return apperr.New(apperr.Unavailable, "SkyrimNet hasn’t made content-registry.json yet, so records can’t be switched until it has started once")
 		}
-		return textfile.Normalize(string(out)), nil
+		raw := map[string]any{}
+		if err := json.Unmarshal(old, &raw); err != nil {
+			return apperr.New(apperr.Invalid, "Could not read content-registry.json: %v", err)
+		}
+		layers.SetActivation(raw, path, word)
+		out, err := layers.EncodeRegistry(raw, old)
+		if err != nil || bytes.Equal(out, old) {
+			return err
+		}
+		if _, err := textfile.Backup(filepath.Join(r.store.BackupDir(), "content-registry.json"), old, 0o644); err != nil {
+			return apperr.New(apperr.Conflict, "Could not back up content-registry.json, so nothing was changed: %v", err)
+		}
+		return textfile.WriteAtomic(regPath, out, 0o644)
 	})
 	if err != nil {
 		return nil, err
 	}
 	return r.Versions(rel)
+}
+
+// winning is the file SkyrimNet uses for a record, from the highest layer
+// that has it: its path under that layer, as spelled there, and its bytes.
+func (r *Records) winning(rel string) (string, []byte) {
+	for _, l := range r.library.Layers() {
+		if p := layers.Lookup(l.Root, rel); p != "" {
+			b, err := os.ReadFile(p)
+			if err != nil {
+				return "", nil
+			}
+			spelled, _ := filepath.Rel(l.Root, p)
+			return filepath.ToSlash(spelled), b
+		}
+	}
+	return "", nil
 }
 
 // RevertRecord removes the player's copy, so the version below applies

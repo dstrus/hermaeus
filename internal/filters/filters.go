@@ -47,6 +47,10 @@ type List struct {
 	Source      string              `json:"source"`             // the layer, for people
 	Replaces    string              `json:"replaces,omitempty"` // the source of the list this copy replaces
 	Modified    int64               `json:"modified"`
+	// Enabled is whether SkyrimNet uses the list: its switch in
+	// content-registry.json, or else its file's enabled:. A list switched
+	// off adds nothing.
+	Enabled bool `json:"enabled"`
 }
 
 // Source is one list an entry in effect comes from.
@@ -88,6 +92,7 @@ func (f *Filters) Lists(kind string) (ListsResponse, error) {
 	}
 	out := ListsResponse{Kind: kind, Lists: []List{}, InEffect: map[string][]Entry{}}
 	seen := map[string]int{} // folded id → index in out.Lists
+	acts := f.library.Activations()
 	for _, l := range f.library.Layers() {
 		dir := layers.Lookup(l.Root, "filters")
 		if dir == "" {
@@ -112,6 +117,7 @@ func (f *Filters) Lists(kind string) (ListsResponse, error) {
 				continue
 			}
 			list.Layer, list.LayerKind, list.Source = l.ID, l.Kind, l.Source
+			list.Enabled = layers.Activation(acts[strings.ToLower("filters/"+name)], list.Enabled)
 			seen[key] = len(out.Lists)
 			out.Lists = append(out.Lists, list)
 		}
@@ -127,6 +133,9 @@ func (f *Filters) Lists(kind string) (ListsResponse, error) {
 		var entries []Entry
 		at := map[string]int{}
 		for _, l := range out.Lists {
+			if !l.Enabled {
+				continue
+			}
 			for _, v := range l.Entries[field] {
 				k := strings.ToLower(v)
 				if i, ok := at[k]; ok {
@@ -161,6 +170,8 @@ func readList(path, kind string) (List, bool) {
 	}
 	l := List{ID: strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)), Entries: map[string][]string{}}
 	l.Name, _ = in["name"].(string)
+	e, ok := in["enabled"].(bool)
+	l.Enabled = !ok || e
 	l.Description, _ = in["description"].(string)
 	if l.Name == "" {
 		l.Name = l.ID

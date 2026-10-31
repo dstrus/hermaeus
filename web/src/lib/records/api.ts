@@ -52,14 +52,19 @@ export function removeRecordCopy(path: string, r: Revert): Promise<Version[]> {
 	return request<Version[]>('DELETE', filePath('file', path), r);
 }
 
-// switchRecord switches a record on or off in your copy of it, making that
-// copy if there isn't one. It reads the record first, for your copy's time.
-export async function switchRecord(path: string, enabled: boolean): Promise<Version[]> {
-	const mine = (await getVersions(path)).find((v) => v.kind === 'overlay');
-	return request<Version[]>('PUT', filePath('enabled', path), {
-		modified: mine?.modified ?? 0,
-		enabled
-	} satisfies Switch);
+// switchRecord switches a record on or off in content-registry.json, as
+// SkyrimNet's dashboard does, leaving its file alone; follow drops the
+// switch, so its file decides again.
+export function switchRecord(path: string, enabled: boolean, follow = false): Promise<Version[]> {
+	return request<Version[]>('PUT', filePath('enabled', path), { enabled, follow } satisfies Switch);
+}
+
+// switched is what a switch did, for the page's notice.
+export function switched(enabled: boolean, follow = false): string {
+	if (follow) return 'Its switch is gone from content-registry.json, so its file decides again, from the next time SkyrimNet starts.';
+	return enabled
+		? 'Switched on in content-registry.json, as SkyrimNet’s dashboard does; its file is unchanged. SkyrimNet uses it from the next time it starts.'
+		: 'Switched off in content-registry.json, as SkyrimNet’s dashboard does; its file is unchanged. SkyrimNet ignores it from the next time it starts.';
 }
 
 // layerName names a content layer, as sourceLabel does for a record.

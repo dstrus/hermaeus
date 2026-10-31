@@ -101,6 +101,19 @@ func TestListsAddUp(t *testing.T) {
 	}
 	_, err = h.filters.Lists("dialogue_rule")
 	kindOf(t, err, apperr.Invalid)
+
+	// A list switched off in content-registry.json, as SkyrimNet's dashboard
+	// removes one, adds nothing.
+	write(t, filepath.Join(h.Dir, "content-registry.json"), `{"items": {"filters/mannequins_no_memories.yaml": "disabled"}, "plugins": {"someone.dogs": {"enabled": true}}, "priority": ["someone.dogs"]}`)
+	r, _ = h.filters.Lists("memory")
+	if r.Lists[2].Enabled || !r.Lists[0].Enabled {
+		t.Errorf("lists = %+v", r.Lists)
+	}
+	for _, e := range r.InEffect["RaceBlacklist"] {
+		if e.Value == "ManakinRace" {
+			t.Error("a switched-off list's entry is in effect")
+		}
+	}
 }
 
 func TestYourListsAndCopies(t *testing.T) {
