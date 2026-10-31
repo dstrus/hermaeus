@@ -29,6 +29,7 @@ import (
 	"hermaeus/internal/settings"
 	"hermaeus/internal/songs"
 	"hermaeus/internal/store"
+	"hermaeus/internal/summary"
 )
 
 // Placeholders in index.html (see app.html): the session's token, and the
@@ -103,6 +104,7 @@ func (s *Server) routes() {
 	records.New(s.Store, s.Library).Routes(m)
 	screenshots.Routes(m, s.Store)
 	songs.Routes(m, s.Store)
+	summary.Routes(m, s.Store)
 
 	m.Handle("/api/", httpapi.JSON(func(r *http.Request, _ httpapi.None) (httpapi.None, error) {
 		return httpapi.None{}, apperr.New(apperr.NotFound, "Unknown endpoint: %s %s", r.Method, r.URL.Path)

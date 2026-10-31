@@ -196,7 +196,7 @@ A near-monochrome palette, off-white on near-black (or near-black on pale smoke)
 **Character:** Barlow Condensed in tracked capitals is the game's menu voice, crisp and narrow; Jost is a calm geometric text face that stays legible at small sizes. DM Mono, geometric like Jost, is for a file shown or edited as SkyrimNet stores it, where markup and Markdown must be seen character for character. The scale is short (five steps) because the interface is a menu, not a document.
 
 ### Hierarchy
-- **Display** (Barlow Condensed 600, 2.5rem, line-height 1, uppercase): the page title only (Characters, Playthroughs, a character's name).
+- **Display** (Barlow Condensed 600, 2.5rem, line-height 1, uppercase): the page title only (Characters, Playthroughs, a character's name, the player's name on a playthrough's Overview).
 - **Headline** (Barlow Condensed 600, 1.375rem, uppercase): the selected item's name in the details pane, and the app name in the top bar.
 - **Title** (Barlow Condensed 500, 1.125rem, uppercase): category links in the sections column and the tabs under a character.
 - **Body** (Jost 400, 0.9375rem, line-height 1.5, tabular figures): table cells, values, prose. Long text in the pane runs at line-height 1.6 with a 65ch measure.
@@ -213,7 +213,7 @@ A near-monochrome palette, off-white on near-black (or near-black on pale smoke)
 
 The shell is a CSS grid: a full-width top bar, then a 13rem sections column beside the main area, with the hint strip fixed along the bottom. The top bar holds the name at left and the playthrough select, Skyrim's state, and the theme switch at right. Main content has 1.5rem top padding, 2rem side padding and 5rem bottom padding to clear the hint strip.
 
-List screens split into the item table and a details pane of `clamp(18rem, 26vw, 24rem)` (the memory and diary tables use `minmax(20rem, 26rem)`, narrowing to `minmax(18rem, 22rem)` under 70rem). The pane sticks to the top and is sized by script to end exactly at the hint strip, so a form's Save stays in view. A filter bar above the table stops at the pane's edge.
+List screens split into the item table and a details pane of `clamp(18rem, 26vw, 24rem)` (the memory and diary tables use `minmax(20rem, 26rem)`, narrowing to `minmax(18rem, 22rem)` under 70rem). The pane sticks to the top and is sized by script to end exactly at the hint strip, so a form's Save stays in view. A filter bar above the table stops at the pane's edge. The Playthroughs list, outside any playthrough, has no sections column; its main area widens to 90rem so the table and its pane sit side by side. A playthrough's Overview splits the same way: the story column (the latest diary, then the newest events) beside a pane of what's stored.
 
 Spacing follows a seven-step scale from 0.25rem to 2.5rem; table cells use 0.5rem by 0.75rem, gaps between zones use 1.5rem, and section gaps on overview grids use 2.5rem.
 
@@ -267,17 +267,23 @@ The core of every list screen.
 - Opaque `panel` fill, a `rule-strong` left edge, 1.5rem padding, sticky at the top, sized to end at the hint strip.
 - The item's name in headline caps, then a definition grid (7 to 7.5rem term column, muted terms at the label size), then actions.
 - Forms inside the pane keep their buttons in a sticky footer with a `rule` top edge.
+- Every list has one, the Playthroughs list included: there the pane previews the selected playthrough, with a primary Open beside its name.
 
 ### Navigation
-- **Sections column:** title-size caps in muted ink; the current section and hover turn ink. The playthrough's own sections come first, unlabeled; then the Behavior, Memory, Voice, AI, Library, General, and Plugin settings groups, each under a muted label-caps name, never as bright as the current section. A page's URL nests under its group's.
+- **Sections column:** title-size caps in muted ink; the current section and hover turn ink. The playthrough's own sections come first, unlabeled: Overview (the playthrough's own URL, its home), then Characters, History, Screenshots, and Bard songs; then the Behavior, Memory, Voice, AI, Library, General, and Plugin settings groups, each under a muted label-caps name, never as bright as the current section. A page's URL nests under its group's.
 - **Tabs:** title-size caps in muted ink, spaced 2rem apart over a `rule` baseline; the current tab is ink at weight 600 with a 2px accent underline. A tab's count follows in muted Jost.
 - **Theme switch, and any segmented choice:** a 3px-radius outlined group of caps options; the chosen one fills with the accent, in accent-ink text at weight 600. The game's menus mark the chosen item plainly, and so do these.
 
 ### Button-Hint Strip (signature)
-Fixed along the bottom of the viewport, opaque ground, `rule` top edge, hints right-aligned with 1.5rem gaps. Each hint is a button: a key cap (1px `rule-strong` border, 3px radius, ink, min 1.6em wide) followed by the action in muted caps; hover turns it ink, unavailable hints fade to 45%. Every hint is backed by a real shortcut registered in the shortcut registry, and the strip shows only what the current screen offers.
+Fixed along the bottom of the viewport, opaque ground, `rule` top edge, hints right-aligned with 1.5rem gaps. Each hint is a button: a key cap (1px `rule-strong` border, 3px radius, ink, min 1.6em wide) followed by the action in muted caps; hover turns it ink, unavailable hints fade to 45%. Every hint is backed by a real shortcut registered in the shortcut registry, and the strip shows only what the current screen offers. Enter on a focused link or button is never a shortcut: it does what that link or button does, and a page's Enter shortcut runs only when focus is elsewhere.
 
 ### Stat List
 A name-and-count list under a label-caps heading in the accent. Each row carries a 2px accent bar at 55% opacity under the name, scaled to the count; counts are muted and right-aligned.
+
+**The Numbers Are Doors Rule.** When a stat list's rows are the page's navigation (the Overview's Stored list), each name is a title-size caps link, muted at rest, beside a 1.25rem marker column. The diamond and the `select` haze mark the row the arrow keys reach; hover and focus move them, and Enter opens it, with the hint naming the row. Where a table beside it owns the arrow keys (the Playthroughs preview), the rows are plain links with no marker.
+
+### Diary Dateline
+The line above a diary excerpt: the author's name as a label (label caps, muted, underlined and opening the character when known, as speakers are in History), then the day, place, and mood in muted label caps joined by middots, then the action as a text button at the line's right end. The dateline runs the column's width while the prose under it keeps its 65ch measure; the excerpt shows three lines (two on short windows). Stacked under 60rem, the day, place, and mood wrap to their own line rather than losing any of it.
 
 ### Quick Find
 A dialog (28rem max, 18vh from the top) on the smoke surface with a strong hairline, 3px radius and the modal lift; results are full-width rows with the diamond on the selected one.

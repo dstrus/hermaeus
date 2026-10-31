@@ -43,6 +43,18 @@ packages:
       import type * as calendar from './calendar.ts';
     type_mappings:
       calendar.GameDate: calendar.GameDate
+  - path: hermaeus/internal/summary
+    include_files: [summary.go]
+    output_path: web/src/lib/api/types/summary.ts
+    fallback_type: unknown
+    frontmatter: |
+      import type * as calendar from './calendar.ts';
+      import type * as characters from './characters.ts';
+      import type * as memories from './memories.ts';
+    type_mappings:
+      calendar.GameDate: calendar.GameDate
+      characters.Event: characters.Event
+      memories.DiaryEntry: memories.DiaryEntry
   - path: hermaeus/internal/bios
     include_files: [bios.go, save.go, history.go, catalog.go]
     output_path: web/src/lib/api/types/bios.ts

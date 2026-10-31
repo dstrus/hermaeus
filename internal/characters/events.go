@@ -86,6 +86,16 @@ func AllEvents(db store.DB) (EventsResponse, error) {
 	return listEvents(db, a, nil, "select * from events", nil)
 }
 
+// LatestEvents lists the playthrough's newest n events.
+func LatestEvents(db store.DB, n int) ([]Event, error) {
+	a, err := identity.Load(db)
+	if err != nil {
+		return []Event{}, err
+	}
+	r, err := listEvents(db, a, nil, "select * from events order by game_time is null, game_time desc, id desc limit ?", []any{n})
+	return r.Events, err
+}
+
 // actorNames is every character's name by UUID.
 func actorNames(db store.DB) (map[string]string, error) {
 	names := map[string]string{}

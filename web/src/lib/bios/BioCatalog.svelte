@@ -88,7 +88,7 @@
 			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
 			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
 			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !e, run: () => e && goto(href(e)) },
-			{ key: 'Escape', shown: 'Esc', label: 'This playthrough', run: () => goto(`/${encodeURIComponent(save)}`) }
+			{ key: 'Escape', shown: 'Esc', label: 'This playthrough', run: () => goto(`/${encodeURIComponent(save)}/characters`) }
 		];
 	});
 </script>
@@ -102,7 +102,7 @@
 			{ value: 'all', label: 'Every bio', title: 'Everyone SkyrimNet or a plugin ships a bio for, met or not' }
 		]}
 		label="Which characters"
-		onchange={(v) => v === 'here' && goto(`/${encodeURIComponent(save)}`)}
+		onchange={(v) => v === 'here' && goto(`/${encodeURIComponent(save)}/characters`)}
 	/>
 	{#if fromLayer >= 0}
 		<span class="muted n" use:clipped>{count(shown.length)} from <a href={pluginHref(save, from!)}>{catalog.layers[fromLayer]?.source}</a> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>Show all</button></span>

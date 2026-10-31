@@ -29,7 +29,8 @@
 		const shared = data.status.playthroughs.filter((o) => (o.player || 'No player yet') === name).length > 1;
 		return shared ? `${name} · ${p.id}` : name;
 	}
-	let charactersActive = $derived(!!save && (page.url.pathname === base || page.url.pathname.startsWith(`${base}/npc/`) || page.url.pathname.startsWith(`${base}/bios`)));
+	let overviewActive = $derived(!!save && page.url.pathname === base);
+	let charactersActive = $derived(!!save && ['characters', 'npc', 'bios'].some((p) => page.url.pathname === `${base}/${p}` || page.url.pathname.startsWith(`${base}/${p}/`)));
 	let historyActive = $derived(!!save && page.url.pathname.startsWith(`${base}/history`));
 	let screenshotsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/screenshots`));
 	let songsActive = $derived(!!save && page.url.pathname.startsWith(`${base}/songs`));
@@ -68,7 +69,8 @@
 	{:else if save}
 		<nav class="sections" aria-label="Sections" use:fitToViewport>
 			<ul aria-label="This playthrough">
-				<li><a class="caps" href={base} aria-current={charactersActive ? 'page' : undefined}>Characters</a></li>
+				<li><a class="caps" href={base} aria-current={overviewActive ? 'page' : undefined}>Overview</a></li>
+				<li><a class="caps" href="{base}/characters" aria-current={charactersActive ? 'page' : undefined}>Characters</a></li>
 				<li><a class="caps" href="{base}/history/events" aria-current={historyActive ? 'page' : undefined}>History</a></li>
 				<li><a class="caps" href="{base}/screenshots" aria-current={screenshotsActive ? 'page' : undefined}>Screenshots</a></li>
 				<li><a class="caps" href="{base}/songs" aria-current={songsActive ? 'page' : undefined}>Bard songs</a></li>
@@ -92,7 +94,7 @@
 		</nav>
 		<main>{@render children()}</main>
 	{:else}
-		<main class="solo">{@render children()}</main>
+		<main class="solo wide">{@render children()}</main>
 	{/if}
 
 	<HintBar />
@@ -101,7 +103,7 @@
 <style>
 	.app {
 		display: grid;
-		grid-template-columns: 1fr;
+		grid-template-columns: minmax(0, 1fr);
 		grid-template-rows: auto 1fr;
 		min-height: 100vh;
 	}
@@ -199,9 +201,13 @@
 	main.solo {
 		max-width: 64rem;
 	}
+	/* The playthroughs list has its pane beside it. */
+	main.solo.wide {
+		max-width: 90rem;
+	}
 	@media (max-width: 60rem) {
 		.app.withsections {
-			grid-template-columns: 1fr;
+			grid-template-columns: minmax(0, 1fr);
 		}
 		.top {
 			flex-wrap: wrap;

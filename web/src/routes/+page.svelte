@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import Preview from '#lib/summary/Preview.svelte';
 	import Diamond from '#lib/ui/Diamond.svelte';
+	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { count, realTime } from '#lib/format.ts';
@@ -34,6 +36,7 @@
 {#if !playthroughs.length}
 	<p class="empty">There are no SkyrimNet databases here yet. SkyrimNet makes one the first time you load a save with it.</p>
 {:else}
+	<div class="split">
 	<table>
 		<thead>
 			<tr>
@@ -56,6 +59,10 @@
 			{/each}
 		</tbody>
 	</table>
+	<aside class="pane" aria-label="Playthrough" use:fitToViewport>
+		{#if selection.current}<Preview playthrough={selection.current} />{/if}
+	</aside>
+	</div>
 {/if}
 
 <style>
@@ -77,6 +84,35 @@
 	}
 	.empty {
 		max-width: 60ch;
+	}
+	.split {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) clamp(18rem, 26vw, 24rem);
+		gap: var(--space-5);
+		align-items: start;
+	}
+	/* The selected playthrough at a glance, as other lists show their item. */
+	.pane {
+		position: sticky;
+		top: 0;
+		display: flex;
+		flex-direction: column;
+		min-height: calc(100vh - 7rem); /* fitToViewport sets the height */
+		padding: var(--space-5);
+		background: var(--panel);
+		border-left: 1px solid var(--rule-strong);
+		overflow: hidden;
+	}
+	@media (max-width: 60rem) {
+		.split {
+			grid-template-columns: 1fr;
+		}
+		.pane {
+			position: static;
+			min-height: 0;
+			border-left: 0;
+			border-top: 1px solid var(--rule-strong);
+		}
 	}
 	table {
 		width: 100%;
