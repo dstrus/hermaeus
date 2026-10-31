@@ -13,7 +13,7 @@
 	let { data, children }: LayoutProps = $props();
 	let c = $derived(data.character);
 	let list = $derived(`/${encodeURIComponent(data.playthrough.id)}/characters`);
-	let base = $derived(`${list}/npc/${c.uuid}`);
+	let base = $derived(`/${encodeURIComponent(data.playthrough.id)}/npc/${c.uuid}`);
 	let tabs = $derived([
 		{ href: base, label: 'Overview' },
 		...(c.bio ? [{ href: `${base}/bio`, label: 'Bio' }] : []),
