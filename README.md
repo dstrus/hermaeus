@@ -27,6 +27,7 @@ You need Go 1.26 or later and Node 22.17 or later.
 
 ```sh
 make build              # the frontend, then the program, as ./hermaeus
+make windows            # the program for 64-bit Windows, with its icon, as ./Hermaeus.exe
 make test               # Go tests, then type-checking the frontend
 make dev DIR=/path/to/SkyrimNet   # Hermaeus plus Vite's dev server at http://localhost:5173
 make types              # regenerate the API's TypeScript types after changing them in Go

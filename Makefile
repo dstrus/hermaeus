@@ -3,11 +3,19 @@
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
-.PHONY: build web types test dev icons clean
+.PHONY: build windows web types test dev icons clean
 
 # The program, for this machine.
 build: web
 	go build -ldflags "-s -w -X main.version=$(VERSION)" -o hermaeus ./cmd/hermaeus
+
+# The program for 64-bit Windows, as Hermaeus.exe, from any OS. Its icon and
+# file details go into a .syso file that go build links into Windows builds.
+windows: web
+	go tool go-winres simply --arch amd64 --manifest cli --icon cmd/hermaeus/hermaeus.ico \
+		--product-name Hermaeus --file-description "Hermaeus, an unofficial dashboard for SkyrimNet" \
+		--original-filename Hermaeus.exe --out cmd/hermaeus/rsrc
+	GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version=$(VERSION)" -o Hermaeus.exe ./cmd/hermaeus
 
 # The frontend, into web/build, where the program embeds it from.
 web: web/node_modules
@@ -55,4 +63,4 @@ dev: web/node_modules
 	npm --prefix web run dev
 
 clean:
-	rm -rf hermaeus web/build web/.svelte-kit
+	rm -rf hermaeus Hermaeus.exe cmd/hermaeus/*.syso web/build web/.svelte-kit
