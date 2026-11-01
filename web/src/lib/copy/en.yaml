@@ -27,9 +27,9 @@ plugins:
   offCount: "{count} off"
   pendingCount: "{count} not added yet"
   lead: >-
-    What SkyrimNet loads, in order. Lower in the list wins: a plugin’s prompt
-    replaces the same prompt in any plugin above it, and your own edits, at the
-    bottom, win over them all.
+    What SkyrimNet loads, in order. Lower in the list wins. A plugin’s prompt
+    replaces the same prompt in any plugin above it. Your own edits, at the
+    bottom, win over everything else.
   hub: Installing, updating, and removing plugins happens in SkyrimNet’s dashboard, through its Plugin Hub.
 
   # The table.
