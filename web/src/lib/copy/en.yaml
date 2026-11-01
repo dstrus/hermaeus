@@ -1,0 +1,107 @@
+# Every word Hermaeus shows, grouped by page. Components use these as
+# m.<group>.<name>, so renaming or removing one means changing them too;
+# a mistake fails `make test`.
+#
+# - {name} is filled in when the message is shown.
+# - A message with `one:` and `other:` picks one by its count; {count} is
+#   the number, written as the reader's locale writes numbers.
+# - Typographic quotes and apostrophes: ’ “ ”.
+
+# Words many pages share.
+common:
+  next: Next
+  previous: Previous
+  selected: Selected
+  switchOn: Switch on
+  switchOff: Switch off
+  moveUp: Move up
+  moveDown: Move down
+  off: "off"
+  gameRunning: Skyrim is running, so nothing can be changed until you close it.
+
+plugins:
+  title: Plugins
+  installed:
+    one: "{count} plugin installed"
+    other: "{count} plugins installed"
+  offCount: "{count} off"
+  pendingCount: "{count} not added yet"
+  lead: >-
+    What SkyrimNet loads, in order. Lower in the list wins: a plugin’s prompt
+    replaces the same prompt in any plugin above it, and your own edits, at the
+    bottom, win over them all.
+  hub: Installing, updating, and removing plugins happens in SkyrimNet’s dashboard, through its Plugin Hub.
+
+  # The table.
+  order: Order
+  plugin: Plugin
+  version: Version
+  holds: Holds
+  notAddedYet: not added yet
+  someReplaced: some replaced
+  nothing: Nothing
+  modOff: Its mod is switched off
+  notFound: Not found
+
+  # Where a plugin comes from.
+  fromSkyrimNet: SkyrimNet
+  yours: Yours
+  fromHub: From the Hub
+  fromMod: From a mod
+  local: Local
+  by: "by {author}"
+
+  # What a plugin holds, by top folder. A folder not listed here is shown
+  # as {count} and its own name.
+  contents:
+    prompts: { one: "{count} prompt", other: "{count} prompts" }
+    bios: { one: "{count} bio", other: "{count} bios" }
+    actions: { one: "{count} action", other: "{count} actions" }
+    triggers: { one: "{count} trigger", other: "{count} triggers" }
+    filters: { one: "{count} filter", other: "{count} filters" }
+    voiceEffects: { one: "{count} voice effect", other: "{count} voice effects" }
+    entities: { one: "{count} entity", other: "{count} entities" }
+    dialogueActions: { one: "{count} dialogue action", other: "{count} dialogue actions" }
+    translator: { one: "{count} speech rule", other: "{count} speech rules" }
+    items: { one: "{count} item", other: "{count} items" }
+    spells: { one: "{count} spell", other: "{count} spells" }
+    furniture: { one: "{count} furniture name", other: "{count} furniture names" }
+    identity: { one: "{count} identity link", other: "{count} identity links" }
+    places: { one: "{count} named place", other: "{count} named places" }
+    knowledge: { one: "{count} knowledge pack", other: "{count} knowledge packs" }
+    settings: { one: "{count} settings file", other: "{count} settings files" }
+    config: { one: "{count} config file", other: "{count} config files" }
+  otherFolder: "{count} {folder}"
+
+  # What happened.
+  wins: "{winner} now wins over {loser}."
+  switchedOff: "Switched off {title}. SkyrimNet ignores it from the next time it starts."
+  switchedOn: "Switched on {title}. SkyrimNet loads it from the next time it starts."
+
+  # The pane.
+  pending: >-
+    Found on disk, but SkyrimNet hasn’t added it to its plugins yet. It will the
+    next time it starts, at the bottom of this list, over every other plugin,
+    and it can be moved and switched here then.
+  isOff: "Switched off: SkyrimNet doesn’t load it, so nothing in it applies."
+  files: Files
+  modOffFiles: >-
+    Its mod, {mod}, is switched off in Mod Organizer’s profile, so SkyrimNet
+    can’t see it either. Its order and switch here still apply when the mod is
+    on again.
+  notAnywhere: Not in the SkyrimNet folder or any mod Hermaeus can see. Its order and switch still work here.
+  folder: Folder
+  tags: Tags
+  settings: Settings
+  ownSettings: "{count} of its own"
+  models: Models
+  ownTasks:
+    one: its own model task
+    other: its own model tasks
+  replaces:
+    one: Replaces {count} prompt above it
+    other: Replaces {count} prompts above it
+  replaced:
+    one: "{count} prompt replaced below it"
+    other: "{count} prompts replaced below it"
+  replacedWhy: A plugin lower in the list, or your own edits, has these too, so theirs apply.

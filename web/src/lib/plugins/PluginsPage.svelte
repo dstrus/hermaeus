@@ -11,7 +11,8 @@
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { List, Plugin } from '#lib/api/types/plugins.ts';
 	import type { PluginSchema } from '#lib/api/types/settings.ts';
-	import { plural } from '#lib/format.ts';
+	import { m } from '#lib/copy/messages.ts';
+	import Fill from '#lib/copy/Fill.svelte';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
@@ -69,36 +70,36 @@
 		const order = [...installed];
 		[order[at], order[to]] = [order[to]!, order[at]!];
 		const other = installed[to]!;
-		run(() => setOrder({ modified: list.modified, priority: priorityOf(order) }), by > 0 ? `${p.title} now wins over ${other.title}.` : `${other.title} now wins over ${p.title}.`);
+		run(() => setOrder({ modified: list.modified, priority: priorityOf(order) }), by > 0 ? m.plugins.wins({ winner: p.title, loser: other.title }) : m.plugins.wins({ winner: other.title, loser: p.title }));
 	}
 
 	function toggle() {
 		const p = current;
 		if (!p || p.kind !== 'plugin' || readOnly) return;
-		run(() => setEnabled(p.id, { modified: list.modified, enabled: !p.enabled }), p.enabled ? `Switched off ${p.title}. SkyrimNet ignores it from the next time it starts.` : `Switched on ${p.title}. SkyrimNet loads it from the next time it starts.`);
+		run(() => setEnabled(p.id, { modified: list.modified, enabled: !p.enabled }), p.enabled ? m.plugins.switchedOff({ title: p.title }) : m.plugins.switchedOn({ title: p.title }));
 	}
 
 	const kindLabel = (p: Plugin) =>
-		p.kind === 'base' ? 'SkyrimNet' : p.kind === 'overlay' ? 'Yours' : p.source === 'hub' ? 'From the Hub' : p.source === 'external' || p.external ? 'From a mod' : 'Local';
+		p.kind === 'base' ? m.plugins.fromSkyrimNet : p.kind === 'overlay' ? m.plugins.yours : p.source === 'hub' ? m.plugins.fromHub : p.source === 'external' || p.external ? m.plugins.fromMod : m.plugins.local;
 
 	useShortcuts(() => {
 		const p = current;
 		const movable = !!p && p.kind === 'plugin' && !readOnly && !saving;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-			{ key: 'o', shown: 'O', label: p?.enabled === false ? 'Switch on' : 'Switch off', disabled: !movable, run: toggle },
-			{ key: 'u', shown: 'U', label: 'Move up', disabled: !movable || at <= 0, run: () => move(-1) },
-			{ key: 'd', shown: 'D', label: 'Move down', disabled: !movable || at >= installed.length - 1, run: () => move(1) }
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+			{ key: 'o', shown: 'O', label: p?.enabled === false ? m.common.switchOn : m.common.switchOff, disabled: !movable, run: toggle },
+			{ key: 'u', shown: 'U', label: m.common.moveUp, disabled: !movable || at <= 0, run: () => move(-1) },
+			{ key: 'd', shown: 'D', label: m.common.moveDown, disabled: !movable || at >= installed.length - 1, run: () => move(1) }
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Plugins</h1>
-	<span class="muted n" use:clipped>{plural(installed.length, 'plugin', 'plugins')} installed{off ? ` · ${off} off` : ''}{pending ? ` · ${pending} not added yet` : ''}</span>
+	<h1 class="caps">{m.plugins.title}</h1>
+	<span class="muted n" use:clipped>{m.plugins.installed({ count: installed.length })}{off ? ` · ${m.plugins.offCount({ count: off })}` : ''}{pending ? ` · ${m.plugins.pendingCount({ count: pending })}` : ''}</span>
 </div>
-<p class="muted lead">What SkyrimNet loads, in order. Lower in the list wins: a plugin’s prompt replaces the same prompt in any plugin above it, and your own edits, at the bottom, win over them all.</p>
+<p class="muted lead">{m.plugins.lead}</p>
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
@@ -107,11 +108,11 @@
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<th class="caps at">Order</th>
-					<th class="caps">Plugin</th>
-					<th class="caps version">Version</th>
-					<th class="caps holds">Holds</th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<th class="caps at">{m.plugins.order}</th>
+					<th class="caps">{m.plugins.plugin}</th>
+					<th class="caps version">{m.plugins.version}</th>
+					<th class="caps holds">{m.plugins.holds}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -121,86 +122,87 @@
 						<td class="at n">{p.kind === 'overlay' ? '∞' : p.kind === 'base' ? 0 : p.kind === 'new' ? '' : i}</td>
 						<td class="name" use:clipped>
 							{p.title}
-							{#if p.kind === 'new'}<span class="flag">not added yet</span>{:else if !p.enabled}<span class="flag">off</span>{/if}
-							{#if p.kind === 'plugin' && p.replaced.length}<span class="flag">some replaced</span>{/if}
+							{#if p.kind === 'new'}<span class="flag">{m.plugins.notAddedYet}</span>{:else if !p.enabled}<span class="flag">{m.common.off}</span>{/if}
+							{#if p.kind === 'plugin' && p.replaced.length}<span class="flag">{m.plugins.someReplaced}</span>{/if}
 						</td>
 						<td class="version muted">{p.version}</td>
-						<td class="holds muted" use:clipped>{p.found ? contentsLine(p) || 'Nothing' : p.modOff ? 'Its mod is switched off' : 'Not found'}</td>
+						<td class="holds muted" use:clipped>{p.found ? contentsLine(p) || m.plugins.nothing : p.modOff ? m.plugins.modOff : m.plugins.notFound}</td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
-		<p class="muted small">Installing, updating, and removing plugins happens in SkyrimNet’s dashboard, through its Plugin Hub.</p>
+		<p class="muted small">{m.plugins.hub}</p>
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Plugin">
+	<aside class="pane" use:fitToViewport aria-label={m.plugins.plugin}>
 		{#if current}
 			{@const p = current}
 			{#key p.id}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2 class="caps">{p.title}</h2>
 					{#if p.tagline}<p class="tagline">{p.tagline}</p>{/if}
-					<p class="muted small">{kindLabel(p)}{p.author ? ` · by ${p.author}` : ''}{p.version ? ` · ${p.version}` : ''}{p.kind === 'plugin' ? ` · ` : ''}{#if p.kind === 'plugin'}<span class="id">{p.id}</span>{/if}</p>
+					<p class="muted small">{kindLabel(p)}{p.author ? ` · ${m.plugins.by({ author: p.author })}` : ''}{p.version ? ` · ${p.version}` : ''}{p.kind === 'plugin' ? ` · ` : ''}{#if p.kind === 'plugin'}<span class="id">{p.id}</span>{/if}</p>
 					{#if p.kind === 'plugin'}
 						<div class="actions">
-							<button type="button" class="button" onclick={toggle} disabled={readOnly || saving}>{p.enabled ? 'Switch off' : 'Switch on'}</button>
-							<button type="button" class="button" onclick={() => move(-1)} disabled={readOnly || saving || at <= 0}>Move up</button>
-							<button type="button" class="button" onclick={() => move(1)} disabled={readOnly || saving || at >= installed.length - 1}>Move down</button>
+							<button type="button" class="button" onclick={toggle} disabled={readOnly || saving}>{p.enabled ? m.common.switchOff : m.common.switchOn}</button>
+							<button type="button" class="button" onclick={() => move(-1)} disabled={readOnly || saving || at <= 0}>{m.common.moveUp}</button>
+							<button type="button" class="button" onclick={() => move(1)} disabled={readOnly || saving || at >= installed.length - 1}>{m.common.moveDown}</button>
 						</div>
 					{/if}
 					{#if p.kind === 'new'}
-						<p class="notice">Found on disk, but SkyrimNet hasn’t added it to its plugins yet. It will the next time it starts, at the bottom of this list, over every other plugin, and it can be moved and switched here then.</p>
+						<p class="notice">{m.plugins.pending}</p>
 					{:else if !p.enabled}
-						<p class="notice">Switched off: SkyrimNet doesn’t load it, so nothing in it applies.</p>
+						<p class="notice">{m.plugins.isOff}</p>
 					{/if}
 					{#if p.description}<p class="description small">{p.description}</p>{/if}
 					<dl>
 						{#if !p.found}
-							<dt class="caps">Files</dt>
+							<dt class="caps">{m.plugins.files}</dt>
 							<dd>
 								{#if p.modOff}
-									Its mod, <span class="id">{p.modOff}</span>, is switched off in Mod Organizer’s profile, so SkyrimNet can’t see it either. Its order and switch here still apply when the mod is on again.
+									{@const name = p.modOff}
+									<Fill text={m.plugins.modOffFiles.text}>{#snippet mod()}<span class="id">{name}</span>{/snippet}</Fill>
 								{:else}
-									Not in the SkyrimNet folder or any mod Hermaeus can see. Its order and switch still work here.
+									{m.plugins.notAnywhere}
 								{/if}
 							</dd>
 						{:else}
-							<dt class="caps">Holds</dt>
+							<dt class="caps">{m.plugins.holds}</dt>
 							<dd>
 								<!-- Prompts, actions, and triggers link to their pages, narrowed to this plugin. -->
-								{#each p.contents as c, n (c.folder)}{n ? ' · ' : ''}{#if c.folder === 'prompts' || c.folder === 'actions' || c.folder === 'triggers' || c.folder === 'bios'}<a href={fromHref(save, c.folder, p.id)}>{countLine(c.folder, c.files)}</a>{:else}{countLine(c.folder, c.files)}{/if}{:else}Nothing{/each}
+								{#each p.contents as c, n (c.folder)}{n ? ' · ' : ''}{#if c.folder === 'prompts' || c.folder === 'actions' || c.folder === 'triggers' || c.folder === 'bios'}<a href={fromHref(save, c.folder, p.id)}>{countLine(c.folder, c.files)}</a>{:else}{countLine(c.folder, c.files)}{/if}{:else}{m.plugins.nothing}{/each}
 							</dd>
-							<dt class="caps">Folder</dt>
+							<dt class="caps">{m.plugins.folder}</dt>
 							<dd class="id folder">{p.folder}</dd>
 						{/if}
-						{#if p.tags.length}<dt class="caps">Tags</dt><dd>{p.tags.join(', ')}</dd>{/if}
+						{#if p.tags.length}<dt class="caps">{m.plugins.tags}</dt><dd>{p.tags.join(', ')}</dd>{/if}
 						{#if settingsOf(p.id)}
 							{@const s = settingsOf(p.id)!}
-							<dt class="caps">Settings</dt>
-							<dd><a href={pluginSettingsHref(save, s.folder)}>{s.fields.length} of its own</a></dd>
+							<dt class="caps">{m.plugins.settings}</dt>
+							<dd><a href={pluginSettingsHref(save, s.folder)}>{m.plugins.ownSettings({ count: s.fields.length })}</a></dd>
 							{#if s.variants.length}
-								<dt class="caps">Models</dt>
-								<dd>{#each s.variants as v, n (v)}{n ? ', ' : ''}<a href={modelsHref(save, v)}>{v.replace(/_/g, ' ')}</a>{/each}<span class="muted small aside">· its own model {s.variants.length === 1 ? 'task' : 'tasks'}</span></dd>
+								<dt class="caps">{m.plugins.models}</dt>
+								<dd>{#each s.variants as v, n (v)}{n ? ', ' : ''}<a href={modelsHref(save, v)}>{v.replace(/_/g, ' ')}</a>{/each}<span class="muted small aside">· {m.plugins.ownTasks({ count: s.variants.length })}</span></dd>
 							{/if}
 						{/if}
 					</dl>
 					{#if p.replaces.length}
 						<details>
-							<summary class="caps">Replaces {plural(p.replaces.length, 'prompt', 'prompts')} above it</summary>
+							<summary class="caps">{m.plugins.replaces({ count: p.replaces.length })}</summary>
 							<ul class="paths">{#each p.replaces as path (path)}<li class="id">{path}</li>{/each}</ul>
 						</details>
 					{/if}
 					{#if p.replaced.length}
 						<details>
-							<summary class="caps">{plural(p.replaced.length, 'prompt', 'prompts')} replaced below it</summary>
-							<p class="muted small">A plugin lower in the list, or your own edits, has these too, so theirs apply.</p>
+							<summary class="caps">{m.plugins.replaced({ count: p.replaced.length })}</summary>
+							<p class="muted small">{m.plugins.replacedWhy}</p>
 							<ul class="paths">{#each p.replaced as path (path)}<li class="id">{path}</li>{/each}</ul>
 						</details>
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so nothing can be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.common.gameRunning}</p>{/if}
 	</aside>
 </div>
 

@@ -1,5 +1,6 @@
 import { request } from '#lib/api/client.ts';
 import type { List, Order, Plugin, Switch } from '#lib/api/types/plugins.ts';
+import { m } from '#lib/copy/messages.ts';
 
 export const pluginsDependency = 'app:plugins';
 
@@ -24,9 +25,9 @@ export function priorityOf(shown: Plugin[]): string[] {
 
 // countLine is one folder's count: "9 prompts", "1 filter".
 export function countLine(folder: string, files: number): string {
-	const name = folder.replace(/_/g, ' ');
-	if (files !== 1) return `${files} ${name}`;
-	return `1 ${name.endsWith('ies') ? `${name.slice(0, -3)}y` : name.endsWith('s') ? name.slice(0, -1) : name}`;
+	const key = folder.replace(/_(.)/g, (_, c: string) => c.toUpperCase());
+	const line = (m.plugins.contents as Record<string, ((p: { count: number }) => string) | undefined>)[key];
+	return line ? line({ count: files }) : m.plugins.otherFolder({ count: files, folder: folder.replace(/_/g, ' ') });
 }
 
 // contentsLine is what a plugin holds, by folder: "9 prompts · 1 filter".

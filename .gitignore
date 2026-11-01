@@ -16,6 +16,7 @@ coverage.*
 /site/dist/
 /site/.astro/
 /web/.svelte-kit/
+/web/src/lib/copy/messages.ts
 node_modules/
 .vite/
 *.tsbuildinfo

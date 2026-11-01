@@ -1,6 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
+import { copy } from './copy.ts';
 import { thirdParty } from './third-party.ts';
 
 // During development, `make dev` runs Hermaeus and this dev server in front
@@ -11,6 +12,7 @@ const devPort = process.env.HERMAEUS_DEV_PORT ?? '8775';
 
 export default defineConfig({
 	plugins: [
+		copy(),
 		sveltekit({
 			// A single-page app: Hermaeus serves index.html for every view's
 			// address, and the page routes itself.
