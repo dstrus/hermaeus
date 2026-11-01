@@ -363,10 +363,13 @@ const safety = [
 	}
 
 	// The hint strip: every hint is a real shortcut, and clicking it does the same.
-	const order = ['top', 'screens', 'rest', 'safety', 'download'];
+	const order = ['screens', 'rest', 'safety', 'download'];
+	// The next section is the first whose top is still below where scrolling
+	// to a section leaves it (the page's scroll padding), so the one just
+	// reached doesn't count. After the last, back to the top.
 	function next() {
-		const y = window.scrollY + 8;
-		const id = order.find((id) => (document.getElementById(id)?.offsetTop ?? 0) > y);
+		const landed = parseFloat(getComputedStyle(root).scrollPaddingTop) || 0;
+		const id = order.find((id) => (document.getElementById(id)?.getBoundingClientRect().top ?? 0) > landed + 1);
 		go(id ?? 'top');
 	}
 	function go(id: string) {
