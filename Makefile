@@ -2,12 +2,13 @@
 # program it builds has the frontend embedded.
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+GOBUILD = CGO_ENABLED=0 go build -trimpath -ldflags "-s -w -X main.version=$(VERSION)"
 
-.PHONY: build windows web notices types test dev icons clean
+.PHONY: build windows release web notices types test dev icons clean
 
 # The program, for this machine.
 build: web
-	go build -ldflags "-s -w -X main.version=$(VERSION)" -o hermaeus ./cmd/hermaeus
+	$(GOBUILD) -o hermaeus ./cmd/hermaeus
 
 # The program for 64-bit Windows, as Hermaeus.exe, from any OS. Its icon and
 # file details go into a .syso file that go build links into Windows builds.
@@ -15,7 +16,28 @@ windows: web
 	go tool go-winres simply --arch amd64 --manifest cli --icon cmd/hermaeus/hermaeus.ico \
 		--product-name Hermaeus --file-description "Hermaeus, an unofficial dashboard for SkyrimNet" \
 		--original-filename Hermaeus.exe --out cmd/hermaeus/rsrc
-	GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version=$(VERSION)" -o Hermaeus.exe ./cmd/hermaeus
+	GOOS=windows GOARCH=amd64 $(GOBUILD) -o Hermaeus.exe ./cmd/hermaeus
+
+# A release's downloads, into dist/: a zip for Windows, a zip for macOS (one
+# program for both Apple silicon and Intel), and a tarball for Linux, each
+# with LICENSE and THIRD_PARTY_NOTICES.txt, plus their SHA256SUMS. Their
+# names carry no version, so the site can link to the latest release's.
+# Needs macOS, for lipo and codesign; the Release workflow runs it when a
+# version tag is pushed.
+release: windows
+	rm -rf dist && mkdir -p dist/windows dist/macos dist/linux
+	cp Hermaeus.exe dist/windows/
+	GOOS=darwin GOARCH=arm64 $(GOBUILD) -o dist/macos/hermaeus-arm64 ./cmd/hermaeus
+	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o dist/macos/hermaeus-amd64 ./cmd/hermaeus
+	lipo -create -output dist/macos/hermaeus dist/macos/hermaeus-arm64 dist/macos/hermaeus-amd64
+	rm dist/macos/hermaeus-arm64 dist/macos/hermaeus-amd64
+	codesign --force --sign - dist/macos/hermaeus
+	GOOS=linux GOARCH=amd64 $(GOBUILD) -o dist/linux/hermaeus ./cmd/hermaeus
+	for os in windows macos linux; do cp LICENSE dist/$$os/LICENSE.txt; cp THIRD_PARTY_NOTICES.txt dist/$$os/; done
+	cd dist/windows && zip -qX ../Hermaeus-windows-x64.zip Hermaeus.exe LICENSE.txt THIRD_PARTY_NOTICES.txt
+	cd dist/macos && zip -qX ../Hermaeus-macos.zip hermaeus LICENSE.txt THIRD_PARTY_NOTICES.txt
+	COPYFILE_DISABLE=1 tar -czf dist/Hermaeus-linux-x64.tar.gz -C dist/linux hermaeus LICENSE.txt THIRD_PARTY_NOTICES.txt
+	cd dist && shasum -a 256 Hermaeus-* > SHA256SUMS
 
 # THIRD_PARTY_NOTICES.txt: the license of everything built into the program,
 # from its Go modules and the npm packages in its pages, which the frontend's
@@ -70,4 +92,4 @@ dev: web/node_modules
 	npm --prefix web run dev
 
 clean:
-	rm -rf hermaeus Hermaeus.exe cmd/hermaeus/*.syso web/build web/.svelte-kit
+	rm -rf hermaeus Hermaeus.exe dist cmd/hermaeus/*.syso web/build web/.svelte-kit
