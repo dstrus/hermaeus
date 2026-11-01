@@ -204,7 +204,7 @@ The app's near-monochrome palette, unchanged: off-white on near-black in dark, n
 - **Entry** (Jost 400, up to 2.125rem, line-height 1.45, 32ch measure): the diary entry in the hero, and nothing else.
 - **Title** (Barlow Condensed 600, 1.375rem, uppercase): screen captions, safety rule names, and the name in the top bar.
 - **Lead** (Jost 400, 1.375rem, line-height 1.35): the hook under the name, whose promise ("with Skyrim closed") is set in Jost 600 in the accent and never breaks across lines.
-- **Body** (Jost 400, 1rem, line-height 1.55, tabular figures): prose, captions, table cells. Section leads run at 1.125rem in muted ink with a 60ch measure; rule text holds 44ch.
+- **Body** (Jost 400, 1rem, line-height 1.55, tabular figures): prose, captions, table cells. Section leads run at 1.125rem in muted ink with a 60ch measure; rule text holds 44ch. The fine print under the downloads runs at 0.8125rem in muted ink, opening with "Unofficial." in Jost 600 and full ink.
 - **Button** (Barlow Condensed 500, 1.125rem, label tracking, uppercase; 600 on the primary): buttons and section links.
 - **Hint** (Barlow Condensed 500, 1rem, label tracking, uppercase): the hint strip.
 - **Label** (Barlow Condensed, 0.8125rem, 0.12em tracking, uppercase): the dateline's day and place, locus terms, column heads, group heads, theme options, and provenance lines.
