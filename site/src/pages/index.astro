@@ -76,6 +76,20 @@ const rest = [
 	}
 ];
 
+// Loading-screen tips for the hint strip, as Skyrim shows while you wait:
+// each one true, one picked at random per visit, the next on a click.
+const tips = [
+	'You can look around while Skyrim is running. You just can’t save until you close it.',
+	'Your first change to a database each session gets a backup first, in hermaeus-backups.',
+	'MO2 users: put Hermaeus.exe next to ModOrganizer.exe and it finds SkyrimNet on its own.',
+	'Every save is one transaction. Either all of it works, or nothing changes.',
+	'Hermaeus only listens on 127.0.0.1. The rest of the internet doesn’t get a say.',
+	'Your API keys never reach the browser. Hermaeus only tells it whether one is set.',
+	'Hermaeus dates things the way the game does. Tirdas is Tuesday. You’re welcome.',
+	'Hermaeus Mora hoards knowledge and memories. This one just lets you edit them.',
+	'Everything on this page works from the keyboard. Try N.'
+];
+
 const safety = [
 	{
 		rule: 'Hands off while Skyrim runs',
@@ -358,11 +372,16 @@ const safety = [
 		</nav>
 	</footer>
 
-	<nav class="hints caps" aria-label="Keyboard shortcuts">
-		<button type="button" data-key="d"><kbd>D</kbd>Download</button>
-		<button type="button" data-key="s"><kbd>S</kbd>Safety</button>
-		<button type="button" data-key="n"><kbd>N</kbd>Next</button>
-	</nav>
+	<div class="strip">
+		<button type="button" class="tip" data-tips={JSON.stringify(tips)} aria-live="polite">
+			<span data-tip>{tips[0]}</span><span class="visually-hidden"> (Another tip)</span>
+		</button>
+		<nav class="hints caps" aria-label="Keyboard shortcuts">
+			<button type="button" data-key="d"><kbd>D</kbd>Download</button>
+			<button type="button" data-key="s"><kbd>S</kbd>Safety</button>
+			<button type="button" data-key="n"><kbd>N</kbd>Next</button>
+		</nav>
+	</div>
 </Base>
 
 <script>
@@ -433,17 +452,48 @@ const safety = [
 		if (id === 'download') document.querySelector<HTMLElement>('#download .button')?.focus({ preventScroll: true });
 	}
 	const actions: Record<string, () => void> = { d: () => go('download'), s: () => go('safety'), n: next };
-	document.querySelectorAll<HTMLButtonElement>('.hints [data-key]').forEach((b) => b.addEventListener('click', () => actions[b.dataset.key!]()));
+	// The key cap presses in, as the game's do, whichever way the hint ran.
+	function press(key: string) {
+		const b = document.querySelector<HTMLElement>(`.hints [data-key="${key}"]`);
+		if (!b) return;
+		b.classList.remove('pressed');
+		void b.offsetWidth;
+		b.classList.add('pressed');
+	}
+	document.querySelectorAll<HTMLButtonElement>('.hints [data-key]').forEach((b) =>
+		b.addEventListener('click', () => {
+			press(b.dataset.key!);
+			actions[b.dataset.key!]();
+		})
+	);
 	document.addEventListener('keydown', (e) => {
 		if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
 		const t = e.target as HTMLElement;
 		if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-		const run = actions[e.key.toLowerCase()];
+		const key = e.key.toLowerCase();
+		const run = actions[key];
 		if (run) {
 			e.preventDefault();
+			press(key);
 			run();
 		}
 	});
+
+	// A tip at random per visit; a click shows the next, never the same one twice running.
+	const tip = document.querySelector<HTMLButtonElement>('.tip');
+	const tipText = tip?.querySelector<HTMLElement>('[data-tip]');
+	if (tip && tipText) {
+		const all: string[] = JSON.parse(tip.dataset.tips ?? '[]');
+		let at = Math.floor(Math.random() * all.length);
+		tipText.textContent = all[at];
+		tip.addEventListener('click', () => {
+			at = (at + 1 + Math.floor(Math.random() * (all.length - 1))) % all.length;
+			tipText.textContent = all[at];
+			tip.classList.remove('fresh');
+			void tip.offsetWidth;
+			tip.classList.add('fresh');
+		});
+	}
 </script>
 
 <style>
@@ -954,17 +1004,63 @@ const safety = [
 		font-size: var(--step-0);
 	}
 
-	/* The game's button hints, along the bottom of the window. */
-	.hints {
+	/* The game's bottom strip: a loading-screen tip at left, the button
+	   hints at right. */
+	.strip {
 		position: fixed;
 		inset: auto 0 0 0;
 		display: flex;
-		justify-content: flex-end;
-		gap: var(--space-2) var(--space-5);
+		align-items: center;
+		gap: var(--space-6);
 		padding: var(--space-2) var(--gutter);
 		background: var(--ground);
 		border-top: 1px solid var(--rule);
 		z-index: 2;
+	}
+	.tip {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		text-align: left;
+		background: none;
+		border: 0;
+		padding: 0;
+		color: var(--muted);
+		font: 400 var(--step--1) / 1.5 var(--font-text);
+		cursor: pointer;
+	}
+	.tip:hover {
+		color: var(--ink);
+	}
+	@media (prefers-reduced-motion: no-preference) {
+		.tip.fresh [data-tip] {
+			animation: tip-in 360ms cubic-bezier(0.16, 1, 0.3, 1);
+		}
+		.hints .pressed kbd {
+			animation: press 220ms cubic-bezier(0.16, 1, 0.3, 1);
+		}
+	}
+	@keyframes tip-in {
+		from {
+			opacity: 0;
+			filter: blur(3px);
+		}
+	}
+	@keyframes press {
+		30% {
+			translate: 0 2px;
+			border-color: var(--accent);
+			background: var(--select);
+			color: var(--accent);
+		}
+	}
+	.hints {
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--space-2) var(--space-5);
+		margin-left: auto;
 	}
 	.hints button {
 		display: flex;
@@ -1036,7 +1132,13 @@ const safety = [
 
 	/* Shortcuts are for keyboards; on touch screens the strip goes. */
 	@media (max-width: 60rem), (pointer: coarse) {
-		.hints {
+		.strip {
+			display: none;
+		}
+	}
+	/* Where a tip would be cut short, the strip keeps only the hints. */
+	@media (max-width: 75rem) {
+		.tip {
 			display: none;
 		}
 	}
