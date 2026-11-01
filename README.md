@@ -1,22 +1,54 @@
 # Hermaeus
 
-*An unofficial dashboard for SkyrimNet that does not require the game to be running, named for the Daedric Prince who hoards knowledge and memories.*
+*An unofficial dashboard for SkyrimNet that does not require the game to be running*
 
-Hermaeus reads and edits SkyrimNet's data and settings from your own installation while Skyrim is closed. It's a single program that runs a small web server on your machine and opens itself in your browser.
+Yes, it's vibe-coded, but at least it's vibe-coded by a professional software engineer with lots of experience. 🤷🏻‍♂️
 
-Hermaeus works with SkyrimNet but isn't part of it, and isn't affiliated with or endorsed by Fateless.Ai. It includes none of SkyrimNet's files. The Elder Scrolls V: Skyrim is a trademark of ZeniMax Media Inc.
+## Who?
+
+**Hermaeus Mora** is the Daedric Prince of knowledge, memory, fate, etc.
+
+If you mean the mean the weirdo behind this project, it's me, Davey! I've been a software engineer for somewhere in the neighborhood of a quarter-century, and I play way too much Skyrim VR. I spend _even more_ time fiddling with it.
+
+## What?
+
+Hermaeus reads and edits SkyrimNet's data and settings from your own installation while Skyrim is closed. (It's read-only if the game is running.) It's a single program that runs a small web server on your machine and opens itself in your browser.
+
+Hermaeus is not a 1:1 replacement for the SkyrimNet Dashboard. A number of functions really do require the game to be running, and my goal here is not to offer a comprehensive alternative, but simply to provide access to the settings I am (and perhaps you are) most likely to want to adjust offline.
+
+It works with SkyrimNet but isn't part of it, and isn't affiliated with or endorsed by Fateless.Ai. It includes none of SkyrimNet's files.
+
+## Why?
+
+I made this for myself. Frankly you should use the actual SkyrimNet Dashboard unless you have a compelling reason not to (which I think I do).
+
+SkyrimNet's dashboard is excellent, but I play Skyrim VR ([with ~1700 mods](https://synergyvr.org/mgo)). Launching the game is not exactly instantaneous. It can take several minutes to launch the game and load a save, and I need to wear my headset the whole time. (Yes, I know that there are headless options for running Skyrim VR. No, that doesn't make it _not_ a hassle.)
+
+The things I tend to change are in files (SQLite databases, structured text files) that can be edited manually without an interface that knows anything about SkyrimNet, but finding the right file (and the right _copy_ of that file) to edit isn't always straightforward. So an interface that knows a thing or two is pretty helpful.
+
+# How?
+
+## Installing it (Windows)
+
+**MO2 users:** Put `Hermaeus.exe` in your MO2 installation folder (the same folder as `ModOrganizer.exe`).
+
+**Everyone else (including Vortex users)**: Put `Hermaeus.exe` in your actual Skyrim installation folder (the same folder as `Skyrim.exe` or `SkyrimVR.exe`).
 
 ## Running it
+
+For the Windows version, just run `Hermaeus.exe`.
+
+If you want to run it on a different platform or from a terminal, there are fancy command-line switches.
 
 ```
 hermaeus [-dir <SkyrimNet folder>] [-mod-dir <SkyrimNet mod folder>] [-port 8765] [-backups <folder>] [-no-browser] [-version]
 ```
 
-With Mod Organizer 2, SkyrimNet's own files stay in its mod folder while what it writes lands in `overwrite`; Hermaeus looks for the mod folder next to `overwrite`, and `-mod-dir` names it when that fails. Without `-dir`, Hermaeus uses the folder you last chose, or looks next to the program and in the current directory (including `SKSE/Plugins/SkyrimNet`, `Data/SKSE/Plugins/SkyrimNet` and `overwrite/SKSE/Plugins/SkyrimNet` below them). If it doesn't find one, it asks in the browser.
+With Mod Organizer 2, SkyrimNet's files stay in its mod folder while it writes to `overwrite`. Hermaeus should find all of that stuff automatically if you run it from the suggested location. Failing that, and without `-dir`, Hermaeus uses the folder you last chose, or looks next to the program and in the current directory (including `SKSE/Plugins/SkyrimNet`, `Data/SKSE/Plugins/SkyrimNet` and `overwrite/SKSE/Plugins/SkyrimNet` below them). Failing _that_, it asks in the browser.
 
 ## Safety
 
-- Saving is refused while Skyrim is running, because SkyrimNet keeps its database open. You can still browse.
+- Hermaeus will not save any changes while Skyrim is running, because SkyrimNet keeps its database open. You can still browse.
 - Before the first change to each database in a session, a copy is written to `hermaeus-backups` in the SkyrimNet folder (or to `-backups`).
 - Every save happens in one transaction. If any part fails, nothing changes.
 - The server only listens on `127.0.0.1`, and every API request has to carry a per-session token from the page, so other websites open in your browser can't reach your data.
@@ -76,3 +108,5 @@ Domain packages own their logic, request and response types, routes, and tests. 
 ## License
 
 Hermaeus is released under the [MIT License](LICENSE). Copyright (c) 2026 Davey Strus. It includes other people's software and fonts, each under its own license; [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) lists them with their license texts, and releases include it.
+
+The Elder Scrolls V: Skyrim is a trademark of ZeniMax Media Inc.
