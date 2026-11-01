@@ -6,7 +6,7 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { KnowledgeResponse, Memory, MemoryChanges, Pack } from '#lib/api/types/memories.ts';
-	import { count, plural } from '#lib/format.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { fitToViewport } from '#lib/ui/fit.ts';
@@ -81,25 +81,25 @@
 	async function saveForm(changes: MemoryChanges) {
 		const editing = mode === 'edit' ? current : undefined;
 		await run(async () => {
-			if (editing) return savedNote(await updateMemory(save, editing.id, changes), 'Entry');
+			if (editing) return savedNote(await updateMemory(save, editing.id, changes), m.memories.knowledge.savedWhat);
 			// A new entry goes into the pack the list is narrowed to, if any.
 			const into = pack && pack !== 'none' ? Number(pack) : undefined;
 			const r = await addKnowledge(save, { pack: into, changes });
-			return { note: savedNote(r, 'New entry'), added: String(r.id) };
+			return { note: savedNote(r, m.memories.knowledge.newWhat), added: String(r.id) };
 		});
 	}
 
 	async function remove() {
 		if (!current) return;
 		const id = current.id;
-		await run(async () => `${plural((await deleteMemories(save, [id])).n, 'entry', 'entries')} deleted.`);
+		await run(async () => m.memories.knowledge.deleted({ count: (await deleteMemories(save, [id])).n }));
 	}
 
 	async function togglePack(p: Pack) {
 		error = '';
 		try {
 			await setPackEnabled(save, p.id, !p.enabled);
-			notice = `${p.name} switched ${p.enabled ? 'off' : 'on'}.`;
+			notice = (p.enabled ? m.memories.knowledge.switchedOff : m.memories.knowledge.switchedOn)({ pack: p.name });
 			await invalidate(knowledgeDependency);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -110,33 +110,33 @@
 		const viewing = mode === 'view';
 		const can = !readOnly && viewing;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing, disabled: !can, run: () => open('new') },
-			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !current, run: () => open('delete') }),
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !viewing, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !viewing, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
+			{ key: 'n', shown: 'N', label: m.memories.new, hidden: !viewing, disabled: !can, run: () => open('new') },
+			...deleteShortcuts({ label: m.common.delete, hidden: !viewing, disabled: !can || !current, run: () => open('delete') }),
 			{
 				key: 'Enter',
-				label: 'Save',
+				label: m.common.save,
 				command: true,
 				hidden: mode !== 'edit' && mode !== 'new',
 				run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit()
 			},
-			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => close() }])
+			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => close() }])
 		];
 	});
 </script>
 
 {#if knowledge.packs.length}
 	<section class="packs">
-		<h2 class="caps">Packs</h2>
+		<h2 class="caps">{m.memories.knowledge.packs}</h2>
 		<ul>
 			{#each knowledge.packs as p (p.id)}
 				<li>
 					<label class="pack" class:off={!p.enabled}>
 						<input type="checkbox" checked={p.enabled} disabled={readOnly} onchange={() => togglePack(p)} />
 						<span class="name">{p.name}</span>
-						<span class="muted small">{p.version} · {plural(p.entries, 'entry', 'entries')}{#if p.description} · {p.description}{/if}</span>
+						<span class="muted small">{p.version} · {m.memories.knowledge.entries({ count: p.entries })}{#if p.description} · {p.description}{/if}</span>
 					</label>
 				</li>
 			{/each}
@@ -145,13 +145,13 @@
 {/if}
 
 <div class="tools">
-	<input type="search" bind:value={query} placeholder="Search entries" aria-label="Search entries" />
-	<select bind:value={pack} aria-label="Pack">
-		<option value="">Every pack</option>
+	<input type="search" bind:value={query} placeholder={m.memories.knowledge.search} aria-label={m.memories.knowledge.search} />
+	<select bind:value={pack} aria-label={m.memories.knowledge.pack}>
+		<option value="">{m.memories.knowledge.everyPack}</option>
 		{#each knowledge.packs as p (p.id)}<option value={String(p.id)}>{p.name}</option>{/each}
-		<option value="none">In no pack</option>
+		<option value="none">{m.memories.knowledge.noPack}</option>
 	</select>
-	<span class="muted">{count(shown.length)} of {plural(knowledge.entries.length, 'entry', 'entries')}</span>
+	<span class="muted">{m.memories.knowledge.shownOf({ count: shown.length, entries: m.memories.knowledge.entries({ count: knowledge.entries.length }) })}</span>
 </div>
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
@@ -159,17 +159,17 @@
 <div class="split">
 	<div class="list">
 		{#if !knowledge.entries.length}
-			<p class="muted">No world knowledge yet: no packs are installed, and no entries have been added.</p>
+			<p class="muted">{m.memories.knowledge.none}</p>
 		{:else if !shown.length}
-			<p class="muted">No entries match.</p>
+			<p class="muted">{m.memories.knowledge.noMatch}</p>
 		{:else}
 			<table>
 				<thead>
 					<tr>
-						<th class="mark" aria-label="Selected"></th>
-						<SortHeader label="Entry" key="title" bind:sort />
-						<SortHeader label="Pack" key="pack" bind:sort class="pack-col" />
-						<SortHeader label="Imp." key="importance" bind:sort descendingFirst align="end" class="wide" />
+						<th class="mark" aria-label={m.common.selected}></th>
+						<SortHeader label={m.memories.knowledge.entry} key="title" bind:sort />
+						<SortHeader label={m.memories.knowledge.pack} key="pack" bind:sort class="pack-col" />
+						<SortHeader label={m.memories.imp} key="importance" bind:sort descendingFirst align="end" class="wide" />
 					</tr>
 				</thead>
 				<tbody>
@@ -178,10 +178,10 @@
 							<td class="mark">{#if selection.is(e)}<Diamond />{/if}</td>
 							<td class="text">
 								<span class="line">{#if e.title}<strong>{e.title}: </strong>{/if}{e.content}</span>
-								{#if e.alwaysInject}<span class="flag">always included</span>{/if}
-								{#if !e.active}<span class="flag">inactive</span>{/if}
-								{#if packOf(e)?.enabled === false}<span class="flag">pack off</span>{/if}
-								{#if !e.embedded}<span class="flag">vector pending</span>{/if}
+								{#if e.alwaysInject}<span class="flag">{m.memories.knowledge.alwaysIncluded}</span>{/if}
+								{#if !e.active}<span class="flag">{m.memories.inactive}</span>{/if}
+								{#if packOf(e)?.enabled === false}<span class="flag">{m.memories.knowledge.packOff}</span>{/if}
+								{#if !e.embedded}<span class="flag">{m.memories.vectorPending}</span>{/if}
 							</td>
 							<td class="pack-col muted" use:clipped>{packOf(e)?.name ?? ''}</td>
 							<td class="n wide">{e.importance.toFixed(2)}</td>
@@ -192,46 +192,46 @@
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Entry">
+	<aside class="pane" use:fitToViewport aria-label={m.memories.knowledge.entry}>
 		{#if mode === 'new'}
-			<h2 class="caps">New entry</h2>
-			<p class="muted small">{pack && pack !== 'none' ? `Into ${packs.get(Number(pack))?.name ?? 'the pack'}.` : 'In no pack.'}</p>
+			<h2 class="caps">{m.memories.knowledge.newTitle}</h2>
+			<p class="muted small">{pack && pack !== 'none' ? m.memories.knowledge.into({ pack: packs.get(Number(pack))?.name ?? m.memories.knowledge.thePack }) : m.memories.knowledge.inNoPack}</p>
 			<MemoryForm onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if mode === 'edit'}
-						<h2 class="caps">Edit entry {current.id}</h2>
+						<h2 class="caps">{m.memories.knowledge.editTitle({ id: current.id })}</h2>
 						<MemoryForm memory={current} onsave={saveForm} oncancel={() => close()} />
 					{:else}
-						<h2 class="caps">{current.title || `Entry ${current.id}`}</h2>
+						<h2 class="caps">{current.title || m.memories.knowledge.untitled({ id: current.id })}</h2>
 						{#if packOf(current)}<p class="muted">{packOf(current)?.name}</p>{/if}
 						<p class="content">{current.content}</p>
 						<dl>
-							<dt class="caps">Importance</dt><dd>{current.importance.toFixed(2)}</dd>
-							{#if current.tags.length}<dt class="caps">Tags</dt><dd>{current.tags.join(', ')}</dd>{/if}
-							{#if current.condition}<dt class="caps">Only while</dt><dd><code>{current.condition}</code></dd>{/if}
-							<dt class="caps">Recall</dt><dd>{current.alwaysInject ? 'always included, not only when relevant' : 'when relevant'}</dd>
-							<dt class="caps">Search</dt><dd>{current.embedded ? 'vector built' : 'vector pending; SkyrimNet builds it in the background while a save is loaded'}</dd>
-							{#if !current.active}<dt class="caps">State</dt><dd>inactive: SkyrimNet doesn’t use it</dd>{/if}
+							<dt class="caps">{m.memories.importance}</dt><dd>{current.importance.toFixed(2)}</dd>
+							{#if current.tags.length}<dt class="caps">{m.memories.tags}</dt><dd>{current.tags.join(', ')}</dd>{/if}
+							{#if current.condition}<dt class="caps">{m.memories.onlyWhile}</dt><dd><code>{current.condition}</code></dd>{/if}
+							<dt class="caps">{m.memories.recall}</dt><dd>{current.alwaysInject ? m.memories.alwaysIncluded : m.memories.knowledge.whenRelevant}</dd>
+							<dt class="caps">{m.memories.search}</dt><dd>{current.embedded ? m.memories.vectorBuilt : m.memories.vectorPendingLong}</dd>
+							{#if !current.active}<dt class="caps">{m.memories.state}</dt><dd>{m.memories.knowledge.notUsed}</dd>{/if}
 						</dl>
 						{#if mode === 'delete'}
 							<div class="confirm" role="alert">
-								<p>Delete this entry? Hermaeus backs up the database before its first change each session.</p>
-								<button type="button" class="button primary" onclick={remove}>Delete</button>
-								<button type="button" class="button" onclick={() => close()}>Keep</button>
+								<p>{m.memories.knowledge.confirmDelete}</p>
+								<button type="button" class="button primary" onclick={remove}>{m.common.delete}</button>
+								<button type="button" class="button" onclick={() => close()}>{m.memories.keep}</button>
 							</div>
 						{:else if !readOnly}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
-								<button type="button" class="button" onclick={() => open('delete')}>Delete…</button>
+								<button type="button" class="button" onclick={() => open('edit')}>{m.common.edit}</button>
+								<button type="button" class="button" onclick={() => open('delete')}>{m.memories.deleteMore}</button>
 							</div>
 						{/if}
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so knowledge can’t be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.memories.knowledge.gameRunning}</p>{/if}
 	</aside>
 </div>
 

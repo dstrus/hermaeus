@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '#lib/copy/messages.ts';
 	import CloneList from '#lib/features/CloneList.svelte';
 	import EngineHead from '#lib/features/EngineHead.svelte';
 	import { href } from '#lib/nav.ts';
@@ -18,8 +19,8 @@
 <Tabs
 	label={data.engine.label}
 	tabs={[
-		{ href: base, label: 'Settings' },
-		{ href: `${base}/clones`, label: 'Cloned voices', count: data.cache.voices.length + data.cache.unnamed }
+		{ href: base, label: m.features.engine.settings },
+		{ href: `${base}/clones`, label: m.features.engine.clones, count: data.cache.voices.length + data.cache.unnamed }
 	]}
 />
 <CloneList cache={data.cache} label={data.engine.label} />

@@ -9,7 +9,8 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { Origin } from '#lib/api/types/records.ts';
-	import { plural } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
@@ -23,7 +24,7 @@
 
 	let {
 		title,
-		noun,
+		copy,
 		lead,
 		records,
 		columns,
@@ -32,7 +33,9 @@
 		note
 	}: {
 		title: string;
-		noun: [string, string]; // one, many
+		// What the page calls its records: a noun, as a column heading, counted,
+		// searched for, and when there are none.
+		copy: { noun: string; column: string; count: (p: { count: number }) => string; search: string; none: string };
 		lead: string;
 		records: T[];
 		columns: { label: string; class?: string }[]; // after the name
@@ -88,35 +91,35 @@
 	}
 
 	useShortcuts(() => [
-		{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-		{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !current, disabled: readOnly || saving, run: () => toggle() }
+		{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+		{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+		{ key: 'o', shown: 'O', label: current?.enabled === false ? m.common.switchOn : m.common.switchOff, hidden: !current, disabled: readOnly || saving, run: () => toggle() }
 	]);
 </script>
 
 <div class="bar">
 	<h1 class="caps">{title}</h1>
 	{#if from}
-		<span class="muted n" use:clipped>{plural(shown.length, noun[0], noun[1])} from <a href={pluginHref(save, from)}>{fromLabel ? sourceLabel(fromLabel) : from}</a> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>Show all</button></span>
+		<span class="muted n" use:clipped><Fill text={m.records.list.fromPlugin.text} records={copy.count({ count: shown.length })}>{#snippet plugin()}<a href={pluginHref(save, from)}>{fromLabel ? sourceLabel(fromLabel) : from}</a>{/snippet}</Fill> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>{m.common.showAll}</button></span>
 	{:else}
-		<span class="muted n" use:clipped>{plural(records.length, noun[0], noun[1])} from {plural(sources, 'source', 'sources')}{off ? ` · ${off} off` : ''}</span>
+		<span class="muted n" use:clipped>{m.records.list.fromSources({ records: copy.count({ count: records.length }), count: sources })}{off ? ` · ${m.records.offCount({ count: off })}` : ''}</span>
 	{/if}
-	<input type="search" bind:value={query} placeholder="Search {noun[1]}" aria-label="Search {noun[1]}" />
+	<input type="search" bind:value={query} placeholder={copy.search} aria-label={copy.search} />
 </div>
 <p class="muted lead">{lead}</p>
 
 <div class="split">
 	<div class="list">
 		{#if !records.length}
-			<p class="muted">No {noun[1]} in your plugins or your own edits.</p>
+			<p class="muted">{copy.none}</p>
 		{:else if !shown.length}
-			<p class="muted">Nothing matches “{query}”.</p>
+			<p class="muted">{m.records.noMatch({ query })}</p>
 		{:else}
 			<table>
 				<thead>
 					<tr>
-						<th class="mark" aria-label="Selected"></th>
-						<th class="caps">{noun[0].charAt(0).toUpperCase() + noun[0].slice(1)}</th>
+						<th class="mark" aria-label={m.common.selected}></th>
+						<th class="caps">{copy.column}</th>
 						{#each columns as c (c.label)}<th class="caps {c.class ?? ''}">{c.label}</th>{/each}
 					</tr>
 				</thead>
@@ -127,7 +130,7 @@
 						{/if}
 						<tr aria-selected={selection.is(r)} class:off={!r.enabled} onclick={() => selection.select(r)}>
 							<td class="mark">{#if selection.is(r)}<Diamond />{/if}</td>
-							<td class="name" use:clipped>{r.name}{#if !r.enabled}<span class="flag">off</span>{/if}{#if r.replaces}<span class="flag">replaces {r.replaces}’s</span>{/if}</td>
+							<td class="name" use:clipped>{r.name}{#if !r.enabled}<span class="flag">{m.common.off}</span>{/if}{#if r.replaces}<span class="flag">{m.records.replacesFlag({ source: r.replaces })}</span>{/if}</td>
 							{@render cells(r)}
 						</tr>
 					{/each}
@@ -137,21 +140,21 @@
 		{#if note}<div class="note muted small">{@render note()}</div>{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label={noun[0]}>
+	<aside class="pane" use:fitToViewport aria-label={copy.noun}>
 		{#if current}
 			{@const r = current}
 			{#key r.path}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2 class="caps">{r.name}</h2>
 					<p class="muted small"><a href={pluginHref(save, r.layer)}>{sourceLabel(r)}</a> · <span class="id">{r.path}</span></p>
-					{#if !r.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
+					{#if !r.enabled}<p class="notice">{m.records.isOff}</p>{/if}
 					<Overridden override={r.override} disabled={readOnly || saving} onfollow={() => toggle(true)} />
-					{#if r.replaces}<p class="muted small">Replaces the one from {r.replaces}.</p>{/if}
+					{#if r.replaces}<p class="muted small">{m.records.list.replacesOne({ source: r.replaces })}</p>{/if}
 					{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 					{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 					<div class="buttons">
-						<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{r.enabled ? 'Switch off' : 'Switch on'}</button>
-						<a class="small" href={contentHref(save, r.path)}>Its file, on the Content page</a>
+						<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{r.enabled ? m.common.switchOff : m.common.switchOn}</button>
+						<a class="small" href={contentHref(save, r.path)}>{m.records.list.itsFile}</a>
 					</div>
 					{@render pane(r)}
 				</div>

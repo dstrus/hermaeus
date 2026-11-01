@@ -5,6 +5,8 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { count, realTime } from '#lib/format.ts';
 	import type { Playthrough } from '#lib/api/types/store.ts';
 	import type { PageProps } from './$types';
@@ -16,50 +18,49 @@
 	const open = (p: Playthrough) => goto(`/${encodeURIComponent(p.id)}`);
 
 	useShortcuts(() => [
-		{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-		{ key: 'Enter', label: 'Open', disabled: !selection.current, run: () => selection.current && open(selection.current) }
+		{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+		{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+		{ key: 'Enter', label: m.common.open, disabled: !selection.current, run: () => selection.current && open(selection.current) }
 	]);
 </script>
 
-<h1 class="caps">Playthroughs</h1>
-<p class="muted">In <span class="path">{data.status.skyrimNetDir}</span></p>
+<h1 class="caps">{m.playthroughs.title}</h1>
+<p class="muted"><Fill text={m.playthroughs.in.text}>{#snippet path()}<span class="path">{data.status.skyrimNetDir}</span>{/snippet}</Fill></p>
 <p class="muted defaults">
 	{#if data.status.modDir}
-		SkyrimNet’s own files {data.status.modDirDetected ? 'were found' : 'are'} in <span class="path">{data.status.modDir}</span>.
+		<Fill text={(data.status.modDirDetected ? m.playthroughs.modDirFound : m.playthroughs.modDirSet).text}>{#snippet path()}<span class="path">{data.status.modDir}</span>{/snippet}</Fill>
 	{:else if !data.status.defaultBios}
-		SkyrimNet’s default bios weren’t found, so characters without a save bio show none. Under Mod Organizer 2, start Hermaeus with
-		<code>-mod-dir</code> pointing at SkyrimNet’s mod folder.
+		<Fill text={m.playthroughs.noDefaults.text}>{#snippet flag()}<code>-mod-dir</code>{/snippet}</Fill>
 	{/if}
 </p>
 
 {#if !playthroughs.length}
-	<p class="empty">There are no SkyrimNet databases here yet. SkyrimNet makes one the first time you load a save with it.</p>
+	<p class="empty">{m.playthroughs.none}</p>
 {:else}
 	<div class="split">
 	<table>
 		<thead>
 			<tr>
-				<th class="mark" aria-label="Selected"></th>
-				<th class="caps">Player</th>
-				<th class="caps">Save ID</th>
-				<th class="caps">Last written</th>
-				<th class="caps n">Size</th>
+				<th class="mark" aria-label={m.common.selected}></th>
+				<th class="caps">{m.playthroughs.player}</th>
+				<th class="caps">{m.playthroughs.saveId}</th>
+				<th class="caps">{m.playthroughs.lastWritten}</th>
+				<th class="caps n">{m.playthroughs.size}</th>
 			</tr>
 		</thead>
 		<tbody>
 			{#each playthroughs as p (p.id)}
 				<tr aria-selected={selection.is(p)} onclick={() => selection.select(p)} ondblclick={() => open(p)}>
 					<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
-					<td><a href="/{encodeURIComponent(p.id)}">{p.player || 'No player yet'}</a></td>
+					<td><a href="/{encodeURIComponent(p.id)}">{p.player || m.overview.noPlayer}</a></td>
 					<td class="muted">{p.id}</td>
 					<td>{realTime(p.modified)}</td>
-					<td class="n muted">{count(Math.round(p.size / 1024))} KB</td>
+					<td class="n muted">{m.playthroughs.kb({ size: count(Math.round(p.size / 1024)) })}</td>
 				</tr>
 			{/each}
 		</tbody>
 	</table>
-	<aside class="pane" aria-label="Playthrough" use:fitToViewport>
+	<aside class="pane" aria-label={m.playthroughs.pane} use:fitToViewport>
 		{#if selection.current}<Preview playthrough={selection.current} />{/if}
 	</aside>
 	</div>

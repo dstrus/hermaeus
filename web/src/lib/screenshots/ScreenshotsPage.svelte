@@ -9,7 +9,9 @@
 	import { ApiError, mediaURL } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { Changes, List, Screenshot } from '#lib/api/types/screenshots.ts';
-	import { plural, realTime } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
+	import { realTime } from '#lib/format.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { fitToViewport } from '#lib/ui/fit.ts';
@@ -26,7 +28,7 @@
 	let save = $derived(page.params.save ?? '');
 	let readOnly = $derived(live.gameRunning);
 
-	const typeLabel = (t: string) => ({ location: 'Places', actor: 'People', furniture: 'Furniture' })[t] ?? t.charAt(0).toUpperCase() + t.slice(1);
+	const typeLabel = (t: string) => (m.screenshots.types as Record<string, string>)[t] ?? t.charAt(0).toUpperCase() + t.slice(1);
 	let types = $derived([...new Set(list.screenshots.map((s) => s.subjectType))]);
 	let type = $derived(param('type') ?? '');
 	let query = $state('');
@@ -75,8 +77,8 @@
 		}
 	}
 
-	const lock = (s: Screenshot) => change(s, { locked: !s.locked }, s.locked ? 'OmniSight may write a new description when it takes this again.' : 'Kept as written: OmniSight won’t write a new description.');
-	const retake = (s: Screenshot) => change(s, { needsRefresh: !s.needsRefresh }, s.needsRefresh ? 'No longer marked to be taken again.' : 'Marked to be taken again.');
+	const lock = (s: Screenshot) => change(s, { locked: !s.locked }, s.locked ? m.screenshots.unlocked : m.screenshots.locked);
+	const retake = (s: Screenshot) => change(s, { needsRefresh: !s.needsRefresh }, s.needsRefresh ? m.screenshots.unmarked : m.screenshots.marked);
 
 	// Editing is a state of the address (?mode=edit), so Back cancels it.
 	let mode = $derived<'read' | 'edit'>(param('mode') === 'edit' && current ? 'edit' : 'read');
@@ -101,7 +103,7 @@
 		if (!s) return;
 		const c: Changes = { description: draftText, locked: draftLock };
 		if (draftName.trim() !== s.name) c.name = draftName;
-		if (await change(s, c, draftLock ? 'Saved, and kept as written.' : 'Saved. OmniSight may write a new description when it takes this again.')) await leave('mode');
+		if (await change(s, c, draftLock ? m.screenshots.savedKept : m.screenshots.saved)) await leave('mode');
 	}
 
 	async function openFull(s: Screenshot) {
@@ -115,41 +117,41 @@
 	useShortcuts(() => {
 		const reading = mode === 'read';
 		return [
-			{ key: 'ArrowRight', label: 'Next', hidden: true, disabled: !reading, run: () => selection.move(1) },
-			{ key: 'ArrowLeft', label: 'Previous', hidden: true, disabled: !reading, run: () => selection.move(-1) },
-			{ key: 'ArrowDown', label: 'Down', hidden: true, disabled: !reading, run: () => selection.move(across()) },
-			{ key: 'ArrowUp', label: 'Up', hidden: true, disabled: !reading, run: () => selection.move(-across()) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !reading || !current, disabled: readOnly, run: startEdit },
-			{ key: 'k', shown: 'K', label: current?.locked ? 'Let OmniSight rewrite' : 'Keep as written', hidden: !reading || !current, disabled: readOnly || saving, run: () => current && lock(current) },
-			{ key: 'Enter', label: 'Save', command: true, hidden: reading, disabled: saving, run: submit },
-			{ key: 'Escape', shown: 'Esc', label: 'Cancel', hidden: reading, run: () => leave('mode') }
+			{ key: 'ArrowRight', label: m.common.next, hidden: true, disabled: !reading, run: () => selection.move(1) },
+			{ key: 'ArrowLeft', label: m.common.previous, hidden: true, disabled: !reading, run: () => selection.move(-1) },
+			{ key: 'ArrowDown', label: m.common.down, hidden: true, disabled: !reading, run: () => selection.move(across()) },
+			{ key: 'ArrowUp', label: m.common.up, hidden: true, disabled: !reading, run: () => selection.move(-across()) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !reading || !current, disabled: readOnly, run: startEdit },
+			{ key: 'k', shown: 'K', label: current?.locked ? m.screenshots.letRewrite : m.screenshots.keep, hidden: !reading || !current, disabled: readOnly || saving, run: () => current && lock(current) },
+			{ key: 'Enter', label: m.common.save, command: true, hidden: reading, disabled: saving, run: submit },
+			{ key: 'Escape', shown: 'Esc', label: m.common.cancel, hidden: reading, run: () => leave('mode') }
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Screenshots</h1>
-	<span class="muted n" use:clipped>{plural(list.screenshots.length, 'screenshot', 'screenshots')}{locked ? ` · ${locked} kept as written` : ''}</span>
+	<h1 class="caps">{m.screenshots.title}</h1>
+	<span class="muted n" use:clipped>{m.screenshots.count({ count: list.screenshots.length })}{locked ? ` · ${m.screenshots.kept({ count: locked })}` : ''}</span>
 	{#if types.length > 1}
-		<Segmented value={type} options={[{ value: '', label: 'All' }, ...types.map((t) => ({ value: t, label: typeLabel(t) }))]} label="Subject" onchange={(v) => setParams({ type: v || null })} />
+		<Segmented value={type} options={[{ value: '', label: m.screenshots.all }, ...types.map((t) => ({ value: t, label: typeLabel(t) }))]} label={m.screenshots.subject} onchange={(v) => setParams({ type: v || null })} />
 	{/if}
-	<input type="search" bind:value={query} placeholder="Search screenshots" aria-label="Search screenshots" />
+	<input type="search" bind:value={query} placeholder={m.screenshots.search} aria-label={m.screenshots.search} />
 </div>
-<p class="muted lead">What OmniSight has seen: a picture of each place, and the description a vision model wrote of it, which SkyrimNet gives the AI when you’re there.</p>
-{#if readOnly}<p class="notice warn">Skyrim is running, so screenshots can only be looked at.</p>{/if}
+<p class="muted lead">{m.screenshots.lead}</p>
+{#if readOnly}<p class="notice warn">{m.screenshots.gameRunning}</p>{/if}
 
 <div class="split">
 	<div class="list">
 		{#if !list.screenshots.length}
-			<p class="muted">OmniSight hasn’t taken any screenshots in this playthrough. It takes them as you explore while it’s switched on.</p>
+			<p class="muted">{m.screenshots.none}</p>
 		{:else if !shown.length}
-			<p class="muted">Nothing matches “{query}”.</p>
+			<p class="muted">{m.screenshots.noMatch({ query })}</p>
 		{:else}
-			<div class="grid" role="listbox" aria-label="Screenshots" bind:this={grid}>
+			<div class="grid" role="listbox" aria-label={m.screenshots.title} bind:this={grid}>
 				{#each shown as s (s.id)}
 					<div class="tile" role="option" tabindex="-1" aria-selected={selection.is(s)} onclick={() => selection.select(s)} onkeydown={(e) => e.key === ' ' && selection.select(s)}>
 						<span class="picture">
-							{#if s.hasImage}<MediaImage path={imagePath(save, s.id, true)} alt="" lazy />{:else}<span class="none muted">No image</span>{/if}
+							{#if s.hasImage}<MediaImage path={imagePath(save, s.id, true)} alt="" lazy />{:else}<span class="none muted">{m.screenshots.noImage}</span>{/if}
 						</span>
 						<span class="caption" use:clipped>{s.name}</span>
 					</div>
@@ -158,68 +160,68 @@
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Screenshot">
+	<aside class="pane" use:fitToViewport aria-label={m.screenshots.pane}>
 		{#if current}
 			{@const s = current}
 			{#key s.id}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if s.hasImage}
-						<button type="button" class="full" class:editing={mode === 'edit'} onclick={() => openFull(s)} title="Open full size" style:aspect-ratio={s.width && s.height ? `${s.width} / ${s.height}` : '1'}>
-							<MediaImage path={imagePath(save, s.id)} alt="What OmniSight saw at {s.name}" />
+						<button type="button" class="full" class:editing={mode === 'edit'} onclick={() => openFull(s)} title={m.screenshots.openFull} style:aspect-ratio={s.width && s.height ? `${s.width} / ${s.height}` : '1'}>
+							<MediaImage path={imagePath(save, s.id)} alt={m.screenshots.alt({ name: s.name })} />
 						</button>
 					{:else}
-						<p class="notice">Its image isn’t in <span class="id">{list.folder}</span>, so only its description is here.</p>
+						<p class="notice"><Fill text={m.screenshots.noImageFile.text}>{#snippet folder()}<span class="id">{list.folder}</span>{/snippet}</Fill></p>
 					{/if}
 					<h2 class="caps">{s.name}</h2>
 					<p class="muted small">
-						{#if s.location && s.location !== s.name && s.location !== s.cell}{s.location}{' · '}{/if}<span class="id">{s.cell || s.subject}</span>{[s.indoor ? 'indoors' : '', s.weather, s.timeOfDay]
+						{#if s.location && s.location !== s.name && s.location !== s.cell}{s.location}{' · '}{/if}<span class="id">{s.cell || s.subject}</span>{[s.indoor ? m.screenshots.indoors : '', s.weather, s.timeOfDay]
 							.filter(Boolean)
 							.map((w) => ` · ${w}`)
 							.join('')}
 					</p>
 					<p class="small">
-						{#if s.date}{s.date.time}, {s.date.day}{:else if s.gameTime}{s.gameTime}{/if}<span class="muted">{s.date || s.gameTime ? ' · ' : ''}{realTime(Date.parse(s.taken))}{#if s.manual} · taken with your hotkey{/if}</span>
+						{#if s.date}{m.memories.dateTime(s.date)}{:else if s.gameTime}{s.gameTime}{/if}<span class="muted">{s.date || s.gameTime ? ' · ' : ''}{realTime(Date.parse(s.taken))}{#if s.manual} · {m.screenshots.manual}{/if}</span>
 					</p>
-					{#if s.error}<p class="notice error">OmniSight couldn’t describe it: {s.error}</p>{/if}
+					{#if s.error}<p class="notice error">{m.screenshots.couldntDescribe({ error: s.error })}</p>{/if}
 					{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 					{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 
 					{#if mode === 'edit'}
 						<div class="form">
 							<label>
-								<span class="caps">Name</span>
+								<span class="caps">{m.screenshots.name}</span>
 								<input type="text" bind:value={draftName} />
 							</label>
 							<label class="grow">
-								<span class="caps">Description</span>
+								<span class="caps">{m.screenshots.description}</span>
 								<textarea bind:value={draftText} rows="12"></textarea>
 							</label>
 							<label class="check">
 								<input type="checkbox" bind:checked={draftLock} />
-								<span>Keep it as written: OmniSight won’t write a new one</span>
+								<span>{m.screenshots.keepCheck}</span>
 							</label>
 							<div class="buttons">
-								<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
-								<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+								<button type="button" class="button primary" onclick={submit} disabled={saving}>{m.common.save}</button>
+								<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 							</div>
 						</div>
 					{:else}
-						<div class="switches" role="group" aria-label="Switches">
+						<div class="switches" role="group" aria-label={m.screenshots.switches}>
 							<button type="button" role="switch" aria-checked={s.locked} disabled={readOnly || saving} onclick={() => lock(s)} title="description_locked">
 								<span class="mark" aria-hidden="true"><svg viewBox="0 0 10 10" width="10" height="10"><path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
-								<span class="caps">Keep as written</span>
+								<span class="caps">{m.screenshots.keep}</span>
 							</button>
 							<button type="button" role="switch" aria-checked={s.needsRefresh} disabled={readOnly || saving} onclick={() => retake(s)} title="needs_refresh">
 								<span class="mark" aria-hidden="true"><svg viewBox="0 0 10 10" width="10" height="10"><path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
-								<span class="caps">Take again</span>
+								<span class="caps">{m.screenshots.takeAgain}</span>
 							</button>
-							<button type="button" class="button" onclick={startEdit} disabled={readOnly}>Edit</button>
+							<button type="button" class="button" onclick={startEdit} disabled={readOnly}>{m.common.edit}</button>
 						</div>
 						{#if s.description}
 							<p class="text">{s.description}</p>
-							{#if s.model}<p class="muted small">Described by <span class="id">{s.model}</span>{s.locked ? ', and kept as written' : ''}.</p>{/if}
+							{#if s.model}<p class="muted small"><Fill text={(s.locked ? m.screenshots.describedByKept : m.screenshots.describedBy).text}>{#snippet model()}<span class="id">{s.model}</span>{/snippet}</Fill></p>{/if}
 						{:else}
-							<p class="muted">No description yet.</p>
+							<p class="muted">{m.screenshots.noDescription}</p>
 						{/if}
 					{/if}
 				</div>

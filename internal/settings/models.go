@@ -26,10 +26,11 @@ const modelsFile = "OpenRouter"
 
 // Task is one job SkyrimNet sends to a model, with its rotation of models.
 type Task struct {
-	ID    string `json:"id"` // default for Dialogue; otherwise the variant's name
-	Label string `json:"label"`
-	What  string `json:"what"`
+	ID    string `json:"id"`    // default for Dialogue; otherwise the variant's name
 	Known bool   `json:"known"` // one of SkyrimNet's own tasks; others come from plugins
+	// Its name, for Hermaeus's own messages and order; the frontend names
+	// tasks itself, by id.
+	label string
 
 	Slots        []Slot `json:"slots"` // in rotation order
 	Params       Params `json:"params"`
@@ -111,21 +112,22 @@ type TaskEdit struct {
 	RotationMode string `json:"rotationMode,omitempty"`
 }
 
-// SkyrimNet's own tasks, in the order its dashboard lists them.
-var knownTasks = []struct{ id, label, what string }{
-	{"default", "Dialogue", "What NPCs say in conversation, and any task without a model of its own."},
-	{"combat", "Combat", "What NPCs say and do while fighting."},
-	{"CharacterProfileGeneration", "Character profiles", "Writing and rewriting NPCs’ bios."},
-	{"DiaryGeneration", "Diary", "NPCs’ diary entries."},
-	{"memory", "Memory", "Turning events into memories, with how much they matter."},
-	{"gamemaster_evaluation", "GameMaster", "Reading a scene and deciding who speaks or acts."},
-	{"action_evaluation", "Action evaluation", "Which actions an NPC may take in response to an event."},
-	{"meta", "Meta", "Quick sorting and routing: a fast, cheap model."},
-	{"decisions", "Decisions", "Typed questions (an NPC’s mood, who speaks next) answered with probabilities. Needs a provider with the Decisions or System One API style; sampling settings don’t apply."},
-	{"vision", "Vision", "Describing screenshots for OmniSight."},
-	{"vision_quality", "Vision (quality)", "Describing the OmniSight captures you take yourself, with a stronger model."},
-	{"UniversalTranslator", "Universal Translator", "Rewriting NPCs’ lines in their speech patterns."},
-	{"AgentDefault", "AI assistant", "The dashboard’s tool-calling assistant."},
+// SkyrimNet's own tasks, in the order its dashboard lists them, with the
+// names Hermaeus's messages give them.
+var knownTasks = []struct{ id, label string }{
+	{"default", "Dialogue"},
+	{"combat", "Combat"},
+	{"CharacterProfileGeneration", "Character profiles"},
+	{"DiaryGeneration", "Diary"},
+	{"memory", "Memory"},
+	{"gamemaster_evaluation", "GameMaster"},
+	{"action_evaluation", "Action evaluation"},
+	{"meta", "Meta"},
+	{"decisions", "Decisions"},
+	{"vision", "Vision"},
+	{"vision_quality", "Vision (quality)"},
+	{"UniversalTranslator", "Universal Translator"},
+	{"AgentDefault", "AI assistant"},
 }
 
 func knownTask(id string) (int, bool) {
@@ -207,7 +209,7 @@ func (s *Settings) Models() (Models, error) {
 			if aKnown {
 				return a < b
 			}
-			return strings.ToLower(others[i].Label) < strings.ToLower(others[j].Label)
+			return strings.ToLower(others[i].label) < strings.ToLower(others[j].label)
 		})
 		out.Tasks = append(out.Tasks, others...)
 	}
@@ -215,9 +217,9 @@ func (s *Settings) Models() (Models, error) {
 }
 
 func taskOf(id string, n *yaml.Node) Task {
-	t := Task{ID: id, Label: taskLabel(id), Slots: []Slot{}, Params: Params{StopSequences: []string{}}}
+	t := Task{ID: id, label: taskLabel(id), Slots: []Slot{}, Params: Params{StopSequences: []string{}}}
 	if i, ok := knownTask(id); ok {
-		t.Label, t.What, t.Known = knownTasks[i].label, knownTasks[i].what, true
+		t.label, t.Known = knownTasks[i].label, true
 	}
 	names := splitModels(ruleField(n, "model_name"))
 	params := findNode(n, "model_params")

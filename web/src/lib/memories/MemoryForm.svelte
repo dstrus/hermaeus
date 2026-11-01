@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { Memory, MemoryChanges } from '#lib/api/types/memories.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { commonEmotions, memoryTypes, parseTags } from './api.ts';
 
 	let {
@@ -62,34 +63,34 @@
 </script>
 
 <form onsubmit={submit}>
-	<label class="field"><span class="caps">Text</span><textarea bind:value={f.content} required rows="7"></textarea></label>
-	<label class="field"><span class="caps">Title</span><input bind:value={f.title} placeholder="Optional; few memories have one" /></label>
+	<label class="field"><span class="caps">{m.memories.form.text}</span><textarea bind:value={f.content} required rows="7"></textarea></label>
+	<label class="field"><span class="caps">{m.memories.form.title}</span><input bind:value={f.title} placeholder={m.memories.form.titlePlaceholder} /></label>
 	<div class="pair">
 		<label class="field">
-			<span class="caps">Type</span>
+			<span class="caps">{m.memories.type}</span>
 			<select bind:value={f.type}>
 				{#each types as t (t)}<option value={t}>{t}</option>{/each}
 			</select>
 		</label>
-		<label class="field"><span class="caps">Mood</span><input bind:value={f.emotion} list="memory-emotions" /></label>
+		<label class="field"><span class="caps">{m.memories.mood}</span><input bind:value={f.emotion} list="memory-emotions" /></label>
 	</div>
 	<datalist id="memory-emotions">
 		{#each commonEmotions as e (e)}<option value={e}></option>{/each}
 	</datalist>
 	<div class="pair">
-		<label class="field"><span class="caps">Place</span><input bind:value={f.location} /></label>
-		<label class="field"><span class="caps">Importance</span><input type="number" bind:value={f.importance} min="0" max="1" step="0.05" required /></label>
+		<label class="field"><span class="caps">{m.memories.place}</span><input bind:value={f.location} /></label>
+		<label class="field"><span class="caps">{m.memories.importance}</span><input type="number" bind:value={f.importance} min="0" max="1" step="0.05" required /></label>
 	</div>
-	<label class="field"><span class="caps">Tags</span><input bind:value={f.tags} placeholder="Separated by commas" /></label>
+	<label class="field"><span class="caps">{m.memories.tags}</span><input bind:value={f.tags} placeholder={m.memories.form.tagsPlaceholder} /></label>
 	<label class="field">
-		<span class="caps">Only while</span>
-		<input bind:value={f.condition} spellcheck="false" placeholder="Optional condition" />
+		<span class="caps">{m.memories.onlyWhile}</span>
+		<input bind:value={f.condition} spellcheck="false" placeholder={m.memories.form.conditionPlaceholder} />
 	</label>
-	<label class="check"><input type="checkbox" bind:checked={f.active} /> Active: SkyrimNet can recall it</label>
-	<label class="check"><input type="checkbox" bind:checked={f.alwaysInject} /> Always included, not only when relevant</label>
+	<label class="check"><input type="checkbox" bind:checked={f.active} /> {m.memories.form.active}</label>
+	<label class="check"><input type="checkbox" bind:checked={f.alwaysInject} /> {m.memories.form.alwaysInject}</label>
 	<div class="buttons">
-		<button class="button primary" disabled={saving}>{memory ? 'Save' : 'Add memory'}</button>
-		<button type="button" class="button" onclick={oncancel} disabled={saving}>Cancel</button>
+		<button class="button primary" disabled={saving}>{memory ? m.common.save : m.memories.form.addMemory}</button>
+		<button type="button" class="button" onclick={oncancel} disabled={saving}>{m.common.cancel}</button>
 	</div>
 </form>
 

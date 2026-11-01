@@ -8,8 +8,9 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { ProviderDetails, ProviderEdit, ProvidersResponse } from '#lib/api/types/settings.ts';
-	import { plural } from '#lib/format.ts';
-	import { modelsDependency, modelsHref } from '#lib/models/api.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
+	import { modelsDependency, modelsHref, taskLabel } from '#lib/models/api.ts';
 	import { modelLists } from '#lib/models/lists.svelte.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
@@ -19,6 +20,8 @@
 	import { deleteShortcuts, useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { addProvider, blankProvider, editOf, keyState, providersDependency, removeProvider, saveProvider, setKey, styleLabel } from './api.ts';
 	import ProviderForm from './ProviderForm.svelte';
+
+	const t = m.providers;
 
 	let { save, providers: loaded }: { save: string; providers: ProvidersResponse } = $props();
 
@@ -37,14 +40,14 @@
 	// and Back closes a form.
 	type Mode = 'view' | 'edit' | 'new' | 'key' | 'delete';
 	let mode = $derived.by((): Mode => {
-		const m = param('mode');
+		const asked = param('mode');
 		if (!loaded.found) return 'view';
-		if (m === 'new') return 'new';
-		if ((m === 'edit' || m === 'key') && current) return m;
-		if (m === 'delete' && current && !current.builtin) return 'delete';
+		if (asked === 'new') return 'new';
+		if ((asked === 'edit' || asked === 'key') && current) return asked;
+		if (asked === 'delete' && current && !current.builtin) return 'delete';
 		return 'view';
 	});
-	const open = (m: Mode) => setParams({ mode: m });
+	const open = (to: Mode) => setParams({ mode: to });
 	const close = (opened?: string) => (opened ? setParams({ item: opened, mode: null }, 'replace') : leave('mode'));
 	$effect(() => {
 		if (mode === 'view' && param('mode')) setParams({ mode: null }, 'replace');
@@ -74,10 +77,10 @@
 			if (mode === 'new') {
 				const r = await addProvider(edit);
 				const added = r.providers.at(-1);
-				return { note: `Added ${edit.name}. Give it a key, then a task can use it.`, opened: added?.id ?? '' };
+				return { note: t.added({ name: edit.name }), opened: added?.id ?? '' };
 			}
 			await saveProvider(p!.id, edit);
-			return `Saved ${edit.name}.`;
+			return t.saved({ name: edit.name });
 		});
 	}
 
@@ -94,14 +97,14 @@
 		keyDraft = '';
 		run(async () => {
 			await setKey(p!.id, { modified: loaded.modified, key });
-			return key ? `Set the key for ${p!.name}. Hermaeus never shows it again.` : `Cleared the key for ${p!.name}.`;
+			return key ? t.keyWasSet({ name: p!.name }) : t.keyCleared({ name: p!.name });
 		});
 	}
 	function clearKey() {
 		const p = current;
 		run(async () => {
 			await setKey(p!.id, { modified: loaded.modified, key: '' });
-			return `Cleared the key for ${p!.name}.`;
+			return t.keyCleared({ name: p!.name });
 		});
 	}
 
@@ -109,47 +112,47 @@
 		const p = current;
 		run(async () => {
 			await removeProvider(p!.id, loaded.modified);
-			return `Removed ${p!.name}.`;
+			return t.removed({ name: p!.name });
 		});
 	}
 
 	function listState(p: ProviderDetails): string {
 		if (p.style !== 'chat') return '';
-		if (modelLists.loading[p.id]) return 'asking…';
+		if (modelLists.loading[p.id]) return m.models.lists.asking;
 		const list = modelLists.lists[p.id];
-		return list ? `${plural(list.models.length, 'model', 'models')} fetched` : '';
+		return list ? m.models.lists.fetched({ count: list.models.length }) : '';
 	}
 
 	useShortcuts(() => {
 		const viewing = mode === 'view';
 		const p = current;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !p, run: () => open('edit') },
-			{ key: 'k', shown: 'K', label: 'Set key', hidden: !viewing, disabled: !can || !p, run: () => open('key') },
-			{ key: 'n', shown: 'N', label: 'New provider', hidden: !viewing, disabled: !can, run: () => open('new') },
-			{ key: 'f', shown: 'F', label: 'Fetch models', hidden: !viewing, disabled: !p || p.style !== 'chat' || modelLists.loading[p.id], run: () => p && modelLists.fetch(p.id, !!modelLists.lists[p.id]) },
-			...deleteShortcuts({ label: 'Remove', hidden: !viewing || !p || p.builtin, disabled: !can || !p || p.builtin, run: () => open('delete') }),
-			{ key: 'Enter', label: 'Save', command: true, hidden: viewing || mode === 'delete', run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit() },
-			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => close() }])
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !viewing, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !viewing, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !viewing, disabled: !can || !p, run: () => open('edit') },
+			{ key: 'k', shown: 'K', label: t.setKey, hidden: !viewing, disabled: !can || !p, run: () => open('key') },
+			{ key: 'n', shown: 'N', label: t.newProvider, hidden: !viewing, disabled: !can, run: () => open('new') },
+			{ key: 'f', shown: 'F', label: m.models.lists.fetch, hidden: !viewing, disabled: !p || p.style !== 'chat' || modelLists.loading[p.id], run: () => p && modelLists.fetch(p.id, !!modelLists.lists[p.id]) },
+			...deleteShortcuts({ label: m.common.remove, hidden: !viewing || !p || p.builtin, disabled: !can || !p || p.builtin, run: () => open('delete') }),
+			{ key: 'Enter', label: m.common.save, command: true, hidden: viewing || mode === 'delete', run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit() },
+			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => close() }])
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Providers</h1>
+	<h1 class="caps">{t.title}</h1>
 	<span class="muted n" use:clipped>
 		{#if !loaded.found}
-			Not set up yet
+			{m.common.notSetUp}
 		{:else}
-			{plural(all.length, 'provider', 'providers')} · {keyed === all.length ? 'all with keys' : keyed ? `${keyed} with a key` : 'none with a key yet'}
+			{t.count({ count: all.length })} · {keyed === all.length ? t.allKeyed : keyed ? t.keyed({ count: keyed }) : t.noneKeyed}
 		{/if}
 	</span>
 </div>
-<p class="muted lead">The services SkyrimNet sends its tasks to. A provider needs a key before a task can use it; keys are set here and never shown again, not even to this page.</p>
+<p class="muted lead">{t.lead}</p>
 {#if !loaded.found}
-	<p class="notice">SkyrimNet hasn’t written <span class="id">{loaded.path}</span> yet; it will the next time it starts. Until then there’s nothing to change here.</p>
+	<p class="notice"><Fill text={m.common.notWrittenYet.text}>{#snippet path()}<span class="id">{loaded.path}</span>{/snippet}</Fill></p>
 {/if}
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
@@ -159,11 +162,11 @@
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<th class="caps name">Provider</th>
-					<th class="caps key">Key</th>
-					<th class="caps style">API</th>
-					<th class="caps">Used by</th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<th class="caps name">{t.provider}</th>
+					<th class="caps key">{t.key}</th>
+					<th class="caps style">{t.api}</th>
+					<th class="caps">{t.usedBy}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -171,21 +174,21 @@
 					{@const key = keyState(p, all)}
 					<tr aria-selected={selection.is(p)} class:unkeyed={key === 'none'} onclick={() => mode === 'view' && selection.select(p)} ondblclick={() => can && mode === 'view' && open('edit')}>
 						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
-						<td class="name">{p.name}{#if !p.builtin}<span class="muted small"> · yours</span>{/if}</td>
-						<td class="key">{key === 'own' ? 'Set' : key === 'borrowed' ? `${all.find((o) => o.id === p.keyFrom)?.name ?? p.keyFrom}’s` : 'None'}</td>
+						<td class="name">{p.name}{#if !p.builtin}<span class="muted small"> · {t.yours}</span>{/if}</td>
+						<td class="key">{key === 'own' ? t.keySet : key === 'borrowed' ? t.borrowed({ provider: all.find((o) => o.id === p.keyFrom)?.name ?? p.keyFrom ?? '' }) : t.none}</td>
 						<td class="style">{styleLabel(p.style)}</td>
-						<td class="tasks" use:clipped>{p.tasks.join(', ')}</td>
+						<td class="tasks" use:clipped>{p.tasks.map(taskLabel).join(', ')}</td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
-		<p class="muted small">Which provider each task uses is set on the <a href={modelsHref(save)}>Models</a> page.</p>
+		<p class="muted small"><Fill text={t.modelsNote.text}>{#snippet models()}<a href={modelsHref(save)}>{m.models.title}</a>{/snippet}</Fill></p>
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Provider">
+	<aside class="pane" use:fitToViewport aria-label={t.provider}>
 		{#if mode === 'new'}
-			<h2 class="caps">New provider</h2>
-			<p class="muted small">Any service with an OpenAI-style chat endpoint, such as one running on this machine.</p>
+			<h2 class="caps">{t.newProvider}</h2>
+			<p class="muted small">{t.newHint}</p>
 			<ProviderForm edit={blankProvider(loaded.modified)} isNew {saving} onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{@const p = current}
@@ -193,73 +196,74 @@
 			{#key `${p.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2 class="caps">{p.name}</h2>
-					<p class="muted small">{styleLabel(p.style)} API · <span class="id">{p.id}</span></p>
+					<p class="muted small">{t.styleApi({ style: styleLabel(p.style) })} · <span class="id">{p.id}</span></p>
 					{#if mode === 'edit'}
 						<ProviderForm edit={editOf(p, loaded.modified)} isOpenRouter={p.id === 'openrouter'} {saving} onsave={saveForm} oncancel={() => close()} />
 					{:else if mode === 'key'}
 						<form class="keyform" onsubmit={saveKey}>
 							<label class="field">
-								<span class="caps label">{p.hasKey ? 'New key' : 'Key'}</span>
-								<input bind:this={keyField} type="password" bind:value={keyDraft} autocomplete="off" spellcheck="false" placeholder="Paste the key" />
-								<span class="muted small">Saved into <span class="id">{loaded.path}</span>, where SkyrimNet reads it. Hermaeus never shows a key, here or anywhere.</span>
+								<span class="caps label">{p.hasKey ? t.newKey : t.key}</span>
+								<input bind:this={keyField} type="password" bind:value={keyDraft} autocomplete="off" spellcheck="false" placeholder={t.pasteKey} />
+								<span class="muted small"><Fill text={t.keySaved.text}>{#snippet path()}<span class="id">{loaded.path}</span>{/snippet}</Fill></span>
 							</label>
 							<div class="buttons">
-								<button type="submit" class="button primary" disabled={saving || !keyDraft.trim()}>Save key</button>
-								<button type="button" class="button" onclick={() => close()} disabled={saving}>Cancel</button>
+								<button type="submit" class="button primary" disabled={saving || !keyDraft.trim()}>{t.saveKey}</button>
+								<button type="button" class="button" onclick={() => close()} disabled={saving}>{m.common.cancel}</button>
 							</div>
 						</form>
 					{:else}
+						{@const lender = all.find((o) => o.id === p.keyFrom)?.name ?? p.keyFrom ?? ''}
 						<dl>
-							<dt class="caps">Endpoint</dt><dd class="id endpoint">{p.endpoint}</dd>
-							<dt class="caps">Key</dt>
+							<dt class="caps">{t.endpoint}</dt><dd class="id endpoint">{p.endpoint}</dd>
+							<dt class="caps">{t.key}</dt>
 							<dd>
-								{#if key === 'own'}Set{:else if key === 'borrowed'}Borrows {all.find((o) => o.id === p.keyFrom)?.name ?? p.keyFrom}’s{:else}None yet{#if p.keyFrom}; would borrow {all.find((o) => o.id === p.keyFrom)?.name ?? p.keyFrom}’s{/if}{/if}
+								{#if key === 'own'}{t.keySet}{:else if key === 'borrowed'}{t.borrows({ provider: lender })}{:else if p.keyFrom}{t.noneYetBorrow({ provider: lender })}{:else}{t.noneYet}{/if}
 							</dd>
-							<dt class="caps">Streaming</dt><dd>{p.streaming ? 'On' : 'Off'}</dd>
-							<dt class="caps">Structured outputs</dt><dd>{p.structuredOutputs ? 'On' : 'Off'}</dd>
-							<dt class="caps">Reasoning</dt><dd>{p.reasoning ? 'On' : 'Off'}</dd>
-							{#if p.id === 'openrouter' && p.sorting && p.sorting !== 'default'}<dt class="caps">Upstreams</dt><dd>By {p.sorting}</dd>{/if}
-							{#if p.cacheTTL === '1h'}<dt class="caps">Cache</dt><dd>An hour</dd>{/if}
-							{#if p.settings}<dt class="caps">Settings</dt><dd class="id settings">{p.settings}</dd>{/if}
-							<dt class="caps">Used by</dt><dd>{p.tasks.length ? p.tasks.join(', ') : 'No task yet'}</dd>
+							<dt class="caps">{t.streaming}</dt><dd>{p.streaming ? m.common.isOn : m.common.isOff}</dd>
+							<dt class="caps">{t.structuredOutputs}</dt><dd>{p.structuredOutputs ? m.common.isOn : m.common.isOff}</dd>
+							<dt class="caps">{t.reasoning}</dt><dd>{p.reasoning ? m.common.isOn : m.common.isOff}</dd>
+							{#if p.id === 'openrouter' && p.sorting && p.sorting !== 'default'}<dt class="caps">{t.upstreams}</dt><dd>{t.bySorting({ sorting: p.sorting })}</dd>{/if}
+							{#if p.cacheTTL === '1h'}<dt class="caps">{t.cache}</dt><dd>{t.anHour}</dd>{/if}
+							{#if p.settings}<dt class="caps">{t.settings}</dt><dd class="id settings">{p.settings}</dd>{/if}
+							<dt class="caps">{t.usedBy}</dt><dd>{p.tasks.length ? p.tasks.map(taskLabel).join(', ') : t.noTask}</dd>
 							{#if p.style === 'chat'}
-								<dt class="caps">Models</dt>
+								<dt class="caps">{t.models}</dt>
 								<dd>
 									{#if modelLists.errors[p.id]}
 										<span class="error">{modelLists.errors[p.id]}</span>
 									{:else if listState(p)}
-										{listState(p)}, offered as you type one into a task.
+										{t.listOffered({ list: listState(p) })}
 									{:else}
-										Not fetched. Fetching asks {p.name} over the Internet{key === 'none' ? '' : ', with the key'}.
+										{(key === 'none' ? t.notFetched : t.notFetchedKey)({ provider: p.name })}
 									{/if}
 								</dd>
 							{/if}
 						</dl>
 						{#if key === 'none' && p.style === 'chat'}
-							<p class="notice warn">Without a key, no task can use {p.name}.</p>
+							<p class="notice warn">{t.noKeyWarn({ provider: p.name })}</p>
 						{/if}
 						{#if mode === 'delete'}
 							<div class="confirm" role="alert">
-								<p>Remove {p.name}? A backup of the file is kept.</p>
-								<button type="button" class="button primary" onclick={remove} disabled={saving}>Remove</button>
-								<button type="button" class="button" onclick={() => close()}>Keep</button>
+								<p>{t.confirmRemove({ provider: p.name })}</p>
+								<button type="button" class="button primary" onclick={remove} disabled={saving}>{m.common.remove}</button>
+								<button type="button" class="button" onclick={() => close()}>{m.common.keep}</button>
 							</div>
 						{:else if can}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => open('key')}>{p.hasKey ? 'Change key' : 'Set key'}</button>
-								{#if p.hasKey}<button type="button" class="button" onclick={clearKey}>Clear key</button>{/if}
-								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
+								<button type="button" class="button" onclick={() => open('key')}>{p.hasKey ? t.changeKey : t.setKey}</button>
+								{#if p.hasKey}<button type="button" class="button" onclick={clearKey}>{t.clearKey}</button>{/if}
+								<button type="button" class="button" onclick={() => open('edit')}>{m.common.edit}</button>
 								{#if p.style === 'chat'}
-									<button type="button" class="button" onclick={() => modelLists.fetch(p.id, !!modelLists.lists[p.id])} disabled={modelLists.loading[p.id]}>{modelLists.lists[p.id] ? 'Fetch models again' : 'Fetch models'}</button>
+									<button type="button" class="button" onclick={() => modelLists.fetch(p.id, !!modelLists.lists[p.id])} disabled={modelLists.loading[p.id]}>{modelLists.lists[p.id] ? t.fetchModelsAgain : m.models.lists.fetch}</button>
 								{/if}
-								{#if !p.builtin}<button type="button" class="button" onclick={() => open('delete')}>Remove…</button>{/if}
+								{#if !p.builtin}<button type="button" class="button" onclick={() => open('delete')}>{t.removeMore}</button>{/if}
 							</div>
 						{/if}
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so nothing can be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.common.gameRunning}</p>{/if}
 	</aside>
 </div>
 

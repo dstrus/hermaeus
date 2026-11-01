@@ -3,6 +3,8 @@
      so the changes are read in their context. -->
 <script lang="ts">
 	import type { Section } from '#lib/api/types/bios.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { sectionLabel } from './api.ts';
 	import { diffSections } from './diff.ts';
 
@@ -11,14 +13,22 @@
 	let sections = $derived(diffSections(from, to));
 	let changed = $derived(sections.filter((s) => s.status !== 'same').length);
 	const tag = (status: string) =>
-		status === 'added' ? `only in ${toLabel.toLowerCase()}` : status === 'removed' ? `only in ${fromLabel.toLowerCase()}` : status === 'rewritten' ? 'rewritten' : status === 'changed' ? 'changed' : 'unchanged';
+		status === 'added'
+			? m.bios.diff.onlyIn({ label: toLabel.toLowerCase() })
+			: status === 'removed'
+				? m.bios.diff.onlyIn({ label: fromLabel.toLowerCase() })
+				: status === 'rewritten'
+					? m.bios.diff.rewritten
+					: status === 'changed'
+						? m.bios.diff.changed
+						: m.bios.diff.unchanged;
 </script>
 
 <p class="muted key">
 	{#if changed}
-		{changed} of {sections.length} sections differ. <del>Dropped</del> text is struck through; <ins>added</ins> text is marked.
+		{m.bios.diff.differ({ changed, total: sections.length })} <Fill text={m.bios.diff.key.text}>{#snippet dropped()}<del>{m.bios.diff.dropped}</del>{/snippet}{#snippet added()}<ins>{m.bios.diff.added}</ins>{/snippet}</Fill>
 	{:else}
-		The two are the same.
+		{m.bios.diff.same}
 	{/if}
 </p>
 <article class="document">

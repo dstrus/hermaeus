@@ -3,8 +3,12 @@
 <script lang="ts">
 	import { tick, untrack } from 'svelte';
 	import type { Rule } from '#lib/api/types/settings.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import Segmented from '#lib/ui/Segmented.svelte';
 	import { entityId, entityTypes, type NPC } from './api.ts';
+
+	const t = m.translator.form;
 
 	let {
 		rule,
@@ -44,7 +48,7 @@
 		return q ? npcs.find((n) => n.template.toLowerCase() === q) ?? npcs.find((n) => n.name.toLowerCase() === q) : undefined;
 	});
 	let chosen = $derived(known?.template ?? template);
-	let id = $derived(entityId(type, type === 'npc' ? chosen : editorId, formId));
+	let ruleId = $derived(entityId(type, type === 'npc' ? chosen : editorId, formId));
 
 	$effect(() => {
 		tick().then(() => (global ? patternField : first)?.focus());
@@ -54,14 +58,14 @@
 		e.preventDefault();
 		error = '';
 		if (!global) {
-			if (type === 'npc' && !template.trim()) return void (error = 'Name the NPC by bio template.');
-			if (type !== 'npc' && !editorId.trim()) return void (error = `Give the ${type}’s editor ID.`);
-			if (type !== 'npc' && !/^[0-9a-f]{3,8}$/i.test(formId.trim().replace(/^0x/i, ''))) return void (error = 'The form ID is hexadecimal, such as 0001BDB1; its last three digits are enough.');
+			if (type === 'npc' && !template.trim()) return void (error = t.nameNpc);
+			if (type !== 'npc' && !editorId.trim()) return void (error = t.giveEditorId({ type }));
+			if (type !== 'npc' && !/^[0-9a-f]{3,8}$/i.test(formId.trim().replace(/^0x/i, ''))) return void (error = t.formIdHex);
 		}
 		onsave({
 			...rule,
 			entityType: type,
-			entityId: global ? rule.entityId : id,
+			entityId: global ? rule.entityId : ruleId,
 			name: global ? rule.name : type === 'npc' ? chosen.trim() : name.trim() || editorId.trim(),
 			editorId: global || type === 'npc' ? '' : editorId.trim(),
 			pattern,
@@ -73,56 +77,56 @@
 <form onsubmit={submit}>
 	{#if !global}
 		<div class="field">
-			<span class="caps label">For</span>
-			<Segmented bind:value={type} options={entityTypes} label="What the rule is for" />
+			<span class="caps label">{t.for}</span>
+			<Segmented bind:value={type} options={entityTypes} label={t.forLabel} />
 		</div>
 		{#if type === 'npc'}
 			<label class="field">
-				<span class="caps label">NPC</span>
-				<input bind:this={first} type="text" bind:value={template} list="translator-npcs" placeholder="Aya" autocomplete="off" spellcheck="false" />
+				<span class="caps label">{t.npc}</span>
+				<input bind:this={first} type="text" bind:value={template} list="translator-npcs" placeholder={t.npcPlaceholder} autocomplete="off" spellcheck="false" />
 				<datalist id="translator-npcs">
 					{#each npcs as n (n.template)}<option value={n.name}>{n.template}</option>{/each}
 				</datalist>
 				<span class="muted small">
 					{#if known}
-						{known.name}{known.here ? ' in this playthrough' : ''}, by bio template <span class="id">{known.template}</span>.
+						<Fill text={(known.here ? t.knownHere : t.known).text} name={known.name}>{#snippet template()}<span class="id">{known!.template}</span>{/snippet}</Fill>
 					{:else}
-						Any NPC with a bio, by name or by bio template.
+						{t.anyNpc}
 					{/if}
 				</span>
 			</label>
 		{:else}
 			<label class="field">
-				<span class="caps label">Editor ID</span>
+				<span class="caps label">{t.editorId}</span>
 				<input bind:this={first} type="text" bind:value={editorId} placeholder={type === 'faction' ? 'ThievesGuildFaction' : 'NordRace'} autocomplete="off" spellcheck="false" />
 			</label>
 			<label class="field">
-				<span class="caps label">Form ID</span>
+				<span class="caps label">{t.formId}</span>
 				<input type="text" bind:value={formId} placeholder="00029DA9" autocomplete="off" spellcheck="false" />
-				<span class="muted small">From the Creation Kit or xEdit. SkyrimNet keys the rule as <span class="id">{id || '…'}</span>.</span>
+				<span class="muted small"><Fill text={t.formIdHint.text}>{#snippet id()}<span class="id">{ruleId || '…'}</span>{/snippet}</Fill></span>
 			</label>
 			<label class="field">
-				<span class="caps label">Shown as</span>
-				<input type="text" bind:value={name} placeholder={type === 'faction' ? 'Thieves Guild' : 'Nords'} autocomplete="off" />
+				<span class="caps label">{t.shownAs}</span>
+				<input type="text" bind:value={name} placeholder={type === 'faction' ? t.factionPlaceholder : t.racePlaceholder} autocomplete="off" />
 			</label>
 		{/if}
 	{/if}
 	<label class="field">
-		<span class="caps label">Speech pattern</span>
-		<textarea bind:this={patternField} bind:value={pattern} rows="6" placeholder={global ? 'How every NPC without a rule of their own speaks' : 'How they speak: tone, rhythm, turns of phrase'}></textarea>
-		<span class="muted small">{global ? 'Empty, NPCs without a rule speak as written.' : 'Empty, they speak as written, whatever the global pattern says.'}</span>
+		<span class="caps label">{t.pattern}</span>
+		<textarea bind:this={patternField} bind:value={pattern} rows="6" placeholder={global ? t.globalPlaceholder : t.placeholder}></textarea>
+		<span class="muted small">{global ? t.globalEmpty : t.empty}</span>
 	</label>
 	{#if !global}
 		<label class="check">
 			<input type="checkbox" bind:checked={enabled} />
-			<span>In force</span>
-			<span class="muted small">Off, the rule is skipped and the rules below it can apply.</span>
+			<span>{t.inForce}</span>
+			<span class="muted small">{t.inForceHint}</span>
 		</label>
 	{/if}
 	{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 	<div class="buttons">
-		<button type="submit" class="button primary" disabled={saving}>Save</button>
-		<button type="button" class="button" onclick={oncancel} disabled={saving}>Cancel</button>
+		<button type="submit" class="button primary" disabled={saving}>{m.common.save}</button>
+		<button type="button" class="button" onclick={oncancel} disabled={saving}>{m.common.cancel}</button>
 	</div>
 </form>
 

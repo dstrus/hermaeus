@@ -24,11 +24,10 @@ import (
 // and SkyrimNet itself uses narrator_effect and player_thought_effect. The
 // assignments live in SkyrimNet's save data, not in these files.
 
-// StageParam is one setting of a kind of stage.
+// StageParam is one setting of a kind of stage. The frontend names it, and
+// gives its unit, by its stage's type and its name.
 type StageParam struct {
-	Name    string   `json:"name"` // as the recipe has it
-	Label   string   `json:"label"`
-	Unit    string   `json:"unit,omitempty"`
+	Name    string   `json:"name"`              // as the recipe has it
 	Whole   bool     `json:"whole,omitempty"`   // written as a whole number, as SkyrimNet's recipes write it
 	Suggest []string `json:"suggest,omitempty"` // text, with these values seen in SkyrimNet's recipes and dashboard
 	Default any      `json:"default"`
@@ -37,42 +36,41 @@ type StageParam struct {
 // StageKind is a kind of stage, with its settings. The types, their
 // settings, and their defaults are those SkyrimNet's dashboard offers when
 // a stage is added; the limits SkyrimNet puts on each setting aren't
-// published, so Hermaeus neither shows nor checks them.
+// published, so Hermaeus neither shows nor checks them. The frontend
+// names and describes each by its type.
 type StageKind struct {
 	Type   string       `json:"type"`
-	Label  string       `json:"label"`
-	What   string       `json:"what"`
 	Params []StageParam `json:"params"`
 }
 
-func p(name, label, unit string, def any) StageParam {
-	return StageParam{Name: name, Label: label, Unit: unit, Default: def}
+func p(name string, def any) StageParam {
+	return StageParam{Name: name, Default: def}
 }
 
-func whole(name, label, unit string, def int) StageParam {
-	return StageParam{Name: name, Label: label, Unit: unit, Whole: true, Default: def}
+func whole(name string, def int) StageParam {
+	return StageParam{Name: name, Whole: true, Default: def}
 }
 
 // StageKinds are the stages SkyrimNet's dashboard offers, in its order.
 var StageKinds = []StageKind{
-	{"pitch_shift", "Pitch shift", "Raises or lowers the voice.", []StageParam{p("semitones", "Semitones", "semitones", 0.0)}},
-	{"formant_shift", "Formant shift", "Changes the size the voice sounds, as from a larger or smaller throat, without changing its pitch.", []StageParam{p("semitones", "Semitones", "semitones", 0.0)}},
-	{"speed", "Speed", "Speeds speech up or slows it down. Higher is faster.", []StageParam{p("ratio", "Ratio", "", 1.0)}},
-	{"bitcrush", "Bitcrusher", "Coarsens the sound, like old or broken audio.", []StageParam{whole("bits", "Bits", "", 16), whole("rate_div", "Rate divider", "", 1)}},
-	{"distortion", "Distortion", "Roughens the voice.", []StageParam{p("drive", "Drive", "", 0.0), p("mix", "Mix", "", 1.0)}},
-	{"reverb", "Reverb", "Places the voice in a room, a hall, or a cave.", []StageParam{p("room_size", "Room size", "", 0.5), p("decay", "Decay", "", 0.5), p("wet", "Wet", "", 0.3)}},
-	{"chorus", "Chorus", "Layers slightly shifted copies of the voice, as if several speak at once.", []StageParam{p("rate_hz", "Rate", "Hz", 1.5), p("depth_ms", "Depth", "ms", 3.0), whole("voices", "Voices", "", 2)}},
-	{"tremolo", "Tremolo", "Makes the voice waver in loudness.", []StageParam{p("rate_hz", "Rate", "Hz", 5.0), p("depth", "Depth", "", 0.5)}},
-	{"ringmod", "Ring modulation", "Gives the voice a metallic, inhuman ring.", []StageParam{p("freq_hz", "Frequency", "Hz", 440.0), p("mix", "Mix", "", 1.0)}},
-	{"echo", "Echo", "Repeats the voice after a delay.", []StageParam{whole("delay_ms", "Delay", "ms", 200), p("feedback", "Feedback", "", 0.3), p("wet", "Wet", "", 0.5)}},
-	{"eq", "Equalizer", "Raises or cuts part of the sound, around a frequency.", []StageParam{
-		{Name: "mode", Label: "Mode", Suggest: []string{"band", "low"}, Default: "band"},
-		p("freq_hz", "Frequency", "Hz", 1000.0),
-		p("q", "Width", "", 1.0),
-		p("gain_db", "Gain", "dB", 0.0),
+	{"pitch_shift", []StageParam{p("semitones", 0.0)}},
+	{"formant_shift", []StageParam{p("semitones", 0.0)}},
+	{"speed", []StageParam{p("ratio", 1.0)}},
+	{"bitcrush", []StageParam{whole("bits", 16), whole("rate_div", 1)}},
+	{"distortion", []StageParam{p("drive", 0.0), p("mix", 1.0)}},
+	{"reverb", []StageParam{p("room_size", 0.5), p("decay", 0.5), p("wet", 0.3)}},
+	{"chorus", []StageParam{p("rate_hz", 1.5), p("depth_ms", 3.0), whole("voices", 2)}},
+	{"tremolo", []StageParam{p("rate_hz", 5.0), p("depth", 0.5)}},
+	{"ringmod", []StageParam{p("freq_hz", 440.0), p("mix", 1.0)}},
+	{"echo", []StageParam{whole("delay_ms", 200), p("feedback", 0.3), p("wet", 0.5)}},
+	{"eq", []StageParam{
+		{Name: "mode", Suggest: []string{"band", "low"}, Default: "band"},
+		p("freq_hz", 1000.0),
+		p("q", 1.0),
+		p("gain_db", 0.0),
 	}},
-	{"whisper", "Whisper", "Mixes in breath noise, for a hushed or ghostly voice.", []StageParam{p("noise_db", "Noise", "dB", -20.0), p("mix", "Mix", "", 0.5)}},
-	{"gain", "Gain", "Makes the voice louder or quieter.", []StageParam{p("gain_db", "Gain", "dB", 0.0)}},
+	{"whisper", []StageParam{p("noise_db", -20.0), p("mix", 0.5)}},
+	{"gain", []StageParam{p("gain_db", 0.0)}},
 }
 
 func stageKind(t string) *StageKind {

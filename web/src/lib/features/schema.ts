@@ -3,6 +3,7 @@
 // does, and the kind of value it takes. The page reads and writes the
 // file through the ordinary settings API, one setting at a time.
 import type { Setting } from '#lib/api/types/settings.ts';
+import { m } from '#lib/copy/messages.ts';
 import { keyName } from '#lib/settings/keys.ts';
 
 export type Kind =
@@ -55,7 +56,8 @@ export interface Field {
 	pluginHotkey?: boolean; // a plugin's hotkey: unset is empty or 0, and it may be stored as text
 	columns?: [string, string]; // pairs and map: the two parts' names, as headings
 	pairKeys?: [string, string]; // pairs: each entry's two keys in the file
-	noun?: [string, string]; // lines, pairs, and map: one entry, and many, for counts
+	noun?: (p: { count: number }) => string; // lines, pairs, rows, and map: a count of entries, such as "3 words"
+	add?: string; // pairs and rows: the button that adds an entry, such as "Add word"
 	zero?: string; // a count or number of 0 shown as what it means, such as "No limit"
 	leaf?: string; // map: the setting under each name, when names hold groups, as voice_types.<type>.selected_sample does
 	cols?: Column[]; // rows: each entry's fields, the first naming it
@@ -73,8 +75,8 @@ export interface Feature {
 	title: string;
 	what: string; // the page's lead
 	// A sentence after the lead that links to another page in the
-	// playthrough: before, the link's text, then after.
-	see?: { before: string; label: string; path: string; after: string };
+	// playthrough: its text, with {link} where the link's label goes.
+	see?: { text: string; label: string; path: string };
 	sections: Section[];
 	lists?: 'memory' | 'actor'; // the filter lists of this kind, shown below the settings
 }
@@ -95,45 +97,50 @@ export function show(f: Field, v: unknown): string {
 	if (f.zero && v === 0) return f.zero;
 	switch (f.kind) {
 		case 'switch':
-			return v === true ? 'On' : 'Off';
+			return v === true ? m.features.values.on : m.features.values.off;
 		case 'percent':
 			return typeof v === 'number' ? `${Number((v * 100).toFixed(1))}%` : String(v);
 		case 'minutes':
-			return typeof v === 'number' ? `${v} min` : String(v);
+			return typeof v === 'number' ? m.features.values.minutes({ value: v }) : String(v);
 		case 'count': {
 			// A unit is written plural; one of it is singular ("1 line").
 			const unit = f.unit && v === 1 && /[^s]s$/.test(f.unit) ? f.unit.slice(0, -1) : f.unit;
-			return typeof v === 'number' ? `${v}${unit ? ` ${unit}` : ''}` : String(v);
+			return typeof v === 'number' ? (unit ? m.features.values.withUnit({ value: v, unit }) : String(v)) : String(v);
 		}
 		case 'choice': {
 			const c = f.choices?.find((c) => c.value === String(v));
 			return c ? c.label : String(v);
 		}
 		case 'secret':
-			return typeof v === 'object' && v !== null && 'filled' in v ? ((v as { filled: boolean }).filled ? 'Set' : 'Not set') : String(v) ? 'Set' : 'Not set';
+			return (typeof v === 'object' && v !== null && 'filled' in v ? (v as { filled: boolean }).filled : !!String(v)) ? m.features.values.set : m.features.values.notSet;
 		case 'set':
-			return Array.isArray(v) ? `${v.length} of ${f.choices?.length ?? v.length}` : String(v);
+			return Array.isArray(v) ? m.features.values.picked({ count: v.length, total: f.choices?.length ?? v.length }) : String(v);
 		case 'lines':
 		case 'pairs': {
 			const n = Array.isArray(v) ? v.length : 0;
-			return n === 0 ? 'None' : `${n} ${n === 1 ? (f.noun?.[0] ?? 'entry') : (f.noun?.[1] ?? 'entries')}`;
+			return n === 0 ? m.features.values.none : entriesOf(f, n);
 		}
 		case 'rows': {
 			const rows = Array.isArray(v) ? (v as Record<string, unknown>[]) : [];
 			const on = f.cols?.find((c) => c.kind === 'switch');
-			if (!rows.length) return 'None';
-			const label = `${rows.length} ${rows.length === 1 ? (f.noun?.[0] ?? 'entry') : (f.noun?.[1] ?? 'entries')}`;
-			return on ? `${label}, ${rows.filter((r) => r?.[on.key] === true).length} on` : label;
+			if (!rows.length) return m.features.values.none;
+			const label = entriesOf(f, rows.length);
+			return on ? m.features.values.rowsOn({ entries: label, count: rows.filter((r) => r?.[on.key] === true).length }) : label;
 		}
 		case 'map': {
 			const n = v && typeof v === 'object' ? Object.keys(v).length : 0;
-			return n === 0 ? 'None' : `${n} ${n === 1 ? (f.noun?.[0] ?? 'entry') : (f.noun?.[1] ?? 'entries')}`;
+			return n === 0 ? m.features.values.none : entriesOf(f, n);
 		}
 		case 'text':
-			return String(v).trim() === '' ? 'None' : String(v);
+			return String(v).trim() === '' ? m.features.values.none : String(v);
 		default:
 			return String(v);
 	}
+}
+
+// entriesOf is a count of a field's entries, in its own noun.
+function entriesOf(f: Field, count: number): string {
+	return (f.noun ?? m.features.values.entries)({ count });
 }
 
 // Pair is one entry of a pairs field, as the form edits it.
@@ -155,7 +162,7 @@ export function pairsValue(f: Field, rows: Pair[]): Record<string, string>[] {
 	const [ka, kb] = f.pairKeys ?? ['a', 'b'];
 	const kept = rows.filter((r) => r.a !== '' || r.b !== '');
 	const missing = kept.find((r) => r.a.trim() === '');
-	if (missing) throw new Error(`Each entry needs its ${(f.columns?.[0] ?? 'first part').toLowerCase()}.`);
+	if (missing) throw new Error(m.features.values.eachNeeds({ part: (f.columns?.[0] ?? m.features.values.firstPart).toLowerCase() }));
 	return kept.map((r) => ({ [ka]: r.a, [kb]: r.b }));
 }
 
@@ -177,14 +184,14 @@ export function cellText(c: Column, v: unknown): string {
 	if (v === undefined || v === null || v === '') return '—';
 	switch (c.kind) {
 		case 'switch':
-			return v === true ? 'on' : 'off';
+			return v === true ? m.features.values.cellOn : m.common.off;
 		case 'percent':
 			return typeof v === 'number' ? `${Number((v * 100).toFixed(1))}%` : String(v);
 		case 'choice':
 			return c.choices?.find((x) => x.value === String(v))?.label ?? String(v);
 		case 'count': {
 			const unit = c.unit && v === 1 && /[^s]s$/.test(c.unit) ? c.unit.slice(0, -1) : c.unit;
-			return `${v}${unit ? ` ${unit}` : ''}`;
+			return unit ? m.features.values.withUnit({ value: String(v), unit }) : String(v);
 		}
 		default:
 			return String(v);
@@ -223,28 +230,29 @@ export function rowsValue(f: Field, rows: Row[]): Record<string, unknown>[] {
 	const name = f.cols?.[0];
 	return rows.map((r, i) => {
 		const out: Record<string, unknown> = { ...r.was };
-		const what = (name && String(r.cells[name.key] ?? '').trim()) || `entry ${i + 1}`;
+		const entry = (name && String(r.cells[name.key] ?? '').trim()) || m.features.page.entry({ n: i + 1 });
 		for (const c of f.cols ?? []) {
 			const v = r.cells[c.key];
+			const column = c.label.toLowerCase();
 			if (c.kind === 'switch') {
 				out[c.key] = v === true;
 				continue;
 			}
 			const t = String(v ?? '').trim();
 			if (c.kind === 'text' || c.kind === 'choice') {
-				if (!t) throw new Error(`${what} needs its ${c.label.toLowerCase()}.`);
+				if (!t) throw new Error(m.features.values.entryNeeds({ entry, column }));
 				out[c.key] = t;
 				continue;
 			}
 			const n = Number(t);
-			if (t === '' || Number.isNaN(n)) throw new Error(`${what}: ${c.label.toLowerCase()} needs a number.`);
+			if (t === '' || Number.isNaN(n)) throw new Error(m.features.values.cellNeedsNumber({ entry, column }));
 			if (c.kind === 'percent') {
-				if (n < 0 || n > 100) throw new Error(`${what}: ${c.label.toLowerCase()} is a percentage, from 0 to 100.`);
+				if (n < 0 || n > 100) throw new Error(m.features.values.cellPercent({ entry, column }));
 				out[c.key] = Math.round(n * 100) / 10000;
 				continue;
 			}
-			if (!Number.isInteger(n)) throw new Error(`${what}: ${c.label.toLowerCase()} is a whole number.`);
-			if ((c.min !== undefined && n < c.min) || (c.max !== undefined && n > c.max)) throw new Error(`${what}: ${c.label.toLowerCase()} is from ${c.min} to ${c.max}.`);
+			if (!Number.isInteger(n)) throw new Error(m.features.values.cellWhole({ entry, column }));
+			if ((c.min !== undefined && n < c.min) || (c.max !== undefined && n > c.max)) throw new Error(m.features.values.cellRange({ entry, column, min: String(c.min), max: String(c.max) }));
 			out[c.key] = n;
 		}
 		return out;
@@ -294,7 +302,7 @@ export function parse(f: Field, draft: string): unknown {
 		case 'text':
 			return draft;
 		case 'choice':
-			if (!t) throw new Error(`Choose a value for ${f.label}.`);
+			if (!t) throw new Error(m.features.values.choose({ label: f.label }));
 			return t;
 		case 'hotkey':
 			return number(t, f.label);
@@ -302,13 +310,13 @@ export function parse(f: Field, draft: string): unknown {
 			return t;
 		case 'percent': {
 			const n = number(t, f.label);
-			if (n < 0 || n > 100) throw new Error(`${f.label} is a percentage, from 0 to 100.`);
+			if (n < 0 || n > 100) throw new Error(m.features.values.percent({ label: f.label }));
 			return Math.round(n * 100) / 10000;
 		}
 		case 'count':
 		case 'minutes': {
 			const n = number(t, f.label);
-			if (!Number.isInteger(n)) throw new Error(`${f.label} is a whole number.`);
+			if (!Number.isInteger(n)) throw new Error(m.features.values.whole({ label: f.label }));
 			return within(f, n);
 		}
 		default:
@@ -317,14 +325,14 @@ export function parse(f: Field, draft: string): unknown {
 }
 
 function number(t: string, label: string): number {
-	if (t === '') throw new Error(`${label} needs a number.`);
+	if (t === '') throw new Error(m.features.values.needsNumber({ label }));
 	const n = Number(t);
-	if (Number.isNaN(n)) throw new Error(`${label} must be a number.`);
+	if (Number.isNaN(n)) throw new Error(m.features.values.notNumber({ label }));
 	return n;
 }
 
 function within(f: Field, n: number): number {
-	if (f.min !== undefined && n < f.min) throw new Error(`${f.label} is at least ${f.min}.`);
-	if (f.max !== undefined && n > f.max) throw new Error(`${f.label} is at most ${f.max}.`);
+	if (f.min !== undefined && n < f.min) throw new Error(m.features.values.atLeast({ label: f.label, min: f.min }));
+	if (f.max !== undefined && n > f.max) throw new Error(m.features.values.atMost({ label: f.label, max: f.max }));
 	return n;
 }

@@ -91,17 +91,17 @@ func TestModelsReadsTheTasks(t *testing.T) {
 		t.Errorf("tasks in order = %v", ids)
 	}
 	d := m.Tasks[0]
-	if d.Label != "Dialogue" || !d.Known || len(d.Slots) != 2 || d.Slots[0].Model != "google/gemma-4-31b-it" || d.Slots[0].Provider != "openrouter" || *d.Slots[0].Temperature != 1 || *d.Slots[1].Temperature != 0.7 {
+	if d.label != "Dialogue" || !d.Known || len(d.Slots) != 2 || d.Slots[0].Model != "google/gemma-4-31b-it" || d.Slots[0].Provider != "openrouter" || *d.Slots[0].Temperature != 1 || *d.Slots[1].Temperature != 0.7 {
 		t.Errorf("default = %+v", d)
 	}
 	if d.Timeout == nil || *d.Timeout != 30 || d.RotationMode != "sequential" || d.Params.MaxTokens == nil || *d.Params.MaxTokens != 4096 || d.Params.TopP != nil || len(d.Params.StopSequences) != 0 {
 		t.Errorf("default settings = %+v %+v", d.Timeout, d.Params)
 	}
 	mem := m.Tasks[2]
-	if mem.Label != "Memory" || len(mem.Slots) != 2 || mem.Slots[0].RequestTimeout == nil || *mem.Slots[0].RequestTimeout != 60 || mem.Slots[1].Role != "backup" || !mem.Slots[1].Enabled {
+	if mem.label != "Memory" || len(mem.Slots) != 2 || mem.Slots[0].RequestTimeout == nil || *mem.Slots[0].RequestTimeout != 60 || mem.Slots[1].Role != "backup" || !mem.Slots[1].Enabled {
 		t.Errorf("memory = %+v", mem)
 	}
-	if sev := m.Tasks[3]; sev.Known || sev.Label != "Sever background" || sev.Timeout != nil || sev.RotationMode != "" {
+	if sev := m.Tasks[3]; sev.Known || sev.label != "Sever background" || sev.Timeout != nil || sev.RotationMode != "" {
 		t.Errorf("plugin task = %+v", sev)
 	}
 	if len(m.Providers) != 2 || m.Providers[0].Name != "OpenRouter" || !m.Providers[0].HasKey || m.Providers[1].HasKey {

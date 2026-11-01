@@ -2,6 +2,10 @@
 	import { invalidateAll } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import { setFolder } from '#lib/api/status.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
+
+	const t = m.folders;
 
 	let path = $state('');
 	let modPath = $state('');
@@ -24,25 +28,22 @@
 </script>
 
 <form onsubmit={submit}>
-	<h1 class="caps">Where is SkyrimNet?</h1>
+	<h1 class="caps">{t.title}</h1>
 	<p>
-		Hermaeus didn’t find SkyrimNet’s folder, the one containing <code>data</code>, <code>config</code>, and
-		<code>logs</code>. With Mod Organizer 2, it’s usually <code>overwrite\SKSE\Plugins\SkyrimNet</code> in your MO2
-		instance.
+		<Fill text={t.notFound.text}>{#snippet data()}<code>data</code>{/snippet}{#snippet config()}<code>config</code>{/snippet}{#snippet logs()}<code>logs</code>{/snippet}{#snippet overwrite()}<code>overwrite\SKSE\Plugins\SkyrimNet</code>{/snippet}</Fill>
 	</p>
 	<label>
-		<span class="caps">SkyrimNet folder</span>
+		<span class="caps">{t.folder}</span>
 		<input bind:value={path} required autocomplete="off" spellcheck="false" />
 	</label>
 	<label>
-		<span class="caps">SkyrimNet’s mod folder</span>
-		<input bind:value={modPath} autocomplete="off" spellcheck="false" placeholder="Only with Mod Organizer 2, and usually found on its own" />
+		<span class="caps">{t.modFolder}</span>
+		<input bind:value={modPath} autocomplete="off" spellcheck="false" placeholder={t.modPlaceholder} />
 	</label>
 	<p class="muted small">
-		Under Mod Organizer 2, SkyrimNet’s own files (its default bios, for one) stay in its mod folder while what it writes lands in
-		<code>overwrite</code>. Hermaeus looks for the mod folder next to <code>overwrite</code>; name it here if it isn’t found.
+		<Fill text={t.modHint.text}>{#snippet overwrite()}<code>overwrite</code>{/snippet}</Fill>
 	</p>
-	<div><button class="button primary" disabled={saving}>Use this folder</button></div>
+	<div><button class="button primary" disabled={saving}>{t.use}</button></div>
 	{#if error}
 		<p class="notice error" role="alert">{error}</p>
 	{/if}

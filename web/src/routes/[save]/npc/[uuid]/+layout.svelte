@@ -4,6 +4,7 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import { characterName, charactersDependency, setPinned } from '#lib/characters/api.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { count } from '#lib/format.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import PinButton from '#lib/ui/PinButton.svelte';
@@ -15,17 +16,17 @@
 	let list = $derived(`/${encodeURIComponent(data.playthrough.id)}/characters`);
 	let base = $derived(`/${encodeURIComponent(data.playthrough.id)}/npc/${c.uuid}`);
 	let tabs = $derived([
-		{ href: base, label: 'Overview' },
-		...(c.bio ? [{ href: `${base}/bio`, label: 'Bio' }] : []),
-		{ href: `${base}/events`, label: 'Events' },
-		{ href: `${base}/memories`, label: 'Memories', n: c.memories },
-		{ href: `${base}/diary`, label: 'Diary', n: c.diaries },
-		{ href: `${base}/stats`, label: 'Stats' }
+		{ href: base, label: m.characters.page.overview },
+		...(c.bio ? [{ href: `${base}/bio`, label: m.characters.page.bio }] : []),
+		{ href: `${base}/events`, label: m.characters.page.events },
+		{ href: `${base}/memories`, label: m.characters.page.memories, n: c.memories },
+		{ href: `${base}/diary`, label: m.characters.page.diary, n: c.diaries },
+		{ href: `${base}/stats`, label: m.characters.page.stats }
 	]);
 	let error = $state('');
 
 	// Esc goes back to the character table when the page has nothing of its own to cancel.
-	useShortcuts(() => [{ key: 'Escape', shown: 'Esc', label: 'Characters', run: () => goto(list) }]);
+	useShortcuts(() => [{ key: 'Escape', shown: 'Esc', label: m.characters.title, run: () => goto(list) }]);
 
 	async function togglePin() {
 		error = '';
@@ -39,20 +40,20 @@
 </script>
 
 <header>
-	<Up href={list} label="Characters" />
+	<Up href={list} label={m.characters.title} />
 	<div class="title">
 		<h1 class="caps">{characterName(c)}</h1>
 		{#if c.group !== 'player'}
-			<PinButton always size={18} pinned={c.pinned} name={characterName(c)} disabled={live.gameRunning} reason="Close Skyrim to change pins" onclick={togglePin} />
+			<PinButton always size={18} pinned={c.pinned} name={characterName(c)} disabled={live.gameRunning} reason={m.characters.closeToPin} onclick={togglePin} />
 		{/if}
 	</div>
 	<p class="muted">
-		{[c.formerNames.length ? `Previously ${c.formerNames.map((n) => n || 'unnamed').join(', ')}` : '', c.group === 'player' ? 'You' : c.pinned ? 'Pinned' : '', c.modFile]
+		{[c.formerNames.length ? m.characters.page.previously({ names: c.formerNames.map((n) => n || m.characters.noNameLower).join(', ') }) : '', c.group === 'player' ? m.characters.groups.player : c.pinned ? m.characters.groups.pinned : '', c.modFile]
 			.filter(Boolean)
 			.join(' · ')}
 	</p>
 	{#if error}<p class="notice error" role="alert">{error}</p>{/if}
-	<nav aria-label="{characterName(c)}’s records">
+	<nav aria-label={m.characters.page.records({ name: characterName(c) })}>
 		{#each tabs as tab (tab.href)}
 			<a class="caps" href={tab.href} aria-current={page.url.pathname === tab.href ? 'page' : undefined}>
 				{tab.label}{#if tab.n !== undefined}<span class="n">{count(tab.n)}</span>{/if}

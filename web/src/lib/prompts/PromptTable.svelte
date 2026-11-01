@@ -6,6 +6,8 @@
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { Prompt, PromptList } from '#lib/api/types/prompts.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import PinButton from '#lib/ui/PinButton.svelte';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
@@ -16,6 +18,8 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import Inja from '#lib/ui/Inja.svelte';
 	import { getPrompt, promptFolder, promptHref, promptName, promptsDependency, searchPrompts, setPromptPinned } from './api.ts';
+
+	const t = m.prompts;
 
 	let { save, list }: { save: string; list: PromptList } = $props(); // pinned prompts first, in the order they were pinned, then by path
 
@@ -74,7 +78,7 @@
 		return grouped ? [...found.filter((p) => p.pinned), ...byKey.filter((p) => !p.pinned)] : byKey;
 	});
 	// The heading a row sits under when grouped: Pinned, or its folder.
-	const groupOf = (p: Prompt) => (p.pinned ? 'Pinned' : folderName(p));
+	const groupOf = (p: Prompt) => (p.pinned ? t.pinned : folderName(p));
 
 	async function togglePin(p: Prompt) {
 		error = '';
@@ -113,40 +117,40 @@
 	useShortcuts(() => {
 		const p = selection.current;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !p, run: () => p && goto(href(p)) },
-			{ key: 'p', shown: 'P', label: p?.pinned ? 'Unpin' : 'Pin', disabled: !p, run: () => p && togglePin(p) }
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+			{ key: 'Enter', shown: 'Enter', label: m.common.open, disabled: !p, run: () => p && goto(href(p)) },
+			{ key: 'p', shown: 'P', label: p?.pinned ? m.ui.unpin : m.ui.pin, disabled: !p, run: () => p && togglePin(p) }
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Prompts</h1>
+	<h1 class="caps">{t.title}</h1>
 	{#if fromLayer >= 0}
-		<span class="muted n" use:clipped>{count(shown.length)} from <a href={pluginHref(save, from!)}>{list.layers[fromLayer]?.source}</a> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>Show all</button></span>
+		<span class="muted n" use:clipped><Fill text={t.fromPlugin.text} count={count(shown.length)}>{#snippet plugin()}<a href={pluginHref(save, from!)}>{list.layers[fromLayer]?.source}</a>{/snippet}</Fill> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>{m.common.showAll}</button></span>
 	{:else}
-		<span class="muted n" use:clipped>{count(list.prompts.length)} from {list.layers.length} {list.layers.length === 1 ? 'layer' : 'layers'}</span>
+		<span class="muted n" use:clipped>{t.fromLayers({ prompts: count(list.prompts.length), count: list.layers.length })}</span>
 	{/if}
-	<label class="inside"><input type="checkbox" bind:checked={inside} /> Search inside</label>
-	<input type="search" bind:value={query} placeholder={inside ? 'Search names and text' : 'Filter by name'} aria-label="Filter prompts" />
+	<label class="inside"><input type="checkbox" bind:checked={inside} /> {t.searchInside}</label>
+	<input type="search" bind:value={query} placeholder={inside ? t.searchPlaceholder : t.filterPlaceholder} aria-label={t.filterLabel} />
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
 {#if !list.prompts.length}
-	<p class="muted">No prompts were found. Check that SkyrimNet’s folder, and under Mod Organizer 2 its mod folder, are set on the Playthroughs page.</p>
+	<p class="muted">{t.none}</p>
 {:else if !shown.length}
-	<p class="muted">{searching ? 'Searching…' : `Nothing matches “${query}”.`}</p>
+	<p class="muted">{searching ? t.searching : t.noMatch({ query })}</p>
 {:else}
 	<div class="split">
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<SortHeader label="Prompt" key="name" bind:sort />
-					<SortHeader label="Folder" key="folder" bind:sort class="folder" />
-					<SortHeader label="From" key="source" bind:sort class="from" />
-					<th class="pin" aria-label="Pinned"></th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<SortHeader label={t.prompt} key="name" bind:sort />
+					<SortHeader label={t.folder} key="folder" bind:sort class="folder" />
+					<SortHeader label={t.from} key="source" bind:sort class="from" />
+					<th class="pin" aria-label={t.pinned}></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -158,13 +162,13 @@
 						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
 						<td class="name"><a href={href(p)}>{promptName(p.path)}</a></td>
 						<td class="folder muted">{folderName(p)}</td>
-						<td class="from muted">{#if mine(p)}<span class="changed">Your copy</span>{:else}{source(p)}{/if}</td>
+						<td class="from muted">{#if mine(p)}<span class="changed">{t.yourCopy}</span>{:else}{source(p)}{/if}</td>
 						<td class="pin"><PinButton pinned={p.pinned} name={promptName(p.path)} onclick={() => togglePin(p)} /></td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
-		<aside class="pane" aria-label="Prompt" use:fitToViewport>
+		<aside class="pane" aria-label={t.prompt} use:fitToViewport>
 			{#if current}
 				<div class="title">
 					<h2 class="caps">{promptName(current.path)}</h2>
@@ -172,19 +176,19 @@
 				</div>
 				<p class="path">{current.path}</p>
 				<dl>
-					<dt class="caps">In use</dt><dd>{#if mine(current)}<a class="changed" href={pluginHref(save, 'overlay')}>Your copy</a>{:else}<a href={pluginHref(save, list.layers[current.layer]?.id ?? '')}>{source(current)}</a>{/if}</dd>
+					<dt class="caps">{t.inUse}</dt><dd>{#if mine(current)}<a class="changed" href={pluginHref(save, 'overlay')}>{t.yourCopy}</a>{:else}<a href={pluginHref(save, list.layers[current.layer]?.id ?? '')}>{source(current)}</a>{/if}</dd>
 					{#if current.layers.length > 1}
-						<dt class="caps">Also in</dt>
+						<dt class="caps">{t.alsoIn}</dt>
 						<dd>{#each current.layers.slice(1) as i, n (i)}{n ? ', ' : ''}<a href={pluginHref(save, list.layers[i]?.id ?? '')}>{list.layers[i]?.source}</a>{/each}</dd>
 					{/if}
-					<dt class="caps">Changed</dt><dd>{realTime(current.modified)}</dd>
+					<dt class="caps">{t.changed}</dt><dd>{realTime(current.modified)}</dd>
 				</dl>
 				<div class="actions">
-					<a class="button primary" href={href(current)}>Open</a>
+					<a class="button primary" href={href(current)}>{m.common.open}</a>
 				</div>
 				{#if preview}
 					<section class="preview">
-						<h3 class="caps">Text{mine(current) ? ' · your copy' : ''}</h3>
+						<h3 class="caps">{mine(current) ? t.textYours : t.text}</h3>
 						<pre><Inja text={preview} /></pre>
 					</section>
 				{/if}

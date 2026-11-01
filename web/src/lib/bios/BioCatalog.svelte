@@ -6,6 +6,8 @@
 	import type { Catalog, CatalogEntry } from '#lib/api/types/bios.ts';
 	import type { Character } from '#lib/api/types/characters.ts';
 	import { characterName } from '#lib/characters/api.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import Segmented from '#lib/ui/Segmented.svelte';
@@ -47,7 +49,7 @@
 	const here = (e: CatalogEntry) => {
 		const c = met(e);
 		const parts = c ? [characterName(c)] : [];
-		for (const k of own.get(e.template.toLowerCase()) ?? []) parts.push((kinds[k]?.label ?? k).toLowerCase() + ' bio');
+		for (const k of own.get(e.template.toLowerCase()) ?? []) parts.push(m.bios.kindBio({ kind: (kinds[k]?.label ?? k).toLowerCase() }));
 		return parts.join(' · ');
 	};
 	// A met character's bio opens on their own Bio tab.
@@ -85,47 +87,47 @@
 	useShortcuts(() => {
 		const e = selection.current;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !e, run: () => e && goto(href(e)) },
-			{ key: 'Escape', shown: 'Esc', label: 'This playthrough', run: () => goto(`/${encodeURIComponent(save)}/characters`) }
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+			{ key: 'Enter', shown: 'Enter', label: m.common.open, disabled: !e, run: () => e && goto(href(e)) },
+			{ key: 'Escape', shown: 'Esc', label: m.characters.which.here, run: () => goto(`/${encodeURIComponent(save)}/characters`) }
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Characters</h1>
+	<h1 class="caps">{m.characters.title}</h1>
 	<Segmented
 		value="all"
 		options={[
-			{ value: 'here', label: 'This playthrough', title: 'Everyone with something stored in this playthrough' },
-			{ value: 'all', label: 'Every bio', title: 'Everyone SkyrimNet or a plugin ships a bio for, met or not' }
+			{ value: 'here', label: m.characters.which.here, title: m.characters.which.hereTitle },
+			{ value: 'all', label: m.characters.which.all, title: m.characters.which.allTitle }
 		]}
-		label="Which characters"
+		label={m.characters.which.label}
 		onchange={(v) => v === 'here' && goto(`/${encodeURIComponent(save)}/characters`)}
 	/>
 	{#if fromLayer >= 0}
-		<span class="muted n" use:clipped>{count(shown.length)} from <a href={pluginHref(save, from!)}>{catalog.layers[fromLayer]?.source}</a> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>Show all</button></span>
+		<span class="muted n" use:clipped><Fill text={m.bios.catalog.fromPlugin.text} count={count(shown.length)}>{#snippet plugin()}<a href={pluginHref(save, from!)}>{catalog.layers[fromLayer]?.source}</a>{/snippet}</Fill> · <button type="button" class="textbutton" onclick={() => setParams({ from: null })}>{m.common.showAll}</button></span>
 	{:else}
-		<span class="muted n" use:clipped>{count(catalog.bios.length)} with a bio, from {catalog.layers.length} {catalog.layers.length === 1 ? 'layer' : 'layers'}</span>
+		<span class="muted n" use:clipped>{m.bios.catalog.withBio({ bios: count(catalog.bios.length), count: catalog.layers.length })}</span>
 	{/if}
-	<input type="search" bind:value={query} placeholder="Filter by name" aria-label="Filter bios" />
+	<input type="search" bind:value={query} placeholder={m.bios.catalog.filter} aria-label={m.bios.catalog.filterLabel} />
 </div>
 
 {#if !catalog.bios.length}
-	<p class="muted">No bios were found. Check that SkyrimNet’s folder, and under Mod Organizer 2 its mod folder, are set on the Playthroughs page.</p>
+	<p class="muted">{m.bios.catalog.none}</p>
 {:else if !shown.length}
-	<p class="muted">No one matches “{query}”.</p>
+	<p class="muted">{m.characters.noMatch({ query })}</p>
 {:else}
 	<div class="split">
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<SortHeader label="Character" key="name" bind:sort />
-					<SortHeader label="Template" key="template" bind:sort class="template" />
-					<SortHeader label="From" key="source" bind:sort class="from" />
-					<SortHeader label="In this playthrough" key="here" bind:sort class="here" />
+					<th class="mark" aria-label={m.common.selected}></th>
+					<SortHeader label={m.bios.catalog.character} key="name" bind:sort />
+					<SortHeader label={m.bios.catalog.template} key="template" bind:sort class="template" />
+					<SortHeader label={m.bios.catalog.from} key="source" bind:sort class="from" />
+					<SortHeader label={m.bios.catalog.here} key="here" bind:sort class="here" />
 				</tr>
 			</thead>
 			<tbody>
@@ -140,20 +142,20 @@
 				{/each}
 			</tbody>
 		</table>
-		<aside class="pane" aria-label="Character" use:fitToViewport>
+		<aside class="pane" aria-label={m.characters.character} use:fitToViewport>
 			{#if current}
 				<h2 class="caps">{templateName(current.template)}</h2>
 				<p class="path">{current.template}</p>
 				<dl>
-					<dt class="caps">Bio from</dt><dd>{source(current)}</dd>
-					<dt class="caps">Here</dt><dd>{here(current) || 'Not met, and no bio of this playthrough’s own'}</dd>
+					<dt class="caps">{m.bios.catalog.bioFrom}</dt><dd>{source(current)}</dd>
+					<dt class="caps">{m.bios.catalog.hereLabel}</dt><dd>{here(current) || m.bios.catalog.notHere}</dd>
 				</dl>
 				<div class="actions">
-					<a class="button primary" href={href(current)}>{met(current) ? 'Open character' : 'Open bio'}</a>
+					<a class="button primary" href={href(current)}>{met(current) ? m.bios.catalog.openCharacter : m.bios.catalog.openBio}</a>
 				</div>
 				{#if preview}
 					<section class="preview">
-						<h3 class="caps">Bio · {preview.kind}</h3>
+						<h3 class="caps">{m.bios.previewHeading({ kind: preview.kind })}</h3>
 						<p>{preview.text}</p>
 					</section>
 				{/if}

@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { m } from '#lib/copy/messages.ts';
 import type { Layer } from '#lib/api/types/layers.ts';
 import type { ActionList, ContentList, EffectEdit, FormEdit, Origin, RecordForm, OverrideList, RecordEdit, Revert, Switch, TriggerList, Version, VoiceEffectList } from '#lib/api/types/records.ts';
 
@@ -12,7 +13,7 @@ export function getTriggers(fetchFn?: typeof fetch): Promise<TriggerList> {
 
 // sourceLabel names where a record comes from, as the Plugins page does.
 export function sourceLabel(o: Origin): string {
-	return o.layerKind === 'overlay' ? 'Your edits' : o.layerKind === 'base' ? 'SkyrimNet’s defaults' : o.source;
+	return o.layerKind === 'overlay' ? m.records.yourEdits : o.layerKind === 'base' ? m.records.defaults : o.source;
 }
 
 // words turns an id such as direct_narration or nearby_npcs into words.
@@ -61,16 +62,14 @@ export function switchRecord(path: string, enabled: boolean, follow = false): Pr
 
 // switched is what a switch did, for the page's notice.
 export function switched(enabled: boolean, follow = false): string {
-	if (follow) return 'Its switch is gone from content-registry.json, so its file decides again, from the next time SkyrimNet starts.';
-	return enabled
-		? 'Switched on in content-registry.json, as SkyrimNet’s dashboard does; its file is unchanged. SkyrimNet uses it from the next time it starts.'
-		: 'Switched off in content-registry.json, as SkyrimNet’s dashboard does; its file is unchanged. SkyrimNet ignores it from the next time it starts.';
+	if (follow) return m.records.followingFile;
+	return enabled ? m.records.switchedOn : m.records.switchedOff;
 }
 
 // layerName names a content layer, as sourceLabel does for a record.
 export function layerName(l: Layer | undefined): string {
-	if (!l) return 'an unknown layer';
-	return l.kind === 'overlay' ? 'Your edits' : l.kind === 'base' ? 'SkyrimNet’s defaults' : l.source;
+	if (!l) return m.records.unknownLayer;
+	return l.kind === 'overlay' ? m.records.yourEdits : l.kind === 'base' ? m.records.defaults : l.source;
 }
 
 export function getVoiceEffects(fetchFn?: typeof fetch): Promise<VoiceEffectList> {

@@ -2,6 +2,7 @@
 // the session, so a form can offer a provider's models by name.
 import { ApiError, request } from '#lib/api/client.ts';
 import type { ModelInfo, ModelList } from '#lib/api/types/settings.ts';
+import { m } from '#lib/copy/messages.ts';
 
 class ModelLists {
 	lists = $state<Record<string, ModelList>>({});
@@ -22,19 +23,20 @@ class ModelLists {
 	}
 
 	find(provider: string, model: string): ModelInfo | undefined {
-		return this.lists[provider]?.models.find((m) => m.id === model);
+		return this.lists[provider]?.models.find((x) => x.id === model);
 	}
 }
 
 export const modelLists = new ModelLists();
 
 // describe is a model's context and prices as one line, when known.
-export function describe(m: ModelInfo): string {
+export function describe(info: ModelInfo): string {
+	const t = m.models.lists;
 	const parts: string[] = [];
-	if (m.name && m.name !== m.id) parts.push(m.name);
-	if (m.context) parts.push(`${tokens(m.context)} context`);
-	if (m.prompt !== undefined && m.completion !== undefined) {
-		parts.push(m.prompt === 0 && m.completion === 0 ? 'free' : `$${price(m.prompt)} in, $${price(m.completion)} out per million tokens`);
+	if (info.name && info.name !== info.id) parts.push(info.name);
+	if (info.context) parts.push(t.context({ tokens: tokens(info.context) }));
+	if (info.prompt !== undefined && info.completion !== undefined) {
+		parts.push(info.prompt === 0 && info.completion === 0 ? t.free : t.prices({ input: price(info.prompt), output: price(info.completion) }));
 	}
 	return parts.join(' · ');
 }

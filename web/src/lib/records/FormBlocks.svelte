@@ -2,6 +2,7 @@
      blocks of their own (a trigger's conditions, an action's parameters).
      Every field reads and writes the record object it's given, in place. -->
 <script lang="ts">
+	import { m } from '#lib/copy/messages.ts';
 	import FormBlocks from './FormBlocks.svelte';
 	import { getAt, setAt, shown, stored, type Block, type FieldSpec, type Obj } from './forms.ts';
 
@@ -38,7 +39,7 @@
 		{@const items = listOf(b.rows)}
 		<section class="rows" class:nested={depth > 0}>
 			<h3 class="caps">{b.title}</h3>
-			{#if !items.length}<p class="muted small">{b.empty ?? 'None.'}</p>{/if}
+			{#if !items.length}<p class="muted small">{b.empty ?? m.records.blocks.none}</p>{/if}
 			<ol>
 				{#each items as _, i (i)}
 					<li>
@@ -46,14 +47,14 @@
 							<FormBlocks blocks={b.item(`${b.rows}.${i}`)} {draft} depth={depth + 1} />
 						</div>
 						<span class="tools">
-							<button type="button" class="textbutton" onclick={() => move(b.rows, i, -1)} disabled={i === 0} aria-label="Move {b.add} {i + 1} up">Up</button>
-							<button type="button" class="textbutton" onclick={() => move(b.rows, i, 1)} disabled={i === items.length - 1} aria-label="Move {b.add} {i + 1} down">Down</button>
-							<button type="button" class="textbutton" onclick={() => remove(b.rows, i)} aria-label="Remove {b.add} {i + 1}">Remove</button>
+							<button type="button" class="textbutton" onclick={() => move(b.rows, i, -1)} disabled={i === 0} aria-label={m.records.blocks.moveUp({ item: b.add, n: i + 1 })}>{m.common.up}</button>
+							<button type="button" class="textbutton" onclick={() => move(b.rows, i, 1)} disabled={i === items.length - 1} aria-label={m.records.blocks.moveDown({ item: b.add, n: i + 1 })}>{m.common.down}</button>
+							<button type="button" class="textbutton" onclick={() => remove(b.rows, i)} aria-label={m.records.blocks.remove({ item: b.add, n: i + 1 })}>{m.common.remove}</button>
 						</span>
 					</li>
 				{/each}
 			</ol>
-			<button type="button" class="textbutton add" onclick={() => add(b.rows, b.blank())}>Add {b.add}</button>
+			<button type="button" class="textbutton add" onclick={() => add(b.rows, b.blank())}>{m.records.blocks.add({ item: b.add })}</button>
 		</section>
 	{:else}
 		{@const fields = fieldsOf(b)}
@@ -78,7 +79,7 @@
 										{#each f.choices ?? [] as c (c.value)}<option value={c.value}>{c.label}</option>{/each}
 									</select>
 								{:else if f.type === 'area' || f.type === 'list'}
-									<textarea rows={f.rows ?? (f.type === 'list' ? 4 : 3)} value={shown(f, v)} oninput={(e) => edit(f, e.currentTarget.value)} spellcheck={f.type === 'area'} placeholder={f.type === 'list' ? 'One per line' : undefined}></textarea>
+									<textarea rows={f.rows ?? (f.type === 'list' ? 4 : 3)} value={shown(f, v)} oninput={(e) => edit(f, e.currentTarget.value)} spellcheck={f.type === 'area'} placeholder={f.type === 'list' ? m.records.blocks.onePerLine : undefined}></textarea>
 								{:else}
 									<input
 										type="text"
@@ -96,7 +97,7 @@
 										</datalist>
 									{/if}
 								{/if}
-								{#if f.readonly}<span class="muted small">It names the file, so it can’t change here.</span>{:else if f.hint}<span class="muted small">{f.hint}</span>{/if}
+								{#if f.readonly}<span class="muted small">{m.records.blocks.namesFile}</span>{:else if f.hint}<span class="muted small">{f.hint}</span>{/if}
 							</label>
 						{/if}
 					{/each}

@@ -5,6 +5,8 @@
 	import { untrack } from 'svelte';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { ContentList, RecordForm } from '#lib/api/types/records.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { aboveHints } from '#lib/ui/fit.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { getActions, getForm, layerName, saveForm } from './api.ts';
@@ -94,12 +96,18 @@
 	let mine = $derived(form?.versions.find((v) => v.kind === 'overlay'));
 	let below = $derived(form?.versions.find((v) => v.kind !== 'overlay'));
 	let target = $derived(isNew ? `${kind}/${fileName.trim()}${suffixOf(kind)}` : (path ?? ''));
+	// Where a new record is saved, and the field that names it.
+	let savedAs = $derived.by(() => {
+		const at = `${kind}/${fileName.trim() || '…'}${suffixOf(kind)}`;
+		const key = identity(draft);
+		return key ? m.records.editor.savedAsSame({ path: at, key }) : m.records.editor.savedAs({ path: at });
+	});
 
 	async function submit() {
 		if (saving || readOnly || !fk) return;
 		error = '';
 		if (isNew && !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(fileName.trim())) {
-			error = 'A file name is up to 64 letters, digits, hyphens, and underscores, starting with a letter or digit.';
+			error = m.records.editor.badFileName;
 			return;
 		}
 		saving = true;
@@ -107,7 +115,7 @@
 		try {
 			const saved = await saveForm(target, { modified: mine?.modified ?? 0, data: $state.snapshot(draft), new: isNew });
 			form = saved;
-			onSaved(target, isNew ? `Made ${target}. SkyrimNet reads it from the next time it starts.` : had ? 'Saved your copy. SkyrimNet reads it from the next time it starts.' : 'Saved as your own copy, in place of the one below. SkyrimNet reads it from the next time it starts.');
+			onSaved(target, isNew ? m.records.editor.made({ path: target }) : had ? m.records.savedCopy : m.records.editor.savedAsCopy);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
 		} finally {
@@ -116,23 +124,23 @@
 	}
 
 	useShortcuts(() => [
-		{ key: 'Enter', label: isNew ? 'Make it' : 'Save', command: true, disabled: saving || !usable, run: submit },
-		{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: onCancel }
+		{ key: 'Enter', label: isNew ? m.records.editor.makeIt : m.common.save, command: true, disabled: saving || !usable, run: submit },
+		{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: onCancel }
 	]);
 </script>
 
 <header class="editing">
-	<h1 class="caps">{isNew ? `New ${fk?.noun ?? 'record'}` : (path ? stemOf(path) : '')}</h1>
+	<h1 class="caps">{isNew ? m.records.editor.newKind({ noun: fk?.noun ?? m.records.editor.record }) : path ? stemOf(path) : ''}</h1>
 	{#if !isNew}<p class="path">{path}</p>{/if}
 	<p class="muted">
 		{#if isNew}
-			It’s made in your edits, and SkyrimNet reads it in every playthrough.
+			{m.records.editor.madeInEdits}
 		{:else if mine}
-			Editing <b class="changed">your own copy</b>, which SkyrimNet uses in every playthrough{below ? ` in place of the one from ${layerName(list.layers[below.layer])}` : ''}.
+			<Fill text={(below ? m.records.editingCopyInPlaceOf : m.records.editingCopy).text} layer={below ? layerName(list.layers[below.layer]) : ''}>{#snippet yourCopy()}<b class="changed">{m.records.yourOwnCopy}</b>{/snippet}</Fill>
 		{:else if below}
-			Starting from the copy from {layerName(list.layers[below.layer])}. Saving makes your own copy, which replaces it in every playthrough.
+			{m.records.startingFrom({ layer: layerName(list.layers[below.layer]) })}
 		{/if}
-		{#if !isNew}<button type="button" class="textbutton" onclick={onYaml}>Edit as YAML</button>{/if}
+		{#if !isNew}<button type="button" class="textbutton" onclick={onYaml}>{m.records.editor.editYaml}</button>{/if}
 	</p>
 	{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 	{#if loadError}<p class="notice error">{loadError}</p>{/if}
@@ -141,27 +149,27 @@
 {#if isNew}
 	<div class="new">
 		<label>
-			<span class="caps">Kind</span>
+			<span class="caps">{m.records.kind}</span>
 			<select value={kind} onchange={(e) => startNew(e.currentTarget.value)}>
 				{#each Object.entries(formKinds) as [k, f] (k)}<option value={k}>{f.noun.charAt(0).toUpperCase() + f.noun.slice(1)}</option>{/each}
 			</select>
 		</label>
 		<label>
-			<span class="caps">File name</span>
+			<span class="caps">{m.records.editor.fileName}</span>
 			<input type="text" value={fileName} oninput={(e) => rename(e.currentTarget.value.trim())} placeholder="beast_form" autocomplete="off" spellcheck="false" />
-			<span class="muted small">Saved as {kind}/{fileName.trim() || '…'}{suffixOf(kind)}{identity(draft) ? `, and its ${identity(draft)} is the same` : ''}.</span>
+			<span class="muted small">{savedAs}</span>
 		</label>
 	</div>
 {/if}
 
 {#if form && !usable}
-	<p class="notice">{form.error ? `This file can’t be read as a record: ${form.error}.` : 'This one is laid out in a way the form doesn’t cover.'} <button type="button" class="textbutton" onclick={onYaml}>Edit it as YAML</button></p>
+	<p class="notice">{form.error ? m.records.editor.unreadable({ error: form.error }) : m.records.editor.notCovered} <button type="button" class="textbutton" onclick={onYaml}>{m.records.editor.editItYaml}</button></p>
 {:else if fk && (isNew || form)}
 	<form class="record" onsubmit={(e) => (e.preventDefault(), submit())}>
 		<FormBlocks blocks={fk.blocks(draft, ctx)} {draft} />
 		<div class="buttons" use:aboveHints>
-			<button type="submit" class="button primary" disabled={saving || readOnly}>{isNew ? 'Make it' : 'Save'}</button>
-			<button type="button" class="button" onclick={onCancel} disabled={saving}>Cancel</button>
+			<button type="submit" class="button primary" disabled={saving || readOnly}>{isNew ? m.records.editor.makeIt : m.common.save}</button>
+			<button type="button" class="button" onclick={onCancel} disabled={saving}>{m.common.cancel}</button>
 		</div>
 	</form>
 {/if}

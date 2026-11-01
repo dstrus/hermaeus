@@ -1,6 +1,7 @@
 // Links between a plugin and what it brings: the Plugins page names a
 // plugin by its layer's id, and the Prompts, Actions, Triggers, and bios
 // pages narrow to one plugin with ?from=<that id>.
+import { m } from '#lib/copy/messages.ts';
 import { href } from '#lib/nav.ts';
 
 export function pluginHref(save: string, id: string): string {
@@ -25,12 +26,12 @@ const recordKinds = ['triggers/', 'actions/', 'filters/', 'voice_effects/', 'ent
 export function editHref(save: string, path: string): { href: string; page: string } | undefined {
 	const s = `/${encodeURIComponent(save)}`;
 	const bio = /^prompts\/characters\/([^/]+)\.prompt$/i.exec(path);
-	if (bio) return { href: `${s}/bios/${encodeURIComponent(bio[1]!)}`, page: 'Bio' };
+	if (bio) return { href: `${s}/bios/${encodeURIComponent(bio[1]!)}`, page: m.plugins.editOn.bio };
 	if (/^prompts\/.+\.prompt$/i.test(path))
 		return {
 			href: href(save, 'prompts', '/' + path.slice('prompts/'.length).split('/').map(encodeURIComponent).join('/')),
-			page: 'Prompt'
+			page: m.plugins.editOn.prompt
 		};
-	if (recordKinds.some((k) => path.toLowerCase().startsWith(k))) return { href: contentHref(save, path), page: 'Content' };
+	if (recordKinds.some((k) => path.toLowerCase().startsWith(k))) return { href: contentHref(save, path), page: m.plugins.editOn.content };
 	return undefined;
 }

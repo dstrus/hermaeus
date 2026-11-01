@@ -1,5 +1,6 @@
 import { request } from '#lib/api/client.ts';
 import type { Created, ListEdit, ListsResponse } from '#lib/api/types/filters.ts';
+import { m } from '#lib/copy/messages.ts';
 
 export const filtersDependency = 'app:filters';
 
@@ -23,11 +24,12 @@ export function removeList(kind: FilterKind, id: string, modified: number): Prom
 }
 
 // The six lists a filter list adds to, in SkyrimNet's order.
+const t = m.features.filters.fields;
 export const filterFields = [
-	{ key: 'FactionWhitelist', label: 'Faction whitelist', noun: 'faction' },
-	{ key: 'FactionBlacklist', label: 'Faction blacklist', noun: 'faction' },
-	{ key: 'RaceWhitelist', label: 'Race whitelist', noun: 'race' },
-	{ key: 'RaceBlacklist', label: 'Race blacklist', noun: 'race' },
-	{ key: 'GenderWhitelist', label: 'Gender whitelist', noun: 'gender', placeholder: 'Male or Female, one per line' },
-	{ key: 'GenderBlacklist', label: 'Gender blacklist', noun: 'gender', placeholder: 'Male or Female, one per line' }
+	{ key: 'FactionWhitelist', label: t.factionWhitelist.label, noun: t.factionWhitelist.noun },
+	{ key: 'FactionBlacklist', label: t.factionBlacklist.label, noun: t.factionBlacklist.noun },
+	{ key: 'RaceWhitelist', label: t.raceWhitelist.label, noun: t.raceWhitelist.noun },
+	{ key: 'RaceBlacklist', label: t.raceBlacklist.label, noun: t.raceBlacklist.noun },
+	{ key: 'GenderWhitelist', label: t.genderWhitelist.label, noun: t.genderWhitelist.noun, placeholder: t.genderWhitelist.placeholder },
+	{ key: 'GenderBlacklist', label: t.genderBlacklist.label, noun: t.genderBlacklist.noun, placeholder: t.genderBlacklist.placeholder }
 ];

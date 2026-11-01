@@ -3,6 +3,8 @@
      field per key, remove and add. Each field keeps the kind of value the
      list already uses for that key. -->
 <script lang="ts">
+	import { m } from '#lib/copy/messages.ts';
+
 	type Scalar = string | number | boolean | null;
 	type Field = 'switch' | 'number' | 'text';
 
@@ -43,7 +45,7 @@
 		<li>
 			<div class="head">
 				<span class="caps muted">{i + 1}</span>
-				<button type="button" class="textbutton" onclick={() => remove(i)}>Remove</button>
+				<button type="button" class="textbutton" onclick={() => remove(i)}>{m.common.remove}</button>
 			</div>
 			{#each fields as f (f.key)}
 				<label>
@@ -60,7 +62,7 @@
 		</li>
 	{/each}
 </ol>
-<button type="button" class="button" onclick={add}>Add {fields.length ? 'another' : 'an item'}</button>
+<button type="button" class="button" onclick={add}>{fields.length ? m.settings.addAnother : m.settings.addItem}</button>
 
 <style>
 	.items {

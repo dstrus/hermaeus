@@ -6,6 +6,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { live, watchGame } from '#lib/api/live.svelte.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import FolderForm from '#lib/folders/FolderForm.svelte';
 	import Mark from '#lib/ui/Mark.svelte';
 	import ToggleBar from '#lib/settings/ToggleBar.svelte';
@@ -25,9 +26,9 @@
 	// A playthrough is named by its player, with its save ID only when
 	// another playthrough has the same player.
 	function playthroughLabel(p: Playthrough): string {
-		const name = p.player || 'No player yet';
-		const shared = data.status.playthroughs.filter((o) => (o.player || 'No player yet') === name).length > 1;
-		return shared ? `${name} · ${p.id}` : name;
+		const name = p.player || m.overview.noPlayer;
+		const shared = data.status.playthroughs.filter((o) => (o.player || m.overview.noPlayer) === name).length > 1;
+		return shared ? m.shell.sharedPlayer({ name, id: p.id }) : name;
 	}
 	let overviewActive = $derived(!!save && page.url.pathname === base);
 	let charactersActive = $derived(!!save && ['characters', 'npc', 'bios'].some((p) => page.url.pathname === `${base}/${p}` || page.url.pathname.startsWith(`${base}/${p}/`)));
@@ -42,11 +43,11 @@
 
 <div class="app" class:withsections={!!save && !!data.status.skyrimNetDir}>
 	<header class="top">
-		<a class="name caps" href="/"><Mark size="1.35em" /> Hermaeus</a>
+		<a class="name caps" href="/"><Mark size="1.35em" /> {m.shell.name}</a>
 		<div class="state">
 			{#if save && data.status.playthroughs.length}
 				<label class="playthrough">
-					<span class="caps muted">Playthrough</span>
+					<span class="caps muted">{m.shell.playthrough}</span>
 					<select value={save} onchange={(e) => goto(`/${encodeURIComponent(e.currentTarget.value)}`)}>
 						{#each data.status.playthroughs as p (p.id)}
 							<option value={p.id} title={p.id}>{playthroughLabel(p)}</option>
@@ -55,7 +56,7 @@
 				</label>
 			{/if}
 			<span class="game caps" class:running={live.gameRunning} role="status">
-				{live.gameRunning ? 'Skyrim running · read-only' : 'Skyrim closed'}
+				{live.gameRunning ? m.shell.gameRunning : m.shell.gameClosed}
 			</span>
 			<ThemeSwitch theme={data.status.theme} />
 		</div>
@@ -67,13 +68,13 @@
 	{#if !data.status.skyrimNetDir}
 		<main class="solo"><FolderForm /></main>
 	{:else if save}
-		<nav class="sections" aria-label="Sections" use:fitToViewport>
-			<ul aria-label="This playthrough">
-				<li><a class="caps" href={base} aria-current={overviewActive ? 'page' : undefined}>Overview</a></li>
-				<li><a class="caps" href="{base}/characters" aria-current={charactersActive ? 'page' : undefined}>Characters</a></li>
-				<li><a class="caps" href="{base}/history/events" aria-current={historyActive ? 'page' : undefined}>History</a></li>
-				<li><a class="caps" href="{base}/screenshots" aria-current={screenshotsActive ? 'page' : undefined}>Screenshots</a></li>
-				<li><a class="caps" href="{base}/songs" aria-current={songsActive ? 'page' : undefined}>Bard songs</a></li>
+		<nav class="sections" aria-label={m.nav.sections} use:fitToViewport>
+			<ul aria-label={m.nav.thisPlaythrough}>
+				<li><a class="caps" href={base} aria-current={overviewActive ? 'page' : undefined}>{m.nav.overview}</a></li>
+				<li><a class="caps" href="{base}/characters" aria-current={charactersActive ? 'page' : undefined}>{m.nav.characters}</a></li>
+				<li><a class="caps" href="{base}/history/events" aria-current={historyActive ? 'page' : undefined}>{m.nav.history}</a></li>
+				<li><a class="caps" href="{base}/screenshots" aria-current={screenshotsActive ? 'page' : undefined}>{m.nav.screenshots}</a></li>
+				<li><a class="caps" href="{base}/songs" aria-current={songsActive ? 'page' : undefined}>{m.nav.bardSongs}</a></li>
 			</ul>
 			{#each groups as g (g.path)}
 				<p class="group caps">{g.label}</p>
@@ -84,8 +85,8 @@
 				</ul>
 			{/each}
 			{#if data.pluginSettings.length}
-				<p class="group caps">Plugin settings</p>
-				<ul aria-label="Plugin settings">
+				<p class="group caps">{m.nav.pluginSettings}</p>
+				<ul aria-label={m.nav.pluginSettings}>
 					{#each data.pluginSettings as p (p.folder)}
 						<li><a class="caps" href={pluginSettingsHref(save, p.folder)} aria-current={here(`plugin-settings/${encodeURIComponent(p.folder)}`) ? 'page' : undefined}>{p.title}</a></li>
 					{/each}

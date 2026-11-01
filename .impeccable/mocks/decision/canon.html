@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<style>
+:root{--bg:#0f1115;--panel:#171a21;--line:#262a33;--ink:#e6e8ec;--dim:#9aa1ad;--blue:#5b8def;--amber:#e0a43a}
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;grid-template-columns:224px 280px 1fr;grid-template-rows:52px 1fr}
+.top{grid-column:1/-1;display:flex;align-items:center;gap:20px;padding:0 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+.top b{font-size:15px}
+.pill{border:1px solid var(--line);border-radius:6px;padding:4px 10px;color:var(--dim)}
+.toggles{display:flex;gap:14px;margin-left:auto;color:var(--dim);font-size:13px}
+.t{display:flex;align-items:center;gap:6px}
+.sw{width:26px;height:14px;border-radius:8px;background:#3a3f4a;position:relative}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#c6cbd4}
+.sw.on{background:var(--blue)}.sw.on::after{left:14px;background:#fff}
+.status{display:flex;align-items:center;gap:6px;color:var(--dim)}
+.dot{width:8px;height:8px;border-radius:50%;background:#3fb27f}
+nav{border-right:1px solid var(--line);padding:14px 10px}
+nav .h{color:var(--dim);font-size:12px;margin:14px 10px 6px}
+nav a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink)}
+nav a.on{background:#1f2430;color:#fff}
+.list{border-right:1px solid var(--line);padding:14px 12px}
+.search{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 10px;color:var(--ink);margin-bottom:10px}
+.g{color:var(--dim);font-size:12px;margin:12px 6px 4px}
+.who{display:flex;justify-content:space-between;padding:6px;border-radius:6px}
+.who small{color:var(--dim)}
+.who.on{background:#1f2430}
+main{padding:20px 28px;overflow:hidden}
+h1{font-size:24px;font-weight:600}
+.sub{color:var(--dim);margin-top:2px}
+.tabs{display:flex;gap:20px;border-bottom:1px solid var(--line);margin-top:16px}
+.tabs a{padding:8px 0;color:var(--dim)}
+.tabs a.on{color:var(--ink);box-shadow:inset 0 -2px var(--blue)}
+.bar{display:flex;gap:8px;margin:14px 0}
+.btn{background:#3d6dd4;color:#fff;border-radius:6px;padding:6px 12px}
+.sel{border:1px solid var(--line);border-radius:6px;padding:6px 10px;color:var(--dim)}
+.card{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+.meta{display:flex;gap:10px;color:var(--dim);font-size:13px;margin-bottom:6px}
+.badge{background:#232937;border-radius:4px;padding:0 6px;color:var(--ink)}
+.warn{background:rgba(224,164,58,.12);color:var(--amber);border-radius:4px;padding:0 6px}
+.day{color:var(--dim);font-size:12px;margin:16px 0 8px}
+</style></head><body>
+<div class="top"><b>Hermaeus</b><span class="pill">Gram · 11th of Hearthfire, 4E 201 ▾</span>
+  <div class="toggles"><span class="t"><span class="sw on"></span>AI</span><span class="t"><span class="sw"></span>GameMaster</span><span class="t"><span class="sw on"></span>Narration</span><span class="t"><span class="sw on"></span>Memories</span></div>
+  <span class="status"><span class="dot"></span>Skyrim closed</span></div>
+<nav><a class="on">Characters</a><a>Events</a><a>Knowledge</a><a>Screenshots</a><a>Bard songs</a>
+  <div class="h">Configuration</div><a>Prompts</a><a>Settings</a><a>Plugins</a><a>Content</a><a>Overrides</a></nav>
+<section class="list"><input class="search" placeholder="Search characters">
+  <div class="who"><span>Gram</span><small>127</small></div>
+  <div class="g">Pinned</div><div class="who on"><span>Serana</span><small>51</small></div>
+  <div class="g">10+ memories</div><div class="who"><span>Agmaer</span><small>61</small></div><div class="who"><span>Aya</span><small>136</small></div><div class="who"><span>Camilla Valerius</span><small>28</small></div><div class="who"><span>Laurina Cedalius</span><small>62</small></div><div class="who"><span>Meresine</span><small>94</small></div>
+  <div class="g">Everyone else</div><div class="who"><span>Isran</span><small>6</small></div><div class="who"><span>Lucan Valerius</span><small>4</small></div></section>
+<main><h1>Serana</h1><p class="sub">Previously known as Mysterious Woman · dawnguard.esm</p>
+  <div class="tabs"><a>Overview</a><a>Stats</a><a class="on">Memories (51)</a><a>Diary (7)</a></div>
+  <div class="bar"><span class="btn">New memory</span><span class="sel">All types</span><span class="sel">All emotions</span><span class="sel">Newest first</span></div>
+  <div class="day">Fredas, 11th of Hearthfire, 4E 201</div>
+  <div class="card"><div class="meta"><span>11:08 AM</span><span class="badge">Relationship</span><span>content</span><span>0.55</span></div>Gram and I trade lighthearted insults in the Soul Cairn Outskirts, calling me a snowback, me teasing him as a sweaty half-elf. We laugh together, momentarily forgetting the oppressive rock and danger of this Oblivion realm.</div>
+  <div class="card"><div class="meta"><span>10:17 AM</span><span class="badge">Experience</span><span>hopeful</span><span>0.95</span><span class="warn">search vector pending</span></div>Diary Entry: I can still smell the void salts, chalk and old lightning, and beneath it the copper tang of my own blood in the basin…</div>
+  <div class="day">Morndas, 7th of Hearthfire, 4E 201</div>
+  <div class="card"><div class="meta"><span>9:41 PM</span><span class="badge">Experience</span><span>concerned</span><span>0.60</span></div>Laurina tends to the wounded at Fort Dawnguard while I watch the snow. Isran still doesn’t trust me, and I can’t say I blame him.</div>
+</main>
+</body></html>

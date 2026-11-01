@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { m } from '#lib/copy/messages.ts';
 import { href } from '#lib/nav.ts';
 import type { CloneCache, Edit, File, FileList, FileValues, PinsResponse, SecretValue, Setting, SpeechEdit, SpeechRule, ToggleList, ToggleRequest } from '#lib/api/types/settings.ts';
 
@@ -7,6 +8,13 @@ import type { CloneCache, Edit, File, FileList, FileValues, PinsResponse, Secret
 // settings too.
 export const togglesDependency = 'app:toggles';
 export const settingsDependency = 'app:settings';
+
+// toggleCopy is a quick toggle's name and what it switches, by its id; one
+// Hermaeus doesn't know is named by its id.
+export function toggleCopy(id: string): { label: string; what: string } {
+	const key = id.replace(/_(.)/g, (_, c: string) => c.toUpperCase());
+	return (m.shell.toggles as Record<string, { label: string; what: string }>)[key] ?? { label: id, what: '' };
+}
 
 export function getToggles(fetchFn?: typeof fetch): Promise<ToggleList> {
 	return request<ToggleList>('GET', '/api/toggles', undefined, fetchFn);
@@ -46,7 +54,7 @@ export function settingsHref(save: string, name?: string): string {
 // plugin's named after the plugin.
 export function fileLabel(f: File): string {
 	const plugin = f.name.match(/^Plugin_(.+)$/);
-	if (plugin) return `${plugin[1]} (plugin)`;
+	if (plugin) return m.settings.plugin({ name: plugin[1]! });
 	return f.path.replace(/^.*\//, '').replace(/\.yaml$/i, '');
 }
 
@@ -79,7 +87,7 @@ export function kindOf(s: Setting): Kind {
 // show is a value as a table cell reads it.
 export function show(v: unknown): string {
 	if (v === undefined) return '';
-	if (isSecret(v)) return v.filled ? 'Filled' : 'Empty';
+	if (isSecret(v)) return v.filled ? m.settings.secretFilled : m.settings.secretEmpty;
 	if (v === null) return '~';
 	if (typeof v === 'string') return v;
 	if (typeof v === 'boolean' || typeof v === 'number') return String(v);
@@ -129,8 +137,8 @@ export function fromEntries(entries: Entry[]): Record<string, unknown> {
 	const out: Record<string, unknown> = {};
 	for (const e of entries) {
 		const key = e.key.trim();
-		if (!key) throw new Error('Every row needs a key.');
-		if (key in out) throw new Error(`${key} is listed twice.`);
+		if (!key) throw new Error(m.settings.rowNeedsKey);
+		if (key in out) throw new Error(m.settings.listedTwice({ key }));
 		switch (e.kind) {
 			case 'switch':
 				out[key] = e.on;
@@ -138,7 +146,7 @@ export function fromEntries(entries: Entry[]): Record<string, unknown> {
 			case 'number': {
 				const t = e.text.trim();
 				if (t === '') out[key] = null;
-				else if (Number.isNaN(Number(t))) throw new Error(`${key} holds a number; “${e.text}” isn’t one.`);
+				else if (Number.isNaN(Number(t))) throw new Error(m.settings.notNumber({ key, value: e.text }));
 				else out[key] = Number(t);
 				break;
 			}
@@ -149,7 +157,7 @@ export function fromEntries(entries: Entry[]): Record<string, unknown> {
 					try {
 						out[key] = JSON.parse(t);
 					} catch {
-						throw new Error(`${key} isn’t valid JSON.`);
+						throw new Error(m.settings.notJson({ key }));
 					}
 				}
 				break;

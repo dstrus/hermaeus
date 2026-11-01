@@ -38,7 +38,8 @@ type ProviderDetails struct {
 	Settings          string   `json:"settings"` // provider_settings as JSON, "" for none
 	Sorting           string   `json:"sorting"`  // provider_sorting: how OpenRouter picks among its upstreams
 	CacheTTL          string   `json:"cacheTTL"`
-	Tasks             []string `json:"tasks"` // the tasks with a slot on it, by label
+	Tasks             []string `json:"tasks"` // the tasks with a slot on it, by id
+	taskNames         []string // the same, by name, for messages
 }
 
 type ProvidersResponse struct {
@@ -107,14 +108,14 @@ func (s *Settings) Providers() (ProvidersResponse, error) {
 	out.Found = true
 	out.Modified = info.ModTime().UnixMilli()
 	// Which tasks use each provider, so one in use can't be removed.
-	used := map[string][]string{}
+	used := map[string][]Task{}
 	if models, err := s.Models(); err == nil {
 		for _, t := range models.Tasks {
 			seen := map[string]bool{}
 			for _, sl := range t.Slots {
 				if !seen[sl.Provider] {
 					seen[sl.Provider] = true
-					used[sl.Provider] = append(used[sl.Provider], t.Label)
+					used[sl.Provider] = append(used[sl.Provider], t)
 				}
 			}
 		}
@@ -147,8 +148,9 @@ func (s *Settings) Providers() (ProvidersResponse, error) {
 				}
 			}
 		}
-		if tasks := used[p.ID]; tasks != nil {
-			p.Tasks = tasks
+		for _, t := range used[p.ID] {
+			p.Tasks = append(p.Tasks, t.ID)
+			p.taskNames = append(p.taskNames, t.label)
 		}
 		out.Providers = append(out.Providers, p)
 	}
@@ -241,7 +243,7 @@ func (s *Settings) RemoveProvider(id string, modified int64) (ProvidersResponse,
 			return ProvidersResponse{}, apperr.New(apperr.Invalid, "%s came with SkyrimNet, so it stays; clear its key instead", p.Name)
 		}
 		if len(p.Tasks) > 0 {
-			return ProvidersResponse{}, apperr.New(apperr.Conflict, "%s is still used by %s. Give those tasks another provider first.", p.Name, strings.Join(p.Tasks, ", "))
+			return ProvidersResponse{}, apperr.New(apperr.Conflict, "%s is still used by %s. Give those tasks another provider first.", p.Name, strings.Join(p.taskNames, ", "))
 		}
 	}
 	return s.editProviders("Removed the provider "+id, modified, func(list *yaml.Node) error {

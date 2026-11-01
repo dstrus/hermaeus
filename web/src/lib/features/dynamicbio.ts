@@ -1,4 +1,7 @@
+import { m } from '#lib/copy/messages.ts';
 import type { Feature } from './schema.ts';
+
+const f = m.features.dynamicBios;
 
 // The bio's sections SkyrimNet may rewrite, by name as in the bio file.
 const blocks = ['summary', 'interject_summary', 'background', 'personality', 'appearance', 'aspirations', 'relationships', 'occupation', 'skills', 'speech_style'].map((value) => ({
@@ -11,26 +14,26 @@ const blocks = ['summary', 'interject_summary', 'background', 'personality', 'ap
 export const dynamicBio: Feature = {
 	id: 'dynamic-bios',
 	file: 'DynamicBio',
-	title: 'Dynamic bios',
-	what: 'How SkyrimNet rewrites a character’s bio as you play: which sections it may change, and what it draws on.',
+	title: f.title,
+	what: f.what,
 	sections: [
 		{
-			title: 'General',
+			title: f.general.title,
 			fields: [
-				{ key: 'enabled', label: 'Rewrite bios', what: 'Let SkyrimNet update a character’s dynamic bio from what happens.', kind: 'switch' },
-				{ key: 'preserve_core_personality', label: 'Keep the core personality', what: 'A rewrite keeps the character’s defining traits, whatever has happened.', kind: 'switch' }
+				{ key: 'enabled', label: f.general.enabled.label, what: f.general.enabled.what, kind: 'switch' },
+				{ key: 'preserve_core_personality', label: f.general.preserveCorePersonality.label, what: f.general.preserveCorePersonality.what, kind: 'switch' }
 			]
 		},
 		{
-			title: 'Sections',
-			fields: [{ key: 'updatable_blocks', label: 'Sections it may rewrite', what: 'Which sections of a bio a rewrite may change. The rest stay as written.', kind: 'set', choices: blocks }]
+			title: f.sections.title,
+			fields: [{ key: 'updatable_blocks', label: f.sections.updatableBlocks.label, what: f.sections.updatableBlocks.what, kind: 'set', choices: blocks }]
 		},
 		{
-			title: 'Context',
+			title: f.context.title,
 			fields: [
-				{ key: 'max_recent_events', label: 'Recent events considered', what: 'How many of the latest events a rewrite can draw on.', kind: 'count', min: 10, max: 500, unit: 'events' },
-				{ key: 'max_memories', label: 'Memories considered', what: 'How many memories a rewrite can draw on.', kind: 'count', min: 0, max: 100, unit: 'memories' },
-				{ key: 'min_importance_score', label: 'Memories above', what: 'The importance a memory needs to be drawn on.', kind: 'percent' }
+				{ key: 'max_recent_events', label: f.context.maxRecentEvents.label, what: f.context.maxRecentEvents.what, kind: 'count', min: 10, max: 500, unit: f.context.maxRecentEvents.unit },
+				{ key: 'max_memories', label: f.context.maxMemories.label, what: f.context.maxMemories.what, kind: 'count', min: 0, max: 100, unit: f.context.maxMemories.unit },
+				{ key: 'min_importance_score', label: f.context.minImportanceScore.label, what: f.context.minImportanceScore.what, kind: 'percent' }
 			]
 		}
 	]

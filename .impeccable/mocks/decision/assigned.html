@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+SC:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#121a14;--page:#172119;--rail:#1f2b1c;--ink:#e2dfcc;--dim:#a8a991;--sulfur:#d9cf7e;--sigil:#9fd36b;--amber:#d9893a;--rule:#2d3a29}
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:var(--ground);color:var(--ink);font:15px/1.45 "Alegreya Sans",sans-serif;display:grid;grid-template-columns:256px 300px 1fr}
+.sc{font-family:"Alegreya SC",serif;letter-spacing:.04em}
+.rail{background:var(--rail);padding:22px 18px;display:flex;flex-direction:column;gap:22px}
+.mark{font-size:26px;color:var(--sulfur);font-weight:700}
+.save{border:1px solid #3c4c33;border-radius:6px;padding:10px 12px}
+.save b{display:block;font-size:16px}.save span{color:var(--dim);font-size:13px}
+h4{font-family:"Alegreya SC",serif;font-weight:500;color:var(--sulfur);font-size:14px;letter-spacing:.08em;margin-bottom:8px}
+.tog{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:14px}
+.sw{width:30px;height:16px;border-radius:9px;background:#3a4733;position:relative}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#7d8670}
+.sw.on{background:var(--sigil)}.sw.on::after{left:16px;background:#1f2b1c}
+nav a{display:block;padding:5px 10px;border-radius:5px;color:var(--ink);text-decoration:none;font-size:15px}
+nav a.on{background:#33452b;color:var(--sulfur);font-weight:500}
+nav .sep{height:1px;background:#33422c;margin:8px 0}
+.list{background:var(--ground);border-right:1px solid var(--rule);padding:18px 14px;overflow:hidden}
+.search{width:100%;background:#0d130e;border:1px solid var(--rule);border-radius:5px;color:var(--ink);padding:7px 10px;font:inherit;margin-bottom:14px}
+.grp{font-family:"Alegreya SC",serif;color:var(--sulfur);font-size:13px;letter-spacing:.08em;margin:14px 0 4px}
+.who{display:flex;justify-content:space-between;padding:5px 8px;border-radius:5px;font-size:15px}
+.who small{color:var(--dim);font-variant-numeric:tabular-nums}
+.who.on{background:#1d2a1d;outline:1px solid #3c4c33}
+main{padding:0 40px;overflow:hidden;background:var(--page)}
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid var(--rule);color:var(--dim);font-size:14px}
+.eye{display:flex;align-items:center;gap:10px;color:var(--ink)}
+.eye svg{width:30px;height:16px}
+h1{font-family:"Alegreya SC",serif;font-size:42px;font-weight:700;margin-top:24px;line-height:1}
+.prev{color:var(--dim);margin-top:4px}
+.tabs{display:flex;gap:26px;margin:18px 0 0;border-bottom:1px solid var(--rule)}
+.tabs a{padding:8px 0;color:var(--dim);font-size:15px;text-decoration:none}
+.tabs a.on{color:var(--ink);box-shadow:inset 0 -2px var(--sulfur)}
+.tools{display:flex;gap:10px;margin:16px 0 6px;align-items:center}
+.btn{border:1px solid var(--sigil);color:var(--sigil);background:none;border-radius:5px;padding:5px 12px;font:500 14px "Alegreya Sans"}
+.sel{background:#0d130e;border:1px solid var(--rule);border-radius:5px;color:var(--ink);padding:5px 10px;font-size:14px}
+.day{font-family:"Alegreya SC",serif;color:var(--sulfur);font-size:18px;margin:18px 0 6px;letter-spacing:.03em}
+.mem{display:grid;grid-template-columns:86px 1fr 132px;gap:18px;padding:12px 0;border-top:1px solid var(--rule)}
+.meta{font-size:13px;color:var(--dim);font-variant-numeric:tabular-nums}
+.meta b{display:block;color:var(--ink);font-size:15px;font-weight:500}
+.no{font-family:"Alegreya SC",serif;color:#7f8a6c}
+.text{max-width:720px}
+.tags{display:flex;gap:8px;margin-top:6px;font-size:12.5px}
+.tag{color:var(--dim);border:1px solid var(--rule);border-radius:4px;padding:0 6px}
+.stamp{color:var(--amber);border:1px solid #6b4a24;border-radius:4px;padding:0 6px;font-family:"Alegreya SC",serif}
+.imp{font-size:12.5px;color:var(--dim)}
+.dens{height:6px;margin-top:5px;border-radius:3px;background:var(--sulfur)}
+.edit{float:right;color:var(--sigil);font-size:13.5px}
+</style></head><body>
+<aside class="rail">
+  <div class="mark sc">Hermaeus</div>
+  <div class="save"><b>Gram</b><span>Fredas, 11th of Hearthfire, 4E 201 · 6,121 events</span></div>
+  <div>
+    <h4>Before you play</h4>
+    <div class="tog">SkyrimNet’s AI<span class="sw on"></span></div>
+    <div class="tog">GameMaster<span class="sw"></span></div>
+    <div class="tog">NPC reactions<span class="sw on"></span></div>
+    <div class="tog">Narration<span class="sw on"></span></div>
+    <div class="tog">Memory generation<span class="sw on"></span></div>
+    <div class="tog">OmniSight<span class="sw"></span></div>
+  </div>
+  <nav>
+    <a class="on">Characters</a><a>Events</a><a>Knowledge</a><a>Screenshots</a><a>Bard songs</a>
+    <div class="sep"></div>
+    <a>Prompts</a><a>Settings</a><a>Plugins</a><a>Content</a><a>Overrides</a>
+  </nav>
+</aside>
+<section class="list">
+  <input class="search" value="" placeholder="Find a character">
+  <div class="who"><span>Gram</span><small>127 · 27</small></div>
+  <div class="grp">Pinned</div>
+  <div class="who on"><span>Serana</span><small>51 · 7</small></div>
+  <div class="grp">10+ memories</div>
+  <div class="who"><span>Agmaer</span><small>61 · 11</small></div>
+  <div class="who"><span>Aya</span><small>136 · 39</small></div>
+  <div class="who"><span>Camilla Valerius</span><small>28 · 9</small></div>
+  <div class="who"><span>Laurina Cedalius</span><small>62 · 12</small></div>
+  <div class="who"><span>Meresine</span><small>94 · 24</small></div>
+  <div class="grp">Everyone else</div>
+  <div class="who"><span>Adrianne Avenicci</span><small>1</small></div>
+  <div class="who"><span>Aela the Huntress</span><small>1</small></div>
+  <div class="who"><span>Isran</span><small>6 · 1</small></div>
+  <div class="who"><span>Lucan Valerius</span><small>4 · 1</small></div>
+  <div class="who"><span>Vilja</span><small>1</small></div>
+</section>
+<main>
+  <div class="top"><span>Gram › Characters › Serana</span>
+    <span class="eye"><svg viewBox="0 0 30 16"><path d="M2 8 Q15 15 28 8" fill="none" stroke="#d9cf7e" stroke-width="2"/><path d="M8 11l-2 3M15 12.5V16M22 11l2 3" stroke="#d9cf7e" stroke-width="1.5"/></svg>Skyrim is closed · changes save, after a backup</span></div>
+  <h1>Serana</h1>
+  <p class="prev">Previously known as Mysterious Woman · dawnguard.esm</p>
+  <div class="tabs"><a>Overview</a><a>Stats</a><a class="on">Memories 51</a><a>Diary 7</a></div>
+  <div class="tools"><button class="btn">New memory</button><span class="sel">All types</span><span class="sel">All emotions</span><span class="sel">Newest first</span></div>
+  <div class="day">Fredas, 11th of Hearthfire</div>
+  <div class="mem"><div class="meta"><b>11:08 AM</b><span class="no">№ 687</span></div>
+    <div class="text">Gram and I trade lighthearted insults in the Soul Cairn Outskirts, calling me a snowback, me teasing him as a sweaty half-elf. We laugh together, momentarily forgetting the oppressive rock and danger of this Oblivion realm.
+      <div class="tags"><span class="tag">Relationship</span><span class="tag">content</span><span class="tag">Soul Cairn Outskirts</span></div></div>
+    <div class="imp">importance 0.55<div class="dens" style="width:55%"></div><span class="edit">Edit</span></div></div>
+  <div class="mem"><div class="meta"><b>10:17 AM</b><span class="no">№ 686</span></div>
+    <div class="text">Diary Entry: I can still smell the void salts, chalk and old lightning, and beneath it the copper tang of my own blood in the basin. The blue liquid moves like something alive…
+      <div class="tags"><span class="tag">copy of diary entry 143</span><span class="stamp">saved · search vector pending</span></div></div>
+    <div class="imp">importance 0.95<div class="dens" style="width:95%"></div><span class="edit">Edit</span></div></div>
+  <div class="day">Morndas, 7th of Hearthfire</div>
+  <div class="mem"><div class="meta"><b>9:41 PM</b><span class="no">№ 671</span></div>
+    <div class="text">Laurina tends to the wounded at Fort Dawnguard while I watch the snow. Isran still doesn’t trust me, and I can’t say I blame him.
+      <div class="tags"><span class="tag">Experience</span><span class="tag">concerned</span></div></div>
+    <div class="imp">importance 0.60<div class="dens" style="width:60%"></div><span class="edit">Edit</span></div></div>
+</main>
+</body></html>

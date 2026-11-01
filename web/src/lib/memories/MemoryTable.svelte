@@ -6,7 +6,7 @@
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { Memory, MemoryChanges } from '#lib/api/types/memories.ts';
 	import { charactersDependency } from '#lib/characters/api.ts';
-	import { plural } from '#lib/format.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
@@ -119,9 +119,9 @@
 	async function saveForm(changes: MemoryChanges) {
 		const editing = mode === 'edit' ? current : undefined;
 		await run(async () => {
-			if (!editing && !uuid) throw new Error('A new memory is added from its character’s page.');
+			if (!editing && !uuid) throw new Error(m.memories.memories.newFromPage);
 			const r = editing ? await updateMemory(save, editing.id, changes) : await addMemory(save, uuid!, changes);
-			const note = [savedNote(r, editing ? 'Memory' : 'New memory'), r.warning].filter(Boolean).join(' ');
+			const note = [savedNote(r, editing ? m.memories.memories.savedWhat : m.memories.memories.newWhat), r.warning].filter(Boolean).join(' ');
 			return editing ? note : { note, added: String(r.id) };
 		}, !editing);
 	}
@@ -130,11 +130,11 @@
 		const ids = chosen.map((m) => m.id);
 		await run(async () => {
 			let note: string;
-			if (what === 'move') note = `${plural((await moveToCurrentIdentity(save, ids)).n, 'memory', 'memories')} moved to the current identity.`;
-			else if (what === 'delete') note = `${plural((await deleteMemories(save, ids)).n, 'memory', 'memories')} deleted.`;
+			if (what === 'move') note = m.memories.memories.moved({ count: (await moveToCurrentIdentity(save, ids)).n });
+			else if (what === 'delete') note = m.memories.memories.deleted({ count: (await deleteMemories(save, ids)).n });
 			else {
 				const r = await updateMemories(save, { ids, changes: { active: what === 'activate' } });
-				note = `${plural(r.n, 'memory', 'memories')} made ${what === 'activate' ? 'active' : 'inactive'}.`;
+				note = (what === 'activate' ? m.memories.memories.madeActive : m.memories.memories.madeInactive)({ count: r.n });
 			}
 			marked.clear();
 			return note;
@@ -150,15 +150,15 @@
 		const viewing = mode === 'view';
 		const can = !readOnly && viewing;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => open('new') },
-			{ key: 'x', shown: 'X', label: 'Mark', hidden: !viewing, disabled: !can || !current, run: () => current && toggleMark(current) },
-			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !chosen.length, run: () => open('delete') }),
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !viewing, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !viewing, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
+			{ key: 'n', shown: 'N', label: m.memories.new, hidden: !viewing || !uuid, disabled: !can, run: () => open('new') },
+			{ key: 'x', shown: 'X', label: m.memories.memories.mark, hidden: !viewing, disabled: !can || !current, run: () => current && toggleMark(current) },
+			...deleteShortcuts({ label: m.common.delete, hidden: !viewing, disabled: !can || !chosen.length, run: () => open('delete') }),
 			{
 				key: 'Enter',
-				label: 'Save',
+				label: m.common.save,
 				command: true,
 				hidden: mode !== 'edit' && mode !== 'new',
 				run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit()
@@ -166,32 +166,32 @@
 			// Esc cancels when there's something to cancel; otherwise it's free for the page.
 			...(viewing && !marked.size
 				? []
-				: [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => (mode === 'view' ? marked.clear() : close()) }])
+				: [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => (mode === 'view' ? marked.clear() : close()) }])
 		];
 	});
 </script>
 
 <div class="tools">
-	<input type="search" bind:value={query} placeholder="Search memories" aria-label="Search memories" />
-	<select bind:value={type} aria-label="Type">
-		<option value="">All types</option>
+	<input type="search" bind:value={query} placeholder={m.memories.memories.search} aria-label={m.memories.memories.search} />
+	<select bind:value={type} aria-label={m.memories.type}>
+		<option value="">{m.memories.memories.allTypes}</option>
 		{#each types as t (t)}<option value={t}>{t}</option>{/each}
 	</select>
-	<select bind:value={mood} aria-label="Mood">
-		<option value="">All moods</option>
+	<select bind:value={mood} aria-label={m.memories.mood}>
+		<option value="">{m.memories.memories.allMoods}</option>
 		{#each moods as e (e)}<option value={e}>{e}</option>{/each}
 	</select>
 	{#if !uuid}
-		<select bind:value={actor} aria-label="Character">
-			<option value="">Everyone</option>
+		<select bind:value={actor} aria-label={m.characters.character}>
+			<option value="">{m.characters.everyone}</option>
 			{#each characters as c (c.uuid)}
 				<option value={c.uuid}>{characterName(c)}</option>
 			{/each}
 		</select>
 	{/if}
 	{#if marked.size}
-		<span class="marked">{plural(marked.size, 'memory', 'memories')} marked</span>
-		<button type="button" class="textbutton" onclick={() => marked.clear()}>Clear</button>
+		<span class="marked">{m.memories.memories.marked({ count: marked.size })}</span>
+		<button type="button" class="textbutton" onclick={() => marked.clear()}>{m.memories.memories.clear}</button>
 	{/if}
 </div>
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
@@ -200,44 +200,44 @@
 <div class="split" class:everyone={!uuid}>
 	<div class="list">
 		{#if !memories.length}
-			<p class="muted">No memories yet.</p>
+			<p class="muted">{m.memories.memories.none}</p>
 		{:else if !shown.length}
-			<p class="muted">No memories match.</p>
+			<p class="muted">{m.memories.memories.noMatch}</p>
 		{:else}
 			<table>
 				<thead>
 					<tr>
-						<th class="mark" aria-label="Selected"></th>
-						<SortHeader label="When" key="when" bind:sort descendingFirst />
-						{#if !uuid}<SortHeader label="Who" key="who" bind:sort />{/if}
-						<th class="caps text">Memory</th>
-						<SortHeader label="Type" key="type" bind:sort class="narrow-hide" />
-						<SortHeader label="Mood" key="mood" bind:sort class="wide" />
-						<SortHeader label="Imp." key="importance" bind:sort descendingFirst align="end" class="wide" />
+						<th class="mark" aria-label={m.common.selected}></th>
+						<SortHeader label={m.memories.when} key="when" bind:sort descendingFirst />
+						{#if !uuid}<SortHeader label={m.memories.who} key="who" bind:sort />{/if}
+						<th class="caps text">{m.memories.memories.memory}</th>
+						<SortHeader label={m.memories.type} key="type" bind:sort class="narrow-hide" />
+						<SortHeader label={m.memories.mood} key="mood" bind:sort class="wide" />
+						<SortHeader label={m.memories.imp} key="importance" bind:sort descendingFirst align="end" class="wide" />
 					</tr>
 				</thead>
 				<tbody>
-					{#each shown as m, i (m.id)}
-						{#if byDay && dayLabel(m) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
-							<tr class="day"><th colspan={uuid ? 6 : 7} scope="rowgroup" class="caps sticky-day">{dayLabel(m)}</th></tr>
+					{#each shown as mem, i (mem.id)}
+						{#if byDay && dayLabel(mem) !== (shown[i - 1] ? dayLabel(shown[i - 1]!) : '')}
+							<tr class="day"><th colspan={uuid ? 6 : 7} scope="rowgroup" class="caps sticky-day">{dayLabel(mem)}</th></tr>
 						{/if}
-						<tr aria-selected={selection.is(m)} class:inactive={!m.active} onclick={() => mode === 'view' && selection.select(m)}>
+						<tr aria-selected={selection.is(mem)} class:inactive={!mem.active} onclick={() => mode === 'view' && selection.select(mem)}>
 							<td class="mark">
-								{#if marked.has(m.id)}<span class="tick" aria-label="Marked"></span>{:else if selection.is(m)}<Diamond />{/if}
+								{#if marked.has(mem.id)}<span class="tick" aria-label={m.memories.memories.markedLabel}></span>{:else if selection.is(mem)}<Diamond />{/if}
 							</td>
-							<td class="when">{timeLabel(m)}{#if !byDay}<span class="muted"> · {dayLabel(m)}</span>{/if}</td>
+							<td class="when">{timeLabel(mem)}{#if !byDay}<span class="muted"> · {dayLabel(mem)}</span>{/if}</td>
 							{#if !uuid}
-								<td class="who">{#if owner(m)}<a href={owner(m)}>{m.actor || 'Unnamed'}</a>{:else}{m.actor || 'Unnamed'}{/if}</td>
+								<td class="who">{#if owner(mem)}<a href={owner(mem)}>{mem.actor || m.characters.noName}</a>{:else}{mem.actor || m.characters.noName}{/if}</td>
 							{/if}
 							<td class="text">
-								<span class="line">{#if m.title}<strong>{m.title}: </strong>{/if}{m.content}</span>
-								{#if m.retired !== undefined}<span class="flag warn">under “{m.retired || 'an earlier identity'}”</span>{/if}
-								{#if !m.active}<span class="flag">inactive</span>{/if}
-								{#if !m.embedded}<span class="flag">vector pending</span>{/if}
+								<span class="line">{#if mem.title}<strong>{mem.title}: </strong>{/if}{mem.content}</span>
+								{#if mem.retired !== undefined}<span class="flag warn">{m.memories.under({ name: mem.retired || m.memories.anEarlierIdentity })}</span>{/if}
+								{#if !mem.active}<span class="flag">{m.memories.inactive}</span>{/if}
+								{#if !mem.embedded}<span class="flag">{m.memories.vectorPending}</span>{/if}
 							</td>
-							<td class="type caps narrow-hide">{m.type}</td>
-							<td class="wide">{m.emotion}</td>
-							<td class="n wide">{m.importance.toFixed(2)}</td>
+							<td class="type caps narrow-hide">{mem.type}</td>
+							<td class="wide">{mem.emotion}</td>
+							<td class="n wide">{mem.importance.toFixed(2)}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -245,57 +245,57 @@
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Memory">
+	<aside class="pane" use:fitToViewport aria-label={m.memories.memories.memory}>
 		{#if mode === 'new'}
-			<h2 class="caps">New memory</h2>
+			<h2 class="caps">{m.memories.memories.newTitle}</h2>
 			<MemoryForm onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if mode === 'edit'}
-						<h2 class="caps">Edit memory {current.id}</h2>
+						<h2 class="caps">{m.memories.memories.editTitle({ id: current.id })}</h2>
 						<MemoryForm memory={current} onsave={saveForm} oncancel={() => close()} />
 					{:else}
-						<h2 class="caps">{current.title || `Memory ${current.id}`}</h2>
-						<p class="muted">{current.date ? `${current.date.time}, ${current.date.day}` : dayLabel(current)}</p>
+						<h2 class="caps">{current.title || m.memories.memories.untitled({ id: current.id })}</h2>
+						<p class="muted">{current.date ? m.memories.dateTime(current.date) : dayLabel(current)}</p>
 						<p class="content">{current.content}</p>
 						<dl>
-							<dt class="caps">Type</dt><dd>{current.type}</dd>
-							<dt class="caps">Mood</dt><dd>{current.emotion || '—'}</dd>
-							<dt class="caps">Importance</dt><dd>{current.importance.toFixed(2)}</dd>
-							{#if current.location}<dt class="caps">Place</dt><dd>{current.location}</dd>{/if}
-							{#if current.tags.length}<dt class="caps">Tags</dt><dd>{current.tags.join(', ')}</dd>{/if}
-							{#if current.condition}<dt class="caps">Only while</dt><dd><code>{current.condition}</code></dd>{/if}
-							{#if current.diaryEntry !== undefined}<dt class="caps">Copy of</dt><dd>diary entry {current.diaryEntry}</dd>{/if}
-							<dt class="caps">Search</dt><dd>{current.embedded ? 'vector built' : 'vector pending; SkyrimNet builds it in the background while a save is loaded'}</dd>
-							{#if current.alwaysInject}<dt class="caps">Recall</dt><dd>always included, not only when relevant</dd>{/if}
-							{#if !current.active}<dt class="caps">State</dt><dd>inactive: SkyrimNet doesn’t recall it</dd>{/if}
+							<dt class="caps">{m.memories.type}</dt><dd>{current.type}</dd>
+							<dt class="caps">{m.memories.mood}</dt><dd>{current.emotion || '—'}</dd>
+							<dt class="caps">{m.memories.importance}</dt><dd>{current.importance.toFixed(2)}</dd>
+							{#if current.location}<dt class="caps">{m.memories.place}</dt><dd>{current.location}</dd>{/if}
+							{#if current.tags.length}<dt class="caps">{m.memories.tags}</dt><dd>{current.tags.join(', ')}</dd>{/if}
+							{#if current.condition}<dt class="caps">{m.memories.onlyWhile}</dt><dd><code>{current.condition}</code></dd>{/if}
+							{#if current.diaryEntry !== undefined}<dt class="caps">{m.memories.memories.copyOf}</dt><dd>{m.memories.memories.diaryEntry({ id: current.diaryEntry })}</dd>{/if}
+							<dt class="caps">{m.memories.search}</dt><dd>{current.embedded ? m.memories.vectorBuilt : m.memories.vectorPendingLong}</dd>
+							{#if current.alwaysInject}<dt class="caps">{m.memories.recall}</dt><dd>{m.memories.alwaysIncluded}</dd>{/if}
+							{#if !current.active}<dt class="caps">{m.memories.state}</dt><dd>{m.memories.memories.notRecalled}</dd>{/if}
 						</dl>
 						{#if current.retired !== undefined}
-							<p class="notice warn">Stored under the earlier identity “{current.retired || 'unnamed'}”, which SkyrimNet doesn’t appear to recall.</p>
+							<p class="notice warn">{m.memories.storedUnder({ name: current.retired || m.characters.noNameLower })}</p>
 						{/if}
 						{#if mode === 'delete'}
 							<div class="confirm" role="alert">
-								<p>Delete {chosen.length === 1 ? 'this memory' : plural(chosen.length, 'marked memory', 'marked memories')}? Hermaeus backs up the database before its first change each session.</p>
-								<button type="button" class="button primary" onclick={() => act('delete')}>Delete</button>
-								<button type="button" class="button" onclick={() => close()}>Keep</button>
+								<p>{m.memories.memories.confirmDelete({ count: chosen.length })}</p>
+								<button type="button" class="button primary" onclick={() => act('delete')}>{m.common.delete}</button>
+								<button type="button" class="button" onclick={() => close()}>{m.memories.keep}</button>
 							</div>
 						{:else if !readOnly}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
+								<button type="button" class="button" onclick={() => open('edit')}>{m.common.edit}</button>
 								<button type="button" class="button" onclick={() => act(current!.active ? 'deactivate' : 'activate')}>
-									{current.active ? 'Make inactive' : 'Make active'}
+									{current.active ? m.memories.memories.makeInactive : m.memories.memories.makeActive}
 								</button>
-								{#if anyRetired}<button type="button" class="button" onclick={() => act('move')}>Move to current identity</button>{/if}
-								<button type="button" class="button" onclick={() => open('delete')}>Delete…</button>
+								{#if anyRetired}<button type="button" class="button" onclick={() => act('move')}>{m.memories.memories.move}</button>{/if}
+								<button type="button" class="button" onclick={() => open('delete')}>{m.memories.deleteMore}</button>
 							</div>
-							{#if marked.size}<p class="muted small">Actions apply to the {plural(marked.size, 'marked memory', 'marked memories')}.</p>{/if}
+							{#if marked.size}<p class="muted small">{m.memories.memories.appliesTo({ count: marked.size })}</p>{/if}
 						{/if}
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so memories can’t be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.memories.memories.gameRunning}</p>{/if}
 	</aside>
 </div>
 

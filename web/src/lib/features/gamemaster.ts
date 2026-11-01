@@ -1,42 +1,45 @@
+import { m } from '#lib/copy/messages.ts';
 import type { Feature } from './schema.ts';
+
+const f = m.features.gamemaster;
 
 // The GameMaster: the agent that reads a scene and has characters speak or
 // act. Part of SkyrimNet.yaml; its model is the GameMaster task on Models.
 export const gameMaster: Feature = {
 	id: 'gamemaster',
 	file: 'game',
-	title: 'GameMaster',
-	what: 'The GameMaster reads the scene around you and decides when characters speak up or act.',
+	title: f.title,
+	what: f.what,
 	sections: [
 		{
-			title: 'General',
+			title: f.general.title,
 			fields: [
-				{ key: 'gamemaster.enabled', label: 'GameMaster', what: 'The GameMaster altogether, which also handles replies to what you say.', kind: 'switch' },
-				{ key: 'gamemaster.agentEnabled', label: 'Act on its own', what: 'Let the GameMaster start scenes by itself, prompting characters to speak now and then.', kind: 'switch' },
-				{ key: 'gamemaster.excludeActorsInScenes', label: 'Leave scenes alone', what: 'Don’t choose characters who are busy in one of the game’s own scenes, such as scripted events or vanilla dialogue.', kind: 'switch' }
+				{ key: 'gamemaster.enabled', label: f.general.gamemasterEnabled.label, what: f.general.gamemasterEnabled.what, kind: 'switch' },
+				{ key: 'gamemaster.agentEnabled', label: f.general.gamemasterAgentEnabled.label, what: f.general.gamemasterAgentEnabled.what, kind: 'switch' },
+				{ key: 'gamemaster.excludeActorsInScenes', label: f.general.gamemasterExcludeActorsInScenes.label, what: f.general.gamemasterExcludeActorsInScenes.what, kind: 'switch' }
 			]
 		},
 		{
-			title: 'Timing',
+			title: f.timing.title,
 			fields: [
-				{ key: 'gamemaster.actionCooldownSeconds', label: 'Between actions', what: 'How long the GameMaster waits after one action before the next.', kind: 'count', min: 30, max: 600, step: 5, unit: 'seconds' },
-				{ key: 'gamemaster.requestTimeoutSeconds', label: 'Give the model', what: 'How long a request to the GameMaster’s model can take before it’s given up.', kind: 'count', min: 10, max: 120, unit: 'seconds' },
+				{ key: 'gamemaster.actionCooldownSeconds', label: f.timing.gamemasterActionCooldownSeconds.label, what: f.timing.gamemasterActionCooldownSeconds.what, kind: 'count', min: 30, max: 600, step: 5, unit: f.timing.gamemasterActionCooldownSeconds.unit },
+				{ key: 'gamemaster.requestTimeoutSeconds', label: f.timing.gamemasterRequestTimeoutSeconds.label, what: f.timing.gamemasterRequestTimeoutSeconds.what, kind: 'count', min: 10, max: 120, unit: f.timing.gamemasterRequestTimeoutSeconds.unit },
 				{
 					key: 'gamemaster.continuousSceneCooldownSeconds',
-					label: 'Restart a stalled scene after',
-					what: 'In a continuous scene, the next character speaks as the last one finishes. If the conversation dies instead, the GameMaster tries to restart it after this much silence.',
+					label: f.timing.gamemasterContinuousSceneCooldownSeconds.label,
+					what: f.timing.gamemasterContinuousSceneCooldownSeconds.what,
 					kind: 'count',
 					min: 10,
 					max: 120,
-					unit: 'seconds'
+					unit: f.timing.gamemasterContinuousSceneCooldownSeconds.unit
 				}
 			]
 		},
 		{
-			title: 'Context',
+			title: f.context.title,
 			fields: [
-				{ key: 'gamemaster.nearbyActorRadius', label: 'Who counts as nearby', what: 'How far away, in game units, a character can be and still be part of the scene.', kind: 'count', min: 400, max: 2000, step: 10, unit: 'units' },
-				{ key: 'gamemaster.recentEventsCount', label: 'Recent events considered', what: 'How many of the latest events the GameMaster reads before deciding.', kind: 'count', min: 10, max: 100, unit: 'events' }
+				{ key: 'gamemaster.nearbyActorRadius', label: f.context.gamemasterNearbyActorRadius.label, what: f.context.gamemasterNearbyActorRadius.what, kind: 'count', min: 400, max: 2000, step: 10, unit: f.context.gamemasterNearbyActorRadius.unit },
+				{ key: 'gamemaster.recentEventsCount', label: f.context.gamemasterRecentEventsCount.label, what: f.context.gamemasterRecentEventsCount.what, kind: 'count', min: 10, max: 100, unit: f.context.gamemasterRecentEventsCount.unit }
 			]
 		}
 	]

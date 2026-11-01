@@ -10,8 +10,9 @@
 	import type { ListsResponse } from '#lib/api/types/filters.ts';
 	import type { Snippet } from 'svelte';
 	import type { Change, FileValues, Setting } from '#lib/api/types/settings.ts';
+	import { m } from '#lib/copy/messages.ts';
+	import Fill from '#lib/copy/Fill.svelte';
 	import FilterLists from './FilterLists.svelte';
-	import { count } from '#lib/format.ts';
 	import { saveSettings, settingsDependency, settingsHref, togglesDependency } from '#lib/settings/api.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
@@ -20,6 +21,8 @@
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { codeOf, keyName, mouseCodeOf, noKey } from '#lib/settings/keys.ts';
 	import { blankRow, cellText, draftOf, linesOf, linesValue, pairsOf, pairsValue, parse, pickedOf, rowsOf, rowsValue, setValue, show, valueOf, type Feature, type Field, type Pair, type Row as Entry } from './schema.ts';
+
+	const t = m.features.page;
 
 	let { save, feature, file, lists, extra, tabs }: { save: string; feature: Feature; file: FileValues; lists?: ListsResponse; extra?: Snippet; tabs?: Snippet } = $props();
 
@@ -126,7 +129,7 @@
 		if (!can || !current) return;
 		if (current.field.kind === 'switch') {
 			const on = value !== true;
-			apply({ key: current.field.key, value: on }, `${current.field.label}: ${on ? 'on' : 'off'}.`);
+			apply({ key: current.field.key, value: on }, on ? t.switchedOn({ label: current.field.label }) : t.switchedOff({ label: current.field.label }));
 			return;
 		}
 		setParams({ mode: 'edit' });
@@ -145,7 +148,7 @@
 				return;
 			}
 			const changes = edited.map((p) => ({ key: `${f.key}.${p.a}${f.leaf ? `.${f.leaf}` : ''}`, value: p.b }));
-			apply(changes, `${f.label}: ${edited.length === 1 ? `${edited[0]!.a} changed` : `${edited.length} changed`}.`);
+			apply(changes, edited.length === 1 ? t.mapChangedOne({ label: f.label, name: edited[0]!.a }) : t.mapChanged({ label: f.label, count: edited.length }));
 			return;
 		}
 		let v: unknown;
@@ -159,24 +162,24 @@
 			error = err instanceof Error ? err.message : String(err);
 			return;
 		}
-		apply({ key: current.field.key, value: v }, `${current.field.label}: ${show(current.field, v)}.`);
+		apply({ key: current.field.key, value: v }, t.saved({ label: current.field.label, value: show(current.field, v) }));
 	}
 
 	function reset() {
 		if (!current || !resettable) return;
-		apply({ key: current.field.key, reset: true }, `${current.field.label} is back to its default.`);
+		apply({ key: current.field.key, reset: true }, t.reset({ label: current.field.label }));
 	}
 
 
 	useShortcuts(() => {
 		const busy = editing || listForm;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: busy, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: busy, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: current?.field.kind === 'switch' ? (value === true ? 'Switch off' : 'Switch on') : 'Edit', hidden: busy, disabled: !can || !current, run: startEdit },
-			{ key: 'r', shown: 'R', label: 'Reset to default', hidden: busy, disabled: !can || !resettable, run: reset },
-			{ key: 'Enter', label: 'Save', command: true, hidden: !busy, disabled: saving, run: () => document.querySelector<HTMLFormElement>(listForm ? '.listform' : '.pane form')?.requestSubmit() },
-			...(busy ? [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => leave('mode') }] : [])
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: busy, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: busy, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: current?.field.kind === 'switch' ? (value === true ? m.common.switchOff : m.common.switchOn) : m.common.edit, hidden: busy, disabled: !can || !current, run: startEdit },
+			{ key: 'r', shown: 'R', label: m.common.resetToDefault, hidden: busy, disabled: !can || !resettable, run: reset },
+			{ key: 'Enter', label: m.common.save, command: true, hidden: !busy, disabled: saving, run: () => document.querySelector<HTMLFormElement>(listForm ? '.listform' : '.pane form')?.requestSubmit() },
+			...(busy ? [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => leave('mode') }] : [])
 		];
 	});
 </script>
@@ -185,19 +188,21 @@
 	<h1 class="caps">{feature.title}</h1>
 	<span class="muted n">
 		{#if !file.file.exists}
-			Not written yet
+			{t.notWritten}
 		{:else if changed}
-			<span class="changed">{count(changed)} changed from the defaults</span>
+			<span class="changed">{t.changed({ count: changed })}</span>
 		{:else}
-			Nothing differs from the defaults
+			{t.unchanged}
 		{/if}
 	</span>
 	{#if extra}<span class="extra">{@render extra()}</span>{/if}
 </div>
-<p class="muted lead">{feature.what}{#if feature.see}{' '}{feature.see.before}<a href="/{encodeURIComponent(save)}/{feature.see.path}">{feature.see.label}</a>{feature.see.after}{/if}</p>
+<p class="muted lead">
+	{feature.what}{#if feature.see}{@const see = feature.see}{' '}<Fill text={see.text}>{#snippet link()}<a href="/{encodeURIComponent(save)}/{see.path}">{see.label}</a>{/snippet}</Fill>{/if}
+</p>
 {#if tabs}<div class="tabs">{@render tabs()}</div>{/if}
 {#if !file.file.exists}
-	<p class="notice">SkyrimNet hasn’t written <span class="id">{file.file.path}</span> yet; it will the next time it starts. Until then the defaults can be read but not changed.</p>
+	<p class="notice"><Fill text={t.notWrittenNotice.text}>{#snippet path()}<span class="id">{file.file.path}</span>{/snippet}</Fill></p>
 {/if}
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
@@ -207,10 +212,10 @@
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<th class="caps">Setting</th>
-					<th class="caps value">Value</th>
-					<th class="caps value">Default</th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<th class="caps">{t.setting}</th>
+					<th class="caps value">{t.value}</th>
+					<th class="caps value">{t.default}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -227,13 +232,18 @@
 				{/each}
 			</tbody>
 		</table>
-		<p class="muted small">Everything else in <span class="id">{file.file.path}</span> is on its <a href={settingsHref(save, feature.file)}>full settings page</a>.</p>
+		<p class="muted small">
+			<Fill text={t.everythingElse.text}>
+				{#snippet path()}<span class="id">{file.file.path}</span>{/snippet}
+				{#snippet link()}<a href={settingsHref(save, feature.file)}>{t.fullSettingsPage}</a>{/snippet}
+			</Fill>
+		</p>
 		{#if feature.lists && lists}
 			<FilterLists kind={feature.lists} {lists} canEdit={file.file.exists} />
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Setting">
+	<aside class="pane" use:fitToViewport aria-label={t.setting}>
 		{#if current}
 			{@const f = current.field}
 			{@const s = current.setting}
@@ -246,28 +256,28 @@
 							{#each f.choices as c (c.value)}<li>{#if c.label !== c.value}{c.label}<span class="id muted what-choice">{c.value}</span>{:else}<span class="id">{c.value}</span>{/if}{#if c.what}<span class="muted what-choice">· {c.what}</span>{/if}</li>{/each}
 						</ul>
 					{/if}
-					<p class="muted small"><span class="id">{f.key}</span> in {file.file.path}</p>
+					<p class="muted small"><Fill text={t.keyIn.text} path={file.file.path}>{#snippet key()}<span class="id">{f.key}</span>{/snippet}</Fill></p>
 					{#if editing}
 						<form onsubmit={submit}>
 							<label class="field">
-								<span class="caps label" class:sr={f.kind === 'pairs' || f.kind === 'map' || f.kind === 'rows'}>{f.kind === 'percent' ? 'Percent' : f.kind === 'minutes' ? 'Minutes' : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? 'Chosen' : f.kind === 'hotkey' ? 'Key' : 'Value'}</span>
+								<span class="caps label" class:sr={f.kind === 'pairs' || f.kind === 'map' || f.kind === 'rows'}>{f.kind === 'percent' ? t.percent : f.kind === 'minutes' ? t.minutes : f.unit ? f.unit.charAt(0).toUpperCase() + f.unit.slice(1) : f.kind === 'set' ? t.chosen : f.kind === 'hotkey' ? t.key : t.value}</span>
 								{#if f.kind === 'hotkey'}
 									<button
 										type="button"
 										class="capture"
 										bind:this={field}
-										aria-label="Press the key to use"
+										aria-label={t.pressKey}
 										onkeydown={captureKey}
 										onmousedown={captureMouse}
 										oncontextmenu={(e) => e.preventDefault()}>{keyName(Number(draft))}</button
 									>
-									<span class="muted small">Press a key, or click the box with a mouse button. <button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>No key</button></span>
+									<span class="muted small">{t.pressHint} <button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>{t.noKey}</button></span>
 								{:else if f.kind === 'secret'}
-									<input bind:this={field} type="password" bind:value={draft} placeholder={show(f, value) === 'Set' ? 'Type a new one to replace it' : ''} autocomplete="off" spellcheck="false" />
-									<span class="muted small">Saved into {file.file.path}. Hermaeus never shows it again; save it empty to clear it.</span>
+									<input bind:this={field} type="password" bind:value={draft} placeholder={show(f, value) === m.features.values.set ? t.replaceSecret : ''} autocomplete="off" spellcheck="false" />
+									<span class="muted small">{t.secretSaved({ path: file.file.path })}</span>
 								{:else if f.kind === 'lines'}
-									<textarea bind:this={areaField} bind:value={draft} rows="8" spellcheck="false" placeholder="One per line"></textarea>
-									<span class="muted small">One per line. Blank lines are left out.</span>
+									<textarea bind:this={areaField} bind:value={draft} rows="8" spellcheck="false" placeholder={t.onePerLine}></textarea>
+									<span class="muted small">{t.onePerLineHint}</span>
 								{:else if f.kind === 'rows'}
 									<!-- One card per entry: its name and switch, then its other fields. -->
 									<ol class="cards">
@@ -275,17 +285,17 @@
 											<li>
 												<div class="cardhead">
 													{#each (f.cols ?? []).filter((c) => c.kind === 'text').slice(0, 1) as c (c.key)}
-														<input type="text" bind:value={r.cells[c.key]} placeholder={c.placeholder} aria-label="{c.label} {i + 1}" autocomplete="off" spellcheck="false" />
+														<input type="text" bind:value={r.cells[c.key]} placeholder={c.placeholder} aria-label={t.numbered({ label: c.label, n: i + 1 })} autocomplete="off" spellcheck="false" />
 													{/each}
 													{#each (f.cols ?? []).filter((c) => c.kind === 'switch') as c (c.key)}
 														<label class="check"><input type="checkbox" bind:checked={r.cells[c.key] as boolean} /><span>{c.label}</span></label>
 													{/each}
-													<button type="button" class="textbutton" onclick={() => (entries = entries.filter((_, j) => j !== i))} aria-label="Remove entry {i + 1}">Remove</button>
+													<button type="button" class="textbutton" onclick={() => (entries = entries.filter((_, j) => j !== i))} aria-label={t.removeEntry({ n: i + 1 })}>{m.common.remove}</button>
 												</div>
 												<div class="cardcells">
 													{#each (f.cols ?? []).filter((c, k) => c.kind !== 'switch' && !(c.kind === 'text' && k === (f.cols ?? []).findIndex((x) => x.kind === 'text'))) as c (c.key)}
 														<label>
-															<span class="caps">{c.label}{c.kind === 'percent' ? ' %' : c.unit ? ` (${c.unit})` : ''}</span>
+															<span class="caps">{c.kind === 'percent' ? t.columnPercent({ label: c.label }) : c.unit ? t.columnUnit({ label: c.label, unit: c.unit }) : c.label}</span>
 															{#if c.kind === 'choice'}
 																<select bind:value={r.cells[c.key]}>
 																	{#each c.choices ?? [] as ch (ch.value)}<option value={ch.value}>{ch.label}</option>{/each}
@@ -299,7 +309,7 @@
 											</li>
 										{/each}
 									</ol>
-									<span class="muted small"><button type="button" class="textbutton" onclick={() => (entries = [...entries, blankRow(f)])}>Add {f.noun?.[0] ?? 'an entry'}</button></span>
+									<span class="muted small"><button type="button" class="textbutton" onclick={() => (entries = [...entries, blankRow(f)])}>{f.add ?? t.addEntry}</button></span>
 								{:else if f.kind === 'map' && f.leaf}
 									<ul class="entries">
 										{#each pairs as p (p.a)}
@@ -313,24 +323,24 @@
 									</ul>
 								{:else if f.kind === 'pairs' || f.kind === 'map'}
 									<table class="rows">
-										<thead><tr><th class="caps">{f.columns?.[0] ?? 'Name'}</th><th class="caps">{f.columns?.[1] ?? 'Value'}</th>{#if f.kind === 'pairs'}<th><span class="sr">Remove</span></th>{/if}</tr></thead>
+										<thead><tr><th class="caps">{f.columns?.[0] ?? t.name}</th><th class="caps">{f.columns?.[1] ?? t.value}</th>{#if f.kind === 'pairs'}<th><span class="sr">{m.common.remove}</span></th>{/if}</tr></thead>
 										<tbody>
 											{#each pairs as p, i (i)}
 												<tr>
 													{#if f.kind === 'map'}
 														<td class="id">{p.a}</td>
-														<td><input type="text" bind:value={p.b} aria-label="{f.columns?.[1] ?? 'Value'} for {p.a}" autocomplete="off" spellcheck="false" /></td>
+														<td><input type="text" bind:value={p.b} aria-label={t.valueFor({ column: f.columns?.[1] ?? t.value, name: p.a })} autocomplete="off" spellcheck="false" /></td>
 													{:else}
-														<td><input type="text" bind:value={p.a} aria-label="{f.columns?.[0] ?? 'Name'} {i + 1}" autocomplete="off" spellcheck="false" /></td>
-														<td><input type="text" bind:value={p.b} aria-label="{f.columns?.[1] ?? 'Value'} {i + 1}" autocomplete="off" spellcheck="false" /></td>
-														<td><button type="button" class="textbutton" onclick={() => (pairs = pairs.filter((_, j) => j !== i))} aria-label="Remove {p.a || `entry ${i + 1}`}">Remove</button></td>
+														<td><input type="text" bind:value={p.a} aria-label={t.numbered({ label: f.columns?.[0] ?? t.name, n: i + 1 })} autocomplete="off" spellcheck="false" /></td>
+														<td><input type="text" bind:value={p.b} aria-label={t.numbered({ label: f.columns?.[1] ?? t.value, n: i + 1 })} autocomplete="off" spellcheck="false" /></td>
+														<td><button type="button" class="textbutton" onclick={() => (pairs = pairs.filter((_, j) => j !== i))} aria-label={t.removeNamed({ name: p.a || t.entry({ n: i + 1 }) })}>{m.common.remove}</button></td>
 													{/if}
 												</tr>
 											{/each}
 										</tbody>
 									</table>
 									{#if f.kind === 'pairs'}
-										<span class="muted small"><button type="button" class="textbutton" onclick={() => (pairs = [...pairs, { a: '', b: '' }])}>Add {f.noun?.[0] ?? 'an entry'}</button> · Spaces count, so a phrase like “ - ” matches only with its spaces.</span>
+										<span class="muted small"><button type="button" class="textbutton" onclick={() => (pairs = [...pairs, { a: '', b: '' }])}>{f.add ?? t.addEntry}</button> · {t.spacesCount}</span>
 									{/if}
 								{:else if f.kind === 'set'}
 									<ul class="picks">
@@ -361,20 +371,20 @@
 								{:else}
 									<input bind:this={field} type="text" inputmode="decimal" bind:value={draft} autocomplete="off" />
 									<span class="muted small">
-										{#if f.kind === 'percent'}0 to 100{:else if f.min !== undefined && f.max !== undefined}{f.min} to {f.max}{/if}{#if s?.hasDefault} · default {show(f, s.default)}{/if}
+										{#if f.kind === 'percent'}{t.percentRange}{:else if f.min !== undefined && f.max !== undefined}{t.range({ min: f.min, max: f.max })}{/if}{#if s?.hasDefault} · {t.defaultIs({ value: show(f, s.default) })}{/if}
 									</span>
 								{/if}
 							</label>
 							<div class="buttons">
-								<button type="submit" class="button primary" disabled={saving}>Save</button>
-								<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+								<button type="submit" class="button primary" disabled={saving}>{m.common.save}</button>
+								<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 							</div>
 						</form>
 					{:else}
 						<dl>
-							<dt class="caps">Now</dt>
+							<dt class="caps">{t.now}</dt>
 							<dd class:changed={s?.changed}>
-								{show(f, value)}{#if s && !s.set}<span class="muted"> · not in the file, so the default</span>{/if}
+								{show(f, value)}{#if s && !s.set}<span class="muted"> · {t.notInFile}</span>{/if}
 								{#if f.kind === 'rows' && Array.isArray(value) && value.length}
 									{@const cols = f.cols ?? []}
 									<ul class="entries small">
@@ -384,7 +394,7 @@
 												<span class="id">{cellText(cols[0]!, row[cols[0]!.key])}</span>
 												<span class="muted">{cols
 														.slice(1)
-														.map((c) => (c.kind === 'switch' ? cellText(c, row[c.key]) : `${c.label.toLowerCase()} ${cellText(c, row[c.key])}`))
+														.map((c) => (c.kind === 'switch' ? cellText(c, row[c.key]) : t.cell({ column: c.label.toLowerCase(), value: cellText(c, row[c.key]) })))
 														.join(' · ')}</span>
 											</li>
 										{/each}
@@ -401,7 +411,7 @@
 										</ul>
 									{:else if list.length}
 										<table class="rows small">
-											<thead><tr><th class="caps">{f.columns?.[0] ?? 'Name'}</th><th class="caps">{f.columns?.[1] ?? 'Value'}</th></tr></thead>
+											<thead><tr><th class="caps">{f.columns?.[0] ?? t.name}</th><th class="caps">{f.columns?.[1] ?? t.value}</th></tr></thead>
 											<tbody>
 												{#each list as p, i (i)}<tr><td class:id={f.kind === 'map'}>{p.a}</td><td>{p.b}</td></tr>{/each}
 											</tbody>
@@ -418,19 +428,19 @@
 									</ul>
 								{/if}
 							</dd>
-							{#if s?.hasDefault}<dt class="caps">Default</dt><dd>{show(f, s.default)}</dd>{/if}
+							{#if s?.hasDefault}<dt class="caps">{t.default}</dt><dd>{show(f, s.default)}</dd>{/if}
 						</dl>
 						{#if can}
 							<div class="actions">
-								<button type="button" class="button" onclick={startEdit}>{f.kind === 'switch' ? (value === true ? 'Switch off' : 'Switch on') : 'Edit'}</button>
-								{#if resettable}<button type="button" class="button" onclick={reset}>Reset to default</button>{/if}
+								<button type="button" class="button" onclick={startEdit}>{f.kind === 'switch' ? (value === true ? m.common.switchOff : m.common.switchOn) : m.common.edit}</button>
+								{#if resettable}<button type="button" class="button" onclick={reset}>{m.common.resetToDefault}</button>{/if}
 							</div>
 						{/if}
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so nothing can be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.common.gameRunning}</p>{/if}
 	</aside>
 </div>
 

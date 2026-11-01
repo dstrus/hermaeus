@@ -5,6 +5,8 @@
 // server merges it back into the file, so whatever the form leaves alone,
 // and comments, stay as they were.
 
+import { m } from '#lib/copy/messages.ts';
+
 export type Obj = { [key: string]: unknown };
 
 export interface Choice {
@@ -131,7 +133,12 @@ export function stored(f: FieldSpec, text: string, before: unknown): unknown {
 
 // ---------- the kinds ----------
 
-const options = (values: string[], labels: Record<string, string> = {}): Choice[] => values.map((value) => ({ value, label: labels[value] ?? value }));
+const f = m.records.forms;
+
+// A choice's label is its message, named by its value in camelCase
+// (player_thought is playerThought), or else the value itself.
+const camel = (v: string) => v.toLowerCase().replace(/_(.)/g, (_, c: string) => c.toUpperCase());
+const options = (values: string[], labels: Record<string, string> = {}): Choice[] => values.map((value) => ({ value, label: labels[camel(value)] ?? value }));
 
 const triggerEvents = [
 	'spell_cast',
@@ -183,59 +190,34 @@ const triggerEvents = [
 	'*'
 ];
 const operators = ['equals', 'not_equals', 'contains', 'not_contains', 'starts_with', 'ends_with', 'regex', 'greater_than', 'less_than', 'greater_equal', 'less_equal', 'length_equals', 'length_greater', 'length_less', 'has_field', 'not_has_field'];
-const responses = options(['player_thought', 'player_dialogue', 'npc_thought', 'direct_narration', 'persistent_generic', 'diary_entry', 'dynamic_bio_update', 'enable_virtual_npc', 'disable_virtual_npc', 'activate_voice_effect', 'deactivate_voice_effect'], {
-	player_thought: 'Your character thinks',
-	player_dialogue: 'Your character speaks',
-	npc_thought: 'A character thinks',
-	direct_narration: 'Narration',
-	persistent_generic: 'Tell characters, unspoken',
-	diary_entry: 'A diary entry',
-	dynamic_bio_update: 'A bio update',
-	enable_virtual_npc: 'Switch on a virtual NPC',
-	disable_virtual_npc: 'Switch off a virtual NPC',
-	activate_voice_effect: 'Switch on a voice effect',
-	deactivate_voice_effect: 'Switch off a voice effect'
-});
+const responses = options(['player_thought', 'player_dialogue', 'npc_thought', 'direct_narration', 'persistent_generic', 'diary_entry', 'dynamic_bio_update', 'enable_virtual_npc', 'disable_virtual_npc', 'activate_voice_effect', 'deactivate_voice_effect'], f.triggers.response.type.choices);
 const scoped = ['diary_entry', 'dynamic_bio_update', 'npc_thought', 'activate_voice_effect', 'deactivate_voice_effect'];
-const audiences = options(['player', 'originator', 'target', 'originator_or_target', 'everyone', 'nearby_npcs', 'enabled_virtual_npcs'], {
-	player: 'You',
-	originator: 'Whoever caused it',
-	target: 'Whoever it happened to',
-	originator_or_target: 'Either of them',
-	everyone: 'Everyone',
-	nearby_npcs: 'Characters nearby',
-	enabled_virtual_npcs: 'Virtual NPCs that are on'
-});
-const scopes = options(['triggering_actor', 'player', 'all_pinned_actors', 'all_nearby_actors', 'all_enabled_virtual_npcs'], {
-	triggering_actor: 'Whoever set it off',
-	player: 'You',
-	all_pinned_actors: 'Every pinned character',
-	all_nearby_actors: 'Every character nearby',
-	all_enabled_virtual_npcs: 'Every virtual NPC that’s on'
-});
-const andOr = options(['AND', 'OR'], { AND: 'All of them', OR: 'Any of them' });
+const audiences = options(['player', 'originator', 'target', 'originator_or_target', 'everyone', 'nearby_npcs', 'enabled_virtual_npcs'], f.triggers.audience.choices);
+const scopes = options(['triggering_actor', 'player', 'all_pinned_actors', 'all_nearby_actors', 'all_enabled_virtual_npcs'], f.triggers.response.targetScope.choices);
+const andOr = options(['AND', 'OR'], f.andOr);
 
 function eventRule(base: string): Block[] {
+	const t = f.triggers;
 	return [
 		{
 			fields: [
-				{ key: `${base}.eventType`, label: 'Event', choices: options(triggerEvents), hint: 'An event SkyrimNet records, or * for every event.' },
-				{ key: `${base}.logicalOperator`, label: 'Conditions that must match', type: 'select', choices: andOr }
+				{ key: `${base}.eventType`, label: t.eventType.label, choices: options(triggerEvents), hint: t.eventType.hint },
+				{ key: `${base}.logicalOperator`, label: t.logicalOperator.label, type: 'select', choices: andOr }
 			]
 		},
 		{
-			title: 'Conditions',
+			title: t.conditions.title,
 			rows: `${base}.schemaConditions`,
-			add: 'condition',
+			add: t.conditions.add,
 			blank: () => ({ fieldPath: '', operator: 'equals', value: '' }),
-			empty: 'None: every event of this kind sets it off.',
+			empty: t.conditions.empty,
 			item: (c) => [
 				{
 					fields: [
-						{ key: `${c}.fieldPath`, label: 'Field', hint: 'Of the event, such as spell or victim.' },
-						{ key: `${c}.operator`, label: 'Test', type: 'select', choices: options(operators) },
-						{ key: `${c}.value`, label: 'Value', type: 'any' },
-						{ key: `${c}.caseSensitive`, label: 'Case matters', type: 'check' }
+						{ key: `${c}.fieldPath`, label: t.conditions.fieldPath.label, hint: t.conditions.fieldPath.hint },
+						{ key: `${c}.operator`, label: t.conditions.operator.label, type: 'select', choices: options(operators) },
+						{ key: `${c}.value`, label: t.conditions.value.label, type: 'any' },
+						{ key: `${c}.caseSensitive`, label: t.conditions.caseSensitive.label, type: 'check' }
 					]
 				}
 			]
@@ -244,40 +226,42 @@ function eventRule(base: string): Block[] {
 }
 
 const triggers: FormKind = {
-	noun: 'trigger',
+	noun: f.triggers.noun,
 	nameKey: 'name',
 	blank: (name) => ({ name, description: '', eventCriteria: { eventType: '' }, response: { type: 'player_thought', content: '' }, audience: 'player', enabled: true }),
 	blocks(d, ctx) {
+		const t = f.triggers;
+		const r = t.response;
 		const rt = String(getAt(d, 'response.type') ?? '');
 		const several = Array.isArray(d.eventCriteria);
 		return [
 			{
 				fields: [
-					{ key: 'name', label: 'Name', readonly: true },
-					{ key: 'enabled', label: 'On', type: 'check' },
-					{ key: 'description', label: 'Description', type: 'area', rows: 2, wide: true }
+					{ key: 'name', label: t.name.label, readonly: true },
+					{ key: 'enabled', label: t.enabled.label, type: 'check' },
+					{ key: 'description', label: t.description.label, type: 'area', rows: 2, wide: true }
 				]
 			},
-			...(several ? [{ title: 'When any of these happens', rows: 'eventCriteria', add: 'event', blank: () => ({ eventType: '' }), item: (b: string) => eventRule(b) } as RowsBlock] : [{ title: 'When', fields: [] } as FieldBlock, ...eventRule('eventCriteria')]),
+			...(several ? [{ title: t.whenAny.title, rows: 'eventCriteria', add: t.whenAny.add, blank: () => ({ eventType: '' }), item: (b: string) => eventRule(b) } as RowsBlock] : [{ title: t.when, fields: [] } as FieldBlock, ...eventRule('eventCriteria')]),
 			{
-				title: 'Then',
+				title: t.then,
 				fields: [
-					{ key: 'response.type', label: 'Response', type: 'select', choices: responses },
-					{ key: 'audience', label: 'Who hears it', type: 'select', choices: audiences },
-					scoped.includes(rt) && { key: 'response.targetScope', label: 'For whom', type: 'select', choices: scopes },
-					getAt(d, 'response.targetScope') === 'all_nearby_actors' && { key: 'response.nearbyRadius', label: 'Nearby within', type: 'num', hint: 'In game units.' },
-					/virtual_npc/.test(rt) && { key: 'response.targetName', label: 'Virtual NPC’s name' },
-					rt === 'activate_voice_effect' && { key: 'response.effectId', label: 'Voice effect', choices: options(ctx.effects), hint: 'The effect’s id.' },
-					!/virtual_npc|deactivate_voice/.test(rt) && { key: 'response.content', label: 'What it says', type: 'area', rows: 4, keep: true, wide: true, hint: 'A template: {{ originator }}, {{ target }}, {{ event_json.field }}, {{ player_name }}…' }
+					{ key: 'response.type', label: r.type.label, type: 'select', choices: responses },
+					{ key: 'audience', label: t.audience.label, type: 'select', choices: audiences },
+					scoped.includes(rt) && { key: 'response.targetScope', label: r.targetScope.label, type: 'select', choices: scopes },
+					getAt(d, 'response.targetScope') === 'all_nearby_actors' && { key: 'response.nearbyRadius', label: r.nearbyRadius.label, type: 'num', hint: r.nearbyRadius.hint },
+					/virtual_npc/.test(rt) && { key: 'response.targetName', label: r.targetName.label },
+					rt === 'activate_voice_effect' && { key: 'response.effectId', label: r.effectId.label, choices: options(ctx.effects), hint: r.effectId.hint },
+					!/virtual_npc|deactivate_voice/.test(rt) && { key: 'response.content', label: r.content.label, type: 'area', rows: 4, keep: true, wide: true, hint: r.content.hint }
 				]
 			},
 			{
-				title: 'Timing',
+				title: t.timing,
 				fields: [
-					{ key: 'probability', label: 'Chance', type: 'num', hint: 'From 0 to 1.' },
-					{ key: 'cooldownSeconds', label: 'Cooldown', type: 'num', hint: 'In seconds.' },
-					{ key: 'priority', label: 'Priority', type: 'num' },
-					{ key: 'interrupt', label: 'Interrupts whoever is speaking', type: 'check' }
+					{ key: 'probability', label: t.probability.label, type: 'num', hint: t.probability.hint },
+					{ key: 'cooldownSeconds', label: t.cooldownSeconds.label, type: 'num', hint: t.cooldownSeconds.hint },
+					{ key: 'priority', label: t.priority.label, type: 'num' },
+					{ key: 'interrupt', label: t.interrupt.label, type: 'check' }
 				]
 			}
 		];
@@ -285,39 +269,41 @@ const triggers: FormKind = {
 };
 
 const actions: FormKind = {
-	noun: 'action',
+	noun: f.actions.noun,
 	nameKey: 'name',
 	blank: (name) => ({ name, description: '', enabled: true, questEditorId: '', scriptName: '', executionFunctionName: '', parameterMapping: [{ type: 'speaker', name: 'akActor', description: 'the actor doing it' }], eligibilityRules: [] }),
 	blocks(d, ctx) {
+		const a = f.actions;
 		const noCall = !d.questEditorId && !d.scriptName && !d.executionFunctionName;
 		return [
 			{
 				fields: [
-					{ key: 'name', label: 'Name', readonly: true },
-					{ key: 'enabled', label: 'On', type: 'check' },
-					{ key: 'description', label: 'Description', type: 'area', rows: 3, wide: true, hint: 'What the AI reads to decide when to use it.' },
-					{ key: 'customCategory', label: 'Category', choices: options(ctx.categories), hint: 'Actions in a category are offered together.' },
-					{ key: 'defaultPriority', label: 'Priority', type: 'num' },
-					'eventString' in d && { key: 'eventString', label: 'Event text', type: 'area', rows: 2, wide: true, hint: 'Recorded when it runs, such as {{ actor.name }} gave {{ player.name }} a hug.' },
-					'useConfirmationWindow' in d && { key: 'useConfirmationWindow', label: 'Ask before running it', type: 'check' },
-					'isShortLived' in d && { key: 'isShortLived', label: 'Short-lived', type: 'check' }
+					{ key: 'name', label: a.name.label, readonly: true },
+					{ key: 'enabled', label: a.enabled.label, type: 'check' },
+					{ key: 'description', label: a.description.label, type: 'area', rows: 3, wide: true, hint: a.description.hint },
+					{ key: 'customCategory', label: a.customCategory.label, choices: options(ctx.categories), hint: a.customCategory.hint },
+					{ key: 'defaultPriority', label: a.defaultPriority.label, type: 'num' },
+					'eventString' in d && { key: 'eventString', label: a.eventString.label, type: 'area', rows: 2, wide: true, hint: a.eventString.hint },
+					'useConfirmationWindow' in d && { key: 'useConfirmationWindow', label: a.useConfirmationWindow.label, type: 'check' },
+					'isShortLived' in d && { key: 'isShortLived', label: a.isShortLived.label, type: 'check' }
 				]
 			},
 			{
-				title: 'Papyrus call',
-				note: noCall ? 'No call: this action is a category. The AI picks it, then chooses one of the category’s actions.' : undefined,
+				title: a.call.title,
+				note: noCall ? a.call.note : undefined,
 				fields: [
-					{ key: 'questEditorId', label: 'Quest' },
-					{ key: 'scriptName', label: 'Script' },
-					{ key: 'executionFunctionName', label: 'Function' }
+					{ key: 'questEditorId', label: a.questEditorId.label },
+					{ key: 'scriptName', label: a.scriptName.label },
+					{ key: 'executionFunctionName', label: a.executionFunctionName.label }
 				]
 			},
 			{
-				title: 'Parameters, in the function’s order',
+				title: a.parameters.title,
 				rows: 'parameterMapping',
-				add: 'parameter',
+				add: a.parameters.add,
 				blank: () => ({ type: 'dynamic', name: '', description: '' }),
 				item: (p) => {
+					const pm = a.parameters;
 					const t = getAt(d, `${p}.type`);
 					const dyn = t === 'dynamic' || t === 'dynamic_uuid';
 					return [
@@ -325,47 +311,47 @@ const actions: FormKind = {
 							fields: [
 								{
 									key: `${p}.type`,
-									label: 'From',
+									label: pm.type.label,
 									type: 'select',
-									choices: options(['speaker', 'dynamic', 'dynamic_uuid', 'static'], { speaker: 'The speaker', dynamic: 'The AI fills it in', dynamic_uuid: 'The AI picks a character, passed as its UUID', static: 'A fixed value' })
+									choices: options(['speaker', 'dynamic', 'dynamic_uuid', 'static'], pm.type.choices)
 								},
-								{ key: `${p}.name`, label: 'Name' },
-								t === 'static' && { key: `${p}.value`, label: 'Value', type: 'any' },
-								{ key: `${p}.description`, label: 'Description', type: 'area', rows: 2, wide: true, hint: dyn ? 'Tells the AI what to put here.' : undefined },
-								dyn && { key: `${p}.optional`, label: 'The AI may leave it out', type: 'check' },
-								dyn && 'default' in ((getAt(d, p) as Obj) ?? {}) && { key: `${p}.default`, label: 'Default', type: 'any' },
-								dyn && { key: `${p}.useNearbyActors`, label: 'Choose from characters nearby', type: 'check', on: true }
+								{ key: `${p}.name`, label: pm.name.label },
+								t === 'static' && { key: `${p}.value`, label: pm.value.label, type: 'any' },
+								{ key: `${p}.description`, label: pm.description.label, type: 'area', rows: 2, wide: true, hint: dyn ? pm.description.hint : undefined },
+								dyn && { key: `${p}.optional`, label: pm.optional.label, type: 'check' },
+								dyn && 'default' in ((getAt(d, p) as Obj) ?? {}) && { key: `${p}.default`, label: pm.default.label, type: 'any' },
+								dyn && { key: `${p}.useNearbyActors`, label: pm.useNearbyActors.label, type: 'check', on: true }
 							]
 						}
 					];
 				}
 			},
 			{
-				title: 'Who can use it: every rule must pass',
+				title: a.rules.title,
 				rows: 'eligibilityRules',
-				add: 'rule',
+				add: a.rules.add,
 				blank: () => ({ conditions: [{ decoratorName: '', arguments: ['currentActor'], comparisonOperator: '==', expectedValue: true }], logicalOperator: 'AND', required: true }),
-				empty: 'None: anyone can.',
+				empty: a.rules.empty,
 				item: (r) => [
 					{
-						note: getAt(d, `${r}.required`) === false ? 'SkyrimNet ignores a rule that isn’t required.' : undefined,
+						note: getAt(d, `${r}.required`) === false ? a.rules.note : undefined,
 						fields: [
-							{ key: `${r}.logicalOperator`, label: 'Conditions that must pass', type: 'select', choices: andOr },
-							{ key: `${r}.required`, label: 'Required', type: 'check' }
+							{ key: `${r}.logicalOperator`, label: a.rules.logicalOperator.label, type: 'select', choices: andOr },
+							{ key: `${r}.required`, label: a.rules.required.label, type: 'check' }
 						]
 					},
 					{
-						title: 'Conditions',
+						title: a.conditions.title,
 						rows: `${r}.conditions`,
-						add: 'condition',
+						add: a.conditions.add,
 						blank: () => ({ decoratorName: '', arguments: ['currentActor'], comparisonOperator: '==', expectedValue: true }),
 						item: (c) => [
 							{
 								fields: [
-									{ key: `${c}.decoratorName`, label: 'Decorator', choices: options(ctx.decorators) },
-									{ key: `${c}.arguments`, label: 'Arguments', type: 'csv', hint: 'Separated by commas: currentActor (the speaker), player…' },
-									{ key: `${c}.comparisonOperator`, label: 'Test', type: 'select', choices: options(['==', '!=', '>', '<', '>=', '<=', 'contains', 'not_contains', 'is_null', 'is_not_null', 'is_empty', 'is_not_empty']) },
-									{ key: `${c}.expectedValue`, label: 'Expected', type: 'any' }
+									{ key: `${c}.decoratorName`, label: a.conditions.decoratorName.label, choices: options(ctx.decorators) },
+									{ key: `${c}.arguments`, label: a.conditions.arguments.label, type: 'csv', hint: a.conditions.arguments.hint },
+									{ key: `${c}.comparisonOperator`, label: a.conditions.comparisonOperator.label, type: 'select', choices: options(['==', '!=', '>', '<', '>=', '<=', 'contains', 'not_contains', 'is_null', 'is_not_null', 'is_empty', 'is_not_empty']) },
+									{ key: `${c}.expectedValue`, label: a.conditions.expectedValue.label, type: 'any' }
 								]
 							}
 						]
@@ -376,89 +362,100 @@ const actions: FormKind = {
 	}
 };
 
-const filterKinds: Record<string, string> = { actor: 'Who takes part (actor)', memory: 'Who forms memories (memory)', dialogue_rule: 'Rewrite what’s said (dialogue_rule)', tts_rule: 'Rewrite what’s spoken aloud (tts_rule)' };
+const fk = f.filters.kind.choices;
+const filterKinds: Record<string, string> = { actor: fk.actor, memory: fk.memory, dialogue_rule: fk.dialogueRule, tts_rule: fk.ttsRule };
 
 const filters: FormKind = {
-	noun: 'filter',
+	noun: f.filters.noun,
 	blank: (name) => ({ kind: 'actor', name, description: '' }),
 	blocks(d) {
+		const t = f.filters;
 		const rule = d.kind === 'dialogue_rule' || d.kind === 'tts_rule';
-		const kind: FieldSpec = { key: 'kind', label: 'Kind', type: 'select', choices: options(Object.keys(filterKinds), filterKinds) };
+		const kind: FieldSpec = { key: 'kind', label: t.kind.label, type: 'select', choices: options(Object.keys(filterKinds), t.kind.choices) };
 		if (rule)
 			return [
 				{
 					fields: [
 						kind,
-						{ key: 'enabled', label: 'On', type: 'check' },
-						{ key: 'id', label: 'Id', readonly: true },
-						{ key: 'priority', label: 'Priority', type: 'num', hint: 'Lower runs first; 100 when empty.' },
-						{ key: 'pattern', label: 'Pattern', type: 'area', rows: 2, wide: true, hint: 'A regular expression.' },
-						{ key: 'replacement', label: 'Replacement', keep: true, wide: true, hint: d.kind === 'dialogue_rule' ? 'Empty skips the whole line; otherwise it replaces what matches.' : 'Empty removes what matches.' }
+						{ key: 'enabled', label: t.enabled.label, type: 'check' },
+						{ key: 'id', label: t.id.label, readonly: true },
+						{ key: 'priority', label: t.priority.label, type: 'num', hint: t.priority.hint },
+						{ key: 'pattern', label: t.pattern.label, type: 'area', rows: 2, wide: true, hint: t.pattern.hint },
+						{ key: 'replacement', label: t.replacement.label, keep: true, wide: true, hint: d.kind === 'dialogue_rule' ? t.replacement.dialogueHint : t.replacement.hint }
 					]
 				}
 			];
+		// Each list's key, by its name in the file, with its labels.
+		const lists: [string, string, string][] = [
+			['Faction', t.factionWhitelist.label, t.factionBlacklist.label],
+			['Race', t.raceWhitelist.label, t.raceBlacklist.label],
+			['Gender', t.genderWhitelist.label, t.genderBlacklist.label]
+		];
 		return [
-			{ fields: [kind, { key: 'enabled', label: 'On', type: 'check' }, { key: 'name', label: 'Name' }, { key: 'description', label: 'Description', type: 'area', rows: 2, wide: true }] },
+			{ fields: [kind, { key: 'enabled', label: t.enabled.label, type: 'check' }, { key: 'name', label: t.name.label }, { key: 'description', label: t.description.label, type: 'area', rows: 2, wide: true }] },
 			{
-				title: 'Lists, added to your own filter lists',
-				fields: ['Faction', 'Race', 'Gender'].flatMap((x): FieldSpec[] => [
-					{ key: `${x}Whitelist`, label: `${x} whitelist`, type: 'list' },
-					{ key: `${x}Blacklist`, label: `${x} blacklist`, type: 'list' }
+				title: t.lists,
+				fields: lists.flatMap(([x, white, black]): FieldSpec[] => [
+					{ key: `${x}Whitelist`, label: white, type: 'list' },
+					{ key: `${x}Blacklist`, label: black, type: 'list' }
 				])
 			}
 		];
 	}
 };
 
-const dialogueKinds: Record<string, string> = { lists: 'Lines allowed and blocked (lists)', instruction: 'When to choose a line (instruction)' };
+const dialogueKinds: Record<string, string> = { lists: f.dialogueActions.kind.choices.lists, instruction: f.dialogueActions.kind.choices.instruction };
 
 const dialogueActions: FormKind = {
-	noun: 'dialogue action',
+	noun: f.dialogueActions.noun,
 	blank: (name) => ({ kind: 'instruction', key: name, name: '', text: '' }),
 	blocks(d) {
-		const kind: FieldSpec = { key: 'kind', label: 'Kind', type: 'select', choices: options(Object.keys(dialogueKinds), dialogueKinds) };
+		const t = f.dialogueActions;
+		const kind: FieldSpec = { key: 'kind', label: t.kind.label, type: 'select', choices: options(Object.keys(dialogueKinds), t.kind.choices) };
 		if (d.kind === 'instruction')
 			return [
 				{
 					fields: [
 						kind,
-						{ key: 'enabled', label: 'On', type: 'check' },
-						{ key: 'key', label: 'Dialogue line', readonly: true },
-						{ key: 'name', label: 'Name' },
-						{ key: 'category', label: 'Category', type: 'select', choices: options(['quest', 'follower', 'merchant', 'trainer', 'carriage', 'innkeeper', 'bard', 'marriage', 'crime', 'other']) },
-						{ key: 'text', label: 'Instruction', type: 'area', rows: 3, wide: true, hint: 'Tells the AI when to choose this line.' }
+						{ key: 'enabled', label: t.enabled.label, type: 'check' },
+						{ key: 'key', label: t.key.label, readonly: true },
+						{ key: 'name', label: t.name.label },
+						{ key: 'category', label: t.category.label, type: 'select', choices: options(['quest', 'follower', 'merchant', 'trainer', 'carriage', 'innkeeper', 'bard', 'marriage', 'crime', 'other']) },
+						{ key: 'text', label: t.text.label, type: 'area', rows: 3, wide: true, hint: t.text.hint }
 					]
 				}
 			];
 		return [
 			{
-				fields: [kind, { key: 'enabled', label: 'On', type: 'check' }, { key: 'name', label: 'Name' }, { key: 'description', label: 'Description', type: 'area', rows: 2, wide: true }, { key: 'whitelist', label: 'Always allowed lines', type: 'list' }, { key: 'blacklist', label: 'Lines never said', type: 'list' }]
+				fields: [kind, { key: 'enabled', label: t.enabled.label, type: 'check' }, { key: 'name', label: t.name.label }, { key: 'description', label: t.description.label, type: 'area', rows: 2, wide: true }, { key: 'whitelist', label: t.whitelist.label, type: 'list' }, { key: 'blacklist', label: t.blacklist.label, type: 'list' }]
 			}
 		];
 	}
 };
 
+const e = f.entities;
+
 const entities: FormKind = {
-	noun: 'entity',
+	noun: e.noun,
 	blank: (name) => ({ entityName: name, displayName: name, voiceId: '', ttsOverride: '', language: '', conversationMode: 'private', enabled: true }),
 	blocks: () => [
 		{
 			fields: [
-				{ key: 'entityName', label: 'Name', hint: 'How SkyrimNet and triggers refer to it.' },
-				{ key: 'enabled', label: 'On', type: 'check' },
-				{ key: 'displayName', label: 'Display name' },
-				{ key: 'voiceId', label: 'Voice', hint: 'A voice type from your voice setup.' },
-				{ key: 'ttsOverride', label: 'Voice engine', keep: true },
-				{ key: 'language', label: 'Language', keep: true },
+				{ key: 'entityName', label: e.entityName.label, hint: e.entityName.hint },
+				{ key: 'enabled', label: e.enabled.label, type: 'check' },
+				{ key: 'displayName', label: e.displayName.label },
+				{ key: 'voiceId', label: e.voiceId.label, hint: e.voiceId.hint },
+				{ key: 'ttsOverride', label: e.ttsOverride.label, keep: true },
+				{ key: 'language', label: e.language.label, keep: true },
 				{
 					key: 'conversationMode',
-					label: 'Conversation mode',
+					label: e.conversationMode.label,
 					type: 'select',
 					choices: [
-						{ value: 'private', label: 'Private' },
-						{ value: 'public', label: 'Public' }
+						{ value: 'private', label: e.conversationMode.choices.private },
+						{ value: 'public', label: e.conversationMode.choices.public }
 					],
-					hint: 'Private: only you hear it. Public: characters nearby hear it and react too.'
+					hint: e.conversationMode.hint
 				}
 			]
 		}

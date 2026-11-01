@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { groupByDay, timeLabel } from '#lib/memories/dates.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { realTime } from '#lib/format.ts';
 	import SpeechPattern from '#lib/characters/SpeechPattern.svelte';
 	import Diamond from '#lib/ui/Diamond.svelte';
@@ -12,37 +13,37 @@
 
 <div class="overview">
 	<section>
-		<h2 class="caps">Identity</h2>
+		<h2 class="caps">{m.characters.profile.identity}</h2>
 		<dl>
 			{#if o.firstEvent && o.lastEvent}
-				<dt class="caps">Active</dt>
-				<dd>{o.firstEvent.day} to {o.lastEvent.day}</dd>
+				<dt class="caps">{m.characters.profile.active}</dt>
+				<dd>{m.characters.profile.activeRange({ from: o.firstEvent.day, to: o.lastEvent.day })}</dd>
 			{/if}
 			{#if o.formId}
-				<dt class="caps">Form ID</dt>
+				<dt class="caps">{m.characters.profile.formId}</dt>
 				<dd class="id">{o.formId}</dd>
 			{/if}
 			{#if o.modFile}
-				<dt class="caps">Plugin</dt>
-				<dd>{o.modFile}{#if o.localFormId}<span class="muted">{' · local ID '}<span class="id">{o.localFormId}</span></span>{/if}</dd>
+				<dt class="caps">{m.characters.plugin}</dt>
+				<dd>{o.modFile}{#if o.localFormId}<span class="muted">{' · '}{m.characters.profile.localId}{' '}<span class="id">{o.localFormId}</span></span>{/if}</dd>
 			{/if}
 			{#if o.bio}
-				<dt class="caps">Bio template</dt>
+				<dt class="caps">{m.characters.bioTemplate}</dt>
 				<dd class="id">{o.bio}</dd>
 			{/if}
-			<dt class="caps">SkyrimNet ID</dt>
+			<dt class="caps">{m.characters.skyrimNetId}</dt>
 			<dd class="id">{o.uuid}</dd>
 			{#if o.firstSeen}
-				<dt class="caps">First seen</dt>
+				<dt class="caps">{m.characters.profile.firstSeen}</dt>
 				<dd>{realTime(o.firstSeen)}</dd>
 			{/if}
 			{#if o.updated}
-				<dt class="caps">Record updated</dt>
+				<dt class="caps">{m.characters.profile.updated}</dt>
 				<dd>{realTime(o.updated)}</dd>
 			{/if}
 			{#each o.retired as r (r.uuid)}
-				<dt class="caps">Earlier identity</dt>
-				<dd>{r.name || 'unnamed'}{#if r.since}<span class="muted">{' · re-identified '}{realTime(r.since)}</span>{/if}</dd>
+				<dt class="caps">{m.characters.profile.earlierIdentity}</dt>
+				<dd>{r.name || m.characters.noNameLower}{#if r.since}<span class="muted">{' · '}{m.characters.profile.reidentified({ when: realTime(r.since) })}</span>{/if}</dd>
 			{/each}
 		</dl>
 	</section>
@@ -52,18 +53,18 @@
 	{/if}
 
 	<section class="milestones">
-		<h2 class="caps">Milestones</h2>
+		<h2 class="caps">{m.characters.profile.milestones}</h2>
 		{#if milestones.length}
 			<ol class="timeline">
 				{#each milestones as group (group.items[0]?.eventId)}
 					<li class="day caps sticky-day">{group.day}</li>
-					{#each group.items as m (m.eventId)}
-						<li class="event"><Diamond /><span class="muted">{timeLabel(m)}</span><span class="summary" title={m.summary}>{m.summary}</span></li>
+					{#each group.items as ms (ms.eventId)}
+						<li class="event"><Diamond /><span class="muted">{timeLabel(ms)}</span><span class="summary" title={ms.summary}>{ms.summary}</span></li>
 					{/each}
 				{/each}
 			</ol>
 		{:else}
-			<p class="muted">Nothing that marks a turn in their story yet, such as joining you, a trade or a gift.</p>
+			<p class="muted">{m.characters.profile.noMilestones}</p>
 		{/if}
 	</section>
 </div>

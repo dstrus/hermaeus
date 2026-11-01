@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { m } from '#lib/copy/messages.ts';
 </script>
 
-<h1 class="caps">{page.status === 404 ? 'Not found' : 'Something went wrong'}</h1>
+<h1 class="caps">{page.status === 404 ? m.shell.notFound : m.shell.wentWrong}</h1>
 <p>{page.error?.message}</p>
-<p><a href="/">Back to your playthroughs</a></p>
+<p><a href="/">{m.shell.backHome}</a></p>
 
 <style>
 	h1 {

@@ -48,8 +48,8 @@ type File struct {
 	Changed     int    `json:"changed"` // settings that differ from their defaults
 	Pinned      bool   `json:"pinned"`  // kept at the top of the Settings page
 	// A file with a page of its own, in its feature's terms: the page's path
-	// under the playthrough, and its name. The Settings page lists the page
-	// in place of the file.
+	// under the playthrough, and, for a plugin's page, the name its schema
+	// gives it. The Settings page lists the page in place of the file.
 	Page      string `json:"page,omitempty"`
 	PageLabel string `json:"pageLabel,omitempty"`
 }
@@ -86,44 +86,43 @@ type FileList struct {
 // OwnPage is a settings file that Hermaeus shows on a page of its own, in
 // the feature's own terms. The file can still be read and saved by name.
 type OwnPage struct {
-	Name  string // the file's name, as in File
-	Label string // the page's name
-	Page  string // the page's path under the playthrough
+	Name string // the file's name, as in File
+	Page string // the page's path under the playthrough
 }
 
 var ownPages = []OwnPage{
-	{Name: "UniversalTranslator", Label: "Universal Translator", Page: "behavior/translator"},
-	{Name: "OpenRouter", Label: "Models", Page: "ai/models"},
-	{Name: "Providers", Label: "Providers", Page: "ai/providers"},
-	{Name: "Memory", Label: "Memories", Page: "memory/memories"},
-	{Name: "MemoryFilter", Label: "Memory filter", Page: "memory/memory-filter"},
-	{Name: "ActorFilter", Label: "Actor filter", Page: "behavior/actor-filter"},
-	{Name: "Diary", Label: "Diaries", Page: "memory/diaries"},
-	{Name: "DynamicBio", Label: "Dynamic bios", Page: "memory/dynamic-bios"},
-	{Name: "Hotkey", Label: "Hotkeys", Page: "general/hotkeys"},
-	{Name: "Conversation", Label: "Conversation", Page: "behavior/conversation"},
-	{Name: "NpcThoughts", Label: "NPC thoughts", Page: "behavior/npc-thoughts"},
-	{Name: "PlayerDialogue", Label: "Player reactions", Page: "behavior/player-reactions"},
-	{Name: "BardSinging", Label: "Bard singing", Page: "behavior/bard-singing"},
-	{Name: "PocketTTS", Label: "PocketTTS", Page: "voice/engines/pockettts"},
-	{Name: "Piper", Label: "Piper", Page: "voice/engines/piper"},
-	{Name: "Inworld", Label: "Inworld", Page: "voice/engines/inworld"},
-	{Name: "ElevenLabs", Label: "ElevenLabs", Page: "voice/engines/elevenlabs"},
-	{Name: "FatelessTTS", Label: "Fateless", Page: "voice/engines/fateless"},
-	{Name: "XTTS", Label: "XTTS", Page: "voice/engines/xtts"},
-	{Name: "Zonos", Label: "Zonos", Page: "voice/engines/zonos"},
-	{Name: "Chatterbox", Label: "Chatterbox", Page: "voice/engines/chatterbox"},
-	{Name: "Higgs", Label: "Higgs", Page: "voice/engines/higgs"},
-	{Name: "OpenAICompatibleTTS", Label: "OpenAI-compatible", Page: "voice/engines/openai-compatible"},
-	{Name: "VoiceSamples", Label: "Voice samples", Page: "voice/samples"},
-	{Name: "STT", Label: "Speech to text", Page: "voice/speech-to-text"},
+	{Name: "UniversalTranslator", Page: "behavior/translator"},
+	{Name: "OpenRouter", Page: "ai/models"},
+	{Name: "Providers", Page: "ai/providers"},
+	{Name: "Memory", Page: "memory/memories"},
+	{Name: "MemoryFilter", Page: "memory/memory-filter"},
+	{Name: "ActorFilter", Page: "behavior/actor-filter"},
+	{Name: "Diary", Page: "memory/diaries"},
+	{Name: "DynamicBio", Page: "memory/dynamic-bios"},
+	{Name: "Hotkey", Page: "general/hotkeys"},
+	{Name: "Conversation", Page: "behavior/conversation"},
+	{Name: "NpcThoughts", Page: "behavior/npc-thoughts"},
+	{Name: "PlayerDialogue", Page: "behavior/player-reactions"},
+	{Name: "BardSinging", Page: "behavior/bard-singing"},
+	{Name: "PocketTTS", Page: "voice/engines/pockettts"},
+	{Name: "Piper", Page: "voice/engines/piper"},
+	{Name: "Inworld", Page: "voice/engines/inworld"},
+	{Name: "ElevenLabs", Page: "voice/engines/elevenlabs"},
+	{Name: "FatelessTTS", Page: "voice/engines/fateless"},
+	{Name: "XTTS", Page: "voice/engines/xtts"},
+	{Name: "Zonos", Page: "voice/engines/zonos"},
+	{Name: "Chatterbox", Page: "voice/engines/chatterbox"},
+	{Name: "Higgs", Page: "voice/engines/higgs"},
+	{Name: "OpenAICompatibleTTS", Page: "voice/engines/openai-compatible"},
+	{Name: "VoiceSamples", Page: "voice/samples"},
+	{Name: "STT", Page: "voice/speech-to-text"},
 }
 
 // withPage notes the page a file has of its own, if any.
 func withPage(f *File) {
 	for _, p := range ownPages {
 		if strings.EqualFold(p.Name, f.Name) {
-			f.Page, f.PageLabel = p.Page, p.Label
+			f.Page = p.Page
 		}
 	}
 }

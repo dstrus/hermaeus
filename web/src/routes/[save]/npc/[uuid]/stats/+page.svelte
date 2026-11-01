@@ -2,7 +2,8 @@
 	import CountList from '#lib/characters/CountList.svelte';
 	import { characterName } from '#lib/characters/api.ts';
 	import type { Count } from '#lib/api/types/characters.ts';
-	import { count, plural } from '#lib/format.ts';
+	import { m } from '#lib/copy/messages.ts';
+	import { count } from '#lib/format.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -18,63 +19,63 @@
 	// Memories SkyrimNet can't use as it should, worth knowing about.
 	let health = $derived(
 		[
-			mem.inactive && `${count(mem.inactive)} inactive`,
-			mem.alwaysInject && `${count(mem.alwaysInject)} always included`,
-			mem.pendingEmbedding && `${count(mem.pendingEmbedding)} not yet searchable (SkyrimNet builds the vectors in the background while a save is loaded)`,
-			mem.unembeddable && `${count(mem.unembeddable)} unsearchable`
+			mem.inactive && m.characters.stats.inactive({ count: mem.inactive }),
+			mem.alwaysInject && m.characters.stats.alwaysIncluded({ count: mem.alwaysInject }),
+			mem.pendingEmbedding && m.characters.stats.pending({ count: mem.pendingEmbedding }),
+			mem.unembeddable && m.characters.stats.unsearchable({ count: mem.unembeddable })
 		].filter((x): x is string => !!x)
 	);
 	let nothing = $derived(!s.events.total && !mem.total && !s.diaries);
 	let summary = $derived.by(() => {
-		let events = plural(s.events.total, 'event', 'events');
+		let events = m.characters.stats.events({ count: s.events.total });
 		if (s.events.total) {
-			const detail = [`${count(s.events.started)} they started`];
-			if (s.events.kills) detail.push(plural(s.events.kills, 'kill', 'kills'));
-			events += ` (${detail.join(', ')})`;
+			const detail = [m.characters.stats.started({ count: s.events.started })];
+			if (s.events.kills) detail.push(m.characters.stats.kills({ count: s.events.kills }));
+			events = m.characters.stats.eventsDetail({ events, detail: detail.join(', ') });
 		}
-		return [events, plural(mem.total, 'memory', 'memories'), plural(s.diaries, 'diary entry', 'diary entries')].join(', ');
+		return [events, m.characters.stats.memories({ count: mem.total }), m.characters.stats.diaryEntries({ count: s.diaries })].join(', ');
 	});
 </script>
 
 <p class="summary">{summary}</p>
 
 {#if nothing}
-	<p class="muted">SkyrimNet hasn’t recorded anything about {name} in this playthrough yet.</p>
+	<p class="muted">{m.characters.stats.nothing({ name })}</p>
 {/if}
 
 <div class="grid">
 	{#if s.events.total}
-		<CountList title="Spends time with" items={s.company} linkTo={person} note="Events they were both part of." />
+		<CountList title={m.characters.stats.company} items={s.company} linkTo={person} note={m.characters.stats.companyNote} />
 	{/if}
 	{#if s.talksTo.length}
-		<CountList title="Talks to" items={s.talksTo} linkTo={person} note="Lines {name} spoke to them." />
+		<CountList title={m.characters.stats.talksTo} items={s.talksTo} linkTo={person} note={m.characters.stats.talksToNote({ name })} />
 	{/if}
 	{#if s.mentions.length || s.unknownMentions}
 		<CountList
-			title="Mentioned in memories"
+			title={m.characters.stats.mentions}
 			items={s.mentions}
 			linkTo={person}
-			note={s.unknownMentions ? `Plus ${plural(s.unknownMentions, 'mention', 'mentions')} of actors SkyrimNet has no name for, such as enemies that died.` : undefined}
+			note={s.unknownMentions ? m.characters.stats.unknownMentions({ count: s.unknownMentions }) : undefined}
 		/>
 	{/if}
 	{#if mem.total}
 		<section>
-			<h2 class="caps">Memories by type</h2>
+			<h2 class="caps">{m.characters.stats.byType}</h2>
 			<table>
-				<thead><tr><th class="caps">Type</th><th class="caps n">Count</th><th class="caps n">Avg. importance</th></tr></thead>
+				<thead><tr><th class="caps">{m.characters.stats.type}</th><th class="caps n">{m.characters.stats.count}</th><th class="caps n">{m.characters.stats.avgImportance}</th></tr></thead>
 				<tbody>
 					{#each mem.types as t (t.type)}
-						<tr><td>{t.type || 'No type'}</td><td class="n">{count(t.n)}</td><td class="n">{t.importance.toFixed(2)}</td></tr>
+						<tr><td>{t.type || m.characters.stats.noType}</td><td class="n">{count(t.n)}</td><td class="n">{t.importance.toFixed(2)}</td></tr>
 					{/each}
 				</tbody>
 			</table>
 			{#if health.length}<p class="note">{health.join(' · ')}</p>{/if}
 		</section>
-		<CountList title="Mood" items={mem.emotions} blank="no emotion" />
-		<CountList title="Places" items={mem.places} blank="no location" />
+		<CountList title={m.characters.stats.mood} items={mem.emotions} blank={m.characters.stats.noEmotion} />
+		<CountList title={m.characters.stats.places} items={mem.places} blank={m.characters.stats.noLocation} />
 	{/if}
 	{#if s.events.total}
-		<CountList title="Events by type" items={s.events.types} />
+		<CountList title={m.characters.stats.eventsByType} items={s.events.types} />
 	{/if}
 </div>
 

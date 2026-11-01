@@ -1,12 +1,13 @@
 <!-- The game's button hints: each is a real shortcut, and clicking it does the same. -->
 <script lang="ts">
+	import { m } from '#lib/copy/messages.ts';
 	import { active, onMac } from './shortcuts.svelte.ts';
 
 	let hints = $derived(active().filter((s) => !s.hidden));
 </script>
 
 {#if hints.length}
-	<nav class="hints" aria-label="Keyboard shortcuts">
+	<nav class="hints" aria-label={m.ui.shortcuts}>
 		{#each hints as h (`${h.command ? 'cmd+' : ''}${h.key}`)}
 			<button type="button" class="hint caps" onclick={h.run} disabled={h.disabled}>
 				<kbd>{h.command ? (onMac ? '⌘ ' : 'Ctrl ') : ''}{h.shown ?? h.key}</kbd>{h.label}

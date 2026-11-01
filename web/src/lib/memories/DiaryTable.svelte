@@ -5,6 +5,7 @@
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { DiaryChanges, DiaryEntry } from '#lib/api/types/memories.ts';
 	import { charactersDependency } from '#lib/characters/api.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import SortHeader from '#lib/ui/SortHeader.svelte';
@@ -92,9 +93,9 @@
 	async function saveForm(changes: DiaryChanges) {
 		const editing = mode === 'edit' ? current : undefined;
 		await run(async () => {
-			if (!editing && !uuid) throw new Error('A new entry is added from its character’s page.');
+			if (!editing && !uuid) throw new Error(m.memories.diary.newFromPage);
 			const r = editing ? await updateDiary(save, editing.id, changes) : await addDiaryEntry(save, uuid!, changes);
-			const note = savedNote(r, editing ? 'Diary entry' : 'New diary entry');
+			const note = savedNote(r, editing ? m.memories.diary.savedWhat : m.memories.diary.newWhat);
 			return editing ? note : { note, added: String(r.id) };
 		}, !editing);
 	}
@@ -103,7 +104,7 @@
 		await run(async () => {
 			const r = await deleteDiaryEntries(save, { ids: [d.id], keepMemory });
 			keepMemory = false;
-			return r.memories ? 'Diary entry and its memory copy deleted.' : 'Diary entry deleted.';
+			return r.memories ? m.memories.diary.deletedWithCopy : m.memories.diary.deleted;
 		}, true);
 	}
 
@@ -111,29 +112,29 @@
 		const viewing = mode === 'view';
 		const can = !readOnly && viewing;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
-			{ key: 'n', shown: 'N', label: 'New', hidden: !viewing || !uuid, disabled: !can, run: () => open('new') },
-			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !current, run: () => ((keepMemory = false), open('delete')) }),
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !viewing, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !viewing, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !viewing, disabled: !can || !current, run: () => open('edit') },
+			{ key: 'n', shown: 'N', label: m.memories.new, hidden: !viewing || !uuid, disabled: !can, run: () => open('new') },
+			...deleteShortcuts({ label: m.common.delete, hidden: !viewing, disabled: !can || !current, run: () => ((keepMemory = false), open('delete')) }),
 			{
 				key: 'Enter',
-				label: 'Save',
+				label: m.common.save,
 				command: true,
 				hidden: mode !== 'edit' && mode !== 'new',
 				run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit()
 			},
 			// Esc cancels when there's something to cancel; otherwise it's free for the page.
-			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => close() }])
+			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => close() }])
 		];
 	});
 </script>
 
 <div class="tools">
-	<input type="search" bind:value={query} placeholder="Search the diary" aria-label="Search the diary" />
+	<input type="search" bind:value={query} placeholder={m.memories.diary.search} aria-label={m.memories.diary.search} />
 	{#if !uuid}
-		<select bind:value={actor} aria-label="Character">
-			<option value="">Everyone</option>
+		<select bind:value={actor} aria-label={m.characters.character}>
+			<option value="">{m.characters.everyone}</option>
 			{#each characters as c (c.uuid)}
 				<option value={c.uuid}>{characterName(c)}</option>
 			{/each}
@@ -146,19 +147,19 @@
 <div class="split" class:everyone={!uuid}>
 	<div class="list">
 		{#if !entries.length}
-			<p class="muted">No diary entries yet.</p>
+			<p class="muted">{m.memories.diary.none}</p>
 		{:else if !shown.length}
-			<p class="muted">No diary entries match.</p>
+			<p class="muted">{m.memories.diary.noMatch}</p>
 		{:else}
 			<table>
 				<thead>
 					<tr>
-						<th class="mark" aria-label="Selected"></th>
-						<SortHeader label="When" key="when" bind:sort descendingFirst />
-						{#if !uuid}<SortHeader label="Who" key="who" bind:sort />{/if}
-						<th class="caps text">Entry</th>
-						<SortHeader label="Mood" key="mood" bind:sort class="wide" />
-						<SortHeader label="Imp." key="importance" bind:sort descendingFirst align="end" class="wide" />
+						<th class="mark" aria-label={m.common.selected}></th>
+						<SortHeader label={m.memories.when} key="when" bind:sort descendingFirst />
+						{#if !uuid}<SortHeader label={m.memories.who} key="who" bind:sort />{/if}
+						<th class="caps text">{m.memories.diary.entry}</th>
+						<SortHeader label={m.memories.mood} key="mood" bind:sort class="wide" />
+						<SortHeader label={m.memories.imp} key="importance" bind:sort descendingFirst align="end" class="wide" />
 					</tr>
 				</thead>
 				<tbody>
@@ -170,12 +171,12 @@
 							<td class="mark">{#if selection.is(d)}<Diamond />{/if}</td>
 							<td class="when">{timeLabel(d)}{#if !byDay}<span class="muted"> · {dayLabel(d)}</span>{/if}</td>
 							{#if !uuid}
-								<td class="who">{#if owner(d)}<a href={owner(d)}>{d.actor || 'Unnamed'}</a>{:else}{d.actor || 'Unnamed'}{/if}</td>
+								<td class="who">{#if owner(d)}<a href={owner(d)}>{d.actor || m.characters.noName}</a>{:else}{d.actor || m.characters.noName}{/if}</td>
 							{/if}
 							<td class="text">
 								<span class="line">{d.content}</span>
-								{#if d.retired !== undefined}<span class="flag warn">under “{d.retired || 'an earlier identity'}”</span>{/if}
-								{#if d.memory === undefined}<span class="flag warn">no memory copy</span>{/if}
+								{#if d.retired !== undefined}<span class="flag warn">{m.memories.under({ name: d.retired || m.memories.anEarlierIdentity })}</span>{/if}
+								{#if d.memory === undefined}<span class="flag warn">{m.memories.diary.noCopy}</span>{/if}
 							</td>
 							<td class="wide">{d.emotion}</td>
 							<td class="n wide">{d.importance.toFixed(2)}</td>
@@ -186,48 +187,48 @@
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Diary entry">
+	<aside class="pane" use:fitToViewport aria-label={m.memories.diary.pane}>
 		{#if mode === 'new'}
-			<h2 class="caps">New diary entry</h2>
+			<h2 class="caps">{m.memories.diary.newTitle}</h2>
 			<DiaryForm onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if mode === 'edit'}
-						<h2 class="caps">Edit diary entry {current.id}</h2>
+						<h2 class="caps">{m.memories.diary.editTitle({ id: current.id })}</h2>
 						<DiaryForm entry={current} onsave={saveForm} oncancel={() => close()} />
 					{:else}
-						<h2 class="caps">Diary entry {current.id}</h2>
+						<h2 class="caps">{m.memories.diary.title({ id: current.id })}</h2>
 						<p class="muted">
-							{current.date ? `${current.date.time}, ${current.date.day}` : dayLabel(current)}{#if current.emotion}{' · '}{current.emotion}{/if}{#if current.location}{' · '}{current.location}{/if}
+							{current.date ? m.memories.dateTime(current.date) : dayLabel(current)}{#if current.emotion}{' · '}{current.emotion}{/if}{#if current.location}{' · '}{current.location}{/if}
 						</p>
 						<p class="entry">{current.content}</p>
 						{#if current.memory === undefined}
-							<p class="notice warn">SkyrimNet keeps a copy of each entry as a memory, and none was found for this one.</p>
+							<p class="notice warn">{m.memories.diary.missingCopy}</p>
 						{/if}
 						{#if current.retired !== undefined}
-							<p class="notice warn">Stored under the earlier identity “{current.retired || 'unnamed'}”, which SkyrimNet doesn’t appear to recall.</p>
+							<p class="notice warn">{m.memories.storedUnder({ name: current.retired || m.characters.noNameLower })}</p>
 						{/if}
 						{#if mode === 'delete'}
 							<div class="confirm" role="alert">
-								<p>Delete this diary entry? Hermaeus backs up the database before its first change each session.</p>
+								<p>{m.memories.diary.confirmDelete}</p>
 								{#if current.memory !== undefined}
-									<label class="check"><input type="checkbox" bind:checked={keepMemory} /> Keep its memory copy, so {name || 'the character'} still remembers it</label>
+									<label class="check"><input type="checkbox" bind:checked={keepMemory} /> {m.memories.diary.keepCopy({ name: name || m.memories.diary.theCharacter })}</label>
 								{/if}
-								<button type="button" class="button primary" onclick={() => remove(current!)}>Delete</button>
-								<button type="button" class="button" onclick={() => close()}>Keep</button>
+								<button type="button" class="button primary" onclick={() => remove(current!)}>{m.common.delete}</button>
+								<button type="button" class="button" onclick={() => close()}>{m.memories.keep}</button>
 							</div>
 						{:else if !readOnly}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
-								<button type="button" class="button" onclick={() => ((keepMemory = false), open('delete'))}>Delete…</button>
+								<button type="button" class="button" onclick={() => open('edit')}>{m.common.edit}</button>
+								<button type="button" class="button" onclick={() => ((keepMemory = false), open('delete'))}>{m.memories.deleteMore}</button>
 							</div>
 						{/if}
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so the diary can’t be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.memories.diary.gameRunning}</p>{/if}
 	</aside>
 </div>
 

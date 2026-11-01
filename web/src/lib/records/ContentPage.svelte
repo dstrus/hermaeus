@@ -13,7 +13,9 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { ContentList, Record, Version } from '#lib/api/types/records.ts';
-	import { plural, realTime } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
+	import { realTime } from '#lib/format.ts';
 	import { pluginHref } from '#lib/plugins/links.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
@@ -31,7 +33,12 @@
 	let save = $derived(page.params.save ?? '');
 	let readOnly = $derived(live.gameRunning);
 	const layerOf = (r: Record) => list.layers[r.providers[0]?.layer ?? -1];
-	const kindLabel = (kind: string) => list.kinds.find((k) => k.root === kind)?.label ?? kind;
+	// A kind is named by its folder: voice_effects by records.content.kinds.voiceEffects.
+	const kindNames: { [root: string]: string } = m.records.content.kinds;
+	const kindLabel = (kind: string) => {
+		const key = kind.replace(/_(.)/g, (_, c: string) => c.toUpperCase());
+		return Object.hasOwn(kindNames, key) ? kindNames[key]! : kind;
+	};
 
 	// Narrowed to one kind with ?kind=, and by a search.
 	let query = $state('');
@@ -137,16 +144,16 @@
 		const r = current;
 		if (!r) return;
 		const had = !!mine;
-		await act(() => saveRecord(r.path, { modified: mine?.modified ?? 0, text: draft }), had ? 'Saved your copy. SkyrimNet reads it from the next time it starts.' : 'Saved as your own copy. SkyrimNet reads it in place of the one below from the next time it starts.');
+		await act(() => saveRecord(r.path, { modified: mine?.modified ?? 0, text: draft }), had ? m.records.savedCopy : m.records.content.savedAsCopy);
 		if (!error) await leave('mode');
 	}
 
 	function remove() {
 		const r = current;
 		if (!r || !mine) return;
-		const next = below[0] ? `the copy from ${below[0].kind === 'base' ? 'SkyrimNet’s defaults' : below[0].source} applies again` : 'nothing replaces it, since only you have it';
-		if (!confirm(`Remove your copy of ${r.name}? A backup is kept, and ${next}.`)) return;
-		act(() => removeRecordCopy(r.path, { modified: mine!.modified }), below[0] ? 'Removed your copy. The one below applies again.' : 'Removed your copy.');
+		const next = below[0] ? m.records.content.nextBelow({ source: below[0].kind === 'base' ? m.records.defaults : below[0].source }) : m.records.content.nextNone;
+		if (!confirm(m.records.removeCopyConfirm({ name: r.name, next }))) return;
+		act(() => removeRecordCopy(r.path, { modified: mine!.modified }), below[0] ? m.records.removedCopyBelow : m.records.content.removedCopy);
 	}
 
 	function startEdit() {
@@ -165,14 +172,14 @@
 	useShortcuts(() => {
 		const reading = mode === 'read';
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !reading, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !reading, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: mine ? 'Edit' : 'Edit as your copy', hidden: !reading || !current, disabled: readOnly || using?.text === undefined, run: startEdit },
-			{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !reading || !current?.switch, disabled: readOnly || saving, run: () => toggle() },
-			...deleteShortcuts({ label: 'Remove your copy', hidden: !reading || !mine, disabled: readOnly || saving, run: remove }),
-			{ key: 'n', shown: 'N', label: 'New record', hidden: !reading, disabled: readOnly, run: () => setParams({ mode: 'new' }) },
-			{ key: 'Enter', label: 'Save', command: true, hidden: mode !== 'yaml', disabled: saving, run: submit },
-			{ key: 'Escape', shown: 'Esc', label: 'Cancel', hidden: mode !== 'yaml', run: () => leave('mode') }
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !reading, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !reading, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: mine ? m.common.edit : m.records.editCopy, hidden: !reading || !current, disabled: readOnly || using?.text === undefined, run: startEdit },
+			{ key: 'o', shown: 'O', label: current?.enabled === false ? m.common.switchOn : m.common.switchOff, hidden: !reading || !current?.switch, disabled: readOnly || saving, run: () => toggle() },
+			...deleteShortcuts({ label: m.records.removeCopy, hidden: !reading || !mine, disabled: readOnly || saving, run: remove }),
+			{ key: 'n', shown: 'N', label: m.records.content.newRecord, hidden: !reading, disabled: readOnly, run: () => setParams({ mode: 'new' }) },
+			{ key: 'Enter', label: m.common.save, command: true, hidden: mode !== 'yaml', disabled: saving, run: submit },
+			{ key: 'Escape', shown: 'Esc', label: m.common.cancel, hidden: mode !== 'yaml', run: () => leave('mode') }
 		];
 	});
 </script>
@@ -189,51 +196,51 @@
 		<p class="path">{current.path}</p>
 		<p class="muted">
 			{#if mine}
-				Editing <b class="changed">your own copy</b>, which SkyrimNet uses in every playthrough{below[0] ? ` in place of the one from ${layerName(list.layers[below[0].layer])}` : ''}.
+				<Fill text={(below[0] ? m.records.editingCopyInPlaceOf : m.records.editingCopy).text} layer={below[0] ? layerName(list.layers[below[0].layer]) : ''}>{#snippet yourCopy()}<b class="changed">{m.records.yourOwnCopy}</b>{/snippet}</Fill>
 			{:else}
-				Starting from the copy from {layerName(layerOf(current))}. Saving makes your own copy, which replaces it in every playthrough.
+				{m.records.startingFrom({ layer: layerName(layerOf(current)) })}
 			{/if}
-			{#if formKinds[current.kind]}<button type="button" class="textbutton" onclick={() => setParams({ mode: 'edit' }, 'replace')}>Use the form</button>{/if}
+			{#if formKinds[current.kind]}<button type="button" class="textbutton" onclick={() => setParams({ mode: 'edit' }, 'replace')}>{m.records.content.useForm}</button>{/if}
 		</p>
 		{#if current.kind === 'voice_effects'}
-			<LimitsNotice title="Limits Hermaeus can’t check">SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t check them here. An effect outside those limits may not work in the game.</LimitsNotice>
+			<LimitsNotice title={m.records.limitsTitle}>{m.records.content.limits}</LimitsNotice>
 		{/if}
 		{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 	</header>
 	<div class="raw" use:fitToViewport>
-		<CodeArea bind:value={draft} label="{current.name} as YAML" />
+		<CodeArea bind:value={draft} label={m.records.content.asYaml({ name: current.name })} />
 		<div class="buttons">
-			<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
-			<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+			<button type="button" class="button primary" onclick={submit} disabled={saving}>{m.common.save}</button>
+			<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 		</div>
 	</div>
 {:else}
 	<div class="bar">
-		<h1 class="caps">Content</h1>
-		<span class="muted n" use:clipped>{plural(list.records.length, 'record', 'records')}{yours ? ` · ${yours} yours` : ''}{off ? ` · ${off} off` : ''}</span>
-		<button type="button" class="button" onclick={() => setParams({ mode: 'new' })} disabled={readOnly}>New record</button>
-		<select aria-label="Kind" value={kind} onchange={(e) => setParams({ kind: e.currentTarget.value || null })}>
-			<option value="">All kinds</option>
-			{#each kinds as k (k.root)}<option value={k.root}>{k.label} · {k.n}</option>{/each}
+		<h1 class="caps">{m.records.content.title}</h1>
+		<span class="muted n" use:clipped>{m.records.content.count({ count: list.records.length })}{yours ? ` · ${m.records.yoursCount({ count: yours })}` : ''}{off ? ` · ${m.records.offCount({ count: off })}` : ''}</span>
+		<button type="button" class="button" onclick={() => setParams({ mode: 'new' })} disabled={readOnly}>{m.records.content.newRecord}</button>
+		<select aria-label={m.records.kind} value={kind} onchange={(e) => setParams({ kind: e.currentTarget.value || null })}>
+			<option value="">{m.records.content.allKinds}</option>
+			{#each kinds as k (k.root)}<option value={k.root}>{kindLabel(k.root)} · {k.n}</option>{/each}
 		</select>
-		<input type="search" bind:value={query} placeholder="Search records" aria-label="Search records" />
+		<input type="search" bind:value={query} placeholder={m.records.content.search} aria-label={m.records.content.search} />
 	</div>
-	<p class="muted lead">The record files SkyrimNet reads, from your plugins and your own edits. Where two layers have the same file, the higher one’s copy is used: yours, then the plugins in the Plugins page’s order, then SkyrimNet’s defaults.</p>
-	{#if readOnly}<p class="notice warn">Skyrim is running, so records can only be read.</p>{/if}
+	<p class="muted lead">{m.records.content.lead}</p>
+	{#if readOnly}<p class="notice warn">{m.records.content.readOnly}</p>{/if}
 
 	<div class="split">
 		<div class="list">
 			{#if !list.records.length}
-				<p class="muted">No records in SkyrimNet’s defaults, your plugins, or your own edits.</p>
+				<p class="muted">{m.records.content.none}</p>
 			{:else if !shown.length}
-				<p class="muted">Nothing matches “{query}”.</p>
+				<p class="muted">{m.records.noMatch({ query })}</p>
 			{:else}
 				<table>
 					<thead>
 						<tr>
-							<th class="mark" aria-label="Selected"></th>
-							<th class="caps">Record</th>
-							<th class="caps source">From</th>
+							<th class="mark" aria-label={m.common.selected}></th>
+							<th class="caps">{m.records.content.record}</th>
+							<th class="caps source">{m.records.from}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -243,9 +250,9 @@
 							{/if}
 							<tr aria-selected={selection.is(r)} class:off={!r.enabled} onclick={() => selection.select(r)}>
 								<td class="mark">{#if selection.is(r)}<Diamond />{/if}</td>
-								<td class="name" use:clipped>{r.name}{#if !r.enabled}<span class="flag">off</span>{/if}{#if r.error}<span class="flag bad">can’t be read</span>{/if}</td>
+								<td class="name" use:clipped>{r.name}{#if !r.enabled}<span class="flag">{m.common.off}</span>{/if}{#if r.error}<span class="flag bad">{m.records.cantBeRead}</span>{/if}</td>
 								<td class="source muted" use:clipped>
-									{#if layerOf(r)?.kind === 'overlay'}<span class="changed">Your edits</span>{:else}{layerName(layerOf(r))}{/if}{#if r.providers.length > 1}<span class="flag">replaces {layerName(list.layers[r.providers[1]!.layer])}’s</span>{/if}
+									{#if layerOf(r)?.kind === 'overlay'}<span class="changed">{m.records.yourEdits}</span>{:else}{layerName(layerOf(r))}{/if}{#if r.providers.length > 1}<span class="flag">{m.records.replacesFlag({ source: layerName(list.layers[r.providers[1]!.layer]) })}</span>{/if}
 								</td>
 							</tr>
 						{/each}
@@ -254,7 +261,7 @@
 			{/if}
 		</div>
 
-		<aside class="pane" use:fitToViewport aria-label="Record">
+		<aside class="pane" use:fitToViewport aria-label={m.records.content.record}>
 			{#if current}
 				{@const r = current}
 				{@const from = layerOf(r)}
@@ -263,29 +270,33 @@
 						<h2 class="caps">{r.name}</h2>
 						<p class="muted small">{kindLabel(r.kind)} · <span class="id">{r.path}</span></p>
 						<p class="small">
-							{#if from?.kind === 'pack'}From <a href={pluginHref(save, from.id)}>{from.source}</a>{:else if from?.kind === 'overlay'}<span class="changed">Your own copy</span>{:else}From SkyrimNet’s defaults{/if}{#if r.providers.length > 1}, in place of {r.providers
+							<Fill
+								text={(r.providers.length > 1 ? m.records.originInPlaceOf : m.records.origin).text}
+								layers={r.providers
 									.slice(1)
 									.map((p) => layerName(list.layers[p.layer]))
-									.join(', then ')}{/if}.
+									.join(m.records.thenJoin)}
+								>{#snippet source()}{#if from?.kind === 'pack'}<Fill text={m.records.fromPlugin.text}>{#snippet plugin()}<a href={pluginHref(save, from.id)}>{from.source}</a>{/snippet}</Fill>{:else if from?.kind === 'overlay'}<span class="changed">{m.records.content.ownCopy}</span>{:else}{m.records.fromDefaults}{/if}{/snippet}</Fill
+							>
 						</p>
-						{#if r.error}<p class="notice error">SkyrimNet can’t read this file: {r.error}</p>{/if}
-						{#if !r.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
+						{#if r.error}<p class="notice error">{m.records.unreadable({ error: r.error })}</p>{/if}
+						{#if !r.enabled}<p class="notice">{m.records.isOff}</p>{/if}
 						<Overridden override={r.override} disabled={readOnly || saving} onfollow={() => toggle(true)} />
 						{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 						{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 						<div class="buttons">
-							{#if r.switch}<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{r.enabled ? 'Switch off' : 'Switch on'}</button>{/if}
-							<button type="button" class="button" onclick={startEdit} disabled={readOnly || using?.text === undefined}>{mine ? 'Edit' : 'Edit as your copy'}</button>
-							{#if mine}<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>Remove your copy</button>{/if}
+							{#if r.switch}<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{r.enabled ? m.common.switchOff : m.common.switchOn}</button>{/if}
+							<button type="button" class="button" onclick={startEdit} disabled={readOnly || using?.text === undefined}>{mine ? m.common.edit : m.records.editCopy}</button>
+							{#if mine}<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>{m.records.removeCopy}</button>{/if}
 						</div>
 						{#if loadError}
 							<p class="notice error">{loadError}</p>
 						{:else if using}
-							<p class="muted small when">{layerName(list.layers[using.layer])} · {realTime(using.modified)}{using.crlf ? ' · Windows line endings' : ''}</p>
+							<p class="muted small when">{layerName(list.layers[using.layer])} · {realTime(using.modified)}{using.crlf ? ` · ${m.records.content.windowsEndings}` : ''}</p>
 							{#if using.text !== undefined}
 								<pre class="file">{using.text}</pre>
 							{:else}
-								<p class="muted small">Not text, so it can’t be shown.</p>
+								<p class="muted small">{m.records.notText}</p>
 							{/if}
 						{/if}
 					</div>

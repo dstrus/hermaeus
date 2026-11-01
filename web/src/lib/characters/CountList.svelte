@@ -1,6 +1,7 @@
 <!-- A ranked list: what comes up most, with how often, and a bar for scale. -->
 <script lang="ts">
 	import type { Count } from '#lib/api/types/characters.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { count } from '#lib/format.ts';
 
 	let {
@@ -8,8 +9,8 @@
 		items,
 		linkTo,
 		note,
-		empty = 'None yet.',
-		blank = 'none'
+		empty = m.characters.stats.noneYet,
+		blank = m.characters.stats.none
 	}: {
 		title: string;
 		items: Count[];

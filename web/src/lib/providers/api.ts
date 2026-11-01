@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { m } from '#lib/copy/messages.ts';
 import { href } from '#lib/nav.ts';
 import type { KeyEdit, ProviderDetails, ProviderEdit, ProvidersResponse } from '#lib/api/types/settings.ts';
 
@@ -31,21 +32,23 @@ export function providersHref(save: string, id?: string): string {
 	return id ? `${base}?item=${encodeURIComponent(id)}` : base;
 }
 
+const styles = m.providers.styles;
 export const apiStyles = [
-	{ value: 'chat', label: 'Chat', what: 'OpenAI-style chat completions: what every task but Decisions uses.' },
-	{ value: 'decisions', label: 'Decisions', what: 'OpenRouter’s decisions API, for the Decisions task only.' },
-	{ value: 'systemone', label: 'System One', what: 'A System One decision endpoint, for the Decisions task only.' }
+	{ value: 'chat', label: styles.chat.label, what: styles.chat.what },
+	{ value: 'decisions', label: styles.decisions.label, what: styles.decisions.what },
+	{ value: 'systemone', label: styles.systemone.label, what: styles.systemone.what }
 ];
 
 export function styleLabel(style: string): string {
 	return apiStyles.find((s) => s.value === style)?.label ?? style;
 }
 
+const sorts = m.providers.sortings;
 export const sortings = [
-	{ value: 'default', label: 'OpenRouter’s default' },
-	{ value: 'price', label: 'Cheapest first' },
-	{ value: 'throughput', label: 'Fastest throughput first' },
-	{ value: 'latency', label: 'Lowest latency first' }
+	{ value: 'default', label: sorts.default },
+	{ value: 'price', label: sorts.price },
+	{ value: 'throughput', label: sorts.throughput },
+	{ value: 'latency', label: sorts.latency }
 ];
 
 // keyState says whether a provider can be reached: its own key, a borrowed

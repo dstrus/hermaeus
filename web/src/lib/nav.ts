@@ -1,6 +1,8 @@
 // The sections of Hermaeus beyond a playthrough's own (characters, history,
 // screenshots, songs), as the sidebar lists them and as their URLs nest:
 // /<save>/<group>/<page>. A page's URL is built here and nowhere else.
+import { m } from '#lib/copy/messages.ts';
+
 export interface NavPage {
 	path: string; // under its group
 	label: string;
@@ -16,44 +18,46 @@ export interface NavGroup {
 // A feature page, by its feature's id (see #lib/features).
 const feature = (path: string, label: string): NavPage => ({ path, label, feature: true });
 
+const n = m.nav;
+
 export const groups: NavGroup[] = [
 	{
 		path: 'behavior',
-		label: 'Behavior',
+		label: n.behavior.label,
 		pages: [
-			{ path: 'prompts', label: 'Prompts' },
-			{ path: 'actions', label: 'Actions' },
-			{ path: 'triggers', label: 'Triggers' },
-			{ path: 'translator', label: 'Translator' },
-			feature('gamemaster', 'GameMaster'),
-			feature('narration', 'Narration'),
-			feature('conversation', 'Conversation'),
-			feature('npc-thoughts', 'NPC thoughts'),
-			feature('player-reactions', 'Player reactions'),
-			feature('bard-singing', 'Bard singing'),
-			feature('actor-filter', 'Actor filter')
+			{ path: 'prompts', label: n.behavior.prompts },
+			{ path: 'actions', label: n.behavior.actions },
+			{ path: 'triggers', label: n.behavior.triggers },
+			{ path: 'translator', label: n.behavior.translator },
+			feature('gamemaster', n.behavior.gamemaster),
+			feature('narration', n.behavior.narration),
+			feature('conversation', n.behavior.conversation),
+			feature('npc-thoughts', n.behavior.npcThoughts),
+			feature('player-reactions', n.behavior.playerReactions),
+			feature('bard-singing', n.behavior.bardSinging),
+			feature('actor-filter', n.behavior.actorFilter)
 		]
 	},
-	{ path: 'memory', label: 'Memory', pages: [feature('memories', 'Memories'), feature('memory-filter', 'Memory filter'), feature('diaries', 'Diaries'), feature('dynamic-bios', 'Dynamic bios')] },
-	{ path: 'voice', label: 'Voice', pages: [feature('speech', 'Speech'), { path: 'engines', label: 'Engines' }, { path: 'effects', label: 'Voice effects' }, feature('samples', 'Voice samples'), feature('speech-to-text', 'Speech to text')] },
+	{ path: 'memory', label: n.memory.label, pages: [feature('memories', n.memory.memories), feature('memory-filter', n.memory.memoryFilter), feature('diaries', n.memory.diaries), feature('dynamic-bios', n.memory.dynamicBios)] },
+	{ path: 'voice', label: n.voice.label, pages: [feature('speech', n.voice.speech), { path: 'engines', label: n.voice.engines }, { path: 'effects', label: n.voice.effects }, feature('samples', n.voice.samples), feature('speech-to-text', n.voice.speechToText)] },
 	{
 		path: 'ai',
-		label: 'AI',
+		label: n.ai.label,
 		pages: [
-			{ path: 'models', label: 'Models' },
-			{ path: 'providers', label: 'Providers' }
+			{ path: 'models', label: n.ai.models },
+			{ path: 'providers', label: n.ai.providers }
 		]
 	},
 	{
 		path: 'library',
-		label: 'Library',
+		label: n.library.label,
 		pages: [
-			{ path: 'plugins', label: 'Plugins' },
-			{ path: 'content', label: 'Content' },
-			{ path: 'overrides', label: 'Overrides' }
+			{ path: 'plugins', label: n.library.plugins },
+			{ path: 'content', label: n.library.content },
+			{ path: 'overrides', label: n.library.overrides }
 		]
 	},
-	{ path: 'general', label: 'General', pages: [feature('hotkeys', 'Hotkeys'), { path: 'other', label: 'Other' }] }
+	{ path: 'general', label: n.general.label, pages: [feature('hotkeys', n.general.hotkeys), { path: 'other', label: n.general.other }] }
 ];
 
 // href is a page's URL in a playthrough, by its page path; it finds the

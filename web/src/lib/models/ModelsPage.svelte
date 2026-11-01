@@ -7,7 +7,8 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { Models, Slot, Task, TaskEdit } from '#lib/api/types/settings.ts';
-	import { plural } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { providersHref } from '#lib/providers/api.ts';
 	import { settingsHref } from '#lib/settings/api.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
@@ -16,13 +17,15 @@
 	import { fitToViewport } from '#lib/ui/fit.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
-	import { modelChoices, modelsDependency, providerName, rotation, saveTask } from './api.ts';
+	import { modelChoices, modelsDependency, providerName, rotation, saveTask, taskLabel, taskWhat } from './api.ts';
 	import { modelLists } from './lists.svelte.ts';
 	import { page } from '$app/state';
 	import type { PluginSchema } from '#lib/api/types/settings.ts';
 	import { pluginHref } from '#lib/plugins/links.ts';
 	import TaskForm from './TaskForm.svelte';
 	import ModelTest from './ModelTest.svelte';
+
+	const t = m.models;
 
 	let { save, models }: { save: string; models: Models } = $props();
 
@@ -31,14 +34,14 @@
 	const addedBy = (task: string) => (page.data.pluginSettings as PluginSchema[] | undefined)?.find((s) => s.variants.includes(task) && s.plugin);
 	let can = $derived(models.found && !readOnly);
 	let choices = $derived(modelChoices(models));
-	let dialogue = $derived(models.tasks.find((t) => t.id === 'default'));
+	let dialogue = $derived(models.tasks.find((task) => task.id === 'default'));
 	const provider = (id: string) => providerName(models.providers, id);
 	// The providers a task's slots use, named once each.
-	const providersOf = (t: Task) => [...new Set(t.slots.map((s) => provider(s.provider)))].join(', ');
-	const order = (t: Task) => (t.rotationMode || dialogue?.rotationMode || 'sequential') === 'random' ? 'At random' : 'In turn';
-	const shortModel = (m: string) => m.replace(/^[^/]+\//, '');
+	const providersOf = (task: Task) => [...new Set(task.slots.map((s) => provider(s.provider)))].join(', ');
+	const order = (task: Task) => ((task.rotationMode || dialogue?.rotationMode || 'sequential') === 'random' ? t.atRandom : t.inTurn);
+	const shortModel = (model: string) => model.replace(/^[^/]+\//, '');
 
-	const selection = new Selection(() => models.tasks, (t) => t.id, { param: 'item' });
+	const selection = new Selection(() => models.tasks, (task) => task.id, { param: 'item' });
 	let current = $derived(selection.current);
 
 	let notice = $state('');
@@ -52,14 +55,14 @@
 	});
 
 	async function submit(edit: TaskEdit) {
-		const t = current;
-		if (!t || saving) return;
+		const task = current;
+		if (!task || saving) return;
 		saving = true;
 		error = '';
 		notice = '';
 		try {
-			await saveTask(t.id, edit);
-			notice = `Saved the models for ${t.label}.`;
+			await saveTask(task.id, edit);
+			notice = t.saved({ task: taskLabel(task.id) });
 			await leave('mode'); // settles before the reload, which it would cancel
 			await invalidate(modelsDependency);
 		} catch (e) {
@@ -70,28 +73,29 @@
 	}
 
 	// slotNotes are what a slot sets for itself, as a short line.
-	function slotNotes(s: Slot, t: Task): string {
+	function slotNotes(s: Slot, task: Task): string {
+		const n = t.slot;
 		const out: string[] = [];
-		if (s.role === 'backup') out.push('backup');
-		if (!s.enabled) out.push('out of rotation');
-		if (s.temperature !== undefined) out.push(`temperature ${s.temperature}`);
-		else if (t.params.temperature !== undefined) out.push(`temperature ${t.params.temperature}`);
-		if (s.weight !== undefined) out.push(`weight ${s.weight}`);
-		if (s.requestTimeout !== undefined) out.push(`${s.requestTimeout}s`);
-		if (s.maxRetries !== undefined) out.push(plural(s.maxRetries, 'retry', 'retries'));
-		if (s.reasoningEffort) out.push(`reasoning ${s.reasoningEffort}`);
-		if (s.structuredOutputs !== undefined) out.push(s.structuredOutputs ? 'structured outputs' : 'no structured outputs');
+		if (s.role === 'backup') out.push(n.backup);
+		if (!s.enabled) out.push(n.outOfRotation);
+		if (s.temperature !== undefined) out.push(n.temperature({ value: s.temperature }));
+		else if (task.params.temperature !== undefined) out.push(n.temperature({ value: task.params.temperature }));
+		if (s.weight !== undefined) out.push(n.weight({ value: s.weight }));
+		if (s.requestTimeout !== undefined) out.push(t.seconds({ seconds: s.requestTimeout }));
+		if (s.maxRetries !== undefined) out.push(n.retries({ count: s.maxRetries }));
+		if (s.reasoningEffort) out.push(n.reasoning({ effort: s.reasoningEffort }));
+		if (s.structuredOutputs !== undefined) out.push(s.structuredOutputs ? n.structured : n.unstructured);
 		return out.join(' · ');
 	}
 
 	useShortcuts(() => {
 		const viewing = mode === 'view';
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !current, run: () => setParams({ mode: 'edit' }) },
-			{ key: 'Enter', label: 'Save', command: true, hidden: viewing, run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit() },
-			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => leave('mode') }])
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !viewing, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !viewing, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !viewing, disabled: !can || !current, run: () => setParams({ mode: 'edit' }) },
+			{ key: 'Enter', label: m.common.save, command: true, hidden: viewing, run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit() },
+			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => leave('mode') }])
 		];
 	});
 
@@ -102,44 +106,44 @@
 	let waiting = $derived(models.providers.filter((p) => !p.hasKey && p.style === 'chat' && !p.signIn));
 	// A provider's model list, as a few words.
 	function listState(id: string): string {
-		if (modelLists.loading[id]) return 'asking…';
+		if (modelLists.loading[id]) return t.lists.asking;
 		const list = modelLists.lists[id];
-		return list ? `${plural(list.models.length, 'model', 'models')} fetched` : 'models not fetched';
+		return list ? t.lists.fetched({ count: list.models.length }) : t.lists.notFetched;
 	}
 </script>
 
 <div class="bar">
-	<h1 class="caps">Models</h1>
+	<h1 class="caps">{t.title}</h1>
 	<span class="muted n" use:clipped>
 		{#if !models.found}
-			Not set up yet
+			{m.common.notSetUp}
 		{:else}
-			{plural(models.tasks.length, 'task', 'tasks')} · {plural(models.providers.length, 'provider', 'providers')}
+			{t.tasksCount({ count: models.tasks.length })} · {t.providersCount({ count: models.providers.length })}
 		{/if}
 	</span>
 </div>
-<p class="muted lead">Which model does each of SkyrimNet’s jobs. A task tries its models in rotation, each with its own provider and settings; a task without a model of its own uses Dialogue’s.</p>
+<p class="muted lead">{t.lead}</p>
 {#if models.providers.length}
 	<!-- The providers with a key, each with its model list to fetch here,
 	     before any form needs it; a fetched list is offered as you type. -->
-	<div class="providers" role="group" aria-label="Providers">
-		<span class="caps muted group" aria-hidden="true">Providers</span>
+	<div class="providers" role="group" aria-label={t.providers}>
+		<span class="caps muted group" aria-hidden="true">{t.providers}</span>
 		{#each ready as p (p.id)}
 			<span class="item">
 				<span class="name">{p.name}</span>
 				<span class="muted small">{listState(p.id)}</span>
 				<button type="button" class="textbutton small" onclick={() => modelLists.fetch(p.id, !!modelLists.lists[p.id])} disabled={modelLists.loading[p.id]}>
-					{modelLists.lists[p.id] ? 'Fetch again' : 'Fetch models'}
+					{modelLists.lists[p.id] ? t.lists.fetchAgain : t.lists.fetch}
 				</button>
 			</span>
 		{/each}
 		<a class="small" href={providersHref(save)}>
 			{#if !ready.length}
-				None has a key yet: set one on the Providers page
+				{t.noKeyYet}
 			{:else if waiting.length}
-				{plural(waiting.length, 'more without a key', 'more without keys')}
+				{t.moreWithoutKey({ count: waiting.length })}
 			{:else}
-				All providers
+				{t.allProviders}
 			{/if}
 		</a>
 		{#each ready.filter((p) => modelLists.errors[p.id]) as p (p.id)}
@@ -148,7 +152,7 @@
 	</div>
 {/if}
 {#if !models.found}
-	<p class="notice">SkyrimNet hasn’t written <span class="id">{models.path}</span> yet; it will the next time it starts. Until then there’s nothing to change here.</p>
+	<p class="notice"><Fill text={m.common.notWrittenYet.text}>{#snippet path()}<span class="id">{models.path}</span>{/snippet}</Fill></p>
 {/if}
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
@@ -158,44 +162,55 @@
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<th class="caps task">Task</th>
-					<th class="caps">Models</th>
-					<th class="caps provider">Provider</th>
-					<th class="caps order">Order</th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<th class="caps task">{t.task}</th>
+					<th class="caps">{t.title}</th>
+					<th class="caps provider">{t.provider}</th>
+					<th class="caps order">{t.order}</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each models.tasks as t (t.id)}
-					<tr aria-selected={selection.is(t)} onclick={() => mode === 'view' && selection.select(t)} ondblclick={() => can && mode === 'view' && setParams({ mode: 'edit' })}>
-						<td class="mark">{#if selection.is(t)}<Diamond />{/if}</td>
-						<td class="task">{t.label}{#if !t.known}<span class="muted small"> · plugin</span>{/if}</td>
+				{#each models.tasks as task (task.id)}
+					<tr aria-selected={selection.is(task)} onclick={() => mode === 'view' && selection.select(task)} ondblclick={() => can && mode === 'view' && setParams({ mode: 'edit' })}>
+						<td class="mark">{#if selection.is(task)}<Diamond />{/if}</td>
+						<td class="task">{taskLabel(task.id)}{#if !task.known}<span class="muted small"> · {t.plugin}</span>{/if}</td>
 						<td class="models">
 							<div class="cell">
-								<span class="line id">{t.slots.map((s) => shortModel(s.model)).join(', ') || '—'}</span>
-								{#if t.slots.some((s) => s.role === 'backup')}<span class="flag">backup</span>{/if}
-								{#if t.slots.some((s) => !s.enabled)}<span class="flag">one out</span>{/if}
+								<span class="line id">{task.slots.map((s) => shortModel(s.model)).join(', ') || '—'}</span>
+								{#if task.slots.some((s) => s.role === 'backup')}<span class="flag">{t.backup}</span>{/if}
+								{#if task.slots.some((s) => !s.enabled)}<span class="flag">{t.oneOut}</span>{/if}
 							</div>
 						</td>
-						<td class="provider muted">{providersOf(t)}</td>
-						<td class="order muted">{t.slots.length > 1 ? order(t) : ''}</td>
+						<td class="provider muted">{providersOf(task)}</td>
+						<td class="order muted">{task.slots.length > 1 ? order(task) : ''}</td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
-		<p class="muted small">Fetching a provider’s models asks it over the Internet, with your key. Providers and their keys are on the <a href={providersHref(save)}>Providers</a> page; the rest of <span class="id">{models.path}</span> is under <a href={settingsHref(save, 'OpenRouter')}>OpenRouter</a> in Other settings.</p>
+		<p class="muted small">
+			<Fill text={t.note.text}>
+				{#snippet providers()}<a href={providersHref(save)}>{t.providers}</a>{/snippet}
+				{#snippet path()}<span class="id">{models.path}</span>{/snippet}
+				{#snippet openRouter()}<a href={settingsHref(save, 'OpenRouter')}>OpenRouter</a>{/snippet}
+			</Fill>
+		</p>
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Task">
+	<aside class="pane" use:fitToViewport aria-label={t.task}>
 		{#if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
-					<h2 class="caps">{current.label}</h2>
-					{#if current.what}
-						<p class="muted small">{current.what}</p>
+					<h2 class="caps">{taskLabel(current.id)}</h2>
+					{#if taskWhat(current.id)}
+						<p class="muted small">{taskWhat(current.id)}</p>
 					{:else}
 						{@const by = addedBy(current.id)}
-						<p class="muted small">A task added by {#if by}<a href={pluginHref(save, by.plugin ?? '')}>{by.title}</a>{:else}a plugin{/if}, as <span class="id">{current.id}</span>.</p>
+						<p class="muted small">
+							<Fill text={t.addedBy.text}>
+								{#snippet plugin()}{#if by}<a href={pluginHref(save, by.plugin ?? '')}>{by.title}</a>{:else}{t.aPlugin}{/if}{/snippet}
+								{#snippet id()}<span class="id">{current.id}</span>{/snippet}
+							</Fill>
+						</p>
 					{/if}
 					{#if mode === 'edit'}
 						<TaskForm task={current} modified={models.modified} providers={models.providers} {choices} {saving} onsave={submit} oncancel={() => leave('mode')} />
@@ -210,29 +225,29 @@
 								{/each}
 							</ol>
 						{:else}
-							<p class="muted">No model of its own: Dialogue’s rotation answers.</p>
+							<p class="muted">{t.noOwnModel}</p>
 						{/if}
 						<dl>
-							{#if current.slots.length > 1}<dt class="caps">Order</dt><dd>{order(current)}{!current.rotationMode && current.id !== 'default' ? ', as Dialogue' : ''}</dd>{/if}
+							{#if current.slots.length > 1}<dt class="caps">{t.order}</dt><dd>{!current.rotationMode && current.id !== 'default' ? t.orderAsDialogue({ order: order(current) }) : order(current)}</dd>{/if}
 							{#if current.id !== 'decisions'}
-								<dt class="caps">Max tokens</dt><dd>{current.params.maxTokens ?? '—'}</dd>
-								{#if current.params.topP !== undefined}<dt class="caps">Top-p</dt><dd>{current.params.topP}</dd>{/if}
-								{#if current.params.topK !== undefined}<dt class="caps">Top-k</dt><dd>{current.params.topK}</dd>{/if}
-								{#if current.params.frequencyPenalty !== undefined}<dt class="caps">Frequency penalty</dt><dd>{current.params.frequencyPenalty}</dd>{/if}
-								{#if current.params.presencePenalty !== undefined}<dt class="caps">Presence penalty</dt><dd>{current.params.presencePenalty}</dd>{/if}
-								{#if current.params.stopSequences.length}<dt class="caps">Stops at</dt><dd class="id">{current.params.stopSequences.map((s) => JSON.stringify(s)).join(' ')}</dd>{/if}
+								<dt class="caps">{t.maxTokens}</dt><dd>{current.params.maxTokens ?? '—'}</dd>
+								{#if current.params.topP !== undefined}<dt class="caps">{t.topP}</dt><dd>{current.params.topP}</dd>{/if}
+								{#if current.params.topK !== undefined}<dt class="caps">{t.topK}</dt><dd>{current.params.topK}</dd>{/if}
+								{#if current.params.frequencyPenalty !== undefined}<dt class="caps">{t.frequencyPenalty}</dt><dd>{current.params.frequencyPenalty}</dd>{/if}
+								{#if current.params.presencePenalty !== undefined}<dt class="caps">{t.presencePenalty}</dt><dd>{current.params.presencePenalty}</dd>{/if}
+								{#if current.params.stopSequences.length}<dt class="caps">{t.stopsAt}</dt><dd class="id">{current.params.stopSequences.map((s) => JSON.stringify(s)).join(' ')}</dd>{/if}
 							{/if}
-							<dt class="caps">Timeout</dt><dd>{current.timeout !== undefined ? `${current.timeout}s` : current.id === 'default' ? '—' : `as Dialogue${dialogue?.timeout !== undefined ? ` (${dialogue.timeout}s)` : ''}`}</dd>
+							<dt class="caps">{t.timeout}</dt><dd>{current.timeout !== undefined ? t.seconds({ seconds: current.timeout }) : current.id === 'default' ? '—' : dialogue?.timeout !== undefined ? t.asDialogueSeconds({ seconds: dialogue.timeout }) : t.asDialogue}</dd>
 						</dl>
 						{#if can}
-							<div class="actions"><button type="button" class="button" onclick={() => setParams({ mode: 'edit' })}>Edit</button></div>
+							<div class="actions"><button type="button" class="button" onclick={() => setParams({ mode: 'edit' })}>{m.common.edit}</button></div>
 						{/if}
 						{#if current.id !== 'decisions'}<ModelTest task={current} providers={models.providers} />{/if}
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so nothing can be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.common.gameRunning}</p>{/if}
 	</aside>
 </div>
 

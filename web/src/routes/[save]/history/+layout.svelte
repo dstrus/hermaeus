@@ -1,23 +1,24 @@
 <!-- History: everything SkyrimNet recorded in this playthrough, across every
      character: events, memories, and diary entries. -->
 <script lang="ts">
+	import { m } from '#lib/copy/messages.ts';
 	import Tabs from '#lib/ui/Tabs.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { data, children }: LayoutProps = $props();
 	let base = $derived(`/${encodeURIComponent(data.playthrough.id)}/history`);
 	let tabs = $derived([
-		{ href: `${base}/events`, label: 'Events' },
-		{ href: `${base}/memories`, label: 'Memories' },
-		{ href: `${base}/diary`, label: 'Diary' },
-		{ href: `${base}/knowledge`, label: 'Knowledge' }
+		{ href: `${base}/events`, label: m.history.events },
+		{ href: `${base}/memories`, label: m.history.memories },
+		{ href: `${base}/diary`, label: m.history.diary },
+		{ href: `${base}/knowledge`, label: m.history.knowledge }
 	]);
 </script>
 
 <header>
-	<h1 class="caps">History</h1>
-	<p class="muted">Everything SkyrimNet recorded in this playthrough, everyone’s together, and the knowledge any NPC can draw on.</p>
-	<Tabs {tabs} label="History" />
+	<h1 class="caps">{m.history.title}</h1>
+	<p class="muted">{m.history.lead}</p>
+	<Tabs {tabs} label={m.history.title} />
 </header>
 
 {@render children()}

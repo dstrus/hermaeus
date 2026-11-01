@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { ApiError } from '#lib/api/client.ts';
+import { m } from '#lib/copy/messages.ts';
 import { changedPage, fileLabel, getSettings, getSettingsFile, settingsDependency, type Row } from '#lib/settings/api.ts';
 import type { PageLoad } from './$types';
 
@@ -11,7 +12,7 @@ export const load: PageLoad = async ({ params, fetch, depends }) => {
 	if (params.name === changedPage) {
 		const { files } = await getSettings(fetch);
 		const rows: Row[] = files.filter((f) => !f.file.page).flatMap((f) => f.values.filter((s) => s.changed).map((setting) => ({ file: f.file, setting })));
-		return { title: 'Changed settings', file: null, rows, byFile: true };
+		return { title: m.settings.changedSettings, file: null, rows, byFile: true };
 	}
 	try {
 		const f = await getSettingsFile(params.name, fetch);

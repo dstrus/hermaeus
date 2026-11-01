@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hermaeus · Overview · The load screen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#7fb8a0;--on-accent:#0e1a15;--ground:#0b0b0b;--smoke:#1c1c1c;--panel:#121212;--glass:rgb(0 0 0/.38);--ink:#f2efe6;--muted:#a8a293;--rule:#2a2a2a;--rule-strong:#3a3a3a;--changed:#d2996b;--warn:#d9a441}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.5 Jost,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
+#root{width:1440px;height:900px;overflow:hidden;position:relative;background:radial-gradient(ellipse at 65% 25%,var(--smoke),var(--ground));display:grid;grid-template-columns:13rem 1fr;grid-template-rows:auto auto 1fr}
+.caps{font-family:"Barlow Condensed",Jost,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:500}
+.label{font-size:13px}.title{font-size:18px}.headline{font-size:22px;font-weight:600}.display{font-size:40px;font-weight:600;line-height:1}.btn{font-size:15px}
+.muted{color:var(--muted)}.accent{color:var(--accent)}
+/* top bar */
+.top{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:10px 32px;border-bottom:1px solid var(--rule)}
+.mark{font-size:1.3em;margin-right:.3em;vertical-align:-.08em}
+.right{display:flex;align-items:center;gap:20px}
+.select{background:var(--glass);border:1px solid var(--rule-strong);border-radius:3px;padding:3px 10px;display:inline-flex;gap:16px;align-items:center;margin-left:-6px}
+.switch{display:inline-flex;border:1px solid var(--rule-strong);border-radius:3px;overflow:hidden}.switch span{padding:5px 10px}.switch .on{background:var(--accent);color:var(--on-accent);font-weight:600}
+/* quick toggles */
+.toggles{grid-column:1/-1;display:flex;align-items:center;gap:22px;padding:8px 32px;border-bottom:1px solid var(--rule)}
+.cb{display:inline-flex;align-items:center;gap:8px}.cb i{width:12px;height:12px;border:1px solid var(--rule-strong);border-radius:2px;position:relative;display:inline-block}
+.cb i.on{border-color:var(--accent)}.cb i.on::after{content:"";position:absolute;left:3px;top:0;width:3px;height:7px;border:solid var(--accent);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+/* sections column */
+.nav{border-right:1px solid var(--rule);padding:16px 24px}
+.nav a{display:block;color:var(--muted);line-height:1.25}.nav a.cur{color:var(--accent);font-weight:600}.nav .grp{margin:8px 0 0}
+/* main */
+.main{display:grid;grid-template-columns:1fr clamp(18rem,26vw,24rem);min-height:0}
+.content{padding:24px 32px 80px;display:flex;flex-direction:column;min-width:0}.content .doors{margin-top:auto;padding-top:0}.cols{margin-bottom:16px}
+.pane{background:var(--panel);border-left:1px solid var(--rule-strong);padding:24px}
+.slot h1{margin:0}.slot p{margin:4px 0 2px}
+.days{margin-top:16px}.days h2,.cols h2{margin:0 0 8px}
+.bars,.dn{display:flex;gap:8px;width:608px}.bars{align-items:flex-end;height:72px;border-bottom:1px solid var(--rule-strong)}
+.bars i{display:block;width:36px;background:var(--accent);opacity:.55}.bars i.new{opacity:1}
+.bars i:nth-child(1){height:42px}.bars i:nth-child(2){height:12px}.bars i:nth-child(3){height:29px}.bars i:nth-child(4){height:17px}.bars i:nth-child(5){height:64px}.bars i:nth-child(6){height:6px}.bars i:nth-child(7){height:14px}
+.bars i:nth-child(8){height:7px}.bars i:nth-child(9){height:32px}.bars i:nth-child(10){height:72px}.bars i:nth-child(11){height:50px}.bars i:nth-child(12){height:23px}.bars i:nth-child(13){height:36px}.bars i:nth-child(14){height:13px}
+.dn{font-size:13px;color:var(--muted);margin-top:2px}.dn span{width:36px;text-align:center}.dn .new{color:var(--ink)}
+.days p{margin:2px 0 0}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:16px}
+.cols h2{border-bottom:1px solid var(--rule-strong);padding-bottom:5px}
+.stat .row{display:grid;grid-template-columns:1fr auto;column-gap:12px;align-items:end;margin-bottom:7px}
+.stat .row i{display:block;height:2px;background:var(--accent);opacity:.55;margin-top:3px}.stat small{font-size:13px;color:var(--muted);margin-left:.4em}
+.stat .row:nth-of-type(1) i{width:100%}.stat .row:nth-of-type(2) i{width:68%}.stat .row:nth-of-type(3) i{width:43%}.stat .row:nth-of-type(4) i{width:27%}.stat .row:nth-of-type(5) i{width:19%}.stat .row:nth-of-type(6) i{width:13%}
+.stat .sub{grid-column:1/-1;font-size:13px;color:var(--muted);margin-top:2px}.stat .c{color:var(--muted);text-align:right;padding-bottom:5px}
+.entry{margin-bottom:8px}.entry h3{margin:0 0 2px}.entry p{margin:0}.entry .by{font-size:13px;color:var(--muted);line-height:1.3}
+.shot{aspect-ratio:16/9;border:1px solid var(--rule-strong);display:flex;align-items:flex-end;padding:10px;margin-bottom:8px}
+.new p{margin:0 0 4px}
+.doors{margin-top:20px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.doors div{padding:8px 12px;border-left:1px solid var(--rule)}.doors div:first-child{border-left:0;padding-left:0}.doors p{margin:0;color:var(--muted);font-size:13px}
+.def{display:grid;grid-template-columns:7.5rem 1fr;row-gap:10px;margin:16px 0 20px}.def dt{color:var(--muted);padding-top:2px}.def dd{margin:0}.def small{display:block;font-size:13px;color:var(--muted)}
+.pane h2{margin:0}.links a{display:block;color:var(--accent);margin:4px 0}.pane .note{font-size:13px;margin-top:20px}
+/* hint strip */
+.hints{position:absolute;left:0;right:0;bottom:0;height:40px;background:var(--ground);border-top:1px solid var(--rule);display:flex;justify-content:flex-end;align-items:center;gap:24px;padding:0 32px;box-sizing:border-box}
+.key{border:1px solid var(--rule-strong);border-radius:3px;color:var(--ink);min-width:1.6em;padding:0 .4em;display:inline-block;text-align:center;margin-right:8px;box-sizing:border-box}
+</style>
+</head>
+<body>
+<div id="root">
+  <header class="top">
+    <div class="caps headline"><span class="mark">◉</span>Hermaeus</div>
+    <div class="right">
+      <span class="caps label muted">Playthrough</span><span class="select">Gram <span class="muted">▾</span></span>
+      <span class="caps label muted">Skyrim closed</span>
+      <span class="switch caps label"><span class="on">System</span><span>Dark</span><span>Light</span></span>
+    </div>
+  </header>
+  <div class="toggles caps label">
+    <span class="muted">Quick toggles</span>
+    <span class="cb"><i class="on"></i>AI</span><span class="cb"><i class="on"></i>GameMaster</span><span class="cb"><i class="on"></i>NPC reactions</span><span class="cb"><i class="on"></i>Player reactions</span><span class="cb"><i></i>Narration</span>
+    <span class="cb"><i class="on"></i>Bards</span><span class="cb"><i class="on"></i>Translator</span><span class="cb"><i class="on"></i>Dynamic bios</span><span class="cb"><i class="on"></i>Memories</span><span class="cb"><i class="on"></i>Omnisight</span>
+  </div>
+  <nav class="nav caps title">
+    <a class="cur" href="#">Overview</a><a href="#">Characters</a><a href="#">History</a><a href="#">Screenshots</a><a href="#">Bard songs</a>
+    <div class="grp label muted">Behavior</div><a href="#">Prompts</a><a href="#">Actions</a><a href="#">Triggers</a><a href="#">Translator</a><a href="#">GameMaster</a><a href="#">Narration…</a>
+    <div class="grp label muted">Memory</div><a href="#">Memories</a><a href="#">Memory filter</a><a href="#">Diaries</a><a href="#">Dynamic bios</a>
+    <div class="grp label muted">Voice</div><a href="#">Speech</a><a href="#">Engines</a><a href="#">Voice effects…</a>
+    <div class="grp label muted">AI</div><a href="#">Models</a><a href="#">Providers</a>
+    <div class="grp label muted">Library</div><a href="#">Plugins</a><a href="#">Content</a><a href="#">Overrides</a>
+    <div class="grp label muted">General</div><a href="#">Hotkeys</a><a href="#">Other</a>
+  </nav>
+  <div class="main">
+    <section class="content">
+      <div class="slot">
+        <h1 class="caps display">Gram</h1>
+        <p class="muted">1:04 PM, Tirdas, 15th of Hearthfire, 4E 201 · 59 game days since Sundas, 17th of Last Seed · last&nbsp;written&nbsp;Tuesday,&nbsp;October&nbsp;28</p>
+        <div class="caps label muted">1791685096394-371331</div>
+      </div>
+      <div class="days">
+        <h2 class="caps label accent">The last fourteen days</h2>
+        <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="new"></i></div>
+        <div class="dn"><span>2nd</span><span>3rd</span><span>4th</span><span>5th</span><span>6th</span><span>7th</span><span>8th</span><span>9th</span><span>10th</span><span>11th</span><span>12th</span><span>13th</span><span>14th</span><span class="new">15th</span></div>
+        <p class="muted">Events per game day. Each day opens History there.</p>
+      </div>
+      <div class="cols">
+        <div class="stat">
+          <h2 class="caps label accent">Companions and pinned</h2>
+          <div class="row"><div>Serana<small>pinned</small><i></i></div><div class="c">142 memories</div><div class="sub">traveling with you since the 12th</div></div>
+          <div class="row"><div>Vilja<small>pinned</small><i></i></div><div class="c">96</div></div>
+          <div class="row"><div>Agmaer<i></i></div><div class="c">61</div></div>
+          <div class="row"><div>Laurina Cedalius<i></i></div><div class="c">38</div></div>
+          <div class="row"><div>Meresine<i></i></div><div class="c">27</div></div>
+          <div class="row"><div>Aya<i></i></div><div class="c">19</div></div>
+        </div>
+        <div class="diary">
+          <h2 class="caps label accent">The latest diary</h2>
+          <div class="entry"><h3 class="caps label muted">Morndas, 14th of Hearthfire</h3><p>The Frozen Hearth. Winterhold's perpetual gloom has seeped into the timbers of this place, a damp chill that smells of wet wool and old smoke…</p><div class="by">Gram · determined</div></div>
+          <div class="entry"><h3 class="caps label muted">Morndas, 14th of Hearthfire, earlier</h3><p>The College of Winterhold is… quieter than I expected. After the bleakness of the Soul Cairn, the sound of snow falling on stone…</p><div class="by">Gram · determined</div></div>
+        </div>
+        <div class="new">
+          <h2 class="caps label accent">What's new</h2>
+          <div class="shot caps label muted">Septimus Signus' Outpost · 11:39 AM, 15th</div>
+          <p><span class="muted">▶</span> The Dusty Cup · sung by Karita</p>
+          <p><span class="muted">Newest event:</span> Septimus Signus, 1:04 PM: “Two things I have for you. Two shapes. One edged, one round…”</p>
+        </div>
+      </div>
+      <div class="doors">
+        <div><a class="caps title" href="#">Characters</a><p>90 with something stored</p></div>
+        <div><a class="caps title" href="#">History</a><p>7,205&nbsp;events&nbsp;·&nbsp;823&nbsp;memories · 156&nbsp;diary&nbsp;entries</p></div>
+        <div><a class="caps title" href="#">Screenshots</a><p>305 · newest&nbsp;11:39&nbsp;AM&nbsp;today</p></div>
+        <div><a class="caps title" href="#">Bard songs</a><p>3 · The Dusty Cup</p></div>
+      </div>
+    </section>
+    <aside class="pane">
+      <h2 class="caps headline">Tuning</h2>
+      <dl class="def">
+        <dt class="caps label">Dialogue</dt><dd>google/gemma-4-31b-it<small>+ deepseek/deepseek-v3.2 in rotation</small></dd>
+        <dt class="caps label">Voice</dt><dd>Inworld · inworld-tts-2</dd>
+        <dt class="caps label">Toggles</dt><dd>9 of 10 on · Narration off</dd>
+        <dt class="caps label">Memory</dt><dd>Bekko embedding</dd>
+      </dl>
+      <div class="links caps title"><a href="#">Models</a><a href="#">Engines</a><a href="#">Prompts</a><a href="#">Plugins</a></div>
+      <p class="note muted">Changes here are saved to SkyrimNet's own files, with a backup first.</p>
+    </aside>
+  </div>
+  <footer class="hints caps btn muted"><span><span class="key">Enter</span>Open</span><span><span class="key">/</span>Find</span></footer>
+</div>
+</body>
+</html>

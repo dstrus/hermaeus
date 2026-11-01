@@ -2,6 +2,7 @@
 // SkyrimNet wrote it. The server works out in-game dates; nothing here
 // computes one.
 import type { GameDate } from '#lib/api/types/calendar.ts';
+import { m } from '#lib/copy/messages.ts';
 
 export interface Dated {
 	date?: GameDate;
@@ -10,8 +11,8 @@ export interface Dated {
 
 export function dayLabel(x: Dated): string {
 	if (x.date) return x.date.day;
-	if (x.written) return `Written ${new Date(x.written).toLocaleDateString(undefined, { dateStyle: 'medium' })}`;
-	return 'No date';
+	if (x.written) return m.memories.written({ date: new Date(x.written).toLocaleDateString(undefined, { dateStyle: 'medium' }) });
+	return m.memories.noDate;
 }
 
 export function timeLabel(x: Dated): string {

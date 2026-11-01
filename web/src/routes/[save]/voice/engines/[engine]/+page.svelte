@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { m } from '#lib/copy/messages.ts';
 	import EngineHead from '#lib/features/EngineHead.svelte';
 	import FeaturePage from '#lib/features/FeaturePage.svelte';
 	import { href } from '#lib/nav.ts';
@@ -20,8 +21,8 @@
 				<Tabs
 					label={data.engine.label}
 					tabs={[
-						{ href: base, label: 'Settings' },
-						{ href: `${base}/clones`, label: 'Cloned voices', count: data.clones.voices.length + data.clones.unnamed }
+						{ href: base, label: m.features.engine.settings },
+						{ href: `${base}/clones`, label: m.features.engine.clones, count: data.clones.voices.length + data.clones.unnamed }
 					]}
 				/>
 			{/if}

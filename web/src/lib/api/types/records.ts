@@ -5,11 +5,10 @@ import type * as layers from './layers.ts';
 // source: content.go
 
 /**
- * Kind is a folder of records.
+ * Kind is a folder of records. The frontend names each by its root.
  */
 export interface Kind {
   root: string;
-  label: string;
 }
 /**
  * Provider is one layer's copy of a file.
@@ -208,12 +207,11 @@ export interface Revert {
 // source: voiceeffects.go
 
 /**
- * StageParam is one setting of a kind of stage.
+ * StageParam is one setting of a kind of stage. The frontend names it, and
+ * gives its unit, by its stage's type and its name.
  */
 export interface StageParam {
   name: string; // as the recipe has it
-  label: string;
-  unit?: string;
   whole?: boolean; // written as a whole number, as SkyrimNet's recipes write it
   suggest?: string[]; // text, with these values seen in SkyrimNet's recipes and dashboard
   default: unknown;
@@ -222,12 +220,11 @@ export interface StageParam {
  * StageKind is a kind of stage, with its settings. The types, their
  * settings, and their defaults are those SkyrimNet's dashboard offers when
  * a stage is added; the limits SkyrimNet puts on each setting aren't
- * published, so Hermaeus neither shows nor checks them.
+ * published, so Hermaeus neither shows nor checks them. The frontend
+ * names and describes each by its type.
  */
 export interface StageKind {
   type: string;
-  label: string;
-  what: string;
   params: StageParam[];
 }
 /**

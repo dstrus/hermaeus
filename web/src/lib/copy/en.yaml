@@ -16,8 +16,25 @@ common:
   switchOff: Switch off
   moveUp: Move up
   moveDown: Move down
+  up: Up
+  down: Down
   off: "off"
   gameRunning: Skyrim is running, so nothing can be changed until you close it.
+  edit: Edit
+  save: Save
+  cancel: Cancel
+  remove: Remove
+  resetToDefault: Reset to default
+  open: Open
+  delete: Delete
+  showAll: Show all
+  keep: Keep
+  isOn: "On"
+  isOff: "Off"
+  moreSettings: More settings
+  fewerSettings: Fewer settings
+  notSetUp: Not set up yet
+  notWrittenYet: SkyrimNet hasn’t written {path} yet; it will the next time it starts. Until then there’s nothing to change here.
 
 plugins:
   title: Plugins
@@ -50,6 +67,11 @@ plugins:
   fromMod: From a mod
   local: Local
   by: "by {author}"
+  # The page that edits a file a plugin replaced, by what the file is.
+  editOn:
+    bio: Bio
+    prompt: Prompt
+    content: Content
 
   # What a plugin holds, by top folder. A folder not listed here is shown
   # as {count} and its own name.
@@ -105,3 +127,3550 @@ plugins:
     one: "{count} prompt replaced below it"
     other: "{count} prompts replaced below it"
   replacedWhy: A plugin lower in the list, or your own edits, has these too, so theirs apply.
+
+# The feature pages: settings files shown in each feature’s own terms. Each
+# feature has its title and lead, then its sections, each holding its title
+# and its fields by key.
+features:
+  # What every feature page shares.
+  page:
+    notWritten: Not written yet
+    changed: "{count} changed from the defaults"
+    unchanged: Nothing differs from the defaults
+    notWrittenNotice: >-
+      SkyrimNet hasn’t written {path} yet; it will the next time it starts.
+      Until then the defaults can be read but not changed.
+    noPage: There’s no page “{feature}” under {group}.
+    setting: Setting
+    value: Value
+    default: Default
+    everythingElse: Everything else in {path} is on its {link}.
+    fullSettingsPage: full settings page
+    keyIn: "{key} in {path}"
+    now: Now
+    notInFile: not in the file, so the default
+    defaultIs: default {value}
+
+    # The editor. Its label, by kind of value, when the field has no unit.
+    percent: Percent
+    minutes: Minutes
+    chosen: Chosen
+    key: Key
+    range: "{min} to {max}"
+    percentRange: 0 to 100
+    pressKey: Press the key to use
+    pressHint: Press a key, or click the box with a mouse button.
+    noKey: No key
+    replaceSecret: Type a new one to replace it
+    secretSaved: Saved into {path}. Hermaeus never shows it again; save it empty to clear it.
+    onePerLine: One per line
+    onePerLineHint: One per line. Blank lines are left out.
+    name: Name
+    addEntry: Add an entry
+    entry: entry {n}
+    numbered: "{label} {n}"
+    removeEntry: Remove entry {n}
+    removeNamed: Remove {name}
+    valueFor: "{column} for {name}"
+    spacesCount: Spaces count, so a phrase like “ - ” matches only with its spaces.
+    columnUnit: "{label} ({unit})"
+    columnPercent: "{label} %"
+    cell: "{column} {value}"
+
+    # What happened.
+    switchedOn: "{label}: on."
+    switchedOff: "{label}: off."
+    saved: "{label}: {value}."
+    mapChangedOne: "{label}: {name} changed."
+    mapChanged: "{label}: {count} changed."
+    reset: "{label} is back to its default."
+
+  # A setting’s value as the page shows it, and what’s wrong with one typed in.
+  values:
+    "on": "On"
+    "off": "Off"
+    cellOn: "on"
+    set: Set
+    notSet: Not set
+    none: None
+    picked: "{count} of {total}"
+    entries: { one: "{count} entry", other: "{count} entries" }
+    rowsOn: "{entries}, {count} on"
+    minutes: "{value} min"
+    withUnit: "{value} {unit}"
+    firstPart: first part
+    eachNeeds: Each entry needs its {part}.
+    entryNeeds: "{entry} needs its {column}."
+    cellNeedsNumber: "{entry}: {column} needs a number."
+    cellPercent: "{entry}: {column} is a percentage, from 0 to 100."
+    cellWhole: "{entry}: {column} is a whole number."
+    cellRange: "{entry}: {column} is from {min} to {max}."
+    choose: Choose a value for {label}.
+    percent: "{label} is a percentage, from 0 to 100."
+    whole: "{label} is a whole number."
+    needsNumber: "{label} needs a number."
+    notNumber: "{label} must be a number."
+    atLeast: "{label} is at least {min}."
+    atMost: "{label} is at most {max}."
+
+  # The filter lists below the actor and memory filters.
+  filters:
+    inEffect: In effect
+    inEffectWhat: What every list below adds up to, with the lists each entry comes from.
+    nothing: Nothing
+    lists: Lists
+    newList: New list
+    listsWhat: >-
+      Every list adds its entries. Editing a built-in or plugin list saves your
+      own copy over it; remove the copy to bring the original back. To drop one
+      of them entirely, edit it and empty it.
+    total:
+      one: "{count} list, from SkyrimNet’s defaults, your plugins, and your own."
+      other: "{count} lists, from SkyrimNet’s defaults, your plugins, and your own."
+    none:
+      memory: No memory filter lists in any layer.
+      actor: No actor filter lists in any layer.
+    yours: Yours
+    builtIn: Built-in
+    copyIn: Your copy of the one in {plugin}
+    count: "{label}: {count}"
+    empty: Empty
+    edit: Edit {name}
+    yourCopy: Your copy of {name}
+    editCopy: Edit a copy
+    removeCopy: Remove copy
+    name: Name
+    description: Description
+    perLine: One {noun} per line, by editor ID
+    add: Add
+    added: Added {name}.
+    saved: Saved {name}.
+    savedCopy: Saved your copy of {name}. It replaces the original until you remove it.
+    removedCopy: Removed your copy of {name}; the one in {plugin} applies again.
+    removed: Removed {name}.
+    # The six lists a filter list adds to.
+    fields:
+      factionWhitelist:
+        label: Faction whitelist
+        noun: faction
+      factionBlacklist:
+        label: Faction blacklist
+        noun: faction
+      raceWhitelist:
+        label: Race whitelist
+        noun: race
+      raceBlacklist:
+        label: Race blacklist
+        noun: race
+      genderWhitelist:
+        label: Gender whitelist
+        noun: gender
+        placeholder: Male or Female, one per line
+      genderBlacklist:
+        label: Gender blacklist
+        noun: gender
+        placeholder: Male or Female, one per line
+
+  # A plugin’s settings page, from the schema it ships.
+  pluginSettings:
+    general: General
+    what: These are the plugin’s own settings, as it describes them.
+    notFound: No plugin describes settings called “{name}”.
+
+  # A voice engine’s title bar and tabs.
+  engine:
+    inUse: In use
+    notInUse: Not in use
+    choose: Choose the engine
+    menu: Engine
+    optionInUse: "{engine} · in use"
+    settings: Settings
+    clones: Cloned voices
+    notFound: There’s no voice engine “{engine}”.
+    noClones: "{engine} keeps no cloned voices."
+
+  # The voices a cloud engine has cloned into the player’s account.
+  clones:
+    none: >-
+      None yet. SkyrimNet’s dashboard can clone voice types into your {account}
+      account all at once with its bulk clone.
+    count:
+      one: "{count} voice in your {account} account."
+      other: "{count} voices in your {account} account."
+    countKept:
+      one: >-
+        {count} voice in your {account} account, of up to {max} kept. Before
+        cloning past the limit, SkyrimNet deletes the voice used longest ago.
+      other: >-
+        {count} voices in your {account} account, of up to {max} kept. Before
+        cloning past the limit, SkyrimNet deletes the voice used longest ago.
+    over: >-
+      More than the limit. Each time SkyrimNet clones another voice, it first
+      deletes the one used longest ago, but never one cloned outside SkyrimNet.
+    voiceType: Voice type
+    language: Language
+    lastUsed: Last used
+    unnamed:
+      one: "{count} other voice with a name Hermaeus can’t read."
+      other: "{count} other voices with a name Hermaeus can’t read."
+
+  gamemaster:
+    title: GameMaster
+    what: The GameMaster reads the scene around you and decides when characters speak up or act.
+    general:
+      title: General
+      gamemasterEnabled:
+        label: GameMaster
+        what: The GameMaster altogether, which also handles replies to what you say.
+      gamemasterAgentEnabled:
+        label: Act on its own
+        what: >-
+          Let the GameMaster start scenes by itself, prompting characters to
+          speak now and then.
+      gamemasterExcludeActorsInScenes:
+        label: Leave scenes alone
+        what: >-
+          Don’t choose characters who are busy in one of the game’s own scenes,
+          such as scripted events or vanilla dialogue.
+    timing:
+      title: Timing
+      gamemasterActionCooldownSeconds:
+        label: Between actions
+        what: How long the GameMaster waits after one action before the next.
+        unit: seconds
+      gamemasterRequestTimeoutSeconds:
+        label: Give the model
+        what: How long a request to the GameMaster’s model can take before it’s given up.
+        unit: seconds
+      gamemasterContinuousSceneCooldownSeconds:
+        label: Restart a stalled scene after
+        what: >-
+          In a continuous scene, the next character speaks as the last one
+          finishes. If the conversation dies instead, the GameMaster tries to
+          restart it after this much silence.
+        unit: seconds
+    context:
+      title: Context
+      gamemasterNearbyActorRadius:
+        label: Who counts as nearby
+        what: How far away, in game units, a character can be and still be part of the scene.
+        unit: units
+      gamemasterRecentEventsCount:
+        label: Recent events considered
+        what: How many of the latest events the GameMaster reads before deciding.
+        unit: events
+
+  narration:
+    title: Narration
+    what: A narrator describing what happens around you, spoken or as subtitles.
+    narration:
+      title: Narration
+      narrationEnabled:
+        label: Narrate
+        what: Have a narrator describe what happens.
+      narrationSubtitlesOnly:
+        label: Subtitles only
+        what: >-
+          Show the narration as subtitles without voicing it. It still goes into
+          prompts and the event history.
+      narrationDisableDuringCombat:
+        label: Quiet in combat
+        what: No narration while you’re fighting.
+      narrationDisableFactions:
+        label: Quiet in these factions
+        what: >-
+          No narration while you belong to any of these factions, by editor ID,
+          separated by commas.
+
+  conversation:
+    title: Conversation
+    what: >-
+      How characters take turns to speak: how many times they can reply to one
+      another, which reasons to speak are prioritized, and how long each kind
+      may wait its turn before it’s dropped.
+    turnTaking:
+      title: Turn taking
+      maxChainDepth:
+        label: Replies in a row
+        what: >-
+          How many characters may answer one another after an opening line
+          before the exchange ends.
+        unit: replies
+      takeoverBeforeAudio:
+        label: Urgent lines go first
+        what: >-
+          A more urgent reason to speak, such as you or a line said to someone,
+          replaces a line still being made, before any of it is heard.
+      leadSeconds:
+        label: Head start
+        what: >-
+          How long before the current line ends the next one starts being made.
+          At 0, SkyrimNet judges it from recent lines.
+        zero: Auto
+      generationTimeoutSeconds:
+        label: Give up after
+        what: A line still being made after this long is abandoned, and the next may go.
+        unit: seconds
+    waiting:
+      title: Waiting
+      what: How long each kind of reason to speak may wait for its turn.
+      # Every kind of wait shares these.
+      dropped: "{what} At 0, it’s never dropped."
+      unit: seconds
+      zero: Never dropped
+      ttlSecondsPlayer:
+        label: Your speech
+        what: Characters answering you.
+      ttlSecondsDirected:
+        label: Said to someone
+        what: Lines meant for a particular character.
+      ttlSecondsUrgent:
+        label: Urgent events
+        what: Lines about something that just happened, such as an attack.
+      ttlSecondsReaction:
+        label: Reactions
+        what: Characters reacting to what’s around them.
+      ttlSecondsContinuation:
+        label: Replies
+        what: Characters answering one another.
+
+  npcThoughts:
+    title: NPC thoughts
+    what: Unspoken thoughts a character has, coming only when a trigger or a mod asks for one.
+    general:
+      title: General
+      enabled:
+        label: NPC thoughts
+        what: Let characters have thoughts at all. When off, requests for thoughts are ignored.
+      perNPCCooldownSeconds:
+        label: Between thoughts
+        what: >-
+          A minimum wait time between two thoughts for a single character, so
+          one character doesn’t take every turn.
+        unit: seconds
+      eventHistoryCount:
+        label: Recent events considered
+        what: How many of the latest events a thought can draw on.
+        unit: events
+    inDialogue:
+      title: In dialogue
+      allowInlineInDialogue:
+        label: Thoughts while speaking
+        what: Let a character record a separate, unspoken thought while speaking.
+
+  playerReactions:
+    title: Player reactions
+    what: >-
+      Your character reacting to what happens without you doing anything: a
+      thought, or a line said aloud, when certain events happen.
+    general:
+      title: General
+      enabled:
+        label: Player reactions
+        what: >-
+          Let your character react on their own. It’s the same switch as Player
+          reactions among the quick toggles.
+    events:
+      title: Events
+      eventConfigs:
+        label: Reactions by event
+        what: >-
+          Each kind of event your character reacts to: whether they do, how, how
+          likely they are to, and how long before they do again.
+        noun: { one: "{count} event", other: "{count} events" }
+        add: Add event
+        cols:
+          eventType:
+            label: Event
+          enabled:
+            label: "On"
+          responseType:
+            label: As
+            choices:
+              thought:
+                label: a thought
+              audible:
+                label: aloud
+          probability:
+            label: Chance
+          cooldownSeconds:
+            label: Cooldown
+            unit: s
+
+  bardSinging:
+    title: Bard singing
+    what: >-
+      Bards singing songs: new ones a music service composes from what’s been
+      happening and what bards remember, and ones already made.
+    see: The songs of each playthrough are under {link}.
+    seeLabel: Bard songs
+    general:
+      title: General
+      bardSingingEnabled:
+        label: Bard singing
+        what: Let bards sing at all. It’s the same switch as Bards among the quick toggles.
+      bardSingingGenerationComposeEnabled:
+        label: Compose new songs
+        what: >-
+          Have the music service below compose new songs. Off, bards sing only
+          the songs they already have.
+      bardSingingPlaybackVolume:
+        label: Volume
+        what: >-
+          How loud bards sing, next to the game’s other sounds. With Skyrim’s
+          own audio engine in use, its SkyrimNet Bards slider sets this instead.
+    composing:
+      title: Composing
+      bardSingingProvider:
+        label: Music service
+        what: Who composes new songs. Each costs credits there.
+      bardSingingBackupProvider:
+        label: Backup
+        what: Who composes when the music service fails.
+        choices:
+          none:
+            label: None
+            what: no backup
+      bardSingingGenerationIntervalHours:
+        label: How often
+        what: How many hours of game time pass between tries at a new song.
+        unit: game hours
+      bardSingingGenerationMaxCachedSongs:
+        label: Songs kept
+        what: >-
+          How many composed songs each playthrough keeps. Past it, the oldest
+          composed song’s audio is removed first; imported songs don’t count and
+          are never removed.
+        unit: songs
+      bardSingingGenerationDefaultStyle:
+        label: Style
+        what: Words for the kind of music wanted, separated by commas.
+        placeholder: medieval bardic folk, acoustic lute, harp, tavern ambiance
+      bardSingingGenerationNegativeTags:
+        label: Avoid
+        what: Words for what the music shouldn’t be, separated by commas, such as modern genres.
+        placeholder: electric guitar, synthesizer
+      bardSingingGenerationLanguage:
+        label: Sung in
+        what: The language songs are sung in, as a two-letter code. Only AceStep uses it.
+    # Each music service: a choice for who composes, and a section of its
+    # own. Its key and model fields share the two below; {service} is the
+    # service as they name it, and {where} where its key comes from.
+    providerKey:
+      label: Key
+      what: Your {service} key, from {where}. It’s kept apart from the keys on the Providers page.
+    providerModel:
+      label: Model
+      what: The music model, as {service} names it.
+    providers:
+      openrouter:
+        label: OpenRouter
+        what: openrouter.ai, with an OpenRouter key
+        service: OpenRouter
+        where: openrouter.ai
+      suno:
+        label: Suno
+        what: sunoapi.org, with a key from there
+        service: sunoapi.org
+        where: sunoapi.org
+        modelService: Suno
+        bardSingingSunoBaseUrl:
+          label: Address
+          what: Where Suno’s service is reached. Change it only to go through a proxy of your own.
+      nanoGpt:
+        label: NanoGPT
+        what: nano-gpt.com, with a NanoGPT key
+        service: NanoGPT
+        where: nano-gpt.com
+      minimax:
+        label: MiniMax
+        what: api.minimax.io, with a MiniMax key
+        service: MiniMax
+        where: MiniMax
+      acestepCloud:
+        label: AceMusic
+        what: acemusic.ai’s AceStep, with an AceMusic key
+        service: AceMusic
+        where: acemusic.ai
+      acestepLocal:
+        label: AceStep server
+        what: an AceStep server you run
+        service: your server
+        bardSingingAcestepLocalBaseUrl:
+          label: Address
+          what: Your AceStep server’s full chat-completions address.
+
+  actorFilter:
+    title: Actor filter
+    what: >-
+      Which characters SkyrimNet involves at all: a few switches here, and lists
+      of factions, races, and genders below. A whitelist entry also lets a
+      character who can’t speak take part, the way Paarthurnax does.
+    mode:
+      title: Mode
+      filterMode:
+        label: Mode
+        what: >-
+          With a blacklist, every character takes part except those the
+          blacklists name. With a whitelist, only those the whitelists name do.
+        choices:
+          blacklistExclusion:
+            label: Blacklist
+            what: Everyone but those listed
+          whitelistOnly:
+            label: Whitelist
+            what: Only those listed
+      allowOnlyActorsCapableOfSpeech:
+        label: Only those who can speak
+        what: Characters who can’t speak are left out, unless a whitelist names them.
+      allowSummonedOrReanimated:
+        label: Summoned and raised
+        what: Summoned and reanimated characters always take part, whatever the lists say.
+
+  memories:
+    title: Memories
+    what: >-
+      How SkyrimNet turns what happens into memories, and which of them an NPC
+      recalls when they speak.
+    general:
+      title: General
+      performanceEnableBackgroundProcessing:
+        label: Make memories in the background
+        what: Turn events into memories while you play, rather than not at all.
+      memoryRetrievalMaxMemoriesPerRetrieval:
+        label: Memories recalled at once
+        what: How many memories a single recall brings into a prompt.
+      memoryLifecycleMaxMemoriesPerActor:
+        label: Memory index starts at
+        what: >-
+          The starting capacity of each character’s search index. It grows past
+          this, so it isn’t a limit.
+      generationRulesMinImportanceForStorage:
+        label: Keep memories above
+        what: The importance a new memory needs to be kept at all.
+    embeddingModel:
+      title: Embedding model
+      what: >-
+        The model that turns memories into vectors for recall. Changing it
+        re-embeds every memory in the background, and recall is partial until
+        that finishes.
+      embeddingModel:
+        label: Model
+        what: >-
+          Bekko has the best recall, in English and other languages, and embeds
+          about half as fast. all-MiniLM-L6-v2 is lighter and English only. A
+          custom model goes in a folder of its own, holding its model.onnx and
+          tokenizer.json, in SkyrimNet’s folder for custom models, and is chosen
+          by its folder’s name.
+        choices:
+          bekkoEmbeddingV1A25m:
+            label: Bekko Embedding v1
+            what: Best recall, multilingual
+          allMiniLML6V2:
+            what: Lighter, English only
+    performance:
+      title: Performance
+      performanceMaxConcurrentGenerations:
+        label: Memories written at once
+        what: How many memory generations run at the same time.
+      performanceReembedThreads:
+        label: Re-embedding threads
+        what: >-
+          CPU threads that re-index memories in the background after an update,
+          at low priority. Lower it if the game stutters while that runs; it
+          applies the next time re-embedding starts.
+      performanceMemoryBatchSize:
+        label: Memories per cycle
+        what: How many memories one processing cycle generates.
+    segments:
+      title: Segment boundaries
+      what: >-
+        Events are cut into segments, and each segment becomes memories. These
+        are in real minutes.
+      boundaryConfigMaxTimeGapMinutesReal:
+        label: Gap that ends a segment
+        what: A pause between events longer than this starts a new segment.
+      boundaryConfigMinSegmentDurationMinutesReal:
+        label: Shortest segment
+        what: A segment shorter than this isn’t turned into memories.
+      boundaryConfigMaxSegmentDurationMinutesReal:
+        label: Longest segment
+        what: A segment this long is cut, whatever is happening.
+      boundaryConfigMaxEventsPerSegment:
+        label: Most events in a segment
+        what: A segment with this many events is cut.
+        unit: events
+      boundaryConfigMinEventsPerSegment:
+        label: Fewest events for a memory
+        what: A segment with fewer events than this makes no memory.
+        unit: events
+    recall:
+      title: Recall thresholds
+      vectorStorageSimilarityThreshold:
+        label: Similarity needed
+        what: >-
+          How alike a memory and the moment must be to count: 50% is related,
+          100% a strong match.
+      vectorStorageMinRelevanceScore:
+        label: Relevance needed
+        what: The overall score a memory needs to be recalled, once the weights below are applied.
+    weights:
+      title: Scoring weights
+      what: How much each part of a memory’s fit counts toward its relevance.
+      scoringWeightsSemantic:
+        label: Meaning
+        what: How alike the memory and the moment are in meaning.
+      scoringWeightsTemporal:
+        label: Recency
+        what: How recent the memory is.
+      scoringWeightsActor:
+        label: Who was there
+        what: Whether the people in the memory are the people here.
+      scoringWeightsEmotional:
+        label: Feeling
+        what: How the memory’s mood fits the moment.
+      scoringWeightsLocation:
+        label: Place
+        what: Whether the memory happened near here.
+      scoringWeightsKeyword:
+        label: Words
+        what: Whether the memory shares words with what was said.
+    worldKnowledge:
+      title: World knowledge
+      what: Lore and facts any NPC can draw on, from the History section’s Knowledge page.
+      worldKnowledgeMaxSemanticResults:
+        label: Entries recalled
+        what: How many knowledge entries, found by relevance, go into an NPC’s prompt.
+      worldKnowledgeMaxAlwaysInject:
+        label: Always-included entries
+        what: How many of the entries marked “always include” go in. 0 means all of them.
+      worldKnowledgeSimilarityThreshold:
+        label: Similarity needed
+        what: How alike an entry and the moment must be to be considered, on the model’s scale.
+      worldKnowledgeMinRelevanceScore:
+        label: Relevance needed
+        what: >-
+          The combined score an entry needs to be included: the filter that
+          keeps unrelated lore out, however high it ranks.
+      worldKnowledgeWeightKeyword:
+        label: Words
+        what: How much shared words count in an entry’s score.
+      worldKnowledgeWeightEmbedding:
+        label: Meaning
+        what: How much likeness in meaning counts.
+      worldKnowledgeWeightImportance:
+        label: Importance
+        what: How much an entry’s own importance counts.
+    vectorIndex:
+      title: Vector index
+      what: The search index’s build settings. The defaults suit almost everyone.
+      vectorStorageHnswEfConstruction:
+        label: Build effort
+        what: "HNSW’s ef_construction: higher builds a better index, more slowly."
+      vectorStorageHnswM:
+        label: Connectivity
+        what: "HNSW’s M: how many links each entry keeps. Higher uses more memory."
+
+  memoryFilter:
+    title: Memory filter
+    what: >-
+      Which characters form memories at all: a few switches here, and lists of
+      factions, races, and genders below.
+    mode:
+      title: Mode
+      enableMemoryFiltering:
+        label: Filter memories
+        what: Check each character against the switches and lists here before they form a memory.
+      filterMode:
+        label: Mode
+        what: >-
+          With a blacklist, everyone forms memories except those the blacklists
+          name. With a whitelist, only those the whitelists name do.
+        choices:
+          blacklistExclusion:
+            label: Blacklist
+            what: Everyone but those listed
+          whitelistOnly:
+            label: Whitelist
+            what: Only those listed
+      allowOnlyActorsCapableOfSpeech:
+        label: Only those who can speak
+        what: Characters who can’t speak form no memories, unless a whitelist names them.
+      allowPlayerMemories:
+        label: Your character too
+        what: Your own character forms memories.
+
+  diaries:
+    title: Diaries
+    what: >-
+      When SkyrimNet writes an entry in an NPC’s diary, what it draws on, and
+      whether those entries come back as memories.
+    general:
+      title: General
+      enabled:
+        label: Write diaries
+        what: Let NPCs keep diaries at all.
+      respectDayBoundary:
+        label: One day at a time
+        what: Only events since midnight, game time, go into an entry.
+      minEventsForGeneration:
+        label: Events before an entry
+        what: How many events not yet written up an NPC needs before an entry is written.
+        unit: events
+    content:
+      title: Content
+      maxRecentEvents:
+        label: Recent events considered
+        what: How many of the latest events an entry can draw on.
+        unit: events
+      maxRecentMemories:
+        label: Memories considered
+        what: How many memories an entry can draw on.
+        unit: memories
+      minImportanceScore:
+        label: Memories above
+        what: The importance a memory needs to be drawn on.
+      targetEntryLength:
+        label: Entry length
+        what: The length an entry aims for, in words.
+        unit: words
+    recall:
+      title: Recall
+      excludeFromRecall:
+        label: Keep diaries out of recall
+        what: >-
+          Skip the memories made from diary entries when an NPC recalls memories
+          in conversation. The entries are still indexed, so searching them by
+          hand still works.
+
+  dynamicBios:
+    title: Dynamic bios
+    what: >-
+      How SkyrimNet rewrites a character’s bio as you play: which sections it
+      may change, and what it draws on.
+    general:
+      title: General
+      enabled:
+        label: Rewrite bios
+        what: Let SkyrimNet update a character’s dynamic bio from what happens.
+      preserveCorePersonality:
+        label: Keep the core personality
+        what: A rewrite keeps the character’s defining traits, whatever has happened.
+    sections:
+      title: Sections
+      updatableBlocks:
+        label: Sections it may rewrite
+        what: Which sections of a bio a rewrite may change. The rest stay as written.
+    context:
+      title: Context
+      maxRecentEvents:
+        label: Recent events considered
+        what: How many of the latest events a rewrite can draw on.
+        unit: events
+      maxMemories:
+        label: Memories considered
+        what: How many memories a rewrite can draw on.
+        unit: memories
+      minImportanceScore:
+        label: Memories above
+        what: The importance a memory needs to be drawn on.
+
+  speech:
+    title: Speech
+    what: >-
+      Which engine gives characters their voices, and what every engine shares:
+      the narrator, characters without voice lines of their own, and subtitles.
+      Each engine’s own settings are under Engines.
+    engine:
+      title: Engine
+      ttsEngine:
+        label: Engine
+        what: What turns characters’ lines into speech. Without one, they aren’t spoken at all.
+        # Each engine is a choice, by its name, with one of these two.
+        local: runs on a machine of yours
+        service: a service you sign up for
+        choices:
+          noop:
+            label: None
+            what: lines are only shown, never spoken
+      ttsMaxSegmentWords:
+        label: Words sent at once
+        what: >-
+          Lines go to the engine a sentence at a time. Above 0, short sentences
+          in a row are joined, up to this many words, before they’re sent. At 0,
+          every sentence goes on its own.
+        unit: words
+        zero: Each sentence
+    narrator:
+      title: Narrator
+      ttsEnableNarratorAudioEffect:
+        label: Narrator effect
+        what: >-
+          Play narration through an audio effect, so the narrator sounds apart
+          from the characters.
+      ttsEnablePlayerThoughtAudioEffect:
+        label: Thoughts effect
+        what: >-
+          Play your character’s thoughts through an audio effect, so they sound
+          apart from speech.
+      ttsUseKokoroForNarrator:
+        label: Kokoro narrator
+        what: >-
+          Narrate with Kokoro, a small voice model that runs on your own
+          machine, rather than the engine.
+      ttsKokoroNarratorVoice:
+        label: Kokoro voice
+        what: Which of Kokoro’s voices narrates.
+      ttsKokoroVolumeLevel:
+        label: Kokoro volume
+        what: How loud Kokoro’s narration plays.
+    gameDialogue:
+      title: Game dialogue
+      what: >-
+        The game’s own dialogue: the lines you pick, and characters with no
+        recording of a line.
+      vanillaDialogueVoicePlayerChoices:
+        label: Voice your choices
+        what: >-
+          Speak the line you pick in the dialogue menu in your character’s voice
+          before the NPC answers.
+      vanillaDialogueVoiceSilentNPCs:
+        label: Voice silent characters
+        what: >-
+          Speak the game’s own lines for characters who have no recording of
+          them. Universal Translator depends on it.
+      vanillaDialogueFixSubtitleDuringTTS:
+        label: Subtitle fix
+        what: SkyrimNet’s fix for the game’s subtitle while such a line is spoken.
+    subtitles:
+      title: Subtitles
+      subtitlesEnableNPCSubtitles:
+        label: Characters’ lines
+        what: Show what characters say as subtitles.
+      subtitlesEnablePlayerSubtitles:
+        label: Your lines
+        what: Show what you say as subtitles.
+      subtitlesEnableConsoleOutput:
+        label: In the console
+        what: Also write lines to the game’s console.
+    volume:
+      title: Volume
+      audioUniversalMaxVolume:
+        label: Loudest
+        what: The most any of SkyrimNet’s audio plays at. 1 is full volume.
+
+  # Each voice engine’s page: the Connection section every engine has, then
+  # the engine’s own sections, then the four after it every engine shares.
+  engines:
+    connection:
+      title: Connection
+      endpoint:
+        label: Address
+        what: Where the server is reached.
+        whatBundled: Left empty for the engine that comes with SkyrimNet.
+        whatInworld: >-
+          Where Inworld’s service is reached. It can name your account, so it’s
+          kept like a key: Hermaeus never shows it.
+      language:
+        label: Language
+        what: The language lines are spoken in, as the engine names it.
+      timeout:
+        label: Wait for a line
+        what: How long to wait for the engine to speak a line before giving up.
+        unit: seconds
+      connectTimeout:
+        label: Wait to connect
+        what: How long to wait to reach the engine.
+        unit: seconds
+      maxParallelRequests:
+        label: Lines at once
+        what: >-
+          How many lines the engine may work on at the same time. More starts
+          speech sooner but takes more of the machine or account.
+        unit: lines
+      maxRetries:
+        label: Retries
+        what: >-
+          How many times to ask again when the engine fails with a server error.
+          At 0, a failed line isn’t retried.
+        zero: None
+      streamAudio:
+        label: Stream
+        what: >-
+          Start playing a line while the rest of it is still being made, so
+          speech begins sooner.
+    tags:
+      title: Tags
+      what: Tags the model writes into a line, such as [sighs], for how it’s spoken.
+      enableAudioTags:
+        label: Use tags
+        what: Pass tags on to the engine. Only engines that understand them do anything with them.
+      allowedAudioTags:
+        label: Allowed tags
+        what: The tags passed on; others are taken out of the line.
+        noun: { one: "{count} tag", other: "{count} tags" }
+    pronunciation:
+      title: Pronunciation
+      pronunciationDictionary:
+        label: Pronunciations
+        what: Words the engine says wrong, each spelled the way it should sound.
+        columns:
+          first: Word
+          second: Say it as
+        noun: { one: "{count} word", other: "{count} words" }
+        add: Add word
+    narration:
+      title: Narration
+      narrativeEnabled:
+        label: Speak narration
+        what: Speak the narrator’s lines through this engine.
+      narrativeUseNarratorVoice:
+        label: Narrator’s voice
+        what: Narrate in a narrator’s voice of its own.
+      narrativeShowNarrativeInSubtitles:
+        label: Narration subtitles
+        what: Show narration as subtitles too.
+    fallbackVoices:
+      title: Fallback voices
+      what: Voices used when a character’s own voice can’t be made.
+      voiceFallbackEnabled:
+        label: Fall back
+        what: Speak in a fallback voice when a character’s own fails, rather than not at all.
+      voiceFallbackDefaultFallbackVoiceMale:
+        label: Men
+        what: The voice type a man falls back to, when his race has none below.
+      voiceFallbackDefaultFallbackVoiceFemale:
+        label: Women
+        what: The voice type a woman falls back to, when her race has none below.
+      voiceFallbackRaceGenderFallbacks:
+        label: By race
+        what: The voice type each race and gender falls back to, before the two above.
+        columns:
+          first: Race and gender
+          second: Voice type
+        noun: { one: "{count} voice", other: "{count} voices" }
+
+    pockettts:
+      label: PocketTTS
+      what: >-
+        Voices made on your own machine, cloned from each voice type’s sample.
+        It needs nothing else installed.
+      voice:
+        title: Voice
+        maxLsdSteps:
+          label: Steps
+          what: How many passes go into each line. More sound better but take longer.
+        temperature:
+          label: Variety
+          what: How much each line varies. Lower is steadier; higher is livelier.
+        modelPrecision:
+          label: Precision
+          what: How the model runs.
+          choices:
+            fp32:
+              what: better quality, best on a graphics card
+            int8:
+              what: faster on the processor, a little rougher
+        deviceIndex:
+          label: Device
+          what: Which graphics card to use, counting from 0.
+    piper:
+      label: Piper
+      what: >-
+        Fast voices made on your own machine from voice model files, which are
+        installed as a mod of their own.
+      voice:
+        title: Voice
+        enablePreloading:
+          label: Load at start
+          what: Load the voice models when the game starts, rather than when each is first needed.
+        piperSettingsNoiseScale:
+          label: Expressiveness
+          what: >-
+            How much feeling voices carry. 1 is normal; higher is more dramatic,
+            lower is flatter.
+        piperSettingsNoiseW:
+          label: Rhythm
+          what: >-
+            How natural the pacing sounds. 1 is normal; higher varies more,
+            lower is more mechanical.
+        piperSettingsLengthScale:
+          label: Slowness
+          what: How drawn out speech is. 1 is normal; higher is slower, lower is faster.
+        piperSettingsNumThreads:
+          label: Threads
+          what: How many of the processor’s threads Piper uses.
+        speakerId:
+          label: Speaker
+          what: >-
+            Which speaker to use in a model with several, counting from 0. The
+            usual English models have one.
+    inworld:
+      label: Inworld
+      what: >-
+        Inworld’s service, with voices cloned from each voice type’s sample. It
+        needs an Inworld account and key.
+      account:
+        title: Account
+        apiKeyBase64:
+          label: Key
+          what: Your Inworld key, as Inworld gives it, encoded in Base64.
+        workspaceId:
+          label: Workspace
+          what: The Inworld workspace voices are cloned into.
+      voice:
+        title: Voice
+        modelId:
+          label: Model
+          what: Which of Inworld’s models speaks.
+          choices:
+            inworldTts2:
+              what: the best quality
+            inworldTts2Flash:
+              what: the fastest and cheapest
+        temperature:
+          label: Variety
+          what: How much each line varies, from 0 to 2. Higher is more expressive.
+        speakingRate:
+          label: Speed
+          what: How fast lines are spoken. 1 is normal.
+        sampleRateHz:
+          label: Sample rate
+          what: The quality of the audio Inworld sends back.
+          unit: Hz
+        cloneCacheMaxVoices:
+          label: Cloned voices kept
+          what: >-
+            How many voices may be cloned into the account. Past it, the voice
+            used longest ago is deleted first; voices cloned outside SkyrimNet
+            count, but are never deleted. At 0, there’s no limit.
+          unit: voices
+          zero: No limit
+    elevenlabs:
+      label: ElevenLabs
+      what: >-
+        ElevenLabs’s service, with voices cloned from each voice type’s sample.
+        It needs an ElevenLabs key.
+      account:
+        title: Account
+        apiKey:
+          label: Key
+          what: Your ElevenLabs key.
+        cloneCacheSharedAccount:
+          label: Shared account
+          what: >-
+            Switch on when more than one SkyrimNet install uses the account, so
+            they reuse each other’s cloned voices rather than cloning over them.
+        cloneCacheMaxVoices:
+          label: Cloned voices kept
+          what: >-
+            How many voices may be cloned into the account. Past it, the voice
+            used longest ago is deleted first. At 0, there’s no limit.
+          unit: voices
+          zero: No limit
+      voice:
+        title: Voice
+        modelId:
+          label: Model
+          what: Which of ElevenLabs’s models speaks.
+        voiceSettingsStability:
+          label: Stability
+          what: How consistent a voice is from line to line.
+        voiceSettingsSimilarityBoost:
+          label: Likeness
+          what: How closely a voice keeps to the sample it was cloned from.
+        voiceSettingsStyle:
+          label: Style
+          what: How much a voice exaggerates its delivery.
+        voiceSettingsUseSpeakerBoost:
+          label: Speaker boost
+          what: Make voices clearer.
+        useRequestContext:
+          label: Earlier lines as context
+          what: >-
+            Send a speaker’s earlier lines with each request, for a steadier
+            delivery. Only eleven_v4_turbo uses it, and lines are then made one
+            at a time.
+        outputFormat:
+          label: Audio format
+          what: The audio ElevenLabs sends back. Streaming needs a PCM format.
+        optimizeStreamingLatency:
+          label: Speed over quality
+          what: "From 0 to 4: higher starts speech sooner, at some cost to quality."
+    fateless:
+      label: Fateless
+      what: >-
+        Fateless’s service, from SkyrimNet Beta 29: characters speak in their
+        own in-game voices, with no server or key to set up. It needs a Fateless
+        subscription, signed in from SkyrimNet’s dashboard.
+      voice:
+        title: Voice
+        model:
+          label: Model
+          what: >-
+            Which of Fateless’s speech models speaks. Directions such as [say
+            bitterly in a low voice] need fateless/speech-plus; fateless/speech
+            is faster and cheaper, and plays only sounds such as [sigh].
+          choices:
+            fatelessSpeechPlus:
+              label: Speech Plus
+              what: the default, with directions
+            fatelessSpeech:
+              label: Speech
+              what: faster and cheaper, sounds only
+        speed:
+          label: Speed
+          what: How fast lines are spoken. 1 is normal.
+        temperature:
+          label: Variety
+          what: How much each line varies.
+    xtts:
+      label: XTTS
+      what: >-
+        Cloned voices from an XTTS server you run, on your own machine or rented
+        through VastAI.
+      voice:
+        title: Voice
+        enableLiveCloning:
+          label: Clone as needed
+          what: Clone a voice from its sample the first time it’s used, and keep it for next time.
+    zonos:
+      label: Zonos
+      what: >-
+        Voices that follow a character’s mood, from a Zonos server you run, on
+        your own machine or rented through VastAI.
+      voice:
+        title: Voice
+        model:
+          label: Model
+          what: Which Zonos model speaks.
+          choices:
+            zyphraZonosV01Hybrid:
+              label: Hybrid
+            zyphraZonosV01Transformer:
+              label: Transformer
+        speakingRate:
+          label: Speed
+          what: How fast lines are spoken. Lower is slower.
+        pitchStd:
+          label: Pitch variation
+          what: How much the pitch moves. Higher is more varied.
+        cfgScale:
+          label: Guidance
+          what: How closely speech follows the voice and mood it’s given.
+        vqScore:
+          label: VQ score
+          what: Trades audio quality against speed.
+        dnsmosOverall:
+          label: Clarity target
+          what: The audio quality aimed for, from 1 to 5.
+        fmax:
+          label: Highest frequency
+          what: The highest frequency in the audio.
+          unit: Hz
+        denoiseSpeaker:
+          label: Clean the sample
+          what: Remove noise from a voice’s sample before cloning it.
+        randomizeSeed:
+          label: New seed each line
+          what: Vary every line, rather than repeating the same delivery.
+        unconditionalKeys:
+          label: Unconditioned
+          what: Conditions Zonos leaves for itself to decide, by name.
+          noun: { one: "{count} condition", other: "{count} conditions" }
+      sampling:
+        title: Sampling
+        topP:
+          label: Top P
+          what: A sampling setting. 0 leaves it off.
+        minK:
+          label: Min K
+          what: A sampling setting. 0 leaves it off.
+        minP:
+          label: Min P
+          what: A sampling setting. 0 leaves it off.
+        linear:
+          label: Linear
+          what: A sampling setting.
+        confidence:
+          label: Confidence
+          what: A sampling setting.
+        quadratic:
+          label: Quadratic
+          what: A sampling setting.
+    chatterbox:
+      label: Chatterbox
+      what: Expressive voices that take emotion tags, from a Chatterbox server you run.
+      voice:
+        title: Voice
+        exaggeration:
+          label: Expressiveness
+          what: How dramatic emotions sound. Higher is more expressive.
+        cfgWeight:
+          label: Pace
+          what: How the pace of speech is held.
+        temperature:
+          label: Variety
+          what: How much each line varies.
+        seed:
+          label: Seed
+          what: Repeat the same delivery for the same line. At -1, every line varies.
+        voiceSampleRate:
+          label: Sample rate
+          what: The quality voice samples are sent at for cloning.
+          unit: Hz
+      sampling:
+        title: Sampling
+        minP:
+          label: Min P
+          what: A sampling setting.
+        topP:
+          label: Top P
+          what: A sampling setting.
+        repetitionPenalty:
+          label: Repetition penalty
+          what: Discourages the same sounds repeating.
+    higgs:
+      label: Higgs
+      what: Voices from a Higgs Audio server you run, with tags for emotion, pace, and style.
+      voice:
+        title: Voice
+        model:
+          label: Model
+          what: Which model the server uses.
+        temperature:
+          label: Variety
+          what: How much each line varies.
+        enableTagPropagation:
+          label: Carry tags on
+          what: >-
+            A tag for emotion, style, or pace in one sentence of a reply carries
+            on to the sentences after it.
+    openaiCompatible:
+      label: OpenAI-compatible
+      what: >-
+        Any speech service with an OpenAI-style API that clones voices, such as
+        Boson.ai’s Higgs or a server you run yourself.
+      account:
+        title: Account
+        serviceProfile:
+          label: Service
+          what: Your own server, or Boson.ai’s Higgs, whose address and model are fixed.
+          choices:
+            selfHosted:
+              label: Your own server
+        apiKey:
+          label: Key
+          what: >-
+            Boson.ai’s key, or a token your own server asks for. Leave it empty
+            if it asks for none.
+      voice:
+        title: Voice
+        model:
+          label: Model
+          what: Which model the service uses.
+        temperature:
+          label: Variety
+          what: How much each line varies.
+        speed:
+          label: Speed
+          what: How fast lines are spoken. 1 is normal.
+        topP:
+          label: Top P
+          what: A sampling setting.
+        topK:
+          label: Top K
+          what: A sampling setting.
+        transcribeMissingReferenceSamples:
+          label: Transcribe samples
+          what: >-
+            When a voice’s sample has no transcript, make one with your speech
+            recognition. Off, your own server gets an empty transcript.
+        enableHiggsTags:
+          label: Higgs tags
+          what: >-
+            Turn SkyrimNet’s tags into Higgs’s own. Switch off for a model whose
+            tags are written differently.
+        enableTagPropagation:
+          label: Carry tags on
+          what: >-
+            A tag for emotion, style, or pace in one sentence of a reply carries
+            on to the sentences after it.
+
+  voiceSamples:
+    title: Voice samples
+    what: >-
+      The recordings voices are cloned from: which of the game’s own lines may
+      serve as a voice type’s sample, and the sample each voice type uses.
+    whichLines:
+      title: Which lines may be samples
+      filteringMinDurationSeconds:
+        label: Shortest
+        what: Lines shorter than this aren’t used as samples.
+      filteringMaxDurationSeconds:
+        label: Longest
+        what: Lines longer than this aren’t used as samples.
+      filteringBannedKeywords:
+        label: Left out by word
+        what: >-
+          Lines whose file name has one of these words aren’t used, such as
+          screams, music, and coughs.
+        noun: { one: "{count} word", other: "{count} words" }
+      filteringBannedVoiceTypes:
+        label: Voice types left out
+        what: Voice types never cloned.
+        noun: { one: "{count} voice type", other: "{count} voice types" }
+      filteringExcludedPlugins:
+        label: Plugins left out
+        what: >-
+          Game plugins whose lines are left out of the new audio scan and found
+          the older way instead.
+        noun: { one: "{count} plugin", other: "{count} plugins" }
+    samples:
+      title: Samples
+      voiceTypes:
+        label: Chosen samples
+        what: >-
+          The recording each voice type is cloned from: a voice file in the
+          game’s data, or an audio file of your own.
+        columns:
+          first: Voice type
+          second: Sample
+        noun: { one: "{count} voice type", other: "{count} voice types" }
+
+  speechToText:
+    title: Speech to text
+    what: >-
+      How what you say into your microphone becomes text for characters to
+      answer: which recognizer listens, and when it decides you’ve finished
+      speaking.
+    recognizer:
+      title: Recognizer
+      backend:
+        label: Recognizer
+        what: What turns your speech into text.
+        choices:
+          whisper:
+            label: Whisper
+            what: runs on your machine
+          parakeet:
+            label: Parakeet
+            what: runs on your machine, and tells languages apart itself
+          externalWhisper:
+            label: Whisper service
+            what: any OpenAI-style transcription API; a hosted one needs a key
+          fateless:
+            label: Fateless
+            what: fateless.ai, with an account there
+          none:
+            label: None
+            what: no microphone; you can still type
+      language:
+        label: Language
+        what: The language you speak, as a two-letter code. Whisper also takes auto-detect.
+      nameHints:
+        label: Name hints
+        what: >-
+          Tell the recognizer the names of you, nearby and pinned characters,
+          and nearby places, so they come back spelled right. The stt_hints
+          prompt sets what’s sent. Whisper on your machine has its own switch,
+          under Whisper.
+      enablePartialResults:
+        label: Text as you speak
+        what: Show what’s been recognized so far while you’re still speaking.
+    whisper:
+      title: Whisper
+      what: When the recognizer is Whisper.
+      whisperNameHints:
+        label: Name hints
+        what: >-
+          Send Whisper the names, as above. Off unless set: with the names sent,
+          Whisper can sometimes turn a whole message into a stray word.
+      whisperModel:
+        label: Model
+        what: >-
+          Larger models are more accurate, and slower. A model is downloaded the
+          first time it’s used.
+      whisperUseWhisperFinetune:
+        label: Skyrim’s version
+        what: Use a version of the model trained for the game’s words, where there is one.
+      whisperUseGpu:
+        label: Graphics card
+        what: Run on the graphics card rather than the processor.
+      whisperGpuDeviceIndex:
+        label: Card
+        what: Which graphics card, counting from 0.
+      whisperThreads:
+        label: Threads
+        what: How many of the processor’s threads it uses.
+      whisperInputSampleRate:
+        label: Sample rate
+        what: The sample rate of the microphone’s audio as it reaches Whisper.
+        unit: Hz
+    parakeet:
+      title: Parakeet
+      what: When the recognizer is Parakeet.
+      parakeetModel:
+        label: Model
+        what: Smaller versions are faster; larger ones are more accurate.
+        choices:
+          q80:
+            what: recommended
+          f16:
+            what: the largest
+      parakeetUseGpu:
+        label: Graphics card
+        what: Run on the graphics card rather than the processor.
+      parakeetGpuDeviceIndex:
+        label: Card
+        what: Which graphics card, counting from 0.
+      parakeetThreads:
+        label: Threads
+        what: How many of the processor’s threads it uses.
+    fateless:
+      title: Fateless
+      what: When the recognizer is Fateless, through SkyrimNet’s Fateless sign-in.
+      fatelessModel:
+        label: Model
+        what: Which of Fateless’s transcription models listens.
+      fatelessStreaming:
+        label: Stream while talking
+        what: >-
+          With push-to-talk, send your voice while you hold the key, once it
+          hears you speak, so the text is ready moments after you let go. It
+          costs a little more per minute.
+    whisperService:
+      title: Whisper service
+      what: When the recognizer is a Whisper service.
+      externalWhisperApiEndpoint:
+        label: Address
+        what: The service’s transcription address.
+      externalWhisperApiKey:
+        label: Key
+        what: The service’s key. A server of your own may not need one.
+      externalWhisperModel:
+        label: Model
+        what: >-
+          The model as the service names it, such as openai/whisper-1 on
+          OpenRouter or whisper-1 on OpenAI.
+      externalWhisperTimeoutMs:
+        label: Wait for text
+        what: How long to wait for the service before giving up.
+        unit: ms
+    openMic:
+      title: Open mic
+      what: Listening without a key held down.
+      streamingSilenceThreshold:
+        label: Speech threshold
+        what: >-
+          How sure the voice detector must be that a sound is speech, in your
+          microphone and in characters’ voice files.
+      streamingSilenceDuration:
+        label: Pause that ends it
+        what: How long you must be quiet before what you said is sent.
+        unit: ms
+      streamingChunks:
+        label: Chunks held
+        what: How many pieces of audio are held at once for recognizing.
+      streamingOpenMicVerbose:
+        label: Notices
+        what: Show a notice when open mic hears you and when it sends what you said.
+
+  hotkeys:
+    title: Hotkeys
+    what: >-
+      The keys that drive SkyrimNet while you play. Press a key to set one, or
+      click with a mouse button; any key can be left unset.
+    input:
+      title: Input
+      textInput:
+        label: Type to speak
+        what: Say something to the characters around you, typed.
+      recordSpeech:
+        label: Push to talk
+        what: Hold to record what you say, release to send it.
+      toggleOpenMic:
+        label: Open mic
+        what: Switch the microphone to always listening, instead of push to talk.
+      voiceThought:
+        label: Think aloud
+        what: Hold to voice a thought to yourself. A quick tap prompts a thought with nothing said.
+      voiceDialogueTransform:
+        label: Speak in character
+        what: >-
+          Hold to say something that’s rewritten as your character would say it.
+          A quick tap prompts a line with nothing said.
+      voiceDirectInput:
+        label: Tell the GameMaster
+        what: >-
+          Hold to state something as fact, such as “lightning suddenly strikes”,
+          and characters react as though it happened.
+      dialogueChoice:
+        label: Choose a dialogue option
+        what: >-
+          With the game’s dialogue menu open: a quick tap has the model pick an
+          option for you to confirm; hold and speak to say what you mean, and it
+          picks the closest option.
+    dashboard:
+      title: Dashboard and menus
+      wheelMenu:
+        label: Wheel menu
+        what: Open the wheel of every SkyrimNet action.
+      openLabelPanel:
+        label: Labeling panel
+        what: >-
+          Pause the game and open the labeling panel over the last recorded
+          outputs. It needs request recording on, in SkyrimNet’s developer
+          settings.
+      toggleDashboard:
+        label: Dashboard
+        what: Open or close SkyrimNet’s dashboard in game.
+    switches:
+      title: Switches
+      toggleGlobalAI:
+        label: SkyrimNet on or off
+        what: Switch all of SkyrimNet’s AI on or off.
+      toggleGameMaster:
+        label: GameMaster on or off
+        what: Switch the GameMaster, which prompts characters to speak now and then.
+      toggleContinuousMode:
+        label: Continuous scene
+        what: >-
+          Keep a conversation going: as one character finishes, the GameMaster
+          has another speak.
+      toggleWhisperMode:
+        label: Whisper
+        what: Switch between whisper and normal speaking distance.
+      toggleWorldEventReactions:
+        label: Reactions on or off
+        what: >-
+          Switch characters reacting to what happens around them, including each
+          other’s lines.
+    actions:
+      title: Actions
+      continueNarration:
+        label: Continue
+        what: >-
+          Have a character speak up, to react to something or pick a stalled
+          conversation back up.
+      captureCrosshair:
+        label: Capture
+        what: >-
+          Opens the capture window, for the character or furniture in your
+          crosshairs, yourself, or where you are. With Ctrl, it captures
+          straight away: a quick press for what’s in your crosshairs, or hold
+          for a second for yourself. With a book open, it captures the book.
+      generateDiaryBio:
+        label: Diary and bio now
+        what: >-
+          Write diary entries and update bios now, for you, those nearby, those
+          pinned, or whoever is in your crosshairs.
+      interruptDialogue:
+        label: Interrupt
+        what: Stop every character speaking, and clear what’s waiting to be said.
+
+# Content records: actions, triggers, voice effects, and the other record
+# files SkyrimNet reads, with the pages that list, compare, and edit them.
+records:
+  # What the record pages share.
+  yourEdits: Your edits
+  defaults: SkyrimNet’s defaults
+  unknownLayer: an unknown layer
+  kind: Kind
+  from: From
+  yoursCount: "{count} yours"
+  offCount: "{count} off"
+  cantBeRead: can’t be read
+  isOff: "Off: SkyrimNet doesn’t use it."
+  unreadable: "SkyrimNet can’t read this file: {error}"
+  noMatch: Nothing matches “{query}”.
+  notText: Not text, so it can’t be shown.
+  replacesFlag: replaces {source}’s
+  limitsTitle: Limits Hermaeus can’t check
+
+  # Where a record comes from, and what it replaces: “From X, in place of
+  # Y, then Z.”
+  fromDefaults: From SkyrimNet’s defaults
+  fromPlugin: From {plugin}
+  origin: "{source}."
+  originInPlaceOf: "{source}, in place of {layers}."
+  thenJoin: ", then "
+  listJoin: ", "
+
+  # The player’s own copy.
+  editCopy: Edit as your copy
+  removeCopy: Remove your copy
+  yourOwnCopy: your own copy
+  editingCopy: Editing {yourCopy}, which SkyrimNet uses in every playthrough.
+  editingCopyInPlaceOf: Editing {yourCopy}, which SkyrimNet uses in every playthrough in place of the one from {layer}.
+  startingFrom: Starting from the copy from {layer}. Saving makes your own copy, which replaces it in every playthrough.
+  savedCopy: Saved your copy. SkyrimNet reads it from the next time it starts.
+  removeCopyConfirm: Remove your copy of {name}? A backup is kept, and {next}.
+  removedCopyBelow: Removed your copy. The one below applies again.
+
+  # What a switch in content-registry.json did.
+  switchedOn: >-
+    Switched on in content-registry.json, as SkyrimNet’s dashboard does; its
+    file is unchanged. SkyrimNet uses it from the next time it starts.
+  switchedOff: >-
+    Switched off in content-registry.json, as SkyrimNet’s dashboard does; its
+    file is unchanged. SkyrimNet ignores it from the next time it starts.
+  followingFile: >-
+    Its switch is gone from content-registry.json, so its file decides again,
+    from the next time SkyrimNet starts.
+
+  # A record switched against what its file says.
+  overridden:
+    switchedOn: >-
+      Switched on in content-registry.json, where SkyrimNet’s dashboard keeps
+      its switches. Its file says off.
+    switchedOff: >-
+      Switched off in content-registry.json, where SkyrimNet’s dashboard keeps
+      its switches. Its file says on.
+    follow: Follow its file
+
+  # The list of actions or triggers, grouped by where each comes from.
+  list:
+    fromPlugin: "{records} from {plugin}"
+    fromSources:
+      one: "{records} from {count} source"
+      other: "{records} from {count} sources"
+    replacesOne: Replaces the one from {source}.
+    itsFile: Its file, on the Content page
+
+  actions:
+    title: Actions
+    noun: action
+    column: Action
+    count: { one: "{count} action", other: "{count} actions" }
+    search: Search actions
+    none: No actions in your plugins or your own edits.
+    lead: >-
+      What NPCs can do, beyond speaking: the model reads each action’s
+      description and picks one when it fits. Each comes from a plugin or your
+      own edits.
+    category: Category
+    priority: Priority
+    whoMay: Who may
+    rules: { one: "{count} eligibility rule", other: "{count} eligibility rules" }
+    anyone: Anyone, at any time
+    runs: Runs
+    quest: Quest
+    eventText: Event text
+    confirm: Confirm
+    asksFirst: Asks you first
+    fillsIn: The model fills in
+    optional: "{kind}, optional"
+    note: >-
+      SkyrimNet also has a few actions built in, such as continuing a
+      conversation, which aren’t files and aren’t listed. Actions are edited
+      and made on the Content page.
+
+  triggers:
+    title: Triggers
+    noun: trigger
+    column: Trigger
+    count: { one: "{count} trigger", other: "{count} triggers" }
+    search: Search triggers
+    none: No triggers in your plugins or your own edits.
+    lead: >-
+      How SkyrimNet responds when something happens in the game: a kind of
+      event, the conditions it must meet, and what follows, such as narration
+      or a diary entry.
+    when: When
+    then: Then
+    cooldown: Cooldown
+    minutes: "{value} min"
+    seconds: "{value} s"
+    and: And
+    chance: Chance
+    forScope: "{response}, for {scope}"
+    effect: Effect
+    whicheverTarget: Whichever the target has
+    whoHears: Who hears
+    priority: Priority
+    interrupts: Interrupts
+    whoeverSpeaking: Whoever is speaking
+    whatItSays: What it says
+    note: Triggers are edited and made on the Content page.
+
+  # Every record file, by kind, and its YAML.
+  content:
+    title: Content
+    count: { one: "{count} record", other: "{count} records" }
+    newRecord: New record
+    allKinds: All kinds
+    search: Search records
+    lead: >-
+      The record files SkyrimNet reads, from your plugins and your own edits.
+      Where two layers have the same file, the higher one’s copy is used:
+      yours, then the plugins in the Plugins page’s order, then SkyrimNet’s
+      defaults.
+    readOnly: Skyrim is running, so records can only be read.
+    none: No records in SkyrimNet’s defaults, your plugins, or your own edits.
+    record: Record
+    ownCopy: Your own copy
+    windowsEndings: Windows line endings
+    savedAsCopy: Saved as your own copy. SkyrimNet reads it in place of the one below from the next time it starts.
+    removedCopy: Removed your copy.
+    nextBelow: the copy from {source} applies again
+    nextNone: nothing replaces it, since only you have it
+    useForm: Use the form
+    limits: >-
+      SkyrimNet limits what each stage’s settings and a voice sample can be, in
+      ways that aren’t published, so Hermaeus can’t check them here. An effect
+      outside those limits may not work in the game.
+    asYaml: "{name} as YAML"
+    # Each kind of record, by its folder.
+    kinds:
+      triggers: Triggers
+      actions: Actions
+      filters: Filters
+      voiceEffects: Voice effects
+      entities: Entities
+      dialogueActions: Dialogue actions
+      translator: Speech rules
+      items: Items
+      spells: Spells
+      furniture: Furniture names
+      identity: Identity links
+      places: Named places
+
+  # A record’s form, for an existing record or a new one.
+  editor:
+    badFileName: A file name is up to 64 letters, digits, hyphens, and underscores, starting with a letter or digit.
+    made: Made {path}. SkyrimNet reads it from the next time it starts.
+    savedAsCopy: Saved as your own copy, in place of the one below. SkyrimNet reads it from the next time it starts.
+    makeIt: Make it
+    newKind: New {noun}
+    record: record
+    madeInEdits: It’s made in your edits, and SkyrimNet reads it in every playthrough.
+    editYaml: Edit as YAML
+    fileName: File name
+    savedAs: Saved as {path}.
+    savedAsSame: Saved as {path}, and its {key} is the same.
+    unreadable: "This file can’t be read as a record: {error}."
+    notCovered: This one is laid out in a way the form doesn’t cover.
+    editItYaml: Edit it as YAML
+
+  # A form’s blocks of fields, and its lists of items. {item} is a list’s
+  # noun, such as “condition”.
+  blocks:
+    none: None.
+    moveUp: Move {item} {n} up
+    moveDown: Move {item} {n} down
+    remove: Remove {item} {n}
+    add: Add {item}
+    onePerLine: One per line
+    namesFile: It names the file, so it can’t change here.
+
+  # The record forms, by kind: each field by its key, with its label, its
+  # hint, and its choices by value. A list’s group holds its title, the
+  # noun its add button adds, what it says when empty, and its fields.
+  forms:
+    # Whether all of a rule’s conditions must hold, or any of them.
+    andOr:
+      and: All of them
+      or: Any of them
+
+    triggers:
+      noun: trigger
+      name: { label: Name }
+      enabled: { label: "On" }
+      description: { label: Description }
+      whenAny:
+        title: When any of these happens
+        add: event
+      when: When
+      eventType:
+        label: Event
+        hint: An event SkyrimNet records, or * for every event.
+      logicalOperator: { label: Conditions that must match }
+      conditions:
+        title: Conditions
+        add: condition
+        empty: "None: every event of this kind sets it off."
+        fieldPath:
+          label: Field
+          hint: Of the event, such as spell or victim.
+        operator: { label: Test }
+        value: { label: Value }
+        caseSensitive: { label: Case matters }
+      then: Then
+      response:
+        type:
+          label: Response
+          choices:
+            playerThought: Your character thinks
+            playerDialogue: Your character speaks
+            npcThought: A character thinks
+            directNarration: Narration
+            persistentGeneric: Tell characters, unspoken
+            diaryEntry: A diary entry
+            dynamicBioUpdate: A bio update
+            enableVirtualNpc: Switch on a virtual NPC
+            disableVirtualNpc: Switch off a virtual NPC
+            activateVoiceEffect: Switch on a voice effect
+            deactivateVoiceEffect: Switch off a voice effect
+        targetScope:
+          label: For whom
+          choices:
+            triggeringActor: Whoever set it off
+            player: You
+            allPinnedActors: Every pinned character
+            allNearbyActors: Every character nearby
+            allEnabledVirtualNpcs: Every virtual NPC that’s on
+        nearbyRadius:
+          label: Nearby within
+          hint: In game units.
+        targetName: { label: Virtual NPC’s name }
+        effectId:
+          label: Voice effect
+          hint: The effect’s id.
+        content:
+          label: What it says
+          hint: "A template: {{ originator }}, {{ target }}, {{ event_json.field }}, {{ player_name }}…"
+      audience:
+        label: Who hears it
+        choices:
+          player: You
+          originator: Whoever caused it
+          target: Whoever it happened to
+          originatorOrTarget: Either of them
+          everyone: Everyone
+          nearbyNpcs: Characters nearby
+          enabledVirtualNpcs: Virtual NPCs that are on
+      timing: Timing
+      probability:
+        label: Chance
+        hint: From 0 to 1.
+      cooldownSeconds:
+        label: Cooldown
+        hint: In seconds.
+      priority: { label: Priority }
+      interrupt: { label: Interrupts whoever is speaking }
+
+    actions:
+      noun: action
+      name: { label: Name }
+      enabled: { label: "On" }
+      description:
+        label: Description
+        hint: What the AI reads to decide when to use it.
+      customCategory:
+        label: Category
+        hint: Actions in a category are offered together.
+      defaultPriority: { label: Priority }
+      eventString:
+        label: Event text
+        hint: Recorded when it runs, such as {{ actor.name }} gave {{ player.name }} a hug.
+      useConfirmationWindow: { label: Ask before running it }
+      isShortLived: { label: Short-lived }
+      call:
+        title: Papyrus call
+        note: "No call: this action is a category. The AI picks it, then chooses one of the category’s actions."
+      questEditorId: { label: Quest }
+      scriptName: { label: Script }
+      executionFunctionName: { label: Function }
+      parameters:
+        title: Parameters, in the function’s order
+        add: parameter
+        type:
+          label: From
+          choices:
+            speaker: The speaker
+            dynamic: The AI fills it in
+            dynamicUuid: The AI picks a character, passed as its UUID
+            static: A fixed value
+        name: { label: Name }
+        value: { label: Value }
+        description:
+          label: Description
+          hint: Tells the AI what to put here.
+        optional: { label: The AI may leave it out }
+        default: { label: Default }
+        useNearbyActors: { label: Choose from characters nearby }
+      rules:
+        title: "Who can use it: every rule must pass"
+        add: rule
+        empty: "None: anyone can."
+        note: SkyrimNet ignores a rule that isn’t required.
+        logicalOperator: { label: Conditions that must pass }
+        required: { label: Required }
+      conditions:
+        title: Conditions
+        add: condition
+        decoratorName: { label: Decorator }
+        arguments:
+          label: Arguments
+          hint: "Separated by commas: currentActor (the speaker), player…"
+        comparisonOperator: { label: Test }
+        expectedValue: { label: Expected }
+
+    filters:
+      noun: filter
+      kind:
+        label: Kind
+        choices:
+          actor: Who takes part (actor)
+          memory: Who forms memories (memory)
+          dialogueRule: Rewrite what’s said (dialogue_rule)
+          ttsRule: Rewrite what’s spoken aloud (tts_rule)
+      enabled: { label: "On" }
+      id: { label: Id }
+      priority:
+        label: Priority
+        hint: Lower runs first; 100 when empty.
+      pattern:
+        label: Pattern
+        hint: A regular expression.
+      replacement:
+        label: Replacement
+        hint: Empty removes what matches.
+        dialogueHint: Empty skips the whole line; otherwise it replaces what matches.
+      name: { label: Name }
+      description: { label: Description }
+      lists: Lists, added to your own filter lists
+      factionWhitelist: { label: Faction whitelist }
+      factionBlacklist: { label: Faction blacklist }
+      raceWhitelist: { label: Race whitelist }
+      raceBlacklist: { label: Race blacklist }
+      genderWhitelist: { label: Gender whitelist }
+      genderBlacklist: { label: Gender blacklist }
+
+    dialogueActions:
+      noun: dialogue action
+      kind:
+        label: Kind
+        choices:
+          lists: Lines allowed and blocked (lists)
+          instruction: When to choose a line (instruction)
+      enabled: { label: "On" }
+      key: { label: Dialogue line }
+      name: { label: Name }
+      category: { label: Category }
+      text:
+        label: Instruction
+        hint: Tells the AI when to choose this line.
+      description: { label: Description }
+      whitelist: { label: Always allowed lines }
+      blacklist: { label: Lines never said }
+
+    entities:
+      noun: entity
+      entityName:
+        label: Name
+        hint: How SkyrimNet and triggers refer to it.
+      enabled: { label: "On" }
+      displayName: { label: Display name }
+      voiceId:
+        label: Voice
+        hint: A voice type from your voice setup.
+      ttsOverride: { label: Voice engine }
+      language: { label: Language }
+      conversationMode:
+        label: Conversation mode
+        choices:
+          private: Private
+          public: Public
+        hint: "Private: only you hear it. Public: characters nearby hear it and react too."
+
+  # Voice effects: recipes of stages that change how a voice sounds.
+  voiceEffects:
+    title: Voice effects
+    count: { one: "{count} effect", other: "{count} effects" }
+    newEffect: New effect
+    newVoiceEffect: New voice effect
+    search: Search effects
+    lead: >-
+      Recipes that change how a voice sounds, such as a draugr’s or a ghost’s,
+      applied to speech one stage at a time. A recipe doesn’t say whom it’s
+      for: a trigger puts it on a character, a mod’s script can, and SkyrimNet
+      uses two itself, for the narrator and your thoughts. Each names the
+      recipe by its id.
+    limits: >-
+      SkyrimNet limits what each stage’s settings and a voice sample can be, in
+      ways that aren’t published, so Hermaeus can’t show those limits or check
+      them. An effect outside those limits may not work in the game.
+      SkyrimNet’s own dashboard shows the limits as you edit.
+    readOnly: Skyrim is running, so effects can only be read.
+    none: No voice effects in SkyrimNet’s defaults, your plugins, or your own edits.
+    effect: Effect
+    stages: Stages
+    noChain: None
+    voiceEffect: Voice effect
+    itsFile: its file
+    own: Your own
+    noStages: "None: the voice is left as it is."
+    sample: Sample
+    noSample: "None: the speaker’s own voice is cloned."
+    usedBy: Used by
+    narrator: The narrator, when {setting} is on.
+    narratorSetting: Narrator effect
+    thoughts: Your thoughts, when {setting} is on.
+    thoughtsSetting: Thoughts effect
+    switchedOnBy: Switched on by {trigger}
+    switchedOffBy: Switched off by {trigger}
+    noTrigger: No trigger switches it on.
+    script: >-
+      A mod’s script can also put it on a character, with SkyrimNet’s
+      SetVoiceEffect and the id {id}. Who has an effect is kept in your saves,
+      so it isn’t listed here.
+
+    # Editing one.
+    editingOwn: Editing {yourCopy}, which SkyrimNet uses in place of any other.
+    startingFrom: Starting from the one from {layer}. Saving makes your own copy, which replaces it.
+    id: Id
+    idHint: >-
+      The id of the effect, which is how triggers and scripts refer to it when
+      assigning it to a character. This will also be used in the name of the
+      YAML file for the effect. Lowercase letters, digits, and underscores
+      only. It can’t change later.
+    name: Name
+    namePlaceholder: Frost atronach
+    sampleLabel: Replacement voice sample
+    samplePlaceholder: None
+    sampleHint: >-
+      The file name of a .wav recording cloned in place of the speaker’s usual
+      voice while the effect is on. Upload the recording with SkyrimNet’s
+      dashboard. Leave it empty to keep the speaker’s voice.
+    order: Applied to the voice in order, top to bottom.
+    stage: Stage {n}
+    moveStageUp: Move stage {n} up
+    moveStageDown: Move stage {n} down
+    removeStage: Remove stage {n}
+    noDraftStages: "No stages: the voice is left as it is."
+    addStage: Add a stage
+    addStageMenu: Add a stage…
+    needsNumber: "Stage {n} ({stage}): {param} needs a number."
+
+    # What happened.
+    nextBelow: the one from {layer} applies again
+    nextNone: the effect is gone, since only you had it
+    removed: Removed {name}.
+    made: Made {name}. SkyrimNet uses it from the next time it starts.
+    savedCopy: Saved your copy. SkyrimNet uses it from the next time it starts.
+    savedAsCopy: Saved as your own copy, in place of the one below. SkyrimNet uses it from the next time it starts.
+
+    # Each kind of stage, by its type: its name, what it does, and its
+    # settings by name, each with its unit, if any.
+    stageKinds:
+      pitchShift:
+        label: Pitch shift
+        what: Raises or lowers the voice.
+        params:
+          semitones: { label: Semitones, unit: { one: semitone, other: semitones } }
+      formantShift:
+        label: Formant shift
+        what: Changes the size the voice sounds, as from a larger or smaller throat, without changing its pitch.
+        params:
+          semitones: { label: Semitones, unit: { one: semitone, other: semitones } }
+      speed:
+        label: Speed
+        what: Speeds speech up or slows it down. Higher is faster.
+        params:
+          ratio: { label: Ratio }
+      bitcrush:
+        label: Bitcrusher
+        what: Coarsens the sound, like old or broken audio.
+        params:
+          bits: { label: Bits }
+          rateDiv: { label: Rate divider }
+      distortion:
+        label: Distortion
+        what: Roughens the voice.
+        params:
+          drive: { label: Drive }
+          mix: { label: Mix }
+      reverb:
+        label: Reverb
+        what: Places the voice in a room, a hall, or a cave.
+        params:
+          roomSize: { label: Room size }
+          decay: { label: Decay }
+          wet: { label: Wet }
+      chorus:
+        label: Chorus
+        what: Layers slightly shifted copies of the voice, as if several speak at once.
+        params:
+          rateHz: { label: Rate, unit: Hz }
+          depthMs: { label: Depth, unit: ms }
+          voices: { label: Voices }
+      tremolo:
+        label: Tremolo
+        what: Makes the voice waver in loudness.
+        params:
+          rateHz: { label: Rate, unit: Hz }
+          depth: { label: Depth }
+      ringmod:
+        label: Ring modulation
+        what: Gives the voice a metallic, inhuman ring.
+        params:
+          freqHz: { label: Frequency, unit: Hz }
+          mix: { label: Mix }
+      echo:
+        label: Echo
+        what: Repeats the voice after a delay.
+        params:
+          delayMs: { label: Delay, unit: ms }
+          feedback: { label: Feedback }
+          wet: { label: Wet }
+      eq:
+        label: Equalizer
+        what: Raises or cuts part of the sound, around a frequency.
+        params:
+          mode: { label: Mode }
+          freqHz: { label: Frequency, unit: Hz }
+          q: { label: Width }
+          gainDb: { label: Gain, unit: dB }
+      whisper:
+        label: Whisper
+        what: Mixes in breath noise, for a hushed or ghostly voice.
+        params:
+          noiseDb: { label: Noise, unit: dB }
+          mix: { label: Mix }
+      gain:
+        label: Gain
+        what: Makes the voice louder or quieter.
+        params:
+          gainDb: { label: Gain, unit: dB }
+
+  # Every file a plugin or the player’s edits put in place of another, and
+  # what it changed.
+  overrides:
+    title: Overrides
+    count: { one: "{count} file", other: "{count} files" }
+    showFlagged: Show the {count} to check
+    search: Search files
+    lead: >-
+      Each file a plugin or your own edits put in place of SkyrimNet’s, or of
+      another plugin’s. Only the highest copy is used, so a change SkyrimNet
+      makes to its own copy in an update doesn’t reach you while another
+      replaces it.
+    none: "Nothing replaces any of SkyrimNet’s files: it uses its own throughout."
+    nothingToCheck: Nothing to check.
+    file: File
+    inPlaceOf: In place of
+    older: older
+    conflict: conflict
+    added: "Nothing: added"
+    pluginUsed: "{plugin}’s copy is used"
+    ownUsed: "{own} is used"
+    ownCopy: Your own copy
+    usedInPlaceOf: "{used}, in place of {layers}."
+    usedAdding: "{used}. Nothing below has this file, so it adds one rather than replacing one."
+    openOn: Open on the {page} page
+    stale: >-
+      Your copy is older than the one it replaces, so it may be missing changes
+      made to that one since, such as in a SkyrimNet update.
+    conflictNote: >-
+      More than one plugin has this file. Only {winner}’s is used; {others}’s
+      is ignored. Moving plugins on the Plugins page changes which one wins.
+    andJoin: " and "
+
+    # The copy in use, read against one it replaces.
+    comparedWith: Compared with
+    against: Against {layer}
+    notComparable: One of the two isn’t text, so they can’t be compared here.
+    same: The two are the same.
+    sameButEndings: The two are the same, apart from their line endings.
+    linesAdded: { one: "{count} line added", other: "{count} lines added" }
+    linesRemoved: "{count} removed"
+    changes: "{added} and {removed} in the copy in use, against {layer}’s of {time}."
+    linesUnchanged: { one: "{count} line unchanged", other: "{count} lines unchanged" }
+    changesLabel: Changes
+    lineSame: Unchanged
+    lineAdded: Added
+    lineRemoved: Removed
+
+# The characters with something stored in a playthrough, and each one’s
+# own pages.
+characters:
+  title: Characters
+  # A character SkyrimNet never named, in full, as a name, and among names.
+  unnamed: Unnamed ({uuid})
+  noName: Unnamed
+  noNameLower: unnamed
+  everyone: Everyone
+  character: Character
+  noMatch: No one matches “{query}”.
+  plugin: Plugin
+  bioTemplate: Bio template
+  skyrimNetId: SkyrimNet ID
+  pin: Pin
+  unpin: Unpin
+  closeToPin: Close Skyrim to change pins
+  closeToPinNotice: Close Skyrim to change pins.
+
+  # Which characters the list shows; the Characters page and Every bio share it.
+  which:
+    label: Which characters
+    here: This playthrough
+    hereTitle: Everyone with something stored in this playthrough
+    all: Every bio
+    allTitle: Everyone SkyrimNet or a plugin ships a bio for, met or not
+
+  # The groups the list is in.
+  groups:
+    player: You
+    pinned: Pinned
+    busy: "{n}+ memories"
+    other: Everyone else
+
+  # The Characters page.
+  table:
+    stored: "{count} with something stored"
+    filter: Filter by name or bio
+    filterLabel: Filter characters
+    none: No one has anything stored in this playthrough yet.
+    name: Name
+    memories: Memories
+    diary: Diary
+    was: was {names}
+    previously: previously {names}
+    entries: { one: "{count} entry", other: "{count} entries" }
+
+  # Finding a character from anywhere, with /.
+  find:
+    shortcut: Find
+    title: Find a character
+    input: Character name
+    matches: Matching characters
+
+  # A character’s header and tabs.
+  page:
+    notFound: That character has nothing stored in this playthrough.
+    previously: Previously {names}
+    records: "{name}’s records"
+    overview: Overview
+    bio: Bio
+    events: Events
+    memories: Memories
+    diary: Diary
+    stats: Stats
+
+  # A character’s Overview.
+  profile:
+    identity: Identity
+    active: Active
+    activeRange: "{from} to {to}"
+    formId: Form ID
+    localId: local ID
+    firstSeen: First seen
+    updated: Record updated
+    earlierIdentity: Earlier identity
+    reidentified: re-identified {when}
+    milestones: Milestones
+    noMilestones: Nothing that marks a turn in their story yet, such as joining you, a trade, or a gift.
+
+  # A character’s Universal Translator speech pattern, on their Overview.
+  speech:
+    title: Speech pattern
+    notWritten: >-
+      Universal Translator hasn’t written its settings yet; SkyrimNet creates
+      them the next time it starts. A pattern can be set then.
+    placeholder: "How they speak: tone, rhythm, turns of phrase."
+    saved: Saved. SkyrimNet uses it from the next time it starts.
+    removed: Removed. They speak as written again.
+    edit: Edit speech pattern
+    none: "None: they speak as written."
+    noneGlobal: "None: they speak as written, in the pattern set for every NPC."
+    global: "For every NPC: {pattern}"
+    off: Universal Translator is switched off, so patterns aren’t applied.
+    set: Set a pattern
+    allRules: All rules
+    closeToChange: Close Skyrim to change it.
+
+  # A character’s Stats.
+  stats:
+    noneYet: None yet.
+    none: none
+    events: { one: "{count} event", other: "{count} events" }
+    eventsDetail: "{events} ({detail})"
+    started: "{count} they started"
+    kills: { one: "{count} kill", other: "{count} kills" }
+    memories: { one: "{count} memory", other: "{count} memories" }
+    diaryEntries: { one: "{count} diary entry", other: "{count} diary entries" }
+    inactive: "{count} inactive"
+    alwaysIncluded: "{count} always included"
+    pending: "{count} not yet searchable (SkyrimNet builds the vectors in the background while a save is loaded)"
+    unsearchable: "{count} unsearchable"
+    nothing: SkyrimNet hasn’t recorded anything about {name} in this playthrough yet.
+    company: Spends time with
+    companyNote: Events they were both part of.
+    talksTo: Talks to
+    talksToNote: Lines {name} spoke to them.
+    mentions: Mentioned in memories
+    unknownMentions:
+      one: Plus {count} mention of actors SkyrimNet has no name for, such as enemies that died.
+      other: Plus {count} mentions of actors SkyrimNet has no name for, such as enemies that died.
+    byType: Memories by type
+    type: Type
+    count: Count
+    avgImportance: Avg. importance
+    noType: No type
+    mood: Mood
+    noEmotion: no emotion
+    places: Places
+    noLocation: no location
+    eventsByType: Events by type
+
+# Bios: each character’s, and every one SkyrimNet or a plugin ships.
+bios:
+  # What each kind of bio is called, and what it’s for.
+  kinds:
+    dynamic:
+      label: Dynamic
+      what: The bio NPCs use now. SkyrimNet keeps rewriting it as you play.
+    baseline:
+      label: Baseline
+      what: This playthrough’s fixed bio, which SkyrimNet starts from when it rewrites the dynamic one.
+    default:
+      label: Default
+      what: The bio from SkyrimNet’s content, used until this playthrough has its own.
+  kindBio: "{kind} bio"
+  # A template’s name with its kind, such as “Bandit (generic)”.
+  templateKind: "{name} ({kind})"
+  previewHeading: Bio · {kind}
+  noTemplate: SkyrimNet has no bio template for {name}, so there is no bio to show.
+  notMet: Bio template {template} · not met in this playthrough
+
+  # The bio editor.
+  editor:
+    which: Which bio
+    from: From {source}.
+    fromShared: From {source}, shared as {shared}.
+    createFromThis: Create a save bio from this
+    noBio: "{name} has no bio: nothing in this playthrough, and nothing in SkyrimNet’s content for the template {bioTemplate}."
+    noSections: This bio has no sections.
+    sections: Sections
+    gameRunning: Skyrim is running, so bios can’t be changed until you close it.
+    rawHint: The whole file, with SkyrimNet’s own markup. Broken markup is refused; a removed section only warns.
+    rawLabel: The whole bio
+    back: Back
+
+    # Shortcuts.
+    editSection: Edit section
+    rawFile: Raw file
+    history: History
+    diff: Diff
+    createShortcut: Create save bio
+    restoreShortcut: Restore
+
+    # Comparing two of the bios.
+    pair: "{to} vs {from}"
+    whichTwo: Which two bios
+    diffLead: What the {to} bio has that the {from} doesn’t, and the other way around.
+
+    # Earlier versions.
+    replaced: Replaced
+    by: By
+    playthrough: Playthrough
+    noHistory: No earlier versions of this bio were found.
+    sameAsNow: same as now
+    bySkyrimNet: SkyrimNet
+    byHermaeus: Hermaeus
+    thisOne: this one
+    unclear: unclear
+    earlierVersion: Earlier version
+    keptBySkyrimNet: Kept by SkyrimNet when it replaced the bio.
+    keptByHermaeus: Kept by Hermaeus before a save.
+    howToRead: How to read it
+    text: Text
+    changesSince: Changes since
+    thisVersion: this version
+    bioNow: the bio now
+    restore: Restore this version
+    chooseEarlier: Choose an earlier version to read it.
+
+    # What happened.
+    saved: "{kind} bio saved."
+    created: "{name} now has a baseline bio in this playthrough, copied from the default."
+    restored: Restored the version from {when}. The one it replaced is kept in the history.
+
+  # Two versions of a bio, compared.
+  diff:
+    differ: "{changed} of {total} sections differ."
+    key: "{dropped} text is struck through; {added} text is marked."
+    dropped: Dropped
+    added: added
+    same: The two are the same.
+    onlyIn: only in {label}
+    rewritten: rewritten
+    changed: changed
+    unchanged: unchanged
+
+  # Every bio SkyrimNet or a plugin ships.
+  catalog:
+    fromPlugin: "{count} from {plugin}"
+    withBio:
+      one: "{bios} with a bio, from {count} layer"
+      other: "{bios} with a bio, from {count} layers"
+    filter: Filter by name
+    filterLabel: Filter bios
+    none: >-
+      No bios were found. Check that SkyrimNet’s folder, and under Mod
+      Organizer 2 its mod folder, are set on the Playthroughs page.
+    character: Character
+    template: Template
+    from: From
+    here: In this playthrough
+    bioFrom: Bio from
+    hereLabel: Here
+    notHere: Not met, and no bio of this playthrough’s own
+    openCharacter: Open character
+    openBio: Open bio
+
+# What SkyrimNet recorded in a playthrough, across every character.
+history:
+  title: History
+  lead: Everything SkyrimNet recorded in this playthrough, everyone’s together, and the knowledge any NPC can draw on.
+  events: Events
+  memories: Memories
+  diary: Diary
+  knowledge: Knowledge
+
+# Memories, diary entries, and world knowledge.
+memories:
+  # What the three share.
+  when: When
+  who: Who
+  type: Type
+  mood: Mood
+  imp: Imp.
+  importance: Importance
+  place: Place
+  tags: Tags
+  onlyWhile: Only while
+  recall: Recall
+  search: Search
+  state: State
+  new: New
+  keep: Keep
+  deleteMore: Delete…
+  noDate: No date
+  written: Written {date}
+  dateTime: "{time}, {day}"
+  inactive: inactive
+  vectorPending: vector pending
+  vectorBuilt: vector built
+  vectorPendingLong: vector pending; SkyrimNet builds it in the background while a save is loaded
+  alwaysIncluded: always included, not only when relevant
+  under: under “{name}”
+  anEarlierIdentity: an earlier identity
+  storedUnder: Stored under the earlier identity “{name}”, which SkyrimNet doesn’t appear to recall.
+
+  # What a save did besides the change itself.
+  saved: "{what} saved."
+  diaryMatched: Diary entry {id} was updated to match.
+  memoryMatched: Its memory copy was updated to match.
+  reembed: SkyrimNet makes a new search vector in the background the next time a save is loaded.
+
+  # The forms for a memory, a knowledge entry, and a diary entry.
+  form:
+    text: Text
+    title: Title
+    titlePlaceholder: Optional; few memories have one
+    tagsPlaceholder: Separated by commas
+    conditionPlaceholder: Optional condition
+    active: "Active: SkyrimNet can recall it"
+    alwaysInject: Always included, not only when relevant
+    addMemory: Add memory
+    entry: Entry
+    addEntry: Add entry
+    diaryNote: Its memory copy is kept in step with the text, mood, place, and importance.
+
+  memories:
+    search: Search memories
+    allTypes: All types
+    allMoods: All moods
+    marked: { one: "{count} memory marked", other: "{count} memories marked" }
+    markedLabel: Marked
+    clear: Clear
+    mark: Mark
+    none: No memories yet.
+    noMatch: No memories match.
+    memory: Memory
+    newTitle: New memory
+    editTitle: Edit memory {id}
+    untitled: Memory {id}
+    copyOf: Copy of
+    diaryEntry: diary entry {id}
+    notRecalled: "inactive: SkyrimNet doesn’t recall it"
+    makeActive: Make active
+    makeInactive: Make inactive
+    move: Move to current identity
+    appliesTo:
+      one: Actions apply to the {count} marked memory.
+      other: Actions apply to the {count} marked memories.
+    confirmDelete:
+      one: Delete this memory? Hermaeus backs up the database before its first change each session.
+      other: Delete {count} marked memories? Hermaeus backs up the database before its first change each session.
+    gameRunning: Skyrim is running, so memories can’t be changed until you close it.
+
+    # What happened.
+    newFromPage: A new memory is added from its character’s page.
+    savedWhat: Memory
+    newWhat: New memory
+    moved:
+      one: "{count} memory moved to the current identity."
+      other: "{count} memories moved to the current identity."
+    deleted: { one: "{count} memory deleted.", other: "{count} memories deleted." }
+    madeActive: { one: "{count} memory made active.", other: "{count} memories made active." }
+    madeInactive: { one: "{count} memory made inactive.", other: "{count} memories made inactive." }
+
+  diary:
+    search: Search the diary
+    none: No diary entries yet.
+    noMatch: No diary entries match.
+    entry: Entry
+    noCopy: no memory copy
+    pane: Diary entry
+    newTitle: New diary entry
+    editTitle: Edit diary entry {id}
+    title: Diary entry {id}
+    missingCopy: SkyrimNet keeps a copy of each entry as a memory, and none was found for this one.
+    confirmDelete: Delete this diary entry? Hermaeus backs up the database before its first change each session.
+    keepCopy: Keep its memory copy, so {name} still remembers it
+    theCharacter: the character
+    gameRunning: Skyrim is running, so the diary can’t be changed until you close it.
+
+    # What happened.
+    newFromPage: A new entry is added from its character’s page.
+    savedWhat: Diary entry
+    newWhat: New diary entry
+    deleted: Diary entry deleted.
+    deletedWithCopy: Diary entry and its memory copy deleted.
+
+  # World knowledge: packs, and entries any NPC can draw on.
+  knowledge:
+    packs: Packs
+    pack: Pack
+    entries: { one: "{count} entry", other: "{count} entries" }
+    search: Search entries
+    everyPack: Every pack
+    noPack: In no pack
+    shownOf: "{count} of {entries}"
+    none: "No world knowledge yet: no packs are installed, and no entries have been added."
+    noMatch: No entries match.
+    entry: Entry
+    alwaysIncluded: always included
+    packOff: pack off
+    newTitle: New entry
+    into: Into {pack}.
+    thePack: the pack
+    inNoPack: In no pack.
+    editTitle: Edit entry {id}
+    untitled: Entry {id}
+    whenRelevant: when relevant
+    notUsed: "inactive: SkyrimNet doesn’t use it"
+    confirmDelete: Delete this entry? Hermaeus backs up the database before its first change each session.
+    gameRunning: Skyrim is running, so knowledge can’t be changed until you close it.
+
+    # What happened.
+    savedWhat: Entry
+    newWhat: New entry
+    deleted: { one: "{count} entry deleted.", other: "{count} entries deleted." }
+    switchedOn: "{pack} switched on."
+    switchedOff: "{pack} switched off."
+
+# Events: what SkyrimNet recorded characters taking part in. Their type
+# labels come from the server.
+events:
+  count: { one: "{count} event", other: "{count} events" }
+  they: They
+  type: Type
+  everyType: Every type
+  theirPart: Their part
+  anyPart: Any part
+  acting: Acting or acted on
+  onlyPresent: Only present
+  filter: Filter events
+  none: SkyrimNet hasn’t recorded {name} taking part in anything yet.
+  noMatch: No events match.
+  when: When
+  who: Who
+  event: Event
+  more: Show {count} more
+  further: of {count} further
+  # A line of dialogue, with who spoke it and to whom.
+  spoke: "{speaker}: “{line}”"
+  spokeTo: "{speaker} to {listener}: “{line}”"
+  place: Place
+  part: "{name}’s part"
+  from: From
+  to: To
+  present: Present
+  presentCount: { one: "{count} character", other: "{count} characters" }
+  recorded: Recorded
+  details: Details
+
+# A playthrough’s Overview, and its preview in the Playthroughs list.
+overview:
+  noPlayer: No player yet
+  openDoor: Open {label}
+  daysRecorded: { one: "{count} game day recorded", other: "{count} game days recorded" }
+  daysSince:
+    one: "{count} game day recorded since {day}"
+    other: "{count} game days recorded since {day}"
+  lastEvent: last event recorded {when}
+  empty: >-
+    SkyrimNet hasn’t recorded anything in this playthrough yet. It starts when
+    you play with it: events as they happen, then memories and diary entries
+    made from them.
+  latestDiary: The latest diary
+  latestDiaryOn: Latest diary · {day}
+  readInHistory: Read it in History
+  noDiary: No diary entries yet. SkyrimNet’s characters write them as the days go by.
+  lately: Lately
+  everyEvent: Every event, in History
+  noEvents: No events yet.
+  thisPlaythrough: This playthrough
+  stored: Stored
+  sections: Sections
+  company: Company
+  pinned: (pinned)
+  travel: { one: "{count} travels with you.", other: "{count} travel with you." }
+  tuning: Tuning
+  dialogue: Dialogue
+  noModel: No model yet
+  othersInTurn: { one: "and {count} other in turn", other: "and {count} others in turn" }
+  voice: Voice
+  noVoice: None
+  toggles: Toggles
+  aiOff: "AI off: SkyrimNet makes no AI calls"
+  togglesOn: "{count} of {total} on"
+  togglesOff: "Off: {names}"
+  models: Models
+  engines: Engines
+  prompts: Prompts
+
+  # The doorways into each section: its name, and what it counts.
+  doors:
+    characters:
+      label: Characters
+      unit: { one: with something stored, other: with something stored }
+    events:
+      label: Events
+      unit: { one: event, other: events }
+    memories:
+      label: Memories
+      unit: { one: memory, other: memories }
+    diary:
+      label: Diary
+      unit: { one: entry, other: entries }
+    knowledge:
+      label: Knowledge
+      unit: { one: entry, other: entries }
+    screenshots:
+      label: Screenshots
+      unit: { one: screenshot, other: screenshots }
+    songs:
+      label: Bard songs
+      unit: { one: song, other: songs }
+
+# The list of playthroughs, the first page.
+playthroughs:
+  title: Playthroughs
+  in: In {path}
+  modDirFound: SkyrimNet’s own files were found in {path}.
+  modDirSet: SkyrimNet’s own files are in {path}.
+  noDefaults: >-
+    SkyrimNet’s default bios weren’t found, so characters without a save bio
+    show none. Under Mod Organizer 2, start Hermaeus with {flag} pointing at
+    SkyrimNet’s mod folder.
+  none: There are no SkyrimNet databases here yet. SkyrimNet makes one the first time you load a save with it.
+  player: Player
+  saveId: Save ID
+  lastWritten: Last written
+  size: Size
+  kb: "{size} KB"
+  pane: Playthrough
+
+# The bard songs of a playthrough.
+songs:
+  title: Bard songs
+  count: { one: "{count} song", other: "{count} songs" }
+  bards: { one: "{count} bard", other: "{count} bards" }
+  songsBy: "{songs} by {bards}"
+  search: Search songs
+  lead: >-
+    Songs the bards of this playthrough composed and sang, from what was
+    happening around them. A bard can sing any of them again. How bards
+    compose, and how often, is set under {link}.
+  bardSinging: Bard singing
+  gameRunning: Skyrim is running, so songs can only be listened to.
+  none: No bard has composed a song in this playthrough yet. Ask one to, with bard singing switched on.
+  noMatch: Nothing matches “{query}”.
+  song: Song
+  composedBy: Composed by
+  composed: Composed
+  plays: Plays
+  instrumental: instrumental
+  noAudio: no audio
+  unknown: Unknown
+  by: By {composer}
+  playCount: { one: "{count} play", other: "{count} plays" }
+  voice: "{voice} voice"
+  missing: "{file} isn’t in {folder}, so it can’t be played."
+  wordsOnly: Changing the words doesn’t change the recording.
+  titleLabel: Title
+  style: Style
+  lyrics: Lyrics
+  delete: Delete song
+  saved: Saved. The recording is as it was; bards sing it as before.
+  confirmDelete: >-
+    Delete “{title}”? Bards stop singing it. The database is backed up first,
+    and the audio file stays in the bard songs folder.
+  deleted: Deleted “{title}”.
+
+  # The player.
+  play: Play {label}
+  pause: Pause {label}
+  position: Position in {label}
+
+# OmniSight’s screenshots of a playthrough.
+screenshots:
+  title: Screenshots
+  count: { one: "{count} screenshot", other: "{count} screenshots" }
+  kept: "{count} kept as written"
+  lead: >-
+    What OmniSight has seen: a picture of each place, and the description a
+    vision model wrote of it, which SkyrimNet gives the AI when you’re there.
+  # What each screenshot shows, by its subject’s type. A type not listed here
+  # is shown by its own name.
+  types:
+    location: Places
+    actor: People
+    furniture: Furniture
+  all: All
+  subject: Subject
+  search: Search screenshots
+  gameRunning: Skyrim is running, so screenshots can only be looked at.
+  none: OmniSight hasn’t taken any screenshots in this playthrough. It takes them as you explore while it’s switched on.
+  noMatch: Nothing matches “{query}”.
+  noImage: No image
+  pane: Screenshot
+  openFull: Open full size
+  alt: What OmniSight saw at {name}
+  noImageFile: Its image isn’t in {folder}, so only its description is here.
+  indoors: indoors
+  manual: taken with your hotkey
+  couldntDescribe: "OmniSight couldn’t describe it: {error}"
+  name: Name
+  description: Description
+  keepCheck: "Keep it as written: OmniSight won’t write a new one"
+  switches: Switches
+  keep: Keep as written
+  letRewrite: Let OmniSight rewrite
+  takeAgain: Take again
+  describedBy: Described by {model}.
+  describedByKept: Described by {model}, and kept as written.
+  noDescription: No description yet.
+
+  # What happened.
+  unlocked: OmniSight may write a new description when it takes this again.
+  locked: "Kept as written: OmniSight won’t write a new description."
+  marked: Marked to be taken again.
+  unmarked: No longer marked to be taken again.
+  savedKept: Saved, and kept as written.
+  saved: Saved. OmniSight may write a new description when it takes this again.
+
+# What surrounds every page: the top bar, the quick toggles, the theme,
+# whether Skyrim is running, and the error page.
+shell:
+  name: Hermaeus
+  playthrough: Playthrough
+  sharedPlayer: "{name} · {id}"
+  gameRunning: Skyrim running · read-only
+  gameClosed: Skyrim closed
+  noPlaythrough: There’s no playthrough “{save}” in this SkyrimNet folder.
+  notResponding: Hermaeus isn’t responding. Check that it’s still running, then reload the page.
+  # A request that failed without saying why.
+  requestFailed: "{method} {path} failed ({status})"
+
+  # The error page.
+  notFound: Not found
+  wentWrong: Something went wrong
+  backHome: Back to your playthroughs
+
+  theme:
+    label: Theme
+    auto: Auto
+    autoTitle: Follow your system’s dark or light setting
+    dark: Dark
+    light: Light
+
+  # The quick toggles, each by its id: a short name for the row, and a
+  # sentence saying what it switches.
+  quickToggles: Quick toggles
+  toggleUnavailable: "{what} Not switchable yet: SkyrimNet creates its settings file the next time it starts."
+  toggleGameRunning: "{what} Skyrim is running, so nothing can be changed."
+  toggles:
+    skyrimnet:
+      label: AI
+      what: SkyrimNet’s AI altogether. Off, SkyrimNet makes no AI calls at all.
+    gamemaster:
+      label: GameMaster
+      what: The GameMaster agent, which sets scenes and moves the story along.
+    npcReactions:
+      label: NPC reactions
+      what: NPCs reacting to what happens around them.
+    playerReactions:
+      label: Player reactions
+      what: AI-written lines spoken by your own character.
+    narration:
+      label: Narration
+      what: A narrator describing what happens.
+    bardSinging:
+      label: Bards
+      what: Bards singing AI-written songs.
+    universalTranslator:
+      label: Translator
+      what: The Universal Translator, which replaces NPCs’ recorded lines with AI-written ones in their speech patterns.
+    dynamicBios:
+      label: Dynamic bios
+      what: SkyrimNet rewriting characters’ dynamic bios as you play.
+    memoryGeneration:
+      label: Memories
+      what: Making new memories from events, in the background.
+    omnisight:
+      label: OmniSight
+      what: "OmniSight: NPCs seeing what’s on screen."
+
+# The sidebar: a playthrough’s own pages, then each group of pages.
+nav:
+  sections: Sections
+  thisPlaythrough: This playthrough
+  overview: Overview
+  characters: Characters
+  history: History
+  screenshots: Screenshots
+  bardSongs: Bard songs
+  pluginSettings: Plugin settings
+  behavior:
+    label: Behavior
+    prompts: Prompts
+    actions: Actions
+    triggers: Triggers
+    translator: Translator
+    gamemaster: GameMaster
+    narration: Narration
+    conversation: Conversation
+    npcThoughts: NPC thoughts
+    playerReactions: Player reactions
+    bardSinging: Bard singing
+    actorFilter: Actor filter
+  memory:
+    label: Memory
+    memories: Memories
+    memoryFilter: Memory filter
+    diaries: Diaries
+    dynamicBios: Dynamic bios
+  voice:
+    label: Voice
+    speech: Speech
+    engines: Engines
+    effects: Voice effects
+    samples: Voice samples
+    speechToText: Speech to text
+  ai:
+    label: AI
+    models: Models
+    providers: Providers
+  library:
+    label: Library
+    plugins: Plugins
+    content: Content
+    overrides: Overrides
+  general:
+    label: General
+    hotkeys: Hotkeys
+    other: Other
+
+# The Other page: every settings file without a page of its own, one
+# file’s settings, and everything changed across them.
+settings:
+  title: Other settings
+  changed: "{count} changed from the defaults"
+  unchanged: Nothing differs from the defaults
+  filterFiles: Filter by file
+  filterFilesLabel: Filter settings files
+  lead: Every settings file without a page of its own, as SkyrimNet writes it.
+  noFiles: No settings files were found in SkyrimNet’s config folder.
+  noMatch: Nothing matches “{query}”.
+  file: File
+  settings: Settings
+  changedColumn: Changed
+  pinned: Pinned
+  everythingElse: Everything else
+  notCreated: not created yet
+  settingsFile: Settings file
+  defaults: Defaults
+  none: None
+  recorded: Recorded by SkyrimNet
+  noneRecorded: None recorded
+  notCreatedNotice: >-
+    SkyrimNet hasn’t created this file yet; it will the next time it starts.
+    Until then its defaults can be read but not changed.
+  changedSettings: Changed settings
+  plugin: "{name} (plugin)"
+
+  # One file’s settings, or everything changed.
+  acrossFiles:
+    one: "{rows} across {count} file"
+    other: "{rows} across {count} files"
+  filter: Filter by key or value
+  filterLabel: Filter settings
+  notCreatedDefaults: SkyrimNet hasn’t created this file yet, so these are its defaults; they can be changed once it has.
+  noSettings: This file has no settings.
+  noneChanged: Nothing differs from the defaults.
+  setting: Setting
+  value: Value
+  default: Default
+  pressKey: Press the key to use
+  pressKeyHint: Press a key, or click the box with a mouse button.
+  noKey: No key
+  itemsPerLine: Items, one per line
+  numberPerLine: One number per line.
+  itemPerLine: One item per line.
+  editAsText: Edit as text
+  editAsJson: Edit as JSON
+  asJson: As JSON.
+  editAsFields: Edit as fields
+  defaultNotSet: (the default; the file doesn’t set it)
+  secret: API keys and other secrets are never shown or changed here. Use SkyrimNet’s dashboard.
+  hasSecrets: This holds API keys inside it, so it can’t be changed here. Use SkyrimNet’s dashboard.
+  closeSkyrim: Close Skyrim to change settings.
+  saved: Saved {key}.
+  reset: "{key} is back to its default."
+  secretFilled: Filled
+  secretEmpty: Empty
+
+  # What can’t be saved.
+  enterJson: Enter valid JSON.
+  isList: This setting is a list.
+  isGroup: This setting is a group of settings.
+  notJsonListOrMap: The text isn’t a JSON list or map.
+  enterNumber: Enter a number.
+  cantEdit: This setting can’t be edited here.
+  lineNotNumber: “{line}” isn’t a number; this list holds numbers.
+  fieldNotNumber: "{key} holds numbers; “{value}” isn’t one."
+  rowNeedsKey: Every row needs a key.
+  listedTwice: "{key} is listed twice."
+  notNumber: "{key} holds a number; “{value}” isn’t one."
+  notJson: "{key} isn’t valid JSON."
+
+  # A list of records, and a map, edited as rows.
+  addAnother: Add another
+  addItem: Add an item
+  addKey: Add a key
+  keyPlaceholder: key
+  key: Key
+  valueOf: Value of {key}
+  valueOfJson: Value of {key}, as JSON
+  removeKey: Remove {key}
+
+  # Hotkeys, by the key’s name. Letters, digits, F keys, and punctuation
+  # are shown as they are.
+  keys:
+    notSet: Not set
+    unknown: Key {code}
+    numpad: Numpad {key}
+    leftMouse: Left mouse button
+    rightMouse: Right mouse button
+    middleMouse: Middle mouse button
+    mouse4: Mouse button 4
+    mouse5: Mouse button 5
+    backspace: Backspace
+    tab: Tab
+    enter: Enter
+    shift: Shift
+    ctrl: Ctrl
+    alt: Alt
+    pause: Pause
+    capsLock: Caps Lock
+    esc: Esc
+    space: Space
+    pageUp: Page Up
+    pageDown: Page Down
+    end: End
+    home: Home
+    left: Left
+    up: Up
+    right: Right
+    down: Down
+    printScreen: Print Screen
+    insert: Insert
+    delete: Delete
+    leftWindows: Left Windows
+    rightWindows: Right Windows
+    menu: Menu
+    numLock: Num Lock
+    scrollLock: Scroll Lock
+    leftShift: Left Shift
+    rightShift: Right Shift
+    leftCtrl: Left Ctrl
+    rightCtrl: Right Ctrl
+    leftAlt: Left Alt
+    rightAlt: Right Alt
+
+# Models: which model does each of SkyrimNet’s tasks.
+models:
+  title: Models
+  tasksCount: { one: "{count} task", other: "{count} tasks" }
+  providersCount: { one: "{count} provider", other: "{count} providers" }
+  lead: >-
+    Which model does each of SkyrimNet’s jobs. A task tries its models in
+    rotation, each with its own provider and settings; a task without a model
+    of its own uses Dialogue’s.
+  providers: Providers
+  noKeyYet: "None has a key yet: set one on the Providers page"
+  moreWithoutKey:
+    one: "{count} more without a key"
+    other: "{count} more without keys"
+  allProviders: All providers
+  saved: Saved the models for {task}.
+
+  # The table.
+  task: Task
+  provider: Provider
+  order: Order
+  plugin: plugin
+  backup: backup
+  oneOut: one out
+  inTurn: In turn
+  atRandom: At random
+  note: >-
+    Fetching a provider’s models asks it over the Internet, with your key.
+    Providers and their keys are on the {providers} page; the rest of {path}
+    is under {openRouter} in Other settings.
+
+  # The pane.
+  addedBy: A task added by {plugin}, as {id}.
+  aPlugin: a plugin
+  noOwnModel: "No model of its own: Dialogue’s rotation answers."
+  orderAsDialogue: "{order}, as Dialogue"
+  maxTokens: Max tokens
+  topP: Top-p
+  topK: Top-k
+  frequencyPenalty: Frequency penalty
+  presencePenalty: Presence penalty
+  stopsAt: Stops at
+  timeout: Timeout
+  seconds: "{seconds}s"
+  asDialogue: as Dialogue
+  asDialogueSeconds: as Dialogue ({seconds}s)
+
+  # What a slot sets for itself, as a short line.
+  slot:
+    backup: backup
+    outOfRotation: out of rotation
+    temperature: temperature {value}
+    weight: weight {value}
+    retries: { one: "{count} retry", other: "{count} retries" }
+    reasoning: reasoning {effort}
+    structured: structured outputs
+    unstructured: no structured outputs
+
+  # A provider’s list of models, fetched on request.
+  lists:
+    asking: asking…
+    fetched: { one: "{count} model fetched", other: "{count} models fetched" }
+    notFetched: models not fetched
+    fetch: Fetch models
+    fetchAgain: Fetch again
+    context: "{tokens} context"
+    free: free
+    prices: "${input} in, ${output} out per million tokens"
+
+  # SkyrimNet’s own tasks, by id. A plugin’s task is named from its id.
+  tasks:
+    default:
+      label: Dialogue
+      what: What NPCs say in conversation, and any task without a model of its own.
+    combat:
+      label: Combat
+      what: What NPCs say and do while fighting.
+    characterProfileGeneration:
+      label: Character profiles
+      what: Writing and rewriting NPCs’ bios.
+    diaryGeneration:
+      label: Diary
+      what: NPCs’ diary entries.
+    memory:
+      label: Memory
+      what: Turning events into memories, with how much they matter.
+    gamemasterEvaluation:
+      label: GameMaster
+      what: Reading a scene and deciding who speaks or acts.
+    actionEvaluation:
+      label: Action evaluation
+      what: Which actions an NPC may take in response to an event.
+    meta:
+      label: Meta
+      what: "Quick sorting and routing: a fast, cheap model."
+    decisions:
+      label: Decisions
+      what: >-
+        Typed questions (an NPC’s mood, who speaks next) answered with
+        probabilities. Needs a provider with the Decisions or System One API
+        style; sampling settings don’t apply.
+    vision:
+      label: Vision
+      what: Describing screenshots for OmniSight.
+    visionQuality:
+      label: Vision (quality)
+      what: Describing the OmniSight captures you take yourself, with a stronger model.
+    universalTranslator:
+      label: Universal Translator
+      what: Rewriting NPCs’ lines in their speech patterns.
+    agentDefault:
+      label: AI assistant
+      what: The dashboard’s tool-calling assistant.
+
+  # How a slot thinks first.
+  efforts:
+    inherited: Inherited
+    "off": "Off"
+    default: Model’s default
+    minimal: Minimal
+    low: Low
+    medium: Medium
+    high: High
+
+  # A task’s models as a form.
+  form:
+    rotation: Rotation
+    rotationHint: SkyrimNet tries the models in turn or at random; a backup only answers when no primary does.
+    model: Model
+    modelPlaceholder: vendor/model
+    notInList: Not in {provider}’s list.
+    provider: Provider
+    noKey: "{name} (no key)"
+    role: Role
+    primary: Primary
+    backup: Backup
+    temp: Temp.
+    inRotation: In rotation
+    weight: Weight
+    requestTimeout: Request timeout
+    connectTimeout: Connect timeout
+    retries: Retries
+    reasoning: Reasoning
+    structuredOutputs: Structured outputs
+    providerDefault: Provider’s default
+    addModel: Add a model
+    asking: Asking {provider}…
+    fetch: Fetch {provider}’s models
+    fetchAgain: Fetch {provider}’s models again
+    offered:
+      one: "{count} model, offered as you type."
+      other: "{count} models, offered as you type."
+    signIn: "{provider} is reached through SkyrimNet’s own sign-in, so Hermaeus can’t fetch its list."
+    noList: "{provider} has no list to fetch."
+    asks: Asks {provider} over the Internet.
+    asksWithKey: Asks {provider} over the Internet, with your key.
+    order: Order
+    rotationOrder: Rotation order
+    asDialogue: As Dialogue
+    forEveryModel: For every model here
+    forEveryModelHint: Unless a slot above says otherwise. Empty leaves it to the provider.
+    temperature: Temperature
+    maxTokens: Max tokens
+    timeoutSeconds: Timeout (s)
+    topP: Top-p
+    topK: Top-k
+    frequencyPenalty: Frequency penalty
+    presencePenalty: Presence penalty
+    stopSequences: Stop sequences, one per line
+    timeout: Timeout
+    seconds: Seconds
+
+    # What can’t be saved.
+    addOne: Add at least one model.
+    slot: Model {n}
+    needsName: "{slot} needs a name."
+    slotTemperature: "{slot}’s temperature"
+    slotWeight: "{slot}’s weight"
+    slotRequestTimeout: "{slot}’s request timeout"
+    slotConnectTimeout: "{slot}’s connect timeout"
+    slotRetries: "{slot}’s retries"
+    notNumber: "{label} must be a number."
+    notWhole: "{label} must be a whole number."
+
+  # Trying a task’s model with one prompt.
+  test:
+    title: Try it
+    onFateless: >-
+      Its models are on Fateless, which SkyrimNet reaches through its own
+      sign-in. Hermaeus doesn’t have that sign-in, so SkyrimNet’s dashboard is
+      where to test them.
+    noChat: None of its models is on a chat provider, so there’s nothing a test can send to.
+    noModel: It has no model of its own to try.
+    model: Model
+    slotOff: (off)
+    instructions: Instructions
+    prompt: Prompt
+    vision: >-
+      A test sends text only, so the model gets a description rather than a
+      picture. It shows how the model writes, not how it sees.
+    sends: >-
+      Sends one request to {provider}, as SkyrimNet would, with the task’s
+      sampling settings and up to {tokens} tokens of reply. A paid provider
+      bills it like any other request.
+    waiting: Waiting for a reply…
+    send: Send
+    emptyReply: (An empty reply.)
+    cutOff: Cut off at {tokens} tokens.
+    answeredBy: Answered by
+    through: through {upstream}
+    took: Took
+    seconds: "{seconds} s"
+    tokens: Tokens
+    tokensInOut: "{input} in, {output} out"
+    cost: Cost
+    free: free
+    asBilled: as billed
+    byListedPrices: by its listed prices
+    notReported: Not reported. Fetch this provider’s models to price it by their list.
+    reasoning: Its reasoning
+
+  # The prompt each task’s test starts from, shaped like its job, by task
+  # id: stand-ins for SkyrimNet’s real prompts, which are long templates
+  # filled in from the game. A plugin’s task just checks for a reply.
+  samples:
+    default:
+      system: You are an innkeeper in Skyrim. Stay in character.
+      prompt: A traveler walks in out of the snow. Greet them in a sentence or two.
+    combat:
+      system: You are a bandit in the middle of a fight. Stay in character.
+      prompt: "The traveler just cut your arm with a war axe. Say one line, then choose: flee, surrender, or fight on."
+    characterProfileGeneration:
+      system: "Write a character bio with three short sections: Summary, Personality, and Speech."
+      prompt: Write a bio for the innkeeper of an inn in Whiterun, in under 150 words.
+    diaryGeneration:
+      system: Write a first-person diary entry for the character described.
+      prompt: You are a housecarl. Today you fought a dragon at a watchtower beside your thane. Write tonight’s entry in about 120 words.
+    memory:
+      system: Turn the events into one first-person memory, then rate how much it matters, from 0 to 1.
+      prompt: The traveler paid for a room. They asked about the Companions. They left a large tip.
+    gamemasterEvaluation:
+      system: You direct a scene. Say who should speak next and why, or that no one should.
+      prompt: In a tavern, a bard has just finished a song. A guard is drinking alone, and two farmers are arguing about the harvest.
+    actionEvaluation:
+      system: Choose the best action from the list, or none. Reply with its name only.
+      prompt: "The innkeeper hears: “I’d like a room for the night.” Actions: RentRoom, OpenTrade, Follow, none."
+    meta:
+      system: Answer in one word.
+      prompt: Who is this line meant for, the innkeeper or the bard? “Play something cheerful.”
+    universalTranslator:
+      system: Rewrite the line in the speech pattern given, keeping its meaning.
+      prompt: "Pattern: an old sea captain. Line: “I don’t know where the key is, but the jarl might.”"
+    agentDefault:
+      system: You help a player set up SkyrimNet.
+      prompt: How do I make characters talk to each other less often?
+    vision:
+      system: Describe the place in two sentences, as for someone who can’t see it.
+      prompt: A snowy courtyard with a broken well and a shuttered forge.
+    visionQuality:
+      system: Describe the place in two sentences, as for someone who can’t see it.
+      prompt: A snowy courtyard with a broken well and a shuttered forge.
+    pluginTask: Reply with one short sentence to confirm you’re working.
+
+# Providers: the services SkyrimNet sends its tasks to.
+providers:
+  title: Providers
+  count: { one: "{count} provider", other: "{count} providers" }
+  allKeyed: all with keys
+  keyed: "{count} with a key"
+  noneKeyed: none with a key yet
+  lead: >-
+    The services SkyrimNet sends its tasks to. A provider needs a key before
+    a task can use it; keys are set here and never shown again, not even to
+    this page.
+
+  # The table.
+  provider: Provider
+  key: Key
+  api: API
+  usedBy: Used by
+  yours: yours
+  keySet: Set
+  borrowed: "{provider}’s"
+  none: None
+  modelsNote: Which provider each task uses is set on the {models} page.
+
+  # The pane.
+  newProvider: New provider
+  newHint: Any service with an OpenAI-style chat endpoint, such as one running on this machine.
+  styleApi: "{style} API"
+  newKey: New key
+  pasteKey: Paste the key
+  keySaved: Saved into {path}, where SkyrimNet reads it. Hermaeus never shows a key, here or anywhere.
+  saveKey: Save key
+  endpoint: Endpoint
+  borrows: Borrows {provider}’s
+  noneYet: None yet
+  noneYetBorrow: None yet; would borrow {provider}’s
+  streaming: Streaming
+  structuredOutputs: Structured outputs
+  reasoning: Reasoning
+  upstreams: Upstreams
+  bySorting: By {sorting}
+  cache: Cache
+  anHour: An hour
+  settings: Settings
+  noTask: No task yet
+  models: Models
+  listOffered: "{list}, offered as you type one into a task."
+  notFetched: Not fetched. Fetching asks {provider} over the Internet.
+  notFetchedKey: Not fetched. Fetching asks {provider} over the Internet, with the key.
+  noKeyWarn: Without a key, no task can use {provider}.
+  confirmRemove: Remove {provider}? A backup of the file is kept.
+  changeKey: Change key
+  setKey: Set key
+  clearKey: Clear key
+  fetchModelsAgain: Fetch models again
+  removeMore: Remove…
+
+  # What happened.
+  added: Added {name}. Give it a key, then a task can use it.
+  saved: Saved {name}.
+  keyWasSet: Set the key for {name}. Hermaeus never shows it again.
+  keyCleared: Cleared the key for {name}.
+  removed: Removed {name}.
+
+  # How SkyrimNet talks to a provider.
+  styles:
+    chat:
+      label: Chat
+      what: "OpenAI-style chat completions: what every task but Decisions uses."
+    decisions:
+      label: Decisions
+      what: OpenRouter’s decisions API, for the Decisions task only.
+    systemone:
+      label: System One
+      what: A System One decision endpoint, for the Decisions task only.
+
+  # How OpenRouter chooses among the hosts that serve a model.
+  sortings:
+    default: OpenRouter’s default
+    price: Cheapest first
+    throughput: Fastest throughput first
+    latency: Lowest latency first
+
+  # A provider as a form.
+  form:
+    name: Name
+    namePlaceholder: Groq
+    idFromName: Its id, for the tasks that use it, is made from the name.
+    endpoint: Endpoint
+    endpointHint: The full URL SkyrimNet sends requests to.
+    apiStyle: API style
+    stream: Stream the answer
+    streamHint: Server-sent events, so lines arrive as they’re written.
+    structured: Structured outputs
+    structuredHint: Ask for JSON in the provider’s own format, where it supports that.
+    reasoning: Reasoning
+    reasoningHint: Let models think before answering, where the provider offers it.
+    upstreamSorting: Upstream sorting
+    upstreamHint: How OpenRouter chooses among the hosts that serve a model.
+    promptCache: Prompt cache
+    fiveMinutes: 5 minutes
+    anHour: An hour
+    cacheHint: >-
+      How long the provider keeps the cached start of a prompt. An hour lasts
+      through longer pauses, but costs more with providers that charge for
+      caching.
+    settings: Provider settings, as JSON
+    settingsHint: Sent with every request, as the provider’s API takes them. Empty sends none.
+    invalidJson: The provider settings must be valid JSON, an object of keys and values.
+    add: Add
+
+# Universal Translator: speech patterns NPCs’ lines are rewritten in.
+translator:
+  title: Universal Translator
+  rules: { one: "{count} rule", other: "{count} rules" }
+  globalPattern: a pattern for everyone else
+  lead: >-
+    Rewrites what NPCs say, line by line, in a speech pattern: the first rule
+    that names them applies, and the rest speak as everyone else does.
+  switches: Switches
+  voiceSilent: Voice silent NPCs
+  voiceSilentTitle: "{key} in SkyrimNet.yaml"
+  speaksThrough: The translator speaks through SkyrimNet’s voicing of silent NPCs.
+  unheard: Universal Translator is on, but SkyrimNet isn’t voicing silent NPCs, so nothing it rewrites can be heard.
+
+  # The table.
+  order: Order
+  for: For
+  pattern: Speech pattern
+  everyoneElse: Everyone else
+  leftAsWritten: left as written
+  asWritten: as written
+  noFilter: "No plugin filter: every voice line counts."
+  pluginCount: { one: "{count} plugin", other: "{count} plugins" }
+  filterOnly: "Only {plugins}: {list}."
+  filterAllBut: "All but {plugins}: {list}."
+  modelNote: The lines are rewritten by the model chosen for the translator on the {models} page.
+
+  # The pane.
+  rule: Rule
+  newRule: New rule
+  newRuleHint: It goes first, so it applies before every rule below it.
+  filter: Plugin filter
+  filterHint: Which plugins’ voice lines the translator touches, by the plugin the line’s voice file comes from.
+  allButThese: All but these
+  onlyThese: Only these
+  howApplies: How the list applies
+  pluginsPerLine: Plugins, one per line
+  inPlaythrough: In this playthrough
+  importTitle: Import rules
+  importHint: >-
+    From a YAML file, such as UniversalTranslator.yaml from another install. A
+    rule for an entity already listed replaces its pattern; the others go
+    last, before everyone else.
+  yamlFile: YAML file
+  import: Import
+  editRule: Edit rule
+  unnamed: NPCs no rule names, when the translator is on.
+  noGlobal: "No pattern: they speak as written. Only the NPCs the rules name are translated."
+  npcHere: NPC in this playthrough, by bio template {template}
+  npc: NPC, by bio template {template}
+  noPattern: "No pattern: they speak as written, whatever everyone else does."
+  isOff: "Switched off: skipped, so the rules below it can apply."
+  confirmDelete: Delete the rule for {name}? A backup of the file is kept.
+  deleteMore: Delete…
+
+  # What happened.
+  savedGlobal: Saved the pattern for everyone else.
+  savedRule: Saved the rule for {name}.
+  added: Added a rule for {name}.
+  movedUp: "Moved up: it applies before the one below."
+  movedDown: "Moved down: the one above applies first."
+  switchedOff: Switched the rule off; it stays here for later.
+  switchedOn: Switched the rule on.
+  deleted: Deleted the rule for {name}.
+  filterSaved: "Saved the plugin filter: {plugins}."
+  filterCleared: Cleared the plugin filter.
+  turnedOn: Universal Translator is on.
+  turnedOff: Universal Translator is off.
+  voicesOff: SkyrimNet no longer voices silent NPCs.
+  voicesOn: SkyrimNet voices silent NPCs again.
+  imported: "Imported {file}: {parts}."
+  rulesAdded: { one: "{count} rule added", other: "{count} rules added" }
+  rulesUpdated: { one: "{count} rule updated", other: "{count} rules updated" }
+  nothingNew: nothing new
+
+  # Who a rule is for.
+  entities:
+    npc: NPC
+    faction: Faction
+    race: Race
+
+  # A rule as a form.
+  form:
+    for: For
+    forLabel: What the rule is for
+    npc: NPC
+    npcPlaceholder: Aya
+    knownHere: "{name} in this playthrough, by bio template {template}."
+    known: "{name}, by bio template {template}."
+    anyNpc: Any NPC with a bio, by name or by bio template.
+    editorId: Editor ID
+    formId: Form ID
+    formIdHint: From the Creation Kit or xEdit. SkyrimNet keys the rule as {id}.
+    shownAs: Shown as
+    factionPlaceholder: Thieves Guild
+    racePlaceholder: Nords
+    pattern: Speech pattern
+    globalPlaceholder: How every NPC without a rule of their own speaks
+    placeholder: "How they speak: tone, rhythm, turns of phrase"
+    globalEmpty: Empty, NPCs without a rule speak as written.
+    empty: Empty, they speak as written, whatever the global pattern says.
+    inForce: In force
+    inForceHint: Off, the rule is skipped and the rules below it can apply.
+    nameNpc: Name the NPC by bio template.
+    giveEditorId: Give the {type}’s editor ID.
+    formIdHex: The form ID is hexadecimal, such as 0001BDB1; its last three digits are enough.
+
+# Prompts: every prompt SkyrimNet can use, and one prompt as a document.
+prompts:
+  title: Prompts
+  fromPlugin: "{count} from {plugin}"
+  fromLayers:
+    one: "{prompts} from {count} layer"
+    other: "{prompts} from {count} layers"
+  searchInside: Search inside
+  searchPlaceholder: Search names and text
+  filterPlaceholder: Filter by name
+  filterLabel: Filter prompts
+  none: >-
+    No prompts were found. Check that SkyrimNet’s folder, and under Mod
+    Organizer 2 its mod folder, are set on the Playthroughs page.
+  searching: Searching…
+  noMatch: Nothing matches “{query}”.
+  prompt: Prompt
+  folder: Folder
+  from: From
+  pinned: Pinned
+  yourCopy: Your copy
+  inUse: In use
+  alsoIn: Also in
+  changed: Changed
+  text: Text
+  textYours: Text · your copy
+
+  # The versions switch, by layer.
+  yours: Yours
+  default: Default
+  unknownLayer: an unknown layer
+
+  # One prompt.
+  yourOwnCopy: your own copy
+  mine: You have {yourCopy}, and SkyrimNet uses it in every playthrough.
+  mineInPlaceOf: You have {yourCopy}, and SkyrimNet uses it in every playthrough, in place of the version from {source}.
+  usesVersion: >-
+    SkyrimNet uses the version from {source}. Editing it makes your own copy,
+    which replaces it in every playthrough; SkyrimNet’s dashboard edits the
+    same copy.
+  readOnly: Skyrim is running, so prompts can only be read.
+  checkThis: "Check this: {warning}."
+  startingFrom: Starting from the version from {source}. Saving makes your own copy.
+  promptText: Prompt text
+  version: Version
+  editCopy: Edit as your copy
+  removeCopy: Remove your copy
+  savedCopy: Saved your copy.
+  savedAsCopy: Saved as your own copy. SkyrimNet uses it from the next time it starts.
+  confirmRemove: Remove your copy of {name}? A backup is kept, and {next} applies again.
+  nextVersion: the version from {source}
+  nextNothing: "nothing: only you have this prompt"
+  removed: Removed your copy. The version below applies again.
+
+# The first run, before Hermaeus knows where SkyrimNet is.
+folders:
+  title: Where is SkyrimNet?
+  notFound: >-
+    Hermaeus didn’t find SkyrimNet’s folder, the one containing {data},
+    {config}, and {logs}. With Mod Organizer 2, it’s usually {overwrite} in
+    your MO2 instance.
+  folder: SkyrimNet folder
+  modFolder: SkyrimNet’s mod folder
+  modPlaceholder: Only with Mod Organizer 2, and usually found on its own
+  modHint: >-
+    Under Mod Organizer 2, SkyrimNet’s own files (its default bios, for one)
+    stay in its mod folder while what it writes lands in {overwrite}.
+    Hermaeus looks for the mod folder next to {overwrite}; name it here if it
+    isn’t found.
+  use: Use this folder
+
+# Controls many pages share.
+ui:
+  shortcuts: Keyboard shortcuts
+  pin: Pin
+  unpin: Unpin
+  pinName: Pin {name}
+  unpinName: Unpin {name}
+  noImage: No image

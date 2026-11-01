@@ -68,7 +68,7 @@ func (s *Settings) TestModel(taskID string, t ModelTest) (ModelTestResult, error
 		return ModelTestResult{}, apperr.New(apperr.NotFound, "There's no task %q", taskID)
 	}
 	if t.Slot < 0 || t.Slot >= len(task.Slots) {
-		return ModelTestResult{}, apperr.New(apperr.Invalid, "%s has no model %d", task.Label, t.Slot+1)
+		return ModelTestResult{}, apperr.New(apperr.Invalid, "%s has no model %d", task.label, t.Slot+1)
 	}
 	slot := task.Slots[t.Slot]
 	if strings.TrimSpace(slot.Model) == "" {

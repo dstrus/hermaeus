@@ -3,6 +3,7 @@
      what's seen. -->
 <script lang="ts">
 	import { mediaURL } from '#lib/api/client.ts';
+	import { m } from '#lib/copy/messages.ts';
 
 	let { path, alt, lazy = false }: { path: string; alt: string; lazy?: boolean } = $props();
 
@@ -46,7 +47,7 @@
 </script>
 
 <span class="media" bind:this={box} class:failed>
-	{#if src}<img {src} {alt} draggable="false" />{:else if failed}<span class="muted">No image</span>{/if}
+	{#if src}<img {src} {alt} draggable="false" />{:else if failed}<span class="muted">{m.ui.noImage}</span>{/if}
 </span>
 
 <style>

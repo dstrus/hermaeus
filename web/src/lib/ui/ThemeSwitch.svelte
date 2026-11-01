@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ApiError, request } from '#lib/api/client.ts';
 	import type { Status, ThemeRequest } from '#lib/api/types/api.ts';
+	import { m } from '#lib/copy/messages.ts';
 
 	let { theme }: { theme: string } = $props();
 
@@ -10,9 +11,9 @@
 	let error = $state('');
 
 	const choices = [
-		{ value: 'system', label: 'Auto', title: 'Follow your system’s dark or light setting' },
-		{ value: 'dark', label: 'Dark', title: 'Dark' },
-		{ value: 'light', label: 'Light', title: 'Light' }
+		{ value: 'system', label: m.shell.theme.auto, title: m.shell.theme.autoTitle },
+		{ value: 'dark', label: m.shell.theme.dark, title: m.shell.theme.dark },
+		{ value: 'light', label: m.shell.theme.light, title: m.shell.theme.light }
 	];
 
 	async function choose(value: string) {
@@ -30,7 +31,7 @@
 	}
 </script>
 
-<div class="switch caps" role="radiogroup" aria-label="Theme" title={error || undefined}>
+<div class="switch caps" role="radiogroup" aria-label={m.shell.theme.label} title={error || undefined}>
 	{#each choices as c (c.value)}
 		<button
 			type="button"

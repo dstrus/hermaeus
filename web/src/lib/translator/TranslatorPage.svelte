@@ -10,7 +10,8 @@
 	import type { Catalog } from '#lib/api/types/bios.ts';
 import type { Character } from '#lib/api/types/characters.ts';
 	import type { Rule, Translator, TranslatorEdit } from '#lib/api/types/settings.ts';
-	import { plural } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { saveSettings, settingsDependency, settingsHref, togglesDependency } from '#lib/settings/api.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
@@ -23,6 +24,8 @@ import type { Character } from '#lib/api/types/characters.ts';
 	import { templateName } from '#lib/bios/api.ts';
 	import RuleForm from './RuleForm.svelte';
 
+	const t = m.translator;
+
 	let { save, translator, characters, catalog }: { save: string; translator: Translator; characters: Character[]; catalog: Catalog } = $props();
 
 	let readOnly = $derived(live.gameRunning);
@@ -32,8 +35,8 @@ import type { Character } from '#lib/api/types/characters.ts';
 	// An NPC's rule is named for the character: as SkyrimNet recorded them
 	// in this playthrough, or as their bio template spells it. The template
 	// shows beside the name, since the rule is keyed by it.
-	let template = (r: Rule) => r.name || r.entityId;
-	let npcName = (r: Rule) => npcOf(r, npcs)?.name ?? templateName(template(r));
+	let ruleTemplate = (r: Rule) => r.name || r.entityId;
+	let npcName = (r: Rule) => npcOf(r, npcs)?.name ?? templateName(ruleTemplate(r));
 	let here = (r: Rule) => npcOf(r, npcs)?.here ?? false;
 	let label = (r: Rule) => (r.entityType === 'npc' ? npcName(r) : r.name || r.entityId);
 
@@ -53,13 +56,13 @@ import type { Character } from '#lib/api/types/characters.ts';
 	// URL and Back closes a form.
 	type Mode = 'view' | 'edit' | 'new' | 'delete' | 'filter' | 'import';
 	let mode = $derived.by((): Mode => {
-		const m = param('mode');
+		const asked = param('mode');
 		if (!translator.found) return 'view';
-		if ((m === 'edit' || m === 'delete') && current && !(m === 'delete' && isGlobal)) return m;
-		if (m === 'new' || m === 'filter' || m === 'import') return m;
+		if ((asked === 'edit' || asked === 'delete') && current && !(asked === 'delete' && isGlobal)) return asked;
+		if (asked === 'new' || asked === 'filter' || asked === 'import') return asked;
 		return 'view';
 	});
-	const open = (m: Mode) => setParams({ mode: m });
+	const open = (to: Mode) => setParams({ mode: to });
 	const close = (opened?: string) => (opened ? setParams({ item: opened, mode: null }, 'replace') : leave('mode'));
 	$effect(() => {
 		if (mode === 'view' && param('mode')) setParams({ mode: null }, 'replace');
@@ -89,16 +92,16 @@ import type { Character } from '#lib/api/types/characters.ts';
 		commit((e) => {
 			if (isGlobal && mode === 'edit') {
 				e.global = rule.pattern;
-				return 'Saved the pattern for everyone else.';
+				return t.savedGlobal;
 			}
 			if (mode === 'edit') {
 				e.rules[current!.at] = rule;
-				return `Saved the rule for ${label(rule)}.`;
+				return t.savedRule({ name: label(rule) });
 			}
 			// A new rule goes first: it applies before the rest, as the dashboard adds them.
 			const id = `rule_${Date.now()}`;
 			e.rules.unshift({ ...rule, id });
-			return { note: `Added a rule for ${label(rule)}.`, opened: id };
+			return { note: t.added({ name: label(rule) }), opened: id };
 		});
 	}
 
@@ -110,7 +113,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 		commit((e) => {
 			const [rule] = e.rules.splice(r.at, 1);
 			e.rules.splice(to, 0, rule!);
-			return by < 0 ? 'Moved up: it applies before the one below.' : 'Moved down: the one above applies first.';
+			return by < 0 ? t.movedUp : t.movedDown;
 		});
 	}
 
@@ -119,7 +122,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 		if (!r || !can) return;
 		commit((e) => {
 			e.rules[current!.at]!.enabled = !r.enabled;
-			return r.enabled ? 'Switched the rule off; it stays here for later.' : 'Switched the rule on.';
+			return r.enabled ? t.switchedOff : t.switchedOn;
 		});
 	}
 
@@ -128,7 +131,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 		if (!r) return;
 		commit((e) => {
 			e.rules.splice(current!.at, 1);
-			return `Deleted the rule for ${label(r)}.`;
+			return t.deleted({ name: label(r) });
 		});
 	}
 
@@ -149,7 +152,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 		commit((edit) => {
 			edit.filterMode = filterMode;
 			edit.filterPlugins = filterList;
-			return filterList.length ? `Saved the plugin filter: ${plural(filterList.length, 'plugin', 'plugins')}.` : 'Cleared the plugin filter.';
+			return filterList.length ? t.filterSaved({ plugins: t.pluginCount({ count: filterList.length }) }) : t.filterCleared;
 		});
 	}
 
@@ -157,7 +160,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 	function switchTranslator() {
 		commit((e) => {
 			e.enabled = !translator.enabled;
-			return e.enabled ? 'Universal Translator is on.' : 'Universal Translator is off.';
+			return e.enabled ? t.turnedOn : t.turnedOff;
 		});
 	}
 	async function switchVoices() {
@@ -168,7 +171,7 @@ import type { Character } from '#lib/api/types/characters.ts';
 		notice = '';
 		try {
 			await saveSettings('game', { modified: dep.modified, changes: [{ key: dep.key, value: !dep.on }] });
-			notice = dep.on ? 'SkyrimNet no longer voices silent NPCs.' : 'SkyrimNet voices silent NPCs again.';
+			notice = dep.on ? t.voicesOff : t.voicesOn;
 			await Promise.all([invalidate(translatorDependency), invalidate(settingsDependency)]);
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -189,9 +192,9 @@ import type { Character } from '#lib/api/types/characters.ts';
 		try {
 			const res = await importRules({ modified: translator.modified, yaml: await f.text() });
 			const parts = [];
-			if (res.added) parts.push(`${plural(res.added, 'rule', 'rules')} added`);
-			if (res.updated) parts.push(`${plural(res.updated, 'rule', 'rules')} updated`);
-			notice = `Imported ${f.name}: ${parts.join(', ') || 'nothing new'}.`;
+			if (res.added) parts.push(t.rulesAdded({ count: res.added }));
+			if (res.updated) parts.push(t.rulesUpdated({ count: res.updated }));
+			notice = t.imported({ file: f.name, parts: parts.join(', ') || t.nothingNew });
 			await close();
 			await invalidate(translatorDependency);
 		} catch (err) {
@@ -205,58 +208,58 @@ import type { Character } from '#lib/api/types/characters.ts';
 		const viewing = mode === 'view';
 		const r = current;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !viewing, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !viewing, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !viewing, disabled: !can || !r, run: () => open('edit') },
-			{ key: 'n', shown: 'N', label: 'New rule', hidden: !viewing, disabled: !can, run: () => open('new') },
-			{ key: 'u', shown: 'U', label: 'Move up', hidden: !viewing, disabled: !can || !r?.rule || r.at === 0, run: () => move(-1) },
-			{ key: 'd', shown: 'D', label: 'Move down', hidden: !viewing, disabled: !can || !r?.rule || r.at >= translator.rules.length - 1, run: () => move(1) },
-			{ key: 'o', shown: 'O', label: r?.rule?.enabled === false ? 'Switch on' : 'Switch off', hidden: !viewing, disabled: !can || !r?.rule, run: toggleRule },
-			{ key: 'f', shown: 'F', label: 'Plugin filter', hidden: !viewing, disabled: !can, run: () => open('filter') },
-			{ key: 'i', shown: 'I', label: 'Import', hidden: !viewing, disabled: !can, run: () => open('import') },
-			...deleteShortcuts({ label: 'Delete', hidden: !viewing, disabled: !can || !r?.rule, run: () => open('delete') }),
-			{ key: 'Enter', label: 'Save', command: true, hidden: !(mode === 'edit' || mode === 'new' || mode === 'filter'), run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit() },
-			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => close() }])
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !viewing, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !viewing, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !viewing, disabled: !can || !r, run: () => open('edit') },
+			{ key: 'n', shown: 'N', label: t.newRule, hidden: !viewing, disabled: !can, run: () => open('new') },
+			{ key: 'u', shown: 'U', label: m.common.moveUp, hidden: !viewing, disabled: !can || !r?.rule || r.at === 0, run: () => move(-1) },
+			{ key: 'd', shown: 'D', label: m.common.moveDown, hidden: !viewing, disabled: !can || !r?.rule || r.at >= translator.rules.length - 1, run: () => move(1) },
+			{ key: 'o', shown: 'O', label: r?.rule?.enabled === false ? m.common.switchOn : m.common.switchOff, hidden: !viewing, disabled: !can || !r?.rule, run: toggleRule },
+			{ key: 'f', shown: 'F', label: t.filter, hidden: !viewing, disabled: !can, run: () => open('filter') },
+			{ key: 'i', shown: 'I', label: t.import, hidden: !viewing, disabled: !can, run: () => open('import') },
+			...deleteShortcuts({ label: m.common.delete, hidden: !viewing, disabled: !can || !r?.rule, run: () => open('delete') }),
+			{ key: 'Enter', label: m.common.save, command: true, hidden: !(mode === 'edit' || mode === 'new' || mode === 'filter'), run: () => document.querySelector<HTMLFormElement>('.pane form')?.requestSubmit() },
+			...(viewing ? [] : [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => close() }])
 		];
 	});
 
 	let filterSummary = $derived(
 		translator.filterPlugins.length === 0
-			? 'No plugin filter: every voice line counts.'
-			: `${translator.filterMode === 'whitelist' ? 'Only' : 'All but'} ${plural(translator.filterPlugins.length, 'plugin', 'plugins')}: ${translator.filterPlugins.join(', ')}.`
+			? t.noFilter
+			: (translator.filterMode === 'whitelist' ? t.filterOnly : t.filterAllBut)({ plugins: t.pluginCount({ count: translator.filterPlugins.length }), list: translator.filterPlugins.join(', ') })
 	);
 </script>
 
 <div class="bar">
-	<h1 class="caps">Universal Translator</h1>
+	<h1 class="caps">{t.title}</h1>
 	<span class="muted n" use:clipped>
 		{#if !translator.found}
-			Not set up yet
+			{m.common.notSetUp}
 		{:else if translator.enabled}
-			On · {plural(translator.rules.length, 'rule', 'rules')}{translator.global ? ' · a pattern for everyone else' : ''}
+			{m.common.isOn} · {t.rules({ count: translator.rules.length })}{translator.global ? ` · ${t.globalPattern}` : ''}
 		{:else}
-			Off
+			{m.common.isOff}
 		{/if}
 	</span>
 </div>
-<p class="muted lead">Rewrites what NPCs say, line by line, in a speech pattern: the first rule that names them applies, and the rest speak as everyone else does.</p>
+<p class="muted lead">{t.lead}</p>
 
-<div class="switches" role="group" aria-label="Switches">
+<div class="switches" role="group" aria-label={t.switches}>
 	<button type="button" role="switch" aria-checked={translator.enabled} disabled={!can || saving} onclick={switchTranslator}>
 		<span class="mark" aria-hidden="true"><svg viewBox="0 0 10 10" width="10" height="10"><path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
-		<span class="caps">Universal Translator</span>
+		<span class="caps">{t.title}</span>
 	</button>
-	<button type="button" role="switch" aria-checked={translator.voiceSilentNPCs.on} disabled={!translator.voiceSilentNPCs.available || readOnly || saving} onclick={switchVoices} title="{translator.voiceSilentNPCs.key} in SkyrimNet.yaml">
+	<button type="button" role="switch" aria-checked={translator.voiceSilentNPCs.on} disabled={!translator.voiceSilentNPCs.available || readOnly || saving} onclick={switchVoices} title={t.voiceSilentTitle({ key: translator.voiceSilentNPCs.key })}>
 		<span class="mark" aria-hidden="true"><svg viewBox="0 0 10 10" width="10" height="10"><path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
-		<span class="caps">Voice silent NPCs</span>
+		<span class="caps">{t.voiceSilent}</span>
 	</button>
-	<span class="muted small">The translator speaks through SkyrimNet’s voicing of silent NPCs.</span>
+	<span class="muted small">{t.speaksThrough}</span>
 </div>
 {#if translator.found && translator.enabled && !translator.voiceSilentNPCs.on}
-	<p class="notice warn">Universal Translator is on, but SkyrimNet isn’t voicing silent NPCs, so nothing it rewrites can be heard.</p>
+	<p class="notice warn">{t.unheard}</p>
 {/if}
 {#if !translator.found}
-	<p class="notice">SkyrimNet hasn’t written <span class="id">{translator.path}</span> yet; it will the next time it starts. Until then there’s nothing to change here.</p>
+	<p class="notice"><Fill text={m.common.notWrittenYet.text}>{#snippet path()}<span class="id">{translator.path}</span>{/snippet}</Fill></p>
 {/if}
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
@@ -266,10 +269,10 @@ import type { Character } from '#lib/api/types/characters.ts';
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<th class="caps at">Order</th>
-					<th class="caps">For</th>
-					<th class="caps text">Speech pattern</th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<th class="caps at">{t.order}</th>
+					<th class="caps">{t.for}</th>
+					<th class="caps text">{t.pattern}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -282,60 +285,60 @@ import type { Character } from '#lib/api/types/characters.ts';
 							{#if r}
 								<span class="kind caps">{entityLabel(r.entityType)}</span>
 								<span class="name">{label(r)}</span>
-								{#if r.entityType === 'npc'}<span class="muted id"> · {template(r)}</span>{/if}
+								{#if r.entityType === 'npc'}<span class="muted id"> · {ruleTemplate(r)}</span>{/if}
 							{:else}
-								<span class="kind caps">Everyone else</span>
+								<span class="kind caps">{t.everyoneElse}</span>
 							{/if}
 						</td>
 						<td class="text">
 							<span class="line">{(r ? r.pattern : translator.global) || ''}</span>
-							{#if r && !r.pattern}<span class="flag">left as written</span>{/if}
-							{#if !r && !translator.global}<span class="flag">as written</span>{/if}
-							{#if r && !r.enabled}<span class="flag">off</span>{/if}
+							{#if r && !r.pattern}<span class="flag">{t.leftAsWritten}</span>{/if}
+							{#if !r && !translator.global}<span class="flag">{t.asWritten}</span>{/if}
+							{#if r && !r.enabled}<span class="flag">{m.common.off}</span>{/if}
 						</td>
 					</tr>
 				{/each}
 			</tbody>
 		</table>
 		<p class="muted small">{filterSummary}</p>
-		<p class="muted small">The lines are rewritten by the model chosen for the translator on the <a href={modelHref(save)}>Models</a> page.</p>
+		<p class="muted small"><Fill text={t.modelNote.text}>{#snippet models()}<a href={modelHref(save)}>{m.models.title}</a>{/snippet}</Fill></p>
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Rule">
+	<aside class="pane" use:fitToViewport aria-label={t.rule}>
 		{#if mode === 'new'}
-			<h2 class="caps">New rule</h2>
-			<p class="muted small">It goes first, so it applies before every rule below it.</p>
+			<h2 class="caps">{t.newRule}</h2>
+			<p class="muted small">{t.newRuleHint}</p>
 			<RuleForm rule={blankRule()} {npcs} {saving} onsave={saveRule} oncancel={() => close()} />
 		{:else if mode === 'filter'}
-			<h2 class="caps">Plugin filter</h2>
-			<p class="muted small">Which plugins’ voice lines the translator touches, by the plugin the line’s voice file comes from.</p>
+			<h2 class="caps">{t.filter}</h2>
+			<p class="muted small">{t.filterHint}</p>
 			<form class="filter" onsubmit={saveFilter}>
-				<Segmented bind:value={filterMode} options={[{ value: 'blacklist', label: 'All but these' }, { value: 'whitelist', label: 'Only these' }]} label="How the list applies" />
+				<Segmented bind:value={filterMode} options={[{ value: 'blacklist', label: t.allButThese }, { value: 'whitelist', label: t.onlyThese }]} label={t.howApplies} />
 				<label class="field">
-					<span class="caps label">Plugins, one per line</span>
+					<span class="caps label">{t.pluginsPerLine}</span>
 					<textarea bind:value={filterText} rows="6" placeholder="Skyrim.esm" spellcheck="false"></textarea>
 				</label>
 				{#if plugins.length}
 					<div class="choices">
-						<span class="caps label">In this playthrough</span>
+						<span class="caps label">{t.inPlaythrough}</span>
 						{#each plugins as p (p)}
 							<button type="button" class="textbutton" disabled={filterList.includes(p)} onclick={() => addPlugin(p)}>{p}</button>
 						{/each}
 					</div>
 				{/if}
 				<div class="buttons">
-					<button type="submit" class="button primary" disabled={saving}>Save</button>
-					<button type="button" class="button" onclick={() => close()} disabled={saving}>Cancel</button>
+					<button type="submit" class="button primary" disabled={saving}>{m.common.save}</button>
+					<button type="button" class="button" onclick={() => close()} disabled={saving}>{m.common.cancel}</button>
 				</div>
 			</form>
 		{:else if mode === 'import'}
-			<h2 class="caps">Import rules</h2>
-			<p class="muted small">From a YAML file, such as UniversalTranslator.yaml from another install. A rule for an entity already listed replaces its pattern; the others go last, before everyone else.</p>
+			<h2 class="caps">{t.importTitle}</h2>
+			<p class="muted small">{t.importHint}</p>
 			<form class="import" onsubmit={runImport}>
-				<input bind:this={file} type="file" accept=".yaml,.yml,text/yaml" aria-label="YAML file" />
+				<input bind:this={file} type="file" accept=".yaml,.yml,text/yaml" aria-label={t.yamlFile} />
 				<div class="buttons">
-					<button type="submit" class="button primary" disabled={saving}>Import</button>
-					<button type="button" class="button" onclick={() => close()} disabled={saving}>Cancel</button>
+					<button type="submit" class="button primary" disabled={saving}>{t.import}</button>
+					<button type="button" class="button" onclick={() => close()} disabled={saving}>{m.common.cancel}</button>
 				</div>
 			</form>
 		{:else if current}
@@ -343,29 +346,29 @@ import type { Character } from '#lib/api/types/characters.ts';
 				<div in:fly={{ y: 6, duration: 180 }}>
 					{#if mode === 'edit'}
 						{#if isGlobal}
-							<h2 class="caps">Everyone else</h2>
+							<h2 class="caps">{t.everyoneElse}</h2>
 							<RuleForm rule={{ ...blankRule(), entityType: 'global', entityId: 'global', pattern: translator.global }} global {saving} onsave={saveRule} oncancel={() => close()} />
 						{:else}
-							<h2 class="caps">Edit rule</h2>
+							<h2 class="caps">{t.editRule}</h2>
 							<RuleForm rule={current.rule!} {npcs} {saving} onsave={saveRule} oncancel={() => close()} />
 						{/if}
 					{:else if isGlobal}
-						<h2 class="caps">Everyone else</h2>
-						<p class="muted small">NPCs no rule names, when the translator is on.</p>
+						<h2 class="caps">{t.everyoneElse}</h2>
+						<p class="muted small">{t.unnamed}</p>
 						{#if translator.global}
 							<p class="pattern">{translator.global}</p>
 						{:else}
-							<p class="muted">No pattern: they speak as written. Only the NPCs the rules name are translated.</p>
+							<p class="muted">{t.noGlobal}</p>
 						{/if}
 						{#if can}
-							<div class="actions"><button type="button" class="button" onclick={() => open('edit')}>Edit</button></div>
+							<div class="actions"><button type="button" class="button" onclick={() => open('edit')}>{m.common.edit}</button></div>
 						{/if}
 					{:else}
 						{@const r = current.rule!}
 						<h2 class="caps">{label(r)}</h2>
 						<p class="muted small">
 							{#if r.entityType === 'npc'}
-								NPC{here(r) ? ' in this playthrough' : ''}, by bio template <span class="id">{template(r)}</span>
+								<Fill text={(here(r) ? t.npcHere : t.npc).text}>{#snippet template()}<span class="id">{ruleTemplate(r)}</span>{/snippet}</Fill>
 							{:else}
 								{entityLabel(r.entityType)} · <span class="id">{r.entityId}</span>
 							{/if}
@@ -373,29 +376,29 @@ import type { Character } from '#lib/api/types/characters.ts';
 						{#if r.pattern}
 							<p class="pattern">{r.pattern}</p>
 						{:else}
-							<p class="muted">No pattern: they speak as written, whatever everyone else does.</p>
+							<p class="muted">{t.noPattern}</p>
 						{/if}
-						{#if !r.enabled}<p class="notice">Switched off: skipped, so the rules below it can apply.</p>{/if}
+						{#if !r.enabled}<p class="notice">{t.isOff}</p>{/if}
 						{#if mode === 'delete'}
 							<div class="confirm" role="alert">
-								<p>Delete the rule for {label(r)}? A backup of the file is kept.</p>
-								<button type="button" class="button primary" onclick={remove} disabled={saving}>Delete</button>
-								<button type="button" class="button" onclick={() => close()}>Keep</button>
+								<p>{t.confirmDelete({ name: label(r) })}</p>
+								<button type="button" class="button primary" onclick={remove} disabled={saving}>{m.common.delete}</button>
+								<button type="button" class="button" onclick={() => close()}>{m.common.keep}</button>
 							</div>
 						{:else if can}
 							<div class="actions">
-								<button type="button" class="button" onclick={() => open('edit')}>Edit</button>
-								<button type="button" class="button" onclick={toggleRule}>{r.enabled ? 'Switch off' : 'Switch on'}</button>
-								<button type="button" class="button" onclick={() => move(-1)} disabled={current.at === 0}>Move up</button>
-								<button type="button" class="button" onclick={() => move(1)} disabled={current.at >= translator.rules.length - 1}>Move down</button>
-								<button type="button" class="button" onclick={() => open('delete')}>Delete…</button>
+								<button type="button" class="button" onclick={() => open('edit')}>{m.common.edit}</button>
+								<button type="button" class="button" onclick={toggleRule}>{r.enabled ? m.common.switchOff : m.common.switchOn}</button>
+								<button type="button" class="button" onclick={() => move(-1)} disabled={current.at === 0}>{m.common.moveUp}</button>
+								<button type="button" class="button" onclick={() => move(1)} disabled={current.at >= translator.rules.length - 1}>{m.common.moveDown}</button>
+								<button type="button" class="button" onclick={() => open('delete')}>{t.deleteMore}</button>
 							</div>
 						{/if}
 					{/if}
 				</div>
 			{/key}
 		{/if}
-		{#if readOnly}<p class="notice warn">Skyrim is running, so nothing can be changed until you close it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.common.gameRunning}</p>{/if}
 	</aside>
 </div>
 

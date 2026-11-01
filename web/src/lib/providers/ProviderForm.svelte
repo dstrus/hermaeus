@@ -4,8 +4,11 @@
 <script lang="ts">
 	import { tick, untrack } from 'svelte';
 	import type { ProviderEdit } from '#lib/api/types/settings.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import Segmented from '#lib/ui/Segmented.svelte';
 	import { apiStyles, sortings } from './api.ts';
+
+	const t = m.providers.form;
 
 	let {
 		edit: start,
@@ -49,7 +52,7 @@
 			try {
 				compact = JSON.stringify(JSON.parse(settings));
 			} catch {
-				error = 'The provider settings must be valid JSON, an object of keys and values.';
+				error = t.invalidJson;
 				return;
 			}
 		}
@@ -59,54 +62,54 @@
 
 <form onsubmit={submit}>
 	<label class="field">
-		<span class="caps label">Name</span>
-		<input bind:this={nameField} type="text" bind:value={name} placeholder="Groq" autocomplete="off" />
-		{#if isNew}<span class="muted small">Its id, for the tasks that use it, is made from the name.</span>{/if}
+		<span class="caps label">{t.name}</span>
+		<input bind:this={nameField} type="text" bind:value={name} placeholder={t.namePlaceholder} autocomplete="off" />
+		{#if isNew}<span class="muted small">{t.idFromName}</span>{/if}
 	</label>
 	<label class="field">
-		<span class="caps label">Endpoint</span>
+		<span class="caps label">{t.endpoint}</span>
 		<input type="url" bind:value={endpoint} placeholder="https://api.example.com/v1/chat/completions" autocomplete="off" spellcheck="false" />
-		<span class="muted small">The full URL SkyrimNet sends requests to.</span>
+		<span class="muted small">{t.endpointHint}</span>
 	</label>
 	<div class="field">
-		<span class="caps label">API style</span>
-		<Segmented bind:value={style} options={apiStyles} label="API style" />
+		<span class="caps label">{t.apiStyle}</span>
+		<Segmented bind:value={style} options={apiStyles} label={t.apiStyle} />
 		<span class="muted small">{apiStyles.find((s) => s.value === style)?.what}</span>
 	</div>
 	<div class="checks">
-		<label class="check"><input type="checkbox" bind:checked={streaming} /> <span>Stream the answer</span><span class="muted small">Server-sent events, so lines arrive as they're written.</span></label>
-		<label class="check"><input type="checkbox" bind:checked={structuredOutputs} /> <span>Structured outputs</span><span class="muted small">Ask for JSON in the provider's own format, where it supports that.</span></label>
-		<label class="check"><input type="checkbox" bind:checked={reasoning} /> <span>Reasoning</span><span class="muted small">Let models think before answering, where the provider offers it.</span></label>
+		<label class="check"><input type="checkbox" bind:checked={streaming} /> <span>{t.stream}</span><span class="muted small">{t.streamHint}</span></label>
+		<label class="check"><input type="checkbox" bind:checked={structuredOutputs} /> <span>{t.structured}</span><span class="muted small">{t.structuredHint}</span></label>
+		<label class="check"><input type="checkbox" bind:checked={reasoning} /> <span>{t.reasoning}</span><span class="muted small">{t.reasoningHint}</span></label>
 	</div>
-	<button type="button" class="textbutton small more" onclick={() => (more = !more)}>{more ? 'Fewer settings' : 'More settings'}</button>
+	<button type="button" class="textbutton small more" onclick={() => (more = !more)}>{more ? m.common.fewerSettings : m.common.moreSettings}</button>
 	{#if more}
 		{#if isOpenRouter}
 			<label class="field">
-				<span class="caps label">Upstream sorting</span>
+				<span class="caps label">{t.upstreamSorting}</span>
 				<select bind:value={sorting}>
 					{#each sortings as s (s.value)}<option value={s.value}>{s.label}</option>{/each}
 				</select>
-				<span class="muted small">How OpenRouter chooses among the hosts that serve a model.</span>
+				<span class="muted small">{t.upstreamHint}</span>
 			</label>
 		{/if}
 		<label class="field">
-			<span class="caps label">Prompt cache</span>
+			<span class="caps label">{t.promptCache}</span>
 			<select bind:value={cacheTTL}>
-				<option value="5m">5 minutes</option>
-				<option value="1h">An hour</option>
+				<option value="5m">{t.fiveMinutes}</option>
+				<option value="1h">{t.anHour}</option>
 			</select>
-			<span class="muted small">How long the provider keeps the cached start of a prompt. An hour lasts through longer pauses, but costs more with providers that charge for caching.</span>
+			<span class="muted small">{t.cacheHint}</span>
 		</label>
 		<label class="field">
-			<span class="caps label">Provider settings, as JSON</span>
+			<span class="caps label">{t.settings}</span>
 			<textarea bind:value={settings} rows="6" spellcheck="false" placeholder={'{\n  "route": "fallback"\n}'}></textarea>
-			<span class="muted small">Sent with every request, as the provider's API takes them. Empty sends none.</span>
+			<span class="muted small">{t.settingsHint}</span>
 		</label>
 	{/if}
 	{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 	<div class="buttons">
-		<button type="submit" class="button primary" disabled={saving}>{isNew ? 'Add' : 'Save'}</button>
-		<button type="button" class="button" onclick={oncancel} disabled={saving}>Cancel</button>
+		<button type="submit" class="button primary" disabled={saving}>{isNew ? t.add : m.common.save}</button>
+		<button type="button" class="button" onclick={oncancel} disabled={saving}>{m.common.cancel}</button>
 	</div>
 </form>
 

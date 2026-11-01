@@ -1,5 +1,6 @@
 import { playthroughPath, request } from '#lib/api/client.ts';
 import type { BulkChanges, Count, DeleteDiary, DeletedDiary, DiaryChanges, DiaryResponse, KnowledgeResponse, MemoriesResponse, MemoryChanges, NewEntry, PackChanges, SaveResult } from '#lib/api/types/memories.ts';
+import { m } from '#lib/copy/messages.ts';
 
 // What load functions depend on for memories and diary entries; invalidate
 // them after changing either.
@@ -19,8 +20,8 @@ export function getMemories(save: string, uuid: string, fetchFn?: typeof fetch):
 	return request<MemoriesResponse>('GET', playthroughPath(save, 'characters', uuid, 'memories'), undefined, fetchFn);
 }
 
-export function addMemory(save: string, uuid: string, m: MemoryChanges): Promise<SaveResult> {
-	return request<SaveResult>('POST', playthroughPath(save, 'characters', uuid, 'memories'), m);
+export function addMemory(save: string, uuid: string, memory: MemoryChanges): Promise<SaveResult> {
+	return request<SaveResult>('POST', playthroughPath(save, 'characters', uuid, 'memories'), memory);
 }
 
 export function updateMemory(save: string, id: number, c: MemoryChanges): Promise<SaveResult> {
@@ -57,10 +58,10 @@ export function deleteDiaryEntries(save: string, d: DeleteDiary): Promise<Delete
 
 // savedNote says what a save did besides the change itself, for the user.
 export function savedNote(r: SaveResult, what: string): string {
-	const notes = [`${what} saved.`];
-	if (r.diary !== undefined) notes.push(`Diary entry ${r.diary} was updated to match.`);
-	if (r.memory !== undefined) notes.push(`Its memory copy was updated to match.`);
-	if (r.reembed) notes.push('SkyrimNet makes a new search vector in the background the next time a save is loaded.');
+	const notes = [m.memories.saved({ what })];
+	if (r.diary !== undefined) notes.push(m.memories.diaryMatched({ id: r.diary }));
+	if (r.memory !== undefined) notes.push(m.memories.memoryMatched);
+	if (r.reembed) notes.push(m.memories.reembed);
 	return notes.join(' ');
 }
 

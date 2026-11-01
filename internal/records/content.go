@@ -18,16 +18,15 @@ import (
 // folder per kind. Like a prompt, a record can come from any layer, and the
 // player's edits are copies in overlay/, which replace the same file below.
 
-// Kind is a folder of records.
+// Kind is a folder of records. The frontend names each by its root.
 type Kind struct {
-	Root  string `json:"root"`
-	Label string `json:"label"`
+	Root string `json:"root"`
 }
 
 var Kinds = []Kind{
-	{"triggers", "Triggers"}, {"actions", "Actions"}, {"filters", "Filters"}, {"voice_effects", "Voice effects"},
-	{"entities", "Entities"}, {"dialogue_actions", "Dialogue actions"}, {"translator", "Speech rules"},
-	{"items", "Items"}, {"spells", "Spells"}, {"furniture", "Furniture names"}, {"identity", "Identity links"}, {"places", "Named places"},
+	{"triggers"}, {"actions"}, {"filters"}, {"voice_effects"},
+	{"entities"}, {"dialogue_actions"}, {"translator"},
+	{"items"}, {"spells"}, {"furniture"}, {"identity"}, {"places"},
 }
 
 func isKind(root string) bool {

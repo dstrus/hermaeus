@@ -1,30 +1,33 @@
+import { m } from '#lib/copy/messages.ts';
 import type { Feature } from './schema.ts';
+
+const f = m.features.memoryFilter;
 
 // The memory filter: which characters form memories at all. MemoryFilter.yaml
 // holds the mode; the lists are filters/ files in the content library.
 export const memoryFilter: Feature = {
 	id: 'memory-filter',
 	file: 'MemoryFilter',
-	title: 'Memory filter',
-	what: 'Which characters form memories at all: a few switches here, and lists of factions, races, and genders below.',
+	title: f.title,
+	what: f.what,
 	lists: 'memory',
 	sections: [
 		{
-			title: 'Mode',
+			title: f.mode.title,
 			fields: [
-				{ key: 'EnableMemoryFiltering', label: 'Filter memories', what: 'Check each character against the switches and lists here before they form a memory.', kind: 'switch' },
+				{ key: 'EnableMemoryFiltering', label: f.mode.enableMemoryFiltering.label, what: f.mode.enableMemoryFiltering.what, kind: 'switch' },
 				{
 					key: 'FilterMode',
-					label: 'Mode',
-					what: 'With a blacklist, everyone forms memories except those the blacklists name. With a whitelist, only those the whitelists name do.',
+					label: f.mode.filterMode.label,
+					what: f.mode.filterMode.what,
 					kind: 'choice',
 					choices: [
-						{ value: 'BlacklistExclusion', label: 'Blacklist', what: 'Everyone but those listed' },
-						{ value: 'WhitelistOnly', label: 'Whitelist', what: 'Only those listed' }
+						{ value: 'BlacklistExclusion', label: f.mode.filterMode.choices.blacklistExclusion.label, what: f.mode.filterMode.choices.blacklistExclusion.what },
+						{ value: 'WhitelistOnly', label: f.mode.filterMode.choices.whitelistOnly.label, what: f.mode.filterMode.choices.whitelistOnly.what }
 					]
 				},
-				{ key: 'AllowOnlyActorsCapableOfSpeech', label: 'Only those who can speak', what: 'Characters who can’t speak form no memories, unless a whitelist names them.', kind: 'switch' },
-				{ key: 'AllowPlayerMemories', label: 'Your character too', what: 'Your own character forms memories.', kind: 'switch' }
+				{ key: 'AllowOnlyActorsCapableOfSpeech', label: f.mode.allowOnlyActorsCapableOfSpeech.label, what: f.mode.allowOnlyActorsCapableOfSpeech.what, kind: 'switch' },
+				{ key: 'AllowPlayerMemories', label: f.mode.allowPlayerMemories.label, what: f.mode.allowPlayerMemories.what, kind: 'switch' }
 			]
 		}
 	]

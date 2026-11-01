@@ -4,8 +4,10 @@
 	import { invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { setToggle, settingsDependency } from '#lib/settings/api.ts';
 	import type { Toggle } from '#lib/api/types/settings.ts';
+	import { toggleCopy } from './api.ts';
 
 	let { toggles, error: loadError = '' }: { toggles: Toggle[]; error?: string } = $props();
 
@@ -15,9 +17,10 @@
 	let busy = $state('');
 
 	function title(t: Toggle): string {
-		if (!t.available) return `${t.what} Not switchable yet: SkyrimNet creates its settings file the next time it starts.`;
-		if (live.gameRunning) return `${t.what} Skyrim is running, so nothing can be changed.`;
-		return t.what;
+		const { what } = toggleCopy(t.id);
+		if (!t.available) return m.shell.toggleUnavailable({ what });
+		if (live.gameRunning) return m.shell.toggleGameRunning({ what });
+		return what;
 	}
 
 	async function flip(t: Toggle) {
@@ -38,8 +41,8 @@
 	}
 </script>
 
-<div class="toggles" role="group" aria-label="Quick toggles">
-	<span class="group caps muted" aria-hidden="true">Quick toggles</span>
+<div class="toggles" role="group" aria-label={m.shell.quickToggles}>
+	<span class="group caps muted" aria-hidden="true">{m.shell.quickToggles}</span>
 	{#each current as t (t.id)}
 		<button
 			type="button"
@@ -56,7 +59,7 @@
 					<path d="M2 5.3 4.1 7.4 8 3.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
 				</svg>
 			</span>
-			<span class="caps">{t.label}</span>
+			<span class="caps">{toggleCopy(t.id).label}</span>
 		</button>
 	{/each}
 	{#if error}

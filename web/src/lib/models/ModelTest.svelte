@@ -5,7 +5,10 @@
 	import { untrack } from 'svelte';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { ModelTestResult, Provider, Task } from '#lib/api/types/settings.ts';
-	import { providerName, testModel } from './api.ts';
+	import { m } from '#lib/copy/messages.ts';
+	import { providerName, sample, testModel } from './api.ts';
+
+	const t = m.models.test;
 
 	let { task, providers }: { task: Task; providers: Provider[] } = $props();
 
@@ -28,25 +31,9 @@
 	let cap = $derived(task.params.maxTokens && task.params.maxTokens > 0 ? Math.min(task.params.maxTokens, testCap) : testCap);
 
 	// Each task starts from a prompt shaped like its job: brevity for Meta, an
-	// action's name for action evaluation, sections for a bio. They're
-	// stand-ins for SkyrimNet's real prompts, which are long templates filled
-	// in from the game.
-	const starts: Record<string, [system: string, prompt: string]> = {
-		default: ['You are an innkeeper in Skyrim. Stay in character.', 'A traveler walks in out of the snow. Greet them in a sentence or two.'],
-		combat: ['You are a bandit in the middle of a fight. Stay in character.', 'The traveler just cut your arm with a war axe. Say one line, then choose: flee, surrender, or fight on.'],
-		CharacterProfileGeneration: ['Write a character bio with three short sections: Summary, Personality, and Speech.', 'Write a bio for the innkeeper of an inn in Whiterun, in under 150 words.'],
-		DiaryGeneration: ['Write a first-person diary entry for the character described.', 'You are a housecarl. Today you fought a dragon at a watchtower beside your thane. Write tonight’s entry in about 120 words.'],
-		memory: ['Turn the events into one first-person memory, then rate how much it matters, from 0 to 1.', 'The traveler paid for a room. They asked about the Companions. They left a large tip.'],
-		gamemaster_evaluation: ['You direct a scene. Say who should speak next and why, or that no one should.', 'In a tavern, a bard has just finished a song. A guard is drinking alone, and two farmers are arguing about the harvest.'],
-		action_evaluation: ['Choose the best action from the list, or none. Reply with its name only.', 'The innkeeper hears: “I’d like a room for the night.” Actions: RentRoom, OpenTrade, Follow, none.'],
-		meta: ['Answer in one word.', 'Who is this line meant for, the innkeeper or the bard? “Play something cheerful.”'],
-		UniversalTranslator: ['Rewrite the line in the speech pattern given, keeping its meaning.', 'Pattern: an old sea captain. Line: “I don’t know where the key is, but the jarl might.”'],
-		AgentDefault: ['You help a player set up SkyrimNet.', 'How do I make characters talk to each other less often?'],
-		vision: ['Describe the place in two sentences, as for someone who can’t see it.', 'A snowy courtyard with a broken well and a shuttered forge.'],
-		vision_quality: ['Describe the place in two sentences, as for someone who can’t see it.', 'A snowy courtyard with a broken well and a shuttered forge.']
-	};
-	// A plugin's task, whose job Hermaeus doesn't know, just checks for a reply.
-	const [startSystem, startPrompt] = untrack(() => starts[task.id] ?? ['', 'Reply with one short sentence to confirm you’re working.']);
+	// action's name for action evaluation, sections for a bio. A plugin's
+	// task, whose job Hermaeus doesn't know, just checks for a reply.
+	const [startSystem, startPrompt] = untrack(() => sample(task.id));
 	const vision = untrack(() => task.id === 'vision' || task.id === 'vision_quality');
 
 	let system = $state(startSystem);
@@ -71,66 +58,66 @@
 
 	// A cost as providers quote it: tiny sums to a few significant figures.
 	function dollars(n: number): string {
-		if (n === 0) return 'free';
+		if (n === 0) return t.free;
 		if (n < 0.01) return `$${Number(n.toPrecision(2))}`;
 		return `$${n.toFixed(4)}`;
 	}
 </script>
 
 <section class="test">
-	<h3 class="caps">Try it</h3>
+	<h3 class="caps">{t.title}</h3>
 	{#if slot < 0}
 		<p class="muted small">
 			{#if onFateless}
-				Its models are on Fateless, which SkyrimNet reaches through its own sign-in. Hermaeus doesn’t have that sign-in, so SkyrimNet’s dashboard is where to test them.
+				{t.onFateless}
 			{:else}
-				{task.slots.length ? 'None of its models is on a chat provider, so there’s nothing a test can send to.' : 'It has no model of its own to try.'}
+				{task.slots.length ? t.noChat : t.noModel}
 			{/if}
 		</p>
 	{:else}
 		<form onsubmit={(e) => (e.preventDefault(), send())}>
 			{#if slots.length > 1}
 				<label>
-					<span class="caps">Model</span>
+					<span class="caps">{t.model}</span>
 					<select bind:value={slot}>
-						{#each slots as { s, i } (i)}<option value={i}>{s.model} · {providerName(providers, s.provider)}{s.enabled ? '' : ' (off)'}</option>{/each}
+						{#each slots as { s, i } (i)}<option value={i}>{s.model} · {providerName(providers, s.provider)}{s.enabled ? '' : ` ${t.slotOff}`}</option>{/each}
 					</select>
 				</label>
 			{/if}
 			<label>
-				<span class="caps">Instructions</span>
+				<span class="caps">{t.instructions}</span>
 				<textarea bind:value={system} rows="2"></textarea>
 			</label>
 			<label>
-				<span class="caps">Prompt</span>
+				<span class="caps">{t.prompt}</span>
 				<textarea bind:value={prompt} rows="3"></textarea>
 			</label>
-			{#if vision}<p class="notice warn small">A test sends text only, so the model gets a description rather than a picture. It shows how the model writes, not how it sees.</p>{/if}
-			<p class="muted small">Sends one request to {providerName(providers, chosen?.provider ?? '')}, as SkyrimNet would, with the task’s sampling settings and up to {cap.toLocaleString()} tokens of reply. A paid provider bills it like any other request.</p>
+			{#if vision}<p class="notice warn small">{t.vision}</p>{/if}
+			<p class="muted small">{t.sends({ provider: providerName(providers, chosen?.provider ?? ''), tokens: cap.toLocaleString() })}</p>
 			<div class="buttons">
-				<button type="submit" class="button" disabled={sending || !prompt.trim()}>{sending ? 'Waiting for a reply…' : 'Send'}</button>
+				<button type="submit" class="button" disabled={sending || !prompt.trim()}>{sending ? t.waiting : t.send}</button>
 			</div>
 		</form>
 		{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 		{#if result}
 			<div class="result" role="status">
-				<p class="reply">{result.reply || '(An empty reply.)'}</p>
-				{#if result.finishReason === 'length'}<p class="notice warn small">Cut off at {result.maxTokens} tokens.</p>{/if}
+				<p class="reply">{result.reply || t.emptyReply}</p>
+				{#if result.finishReason === 'length'}<p class="notice warn small">{t.cutOff({ tokens: result.maxTokens })}</p>{/if}
 				<dl class="small">
-					<dt class="caps">Answered by</dt>
-					<dd><span class="id">{result.answered || result.model}</span>{#if result.upstream}<span class="muted"> · through {result.upstream}</span>{/if}</dd>
-					<dt class="caps">Took</dt>
-					<dd>{(result.millis / 1000).toFixed(1)} s</dd>
-					<dt class="caps">Tokens</dt>
-					<dd>{result.promptTokens.toLocaleString()} in, {result.completionTokens.toLocaleString()} out</dd>
-					<dt class="caps">Cost</dt>
+					<dt class="caps">{t.answeredBy}</dt>
+					<dd><span class="id">{result.answered || result.model}</span>{#if result.upstream}<span class="muted"> · {t.through({ upstream: result.upstream })}</span>{/if}</dd>
+					<dt class="caps">{t.took}</dt>
+					<dd>{t.seconds({ seconds: (result.millis / 1000).toFixed(1) })}</dd>
+					<dt class="caps">{t.tokens}</dt>
+					<dd>{t.tokensInOut({ input: result.promptTokens.toLocaleString(), output: result.completionTokens.toLocaleString() })}</dd>
+					<dt class="caps">{t.cost}</dt>
 					<dd>
-						{#if result.cost !== undefined}{dollars(result.cost)}<span class="muted"> · {result.costFrom === 'provider' ? 'as billed' : 'by its listed prices'}</span>{:else}<span class="muted">Not reported. Fetch this provider’s models to price it by their list.</span>{/if}
+						{#if result.cost !== undefined}{dollars(result.cost)}<span class="muted"> · {result.costFrom === 'provider' ? t.asBilled : t.byListedPrices}</span>{:else}<span class="muted">{t.notReported}</span>{/if}
 					</dd>
 				</dl>
 				{#if result.reasoning}
 					<details class="small">
-						<summary>Its reasoning</summary>
+						<summary>{t.reasoning}</summary>
 						<p>{result.reasoning}</p>
 					</details>
 				{/if}

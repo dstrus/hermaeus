@@ -2,6 +2,7 @@
 // categories become sections, and each field's type a kind of value.
 import { request } from '#lib/api/client.ts';
 import type { PluginSchema, SchemaField } from '#lib/api/types/settings.ts';
+import { m } from '#lib/copy/messages.ts';
 import type { Feature, Field, Section } from './schema.ts';
 
 export function getPluginSchemas(fetchFn?: typeof fetch): Promise<PluginSchema[]> {
@@ -38,7 +39,7 @@ export function featureOf(ps: PluginSchema): Feature {
 	const sections: Section[] = [];
 	for (const f of ps.fields) {
 		if (hidden.has((f.category ?? '').trim().toLowerCase())) continue;
-		const title = f.category || 'General';
+		const title = f.category || m.features.pluginSettings.general;
 		let s = sections.find((x) => x.title === title);
 		if (!s) sections.push((s = { title, fields: [] }));
 		s.fields.push(fieldOf(f));
@@ -47,7 +48,7 @@ export function featureOf(ps: PluginSchema): Feature {
 		id: `plugin/${ps.folder}`,
 		file: ps.name,
 		title: ps.title,
-		what: [ps.description, 'These are the plugin’s own settings, as it describes them.'].filter(Boolean).join(' '),
+		what: [ps.description, m.features.pluginSettings.what].filter(Boolean).join(' '),
 		sections
 	};
 }

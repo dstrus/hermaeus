@@ -7,6 +7,7 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { File } from '#lib/api/types/settings.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import Segmented from '#lib/ui/Segmented.svelte';
@@ -19,6 +20,8 @@
 	import Up from '#lib/ui/Up.svelte';
 	import { editable, fileLabel, fromEntries, kindOf, parseJSONText, saveSettings, settingsDependency, settingsHref, show, toEntries, togglesDependency, words, type Entry, type Kind, type Row } from './api.ts';
 	import { codeOf, keyName, mouseCodeOf, noKey } from './keys.ts';
+
+	const t = m.settings;
 
 	let {
 		save,
@@ -133,7 +136,7 @@
 				if (!numbers) return items;
 				return items.map((l) => {
 					const n = Number(l);
-					if (Number.isNaN(n)) throw new Error(`“${l}” isn’t a number; this list holds numbers.`);
+					if (Number.isNaN(n)) throw new Error(t.lineNotNumber({ line: l }));
 					return n;
 				});
 			}
@@ -145,7 +148,7 @@
 					const out: Record<string, Scalar> = {};
 					for (const [key, v] of Object.entries(r)) {
 						if (numeric.has(key) && typeof v === 'string') {
-							if (v.trim() !== '') throw new Error(`${key} holds numbers; “${v}” isn’t one.`);
+							if (v.trim() !== '') throw new Error(t.fieldNotNumber({ key, value: v }));
 							out[key] = null;
 						} else out[key] = v;
 					}
@@ -159,10 +162,10 @@
 		try {
 			v = JSON.parse(draft);
 		} catch {
-			throw new Error('Enter valid JSON.');
+			throw new Error(t.enterJson);
 		}
-		if (kind === 'list' && !Array.isArray(v)) throw new Error('This setting is a list.');
-		if (kind === 'group' && !isMap(v)) throw new Error('This setting is a group of settings.');
+		if (kind === 'list' && !Array.isArray(v)) throw new Error(t.isList);
+		if (kind === 'group' && !isMap(v)) throw new Error(t.isGroup);
 		return v;
 	}
 	// Switching between the fields and the JSON text keeps what's been typed.
@@ -177,7 +180,7 @@
 	function showAsFields() {
 		try {
 			const v = asText ? parseJSONText(draft) : fromFields();
-			if (v === undefined) throw new Error('The text isn’t a JSON list or map.');
+			if (v === undefined) throw new Error(t.notJsonListOrMap);
 			toFields(v);
 			error = '';
 		} catch (e) {
@@ -221,7 +224,7 @@
 			case 'number':
 			case 'hotkey': {
 				const n = Number(draft.trim());
-				if (draft.trim() === '' || Number.isNaN(n)) throw new Error('Enter a number.');
+				if (draft.trim() === '' || Number.isNaN(n)) throw new Error(t.enterNumber);
 				return n;
 			}
 			case 'text':
@@ -230,7 +233,7 @@
 			case 'group':
 				return fromFields();
 		}
-		throw new Error('This setting can’t be edited here.');
+		throw new Error(t.cantEdit);
 	}
 
 	async function apply(change: { key: string; value?: unknown; reset?: boolean }, done: string) {
@@ -259,7 +262,7 @@
 			error = e instanceof Error ? e.message : String(e);
 			return;
 		}
-		apply({ key: current.setting.key, value }, `Saved ${current.setting.key}.`);
+		apply({ key: current.setting.key, value }, t.saved({ key: current.setting.key }));
 	}
 
 	// A hotkey is set by pressing it in the capture box. Tab, Esc, and the
@@ -281,46 +284,46 @@
 
 	function reset() {
 		if (!current || !resettable) return;
-		apply({ key: current.setting.key, reset: true }, `${current.setting.key} is back to its default.`);
+		apply({ key: current.setting.key, reset: true }, t.reset({ key: current.setting.key }));
 	}
 
 	useShortcuts(() => [
-		{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: editing, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: editing, run: () => selection.move(-1) },
-		{ key: 'e', shown: 'E', label: 'Edit', hidden: editing, disabled: !editableNow, run: startEdit },
-		{ key: 'r', shown: 'R', label: 'Reset to default', hidden: editing, disabled: !resettable, run: reset },
-		{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: submit },
-		{ key: 'Escape', shown: 'Esc', label: editing ? 'Cancel' : 'Other settings', run: () => (editing ? leave('mode') : goto(list)) }
+		{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: editing, run: () => selection.move(1) },
+		{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: editing, run: () => selection.move(-1) },
+		{ key: 'e', shown: 'E', label: m.common.edit, hidden: editing, disabled: !editableNow, run: startEdit },
+		{ key: 'r', shown: 'R', label: m.common.resetToDefault, hidden: editing, disabled: !resettable, run: reset },
+		{ key: 'Enter', label: m.common.save, command: true, hidden: !editing, disabled: saving, run: submit },
+		{ key: 'Escape', shown: 'Esc', label: editing ? m.common.cancel : t.title, run: () => (editing ? leave('mode') : goto(list)) }
 	]);
 </script>
 
-<Up href={list} label="Other settings" />
+<Up href={list} label={t.title} />
 <div class="bar">
 	<h1 class="caps">{title}</h1>
 	{#if file}
 		<span class="path n" use:clipped>{file.path}</span>
 	{:else}
-		<span class="muted n" use:clipped>{count(rows.length)} across {new Set(rows.map((r) => r.file.name)).size} files</span>
+		<span class="muted n" use:clipped>{t.acrossFiles({ rows: count(rows.length), count: new Set(rows.map((r) => r.file.name)).size })}</span>
 	{/if}
-	<input type="search" bind:value={query} placeholder="Filter by key or value" aria-label="Filter settings" />
+	<input type="search" bind:value={query} placeholder={t.filter} aria-label={t.filterLabel} />
 </div>
 {#if file && !file.exists}
-	<p class="notice warn">SkyrimNet hasn’t created this file yet, so these are its defaults; they can be changed once it has.</p>
+	<p class="notice warn">{t.notCreatedDefaults}</p>
 {/if}
 
 {#if !rows.length}
-	<p class="muted">{file ? 'This file has no settings.' : 'Nothing differs from the defaults.'}</p>
+	<p class="muted">{file ? t.noSettings : t.noneChanged}</p>
 {:else if !shown.length}
-	<p class="muted">Nothing matches “{query}”.</p>
+	<p class="muted">{t.noMatch({ query })}</p>
 {:else}
 	<div class="split">
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<th class="caps">Setting</th>
-					<th class="caps">Value</th>
-					<th class="caps default">Default</th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<th class="caps">{t.setting}</th>
+					<th class="caps">{t.value}</th>
+					<th class="caps default">{t.default}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -337,7 +340,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<aside class="pane" aria-label="Setting" use:fitToViewport>
+		<aside class="pane" aria-label={t.setting} use:fitToViewport>
 			{#if current}
 				<h2 class="key">{current.setting.key}</h2>
 				<p class="muted small">{byFile ? fileLabel(current.file) : current.file.path}</p>
@@ -346,60 +349,60 @@
 				{#if editing}
 					<form class="edit" onsubmit={(e) => (e.preventDefault(), submit())}>
 						{#if kind === 'switch'}
-							<Segmented bind:value={draft} options={[{ value: 'true', label: 'On' }, { value: 'false', label: 'Off' }]} label="Value" />
+							<Segmented bind:value={draft} options={[{ value: 'true', label: m.common.isOn }, { value: 'false', label: m.common.isOff }]} label={t.value} />
 						{:else if kind === 'number'}
-							<input bind:this={field} bind:value={draft} type="text" inputmode="decimal" aria-label="Value" autocomplete="off" />
+							<input bind:this={field} bind:value={draft} type="text" inputmode="decimal" aria-label={t.value} autocomplete="off" />
 						{:else if kind === 'hotkey'}
 							<button
 								type="button"
 								class="capture"
 								bind:this={field}
-								aria-label="Press the key to use"
+								aria-label={t.pressKey}
 								onkeydown={captureKey}
 								onmousedown={captureMouse}
 								oncontextmenu={(e) => e.preventDefault()}>{keyName(Number(draft))}</button
 							>
-							<p class="muted small">Press a key, or click the box with a mouse button.</p>
-							<button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>No key</button>
+							<p class="muted small">{t.pressKeyHint}</p>
+							<button type="button" class="textbutton" onclick={() => (draft = String(noKey))}>{t.noKey}</button>
 						{:else if shape === 'lines'}
-							<textarea bind:this={field} bind:value={lines} rows={Math.min(16, Math.max(4, lines.split('\n').length + 1))} spellcheck="false" aria-label="Items, one per line"></textarea>
-							<p class="muted small">One {numbers ? 'number' : 'item'} per line. <button type="button" class="textbutton" onclick={showAsText}>Edit as {asText ? 'text' : 'JSON'}</button></p>
+							<textarea bind:this={field} bind:value={lines} rows={Math.min(16, Math.max(4, lines.split('\n').length + 1))} spellcheck="false" aria-label={t.itemsPerLine}></textarea>
+							<p class="muted small">{numbers ? t.numberPerLine : t.itemPerLine} <button type="button" class="textbutton" onclick={showAsText}>{asText ? t.editAsText : t.editAsJson}</button></p>
 						{:else if shape === 'records'}
 							<ListEditor bind:items={records} />
-							<p class="muted small"><button type="button" class="textbutton" onclick={showAsText}>Edit as {asText ? 'text' : 'JSON'}</button></p>
+							<p class="muted small"><button type="button" class="textbutton" onclick={showAsText}>{asText ? t.editAsText : t.editAsJson}</button></p>
 						{:else if shape === 'map'}
 							<MapEditor bind:entries />
-							<p class="muted small"><button type="button" class="textbutton" onclick={showAsText}>Edit as {asText ? 'text' : 'JSON'}</button></p>
+							<p class="muted small"><button type="button" class="textbutton" onclick={showAsText}>{asText ? t.editAsText : t.editAsJson}</button></p>
 						{:else}
-							<textarea bind:this={field} bind:value={draft} rows={kind === 'text' && !asText ? 4 : 12} spellcheck="false" aria-label="Value"></textarea>
+							<textarea bind:this={field} bind:value={draft} rows={kind === 'text' && !asText ? 4 : 12} spellcheck="false" aria-label={t.value}></textarea>
 							{#if shape === 'json' || asText}
-								<p class="muted small">As JSON. <button type="button" class="textbutton" onclick={showAsFields}>Edit as fields</button></p>
+								<p class="muted small">{t.asJson} <button type="button" class="textbutton" onclick={showAsFields}>{t.editAsFields}</button></p>
 							{/if}
 						{/if}
 						<div class="buttons">
-							<button type="submit" class="button primary" disabled={saving}>Save</button>
-							<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+							<button type="submit" class="button primary" disabled={saving}>{m.common.save}</button>
+							<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 						</div>
 					</form>
 				{:else}
 					<dl>
-						<dt class="caps">Value</dt>
-						<dd class:changed={current.setting.changed}><pre>{showValue(current, valueOf(current))}</pre>{#if !current.setting.set}<span class="muted"> (the default; the file doesn’t set it)</span>{/if}</dd>
+						<dt class="caps">{t.value}</dt>
+						<dd class:changed={current.setting.changed}><pre>{showValue(current, valueOf(current))}</pre>{#if !current.setting.set}<span class="muted"> {t.defaultNotSet}</span>{/if}</dd>
 						{#if current.setting.hasDefault}
-							<dt class="caps">Default</dt><dd><pre>{showValue(current, current.setting.default)}</pre></dd>
+							<dt class="caps">{t.default}</dt><dd><pre>{showValue(current, current.setting.default)}</pre></dd>
 						{/if}
 					</dl>
 					{#if kind === 'secret'}
-						<p class="notice">API keys and other secrets are never shown or changed here. Use SkyrimNet’s dashboard.</p>
+						<p class="notice">{t.secret}</p>
 					{:else if current.setting.hasSecrets}
-						<p class="notice">This holds API keys inside it, so it can’t be changed here. Use SkyrimNet’s dashboard.</p>
+						<p class="notice">{t.hasSecrets}</p>
 					{:else if readOnly}
-						<p class="notice warn">Close Skyrim to change settings.</p>
+						<p class="notice warn">{t.closeSkyrim}</p>
 					{/if}
 					<div class="buttons">
-						<button type="button" class="button primary" disabled={!editableNow} onclick={startEdit}>Edit</button>
+						<button type="button" class="button primary" disabled={!editableNow} onclick={startEdit}>{m.common.edit}</button>
 						{#if current.setting.hasDefault}
-							<button type="button" class="button" disabled={!resettable} onclick={reset}>Reset to default</button>
+							<button type="button" class="button" disabled={!resettable} onclick={reset}>{m.common.resetToDefault}</button>
 						{/if}
 					</div>
 				{/if}

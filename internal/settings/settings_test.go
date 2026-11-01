@@ -85,7 +85,7 @@ func TestComparedWithDefaults(t *testing.T) {
 	}
 	// A file with a page of its own says so, as listed and as read by name.
 	for _, f := range list.Files {
-		if f.File.Name == "UniversalTranslator" && (f.File.Page != "behavior/translator" || f.File.PageLabel != "Universal Translator") {
+		if f.File.Name == "UniversalTranslator" && (f.File.Page != "behavior/translator" || f.File.PageLabel != "") {
 			t.Errorf("the translator's page = %+v", f.File)
 		}
 		if f.File.Name == "Memory" && f.File.Page != "memory/memories" {

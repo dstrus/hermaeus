@@ -7,7 +7,9 @@
 	import { fly } from 'svelte/transition';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { Override, OverrideList, Version } from '#lib/api/types/records.ts';
-	import { plural, realTime } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
+	import { realTime } from '#lib/format.ts';
 	import { editHref, pluginHref } from '#lib/plugins/links.ts';
 	import { param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
@@ -20,6 +22,7 @@
 	import { getVersions, layerName } from './api.ts';
 
 	let { list }: { list: OverrideList } = $props();
+	const msg = m.records.overrides;
 
 	let save = $derived(page.params.save ?? '');
 	const layerAt = (i: number | undefined) => (i === undefined ? undefined : list.layers[i]);
@@ -76,34 +79,34 @@
 	let counts = $derived(diff ? { added: diff.filter((l) => l.kind === 'added').length, removed: diff.filter((l) => l.kind === 'removed').length } : null);
 
 	useShortcuts(() => [
-		{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) }
+		{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+		{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) }
 	]);
 </script>
 
 <div class="bar">
-	<h1 class="caps">Overrides</h1>
-	<span class="muted n" use:clipped>{plural(list.overrides.length, 'file', 'files')}</span>
+	<h1 class="caps">{msg.title}</h1>
+	<span class="muted n" use:clipped>{msg.count({ count: list.overrides.length })}</span>
 	{#if flagged}
-		<button type="button" class="textbutton filter" aria-pressed={flaggedOnly} onclick={() => setParams({ show: flaggedOnly ? null : 'flagged' })}>{flaggedOnly ? 'Show all' : `Show the ${flagged} to check`}</button>
+		<button type="button" class="textbutton filter" aria-pressed={flaggedOnly} onclick={() => setParams({ show: flaggedOnly ? null : 'flagged' })}>{flaggedOnly ? m.common.showAll : msg.showFlagged({ count: flagged })}</button>
 	{/if}
-	<input type="search" bind:value={query} placeholder="Search files" aria-label="Search files" />
+	<input type="search" bind:value={query} placeholder={msg.search} aria-label={msg.search} />
 </div>
-<p class="muted lead">Each file a plugin or your own edits put in place of SkyrimNet’s, or of another plugin’s. Only the highest copy is used, so a change SkyrimNet makes to its own copy in an update doesn’t reach you while another replaces it.</p>
+<p class="muted lead">{msg.lead}</p>
 
 <div class="split">
 	<div class="list">
 		{#if !list.overrides.length}
-			<p class="muted">Nothing replaces any of SkyrimNet’s files: it uses its own throughout.</p>
+			<p class="muted">{msg.none}</p>
 		{:else if !shown.length}
-			<p class="muted">{query ? `Nothing matches “${query}”.` : 'Nothing to check.'}</p>
+			<p class="muted">{query ? m.records.noMatch({ query }) : msg.nothingToCheck}</p>
 		{:else}
 			<table>
 				<thead>
 					<tr>
-						<th class="mark" aria-label="Selected"></th>
-						<th class="caps">File</th>
-						<th class="caps instead">In place of</th>
+						<th class="mark" aria-label={m.common.selected}></th>
+						<th class="caps">{msg.file}</th>
+						<th class="caps instead">{msg.inPlaceOf}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -113,9 +116,9 @@
 						{/if}
 						<tr aria-selected={selection.is(o)} onclick={() => selection.select(o)}>
 							<td class="mark">{#if selection.is(o)}<Diamond />{/if}</td>
-							<td use:clipped title={o.path}><span class="file">{fileName(o.path)}</span>{#if o.stale}<span class="flag warn">older</span>{/if}{#if o.conflict}<span class="flag warn">conflict</span>{/if}<span class="folder">{folder(o.path)}</span></td>
+							<td use:clipped title={o.path}><span class="file">{fileName(o.path)}</span>{#if o.stale}<span class="flag warn">{msg.older}</span>{/if}{#if o.conflict}<span class="flag warn">{msg.conflict}</span>{/if}<span class="folder">{folder(o.path)}</span></td>
 							<td class="instead muted" use:clipped>
-								{#if o.providers.length > 1}{o.providers.slice(1).map((p) => layerName(layerAt(p.layer))).join(', ')}{:else}Nothing: added{/if}
+								{#if o.providers.length > 1}{o.providers.slice(1).map((p) => layerName(layerAt(p.layer))).join(m.records.listJoin)}{:else}{msg.added}{/if}
 							</td>
 						</tr>
 					{/each}
@@ -124,7 +127,7 @@
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="File">
+	<aside class="pane" use:fitToViewport aria-label={msg.file}>
 		{#if current}
 			{@const o = current}
 			{@const w = winner(o)}
@@ -134,49 +137,62 @@
 					<h2>{fileName(o.path)}</h2>
 					<p class="muted small id">{o.path}</p>
 					<p class="small">
-						{#if w?.kind === 'pack'}<a href={pluginHref(save, w.id)}>{w.source}</a>’s copy is used{:else}<span class="changed">Your own copy</span> is used{/if}{#if o.providers.length > 1}, in place of {o.providers
+						<Fill
+							text={(o.providers.length > 1 ? msg.usedInPlaceOf : msg.usedAdding).text}
+							layers={o.providers
 								.slice(1)
 								.map((p) => layerName(layerAt(p.layer)))
-								.join(', then ')}.{:else}. Nothing below has this file, so it adds one rather than replacing one.{/if}
-						{#if edit}<a href={edit.href}>Open on the {edit.page === 'Content' ? 'Content page' : `${edit.page} page`}</a>{/if}
+								.join(m.records.thenJoin)}
+							>{#snippet used()}{#if w?.kind === 'pack'}<Fill text={msg.pluginUsed.text}>{#snippet plugin()}<a href={pluginHref(save, w.id)}>{w.source}</a>{/snippet}</Fill>{:else}<Fill text={msg.ownUsed.text}>{#snippet own()}<span class="changed">{msg.ownCopy}</span>{/snippet}</Fill>{/if}{/snippet}</Fill
+						>
+						{#if edit}<a href={edit.href}>{msg.openOn({ page: edit.page })}</a>{/if}
 					</p>
-					{#if o.stale}<p class="notice warn">Your copy is older than the one it replaces, so it may be missing changes made to that one since, such as in a SkyrimNet update.</p>{/if}
-					{#if o.conflict}<p class="notice warn">More than one plugin has this file. Only {layerName(w)}’s is used; {o.providers
-								.slice(1)
-								.filter((p) => layerAt(p.layer)?.kind === 'pack')
-								.map((p) => layerName(layerAt(p.layer)))
-								.join(' and ')}’s is ignored. Moving plugins on the Plugins page changes which one wins.</p>{/if}
+					{#if o.stale}<p class="notice warn">{msg.stale}</p>{/if}
+					{#if o.conflict}<p class="notice warn">
+							{msg.conflictNote({
+								winner: layerName(w),
+								others: o.providers
+									.slice(1)
+									.filter((p) => layerAt(p.layer)?.kind === 'pack')
+									.map((p) => layerName(layerAt(p.layer)))
+									.join(msg.andJoin)
+							})}
+						</p>{/if}
 
 					{#if loadError}
 						<p class="notice error">{loadError}</p>
 					{:else if using && base}
 						<div class="against">
 							{#if choices.length > 1}
-								<Segmented bind:value={() => String(base?.layer ?? ''), (v) => (against = v)} options={choices} label="Compared with" />
+								<Segmented bind:value={() => String(base?.layer ?? ''), (v) => (against = v)} options={choices} label={msg.comparedWith} />
 							{:else}
-								<span class="caps muted small">Against {layerName(layerAt(base.layer))}</span>
+								<span class="caps muted small">{msg.against({ layer: layerName(layerAt(base.layer)) })}</span>
 							{/if}
 						</div>
 						{#if !diff}
-							<p class="muted small">One of the two isn’t text, so they can’t be compared here.</p>
+							<p class="muted small">{msg.notComparable}</p>
 						{:else if counts && !counts.added && !counts.removed}
-							<p class="muted small">The two are the same{using.crlf !== base.crlf ? ', apart from their line endings' : ''}.</p>
+							<p class="muted small">{using.crlf !== base.crlf ? msg.sameButEndings : msg.same}</p>
 						{:else if counts}
-							<p class="muted small key"><ins>{plural(counts.added, 'line', 'lines')} added</ins> and <del>{counts.removed} removed</del> in the copy in use, against {layerName(layerAt(base.layer))}’s of {realTime(base.modified)}.</p>
-							<div class="diff" role="table" aria-label="Changes">
+							<p class="muted small key">
+								<Fill text={msg.changes.text} layer={layerName(layerAt(base.layer))} time={realTime(base.modified)}
+									>{#snippet added()}<ins>{msg.linesAdded({ count: counts.added })}</ins>{/snippet}{#snippet removed()}<del>{msg.linesRemoved({ count: counts.removed })}</del>{/snippet}</Fill
+								>
+							</p>
+							<div class="diff" role="table" aria-label={msg.changesLabel}>
 								{#each changes as h, i (i)}
 									{#if 'skipped' in h}
-										<div class="skipped muted">{plural(h.skipped, 'line', 'lines')} unchanged</div>
+										<div class="skipped muted">{msg.linesUnchanged({ count: h.skipped })}</div>
 									{:else}
 										{#each h.lines as l, j (j)}
-											<div class="line {l.kind}" role="row"><span class="sign" aria-label={l.kind === 'same' ? 'Unchanged' : l.kind === 'added' ? 'Added' : 'Removed'} role="cell">{l.kind === 'added' ? '+' : l.kind === 'removed' ? '−' : ''}</span><span role="cell">{#if words.get(l)}{#each words.get(l) as p, k (k)}{#if p.changed}<mark>{p.text}</mark>{:else}{p.text}{/if}{/each}{:else}{l.text || ' '}{/if}</span></div>
+											<div class="line {l.kind}" role="row"><span class="sign" aria-label={l.kind === 'same' ? msg.lineSame : l.kind === 'added' ? msg.lineAdded : msg.lineRemoved} role="cell">{l.kind === 'added' ? '+' : l.kind === 'removed' ? '−' : ''}</span><span role="cell">{#if words.get(l)}{#each words.get(l) as p, k (k)}{#if p.changed}<mark>{p.text}</mark>{:else}{p.text}{/if}{/each}{:else}{l.text || ' '}{/if}</span></div>
 										{/each}
 									{/if}
 								{/each}
 							</div>
 						{/if}
 					{:else if using}
-						{#if using.text !== undefined}<pre class="whole">{using.text}</pre>{:else}<p class="muted small">Not text, so it can’t be shown.</p>{/if}
+						{#if using.text !== undefined}<pre class="whole">{using.text}</pre>{:else}<p class="muted small">{m.records.notText}</p>{/if}
 					{/if}
 				</div>
 			{/key}

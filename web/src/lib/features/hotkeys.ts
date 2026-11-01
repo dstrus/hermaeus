@@ -1,49 +1,52 @@
+import { m } from '#lib/copy/messages.ts';
 import type { Feature } from './schema.ts';
+
+const f = m.features.hotkeys;
 
 // Hotkeys: the keys that drive SkyrimNet in game. Hotkey.yaml, as key codes.
 export const hotkeys: Feature = {
 	id: 'hotkeys',
 	file: 'Hotkey',
-	title: 'Hotkeys',
-	what: 'The keys that drive SkyrimNet while you play. Press a key to set one, or click with a mouse button; any key can be left unset.',
+	title: f.title,
+	what: f.what,
 	sections: [
 		{
-			title: 'Input',
+			title: f.input.title,
 			fields: [
-				{ key: 'textInput', label: 'Type to speak', what: 'Say something to the characters around you, typed.', kind: 'hotkey' },
-				{ key: 'recordSpeech', label: 'Push to talk', what: 'Hold to record what you say, release to send it.', kind: 'hotkey' },
-				{ key: 'toggleOpenMic', label: 'Open mic', what: 'Switch the microphone to always listening, instead of push to talk.', kind: 'hotkey' },
-				{ key: 'voiceThought', label: 'Think aloud', what: 'Hold to voice a thought to yourself. A quick tap prompts a thought with nothing said.', kind: 'hotkey' },
-				{ key: 'voiceDialogueTransform', label: 'Speak in character', what: 'Hold to say something that’s rewritten as your character would say it. A quick tap prompts a line with nothing said.', kind: 'hotkey' },
-				{ key: 'voiceDirectInput', label: 'Tell the GameMaster', what: 'Hold to state something as fact, such as “lightning suddenly strikes”, and characters react as though it happened.', kind: 'hotkey' },
-				{ key: 'dialogueChoice', label: 'Choose a dialogue option', what: 'With the game’s dialogue menu open: a quick tap has the model pick an option for you to confirm; hold and speak to say what you mean, and it picks the closest option.', kind: 'hotkey' }
+				{ key: 'textInput', label: f.input.textInput.label, what: f.input.textInput.what, kind: 'hotkey' },
+				{ key: 'recordSpeech', label: f.input.recordSpeech.label, what: f.input.recordSpeech.what, kind: 'hotkey' },
+				{ key: 'toggleOpenMic', label: f.input.toggleOpenMic.label, what: f.input.toggleOpenMic.what, kind: 'hotkey' },
+				{ key: 'voiceThought', label: f.input.voiceThought.label, what: f.input.voiceThought.what, kind: 'hotkey' },
+				{ key: 'voiceDialogueTransform', label: f.input.voiceDialogueTransform.label, what: f.input.voiceDialogueTransform.what, kind: 'hotkey' },
+				{ key: 'voiceDirectInput', label: f.input.voiceDirectInput.label, what: f.input.voiceDirectInput.what, kind: 'hotkey' },
+				{ key: 'dialogueChoice', label: f.input.dialogueChoice.label, what: f.input.dialogueChoice.what, kind: 'hotkey' }
 			]
 		},
 		{
-			title: 'Dashboard and menus',
+			title: f.dashboard.title,
 			fields: [
-				{ key: 'wheelMenu', label: 'Wheel menu', what: 'Open the wheel of every SkyrimNet action.', kind: 'hotkey' },
-				{ key: 'openLabelPanel', label: 'Labelling panel', what: 'Pause the game and open the labelling panel over the last recorded outputs. It needs request recording on, in SkyrimNet’s developer settings.', kind: 'hotkey' },
-				{ key: 'toggleDashboard', label: 'Dashboard', what: 'Open or close SkyrimNet’s dashboard in game.', kind: 'hotkey' }
+				{ key: 'wheelMenu', label: f.dashboard.wheelMenu.label, what: f.dashboard.wheelMenu.what, kind: 'hotkey' },
+				{ key: 'openLabelPanel', label: f.dashboard.openLabelPanel.label, what: f.dashboard.openLabelPanel.what, kind: 'hotkey' },
+				{ key: 'toggleDashboard', label: f.dashboard.toggleDashboard.label, what: f.dashboard.toggleDashboard.what, kind: 'hotkey' }
 			]
 		},
 		{
-			title: 'Switches',
+			title: f.switches.title,
 			fields: [
-				{ key: 'toggleGlobalAI', label: 'SkyrimNet on or off', what: 'Switch all of SkyrimNet’s AI on or off.', kind: 'hotkey' },
-				{ key: 'toggleGameMaster', label: 'GameMaster on or off', what: 'Switch the GameMaster, which prompts characters to speak now and then.', kind: 'hotkey' },
-				{ key: 'toggleContinuousMode', label: 'Continuous scene', what: 'Keep a conversation going: as one character finishes, the GameMaster has another speak.', kind: 'hotkey' },
-				{ key: 'toggleWhisperMode', label: 'Whisper', what: 'Switch between whisper and normal speaking distance.', kind: 'hotkey' },
-				{ key: 'toggleWorldEventReactions', label: 'Reactions on or off', what: 'Switch characters reacting to what happens around them, including each other’s lines.', kind: 'hotkey' }
+				{ key: 'toggleGlobalAI', label: f.switches.toggleGlobalAI.label, what: f.switches.toggleGlobalAI.what, kind: 'hotkey' },
+				{ key: 'toggleGameMaster', label: f.switches.toggleGameMaster.label, what: f.switches.toggleGameMaster.what, kind: 'hotkey' },
+				{ key: 'toggleContinuousMode', label: f.switches.toggleContinuousMode.label, what: f.switches.toggleContinuousMode.what, kind: 'hotkey' },
+				{ key: 'toggleWhisperMode', label: f.switches.toggleWhisperMode.label, what: f.switches.toggleWhisperMode.what, kind: 'hotkey' },
+				{ key: 'toggleWorldEventReactions', label: f.switches.toggleWorldEventReactions.label, what: f.switches.toggleWorldEventReactions.what, kind: 'hotkey' }
 			]
 		},
 		{
-			title: 'Actions',
+			title: f.actions.title,
 			fields: [
-				{ key: 'continueNarration', label: 'Continue', what: 'Have a character speak up, to react to something or pick a stalled conversation back up.', kind: 'hotkey' },
-				{ key: 'captureCrosshair', label: 'Capture', what: 'Opens the capture window, for the character or furniture in your crosshairs, yourself, or where you are. With Ctrl, it captures straight away: a quick press for what’s in your crosshairs, or hold for a second for yourself. With a book open, it captures the book.', kind: 'hotkey' },
-				{ key: 'generateDiaryBio', label: 'Diary and bio now', what: 'Write diary entries and update bios now, for you, those nearby, those pinned, or whoever is in your crosshairs.', kind: 'hotkey' },
-				{ key: 'interruptDialogue', label: 'Interrupt', what: 'Stop every character speaking, and clear what’s waiting to be said.', kind: 'hotkey' }
+				{ key: 'continueNarration', label: f.actions.continueNarration.label, what: f.actions.continueNarration.what, kind: 'hotkey' },
+				{ key: 'captureCrosshair', label: f.actions.captureCrosshair.label, what: f.actions.captureCrosshair.what, kind: 'hotkey' },
+				{ key: 'generateDiaryBio', label: f.actions.generateDiaryBio.label, what: f.actions.generateDiaryBio.what, kind: 'hotkey' },
+				{ key: 'interruptDialogue', label: f.actions.interruptDialogue.label, what: f.actions.interruptDialogue.what, kind: 'hotkey' }
 			]
 		}
 	]

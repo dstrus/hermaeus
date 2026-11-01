@@ -6,6 +6,7 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { SpeechRule } from '#lib/api/types/settings.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { setSpeech } from '#lib/settings/api.ts';
 	import { translatorHref } from '#lib/translator/api.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
@@ -49,7 +50,7 @@
 		error = '';
 		try {
 			rule = await setSpeech(template, { modified: rule.modified, pattern });
-			notice = pattern.trim() ? 'Saved. SkyrimNet uses it from the next time it starts.' : 'Removed. They speak as written again.';
+			notice = pattern.trim() ? m.characters.speech.saved : m.characters.speech.removed;
 			leave('mode');
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -59,48 +60,48 @@
 	}
 
 	useShortcuts(() => [
-		{ key: 'e', shown: 'E', label: 'Edit speech pattern', hidden: editing, disabled: !editable, run: startEdit },
-		{ key: 'Enter', label: 'Save', command: true, hidden: !editing, disabled: saving, run: () => save(draft) },
-		...(editing ? [{ key: 'Escape', shown: 'Esc', label: 'Cancel', run: () => leave('mode') }] : [])
+		{ key: 'e', shown: 'E', label: m.characters.speech.edit, hidden: editing, disabled: !editable, run: startEdit },
+		{ key: 'Enter', label: m.common.save, command: true, hidden: !editing, disabled: saving, run: () => save(draft) },
+		...(editing ? [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: () => leave('mode') }] : [])
 	]);
 </script>
 
 <section>
-	<h2 class="caps">Speech pattern</h2>
+	<h2 class="caps">{m.characters.speech.title}</h2>
 	{#if loadError}
 		<p class="notice error" role="alert">{loadError}</p>
 	{:else if !rule?.found}
-		<p class="muted">Universal Translator hasn’t written its settings yet; SkyrimNet creates them the next time it starts. A pattern can be set then.</p>
+		<p class="muted">{m.characters.speech.notWritten}</p>
 	{:else if editing}
 		<form onsubmit={(e) => (e.preventDefault(), save(draft))}>
-			<textarea bind:this={field} bind:value={draft} rows="4" aria-label="Speech pattern" placeholder="How they speak: tone, rhythm, turns of phrase."></textarea>
+			<textarea bind:this={field} bind:value={draft} rows="4" aria-label={m.characters.speech.title} placeholder={m.characters.speech.placeholder}></textarea>
 			<div class="buttons">
-				<button type="submit" class="button primary" disabled={saving}>Save</button>
+				<button type="submit" class="button primary" disabled={saving}>{m.common.save}</button>
 				{#if rule.pattern}
-					<button type="button" class="button" onclick={() => save('')} disabled={saving}>Remove</button>
+					<button type="button" class="button" onclick={() => save('')} disabled={saving}>{m.common.remove}</button>
 				{/if}
-				<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+				<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 			</div>
 		</form>
 	{:else}
 		{#if rule.pattern}
 			<p class="pattern">{rule.pattern}</p>
 		{:else}
-			<p class="muted">None: they speak as written{rule.global ? ', in the pattern set for every NPC' : ''}.</p>
+			<p class="muted">{rule.global ? m.characters.speech.noneGlobal : m.characters.speech.none}</p>
 		{/if}
 		{#if rule.global}
-			<p class="muted small">For every NPC: {rule.global}</p>
+			<p class="muted small">{m.characters.speech.global({ pattern: rule.global })}</p>
 		{/if}
 		{#if !rule.enabled}
-			<p class="notice warn">Universal Translator is switched off, so patterns aren’t applied.</p>
+			<p class="notice warn">{m.characters.speech.off}</p>
 		{/if}
 		{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 		{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 		<div class="buttons">
-			<button type="button" class="button" disabled={!editable} onclick={startEdit}>{rule.pattern ? 'Edit' : 'Set a pattern'}</button>
-			<a class="button" href={translatorHref(playthrough)}>All rules</a>
+			<button type="button" class="button" disabled={!editable} onclick={startEdit}>{rule.pattern ? m.common.edit : m.characters.speech.set}</button>
+			<a class="button" href={translatorHref(playthrough)}>{m.characters.speech.allRules}</a>
 		</div>
-		{#if readOnly}<p class="notice warn">Close Skyrim to change it.</p>{/if}
+		{#if readOnly}<p class="notice warn">{m.characters.speech.closeToChange}</p>{/if}
 	{/if}
 </section>
 

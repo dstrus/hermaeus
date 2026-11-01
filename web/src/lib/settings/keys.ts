@@ -2,52 +2,55 @@
 // with -1 for no key. These turn a code into the key's name, and a key
 // pressed in the browser into its code, through the key's physical position
 // (KeyboardEvent.code), so a Mac keyboard gives the same code the game sees.
+import { m } from '#lib/copy/messages.ts';
 
 export const noKey = -1;
 
+const k = m.settings.keys;
+
 const names: Record<number, string> = {
-	1: 'Left mouse button',
-	2: 'Right mouse button',
-	4: 'Middle mouse button',
-	5: 'Mouse button 4',
-	6: 'Mouse button 5',
-	8: 'Backspace',
-	9: 'Tab',
-	13: 'Enter',
-	16: 'Shift',
-	17: 'Ctrl',
-	18: 'Alt',
-	19: 'Pause',
-	20: 'Caps Lock',
-	27: 'Esc',
-	32: 'Space',
-	33: 'Page Up',
-	34: 'Page Down',
-	35: 'End',
-	36: 'Home',
-	37: 'Left',
-	38: 'Up',
-	39: 'Right',
-	40: 'Down',
-	44: 'Print Screen',
-	45: 'Insert',
-	46: 'Delete',
-	91: 'Left Windows',
-	92: 'Right Windows',
-	93: 'Menu',
-	106: 'Numpad *',
-	107: 'Numpad +',
-	109: 'Numpad -',
-	110: 'Numpad .',
-	111: 'Numpad /',
-	144: 'Num Lock',
-	145: 'Scroll Lock',
-	160: 'Left Shift',
-	161: 'Right Shift',
-	162: 'Left Ctrl',
-	163: 'Right Ctrl',
-	164: 'Left Alt',
-	165: 'Right Alt',
+	1: k.leftMouse,
+	2: k.rightMouse,
+	4: k.middleMouse,
+	5: k.mouse4,
+	6: k.mouse5,
+	8: k.backspace,
+	9: k.tab,
+	13: k.enter,
+	16: k.shift,
+	17: k.ctrl,
+	18: k.alt,
+	19: k.pause,
+	20: k.capsLock,
+	27: k.esc,
+	32: k.space,
+	33: k.pageUp,
+	34: k.pageDown,
+	35: k.end,
+	36: k.home,
+	37: k.left,
+	38: k.up,
+	39: k.right,
+	40: k.down,
+	44: k.printScreen,
+	45: k.insert,
+	46: k.delete,
+	91: k.leftWindows,
+	92: k.rightWindows,
+	93: k.menu,
+	106: k.numpad({ key: '*' }),
+	107: k.numpad({ key: '+' }),
+	109: k.numpad({ key: '-' }),
+	110: k.numpad({ key: '.' }),
+	111: k.numpad({ key: '/' }),
+	144: k.numLock,
+	145: k.scrollLock,
+	160: k.leftShift,
+	161: k.rightShift,
+	162: k.leftCtrl,
+	163: k.rightCtrl,
+	164: k.leftAlt,
+	165: k.rightAlt,
 	186: ';',
 	187: '=',
 	188: ',',
@@ -62,15 +65,15 @@ const names: Record<number, string> = {
 };
 for (let i = 0; i < 10; i++) {
 	names[48 + i] = String(i);
-	names[96 + i] = `Numpad ${i}`;
+	names[96 + i] = k.numpad({ key: i });
 }
 for (let i = 0; i < 26; i++) names[65 + i] = String.fromCharCode(65 + i);
 for (let i = 1; i <= 24; i++) names[111 + i] = `F${i}`;
 
 // keyName is a hotkey code as the key is labelled, or "Not set".
 export function keyName(code: number): string {
-	if (code === noKey) return 'Not set';
-	return names[code] ?? `Key ${code}`;
+	if (code === noKey) return k.notSet;
+	return names[code] ?? k.unknown({ code });
 }
 
 // The code for each physical key, by KeyboardEvent.code.

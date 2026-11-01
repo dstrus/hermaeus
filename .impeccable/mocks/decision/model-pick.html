@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0b0b0b;--glass:#151515;--ink:#f2efe6;--dim:#a8a293;--gold:#c9a24b;--rule:#2a2a2a}
+*{box-sizing:border-box;margin:0}
+body{width:1440px;height:900px;overflow:hidden;background:radial-gradient(ellipse at 70% 30%,#1c1c1c,#080808 70%);color:var(--ink);font:15px/1.45 Jost,sans-serif}
+.cap{font-family:"Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.12em}
+header{display:flex;align-items:center;gap:36px;height:64px;padding:0 40px;border-bottom:1px solid var(--rule)}
+header .name{font-size:26px;font-weight:600}
+.tog{display:flex;gap:22px;font-size:15px;color:var(--dim)}
+.tog span b{color:var(--gold);font-weight:500;margin-right:6px}
+.tog span.off b{color:var(--dim)}
+.save{margin-left:auto;text-align:right;font-size:13px;color:var(--dim)}
+.save strong{display:block;color:var(--ink);font:500 18px "Barlow Condensed";letter-spacing:.1em;text-transform:uppercase}
+.wrap{display:grid;grid-template-columns:220px 1fr 420px;height:836px}
+.cats{padding:28px 24px 0 40px;border-right:1px solid var(--rule)}
+.cats div{font:500 20px "Barlow Condensed";letter-spacing:.12em;text-transform:uppercase;color:var(--dim);padding:7px 0}
+.cats div.on{color:var(--ink)}
+.cats div.on::before{content:"◆ ";color:var(--gold);font-size:12px;vertical-align:3px}
+.cats .gap{height:18px}
+.items{padding:24px 32px;overflow:hidden}
+.who{display:flex;align-items:baseline;gap:18px;margin-bottom:16px}
+.who h1{font:600 40px "Barlow Condensed";letter-spacing:.1em;text-transform:uppercase}
+.who span{color:var(--dim)}
+.tabs{display:flex;gap:28px;margin-bottom:12px}
+.tabs div{font:500 17px "Barlow Condensed";letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.tabs div.on{color:var(--ink);border-bottom:1px solid var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th{font:500 14px "Barlow Condensed";letter-spacing:.14em;text-transform:uppercase;color:var(--dim);text-align:left;padding:8px 10px;border-bottom:1px solid #3a3a3a}
+th.sort{color:var(--gold)}
+td{padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+td.n{font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap}
+tr.on td{background:rgba(242,239,230,.07)}
+tr.on td:first-child::before{content:"◆ ";color:var(--gold);font-size:11px}
+.trunc{display:block;max-width:420px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pane{border-left:1px solid var(--rule);padding:28px 32px;background:rgba(0,0,0,.35)}
+.pane h2{font:600 22px "Barlow Condensed";letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.pane .when{color:var(--dim);font-size:14px;margin-bottom:18px}
+.pane p{font-size:15.5px;line-height:1.6}
+dl{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;margin-top:22px;font-size:14px}
+dt{font:500 14px "Barlow Condensed";letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.warn{color:#d9a441}
+.keys{position:absolute;bottom:22px;right:40px;display:flex;gap:22px;font:500 15px "Barlow Condensed";letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.keys b{border:1px solid #555;border-radius:3px;padding:0 6px;margin-right:6px;color:var(--ink)}
+</style></head><body>
+<header>
+  <div class="name cap">Hermaeus</div>
+  <div class="tog cap"><span><b>●</b>AI</span><span class="off"><b>○</b>GameMaster</span><span><b>●</b>Reactions</span><span><b>●</b>Narration</span><span><b>●</b>Memories</span><span class="off"><b>○</b>OmniSight</span></div>
+  <div class="save"><strong>Gram</strong>Fredas, 11th of Hearthfire, 4E 201 · Skyrim closed</div>
+</header>
+<div class="wrap">
+  <div class="cats">
+    <div class="on">Characters</div><div>Events</div><div>Knowledge</div><div>Screenshots</div><div>Songs</div>
+    <div class="gap"></div>
+    <div>Prompts</div><div>Settings</div><div>Plugins</div><div>Content</div><div>Overrides</div>
+  </div>
+  <div class="items">
+    <div class="who"><h1>Serana</h1><span>Previously Mysterious Woman · Pinned</span></div>
+    <div class="tabs"><div>Overview</div><div>Stats</div><div class="on">Memories 51</div><div>Diary 7</div></div>
+    <table>
+      <tr><th class="sort">When ▾</th><th>Memory</th><th>Type</th><th>Mood</th><th>Imp.</th></tr>
+      <tr class="on"><td class="n">11:08 AM<br>11th Hearthfire</td><td><span class="trunc">Gram and I trade lighthearted insults in the Soul Cairn Outskirts</span></td><td>Relationship</td><td>content</td><td class="n">0.55</td></tr>
+      <tr><td class="n">10:17 AM<br>11th Hearthfire</td><td><span class="trunc">Diary Entry: I can still smell the void salts, chalk and old lightning</span></td><td>Experience</td><td>hopeful</td><td class="n">0.95</td></tr>
+      <tr><td class="n">9:41 PM<br>7th Hearthfire</td><td><span class="trunc">Laurina tends to the wounded at Fort Dawnguard while I watch the snow</span></td><td>Experience</td><td>concerned</td><td class="n">0.60</td></tr>
+      <tr><td class="n">6:02 PM<br>6th Hearthfire</td><td><span class="trunc">Isran still doesn’t trust me, and I can’t say I blame him</span></td><td>Relationship</td><td>troubled</td><td class="n">0.70</td></tr>
+      <tr><td class="n">2:15 PM<br>4th Hearthfire</td><td><span class="trunc">We cleared Forebears’ Holdout; Agmaer was braver than he looks</span></td><td>Experience</td><td>concerned</td><td class="n">0.50</td></tr>
+      <tr><td class="n">9:03 PM<br>27th Last Seed</td><td><span class="trunc">I awaken from centuries of magical stasis in Dimhollow Crypt</span> <span class="warn">· earlier identity</span></td><td>Experience</td><td>concerned</td><td class="n">0.90</td></tr>
+    </table>
+  </div>
+  <aside class="pane">
+    <h2>Soul Cairn Outskirts</h2>
+    <div class="when">11:08 AM, Fredas, 11th of Hearthfire, 4E 201</div>
+    <p>Gram and I trade lighthearted insults in the Soul Cairn Outskirts, calling me a snowback, me teasing him as a sweaty half-elf. We laugh together, momentarily forgetting the oppressive rock and danger of this Oblivion realm.</p>
+    <dl><dt>Type</dt><dd>Relationship</dd><dt>Mood</dt><dd>content</dd><dt>Importance</dt><dd>0.55</dd><dt>Tags</dt><dd>Gram, Serana, banter, bonding</dd><dt>Search</dt><dd>vector built</dd></dl>
+  </aside>
+</div>
+<div class="keys"><span><b>E</b>Edit</span><span><b>N</b>New</span><span><b>Del</b>Delete</span></div>
+</body></html>

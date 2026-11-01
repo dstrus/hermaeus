@@ -9,7 +9,8 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { Stage, StageKind, StageParam, VoiceEffect, VoiceEffectList } from '#lib/api/types/records.ts';
-	import { plural } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { pluginHref } from '#lib/plugins/links.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
@@ -24,22 +25,33 @@
 	import Overridden from './Overridden.svelte';
 
 	let { list: loaded }: { list: VoiceEffectList } = $props();
-
-	// SkyrimNet limits each stage's settings, and what a sample can be, in
-	// ways that aren't published.
-	const limits = 'SkyrimNet limits what each stage’s settings and a voice sample can be, in ways that aren’t published, so Hermaeus can’t show those limits or check them. An effect outside those limits may not work in the game. SkyrimNet’s own dashboard shows the limits as you edit.';
+	const msg = m.records.voiceEffects;
 
 	let list = $derived(loaded);
 	let save = $derived(page.params.save ?? '');
 	let readOnly = $derived(live.gameRunning);
 	const kindOf = (t: string): StageKind | undefined => list.kinds.find((k) => k.type === t);
+	// A stage's name, what it does, and its settings' names and units, by
+	// its type and their names: pitch_shift by stageKinds.pitchShift. A unit
+	// with forms is a word that follows the number.
+	type Unit = string | ((p: { count: number }) => string);
+	type StageCopy = { label: string; what: string; params: { [name: string]: { label: string; unit?: Unit } } };
+	const camel = (v: string) => v.replace(/_(.)/g, (_, c: string) => c.toUpperCase());
+	const stageCopies: { [type: string]: StageCopy } = msg.stageKinds;
+	const stageCopy = (type: string) => (Object.hasOwn(stageCopies, camel(type)) ? stageCopies[camel(type)] : undefined);
+	const kindLabel = (type: string) => stageCopy(type)?.label ?? type;
+	const paramLabel = (type: string, name: string) => stageCopy(type)?.params[camel(name)]?.label ?? name;
+	function unitOf(type: string, name: string, v?: unknown): string {
+		const unit = stageCopy(type)?.params[camel(name)]?.unit;
+		return typeof unit === 'function' ? unit({ count: typeof v === 'number' ? v : NaN }) : (unit ?? '');
+	}
 	const layerOf = (e: VoiceEffect) => list.layers[e.providers[0]?.layer ?? -1];
 	const mineOf = (e: VoiceEffect) => e.providers.find((p) => list.layers[p.layer]?.kind === 'overlay');
 
 	let query = $state('');
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
-		return list.effects.filter((e) => !q || [e.name, e.id, ...e.stages.map((s) => kindOf(s.type)?.label ?? s.type)].some((v) => v.toLowerCase().includes(q)));
+		return list.effects.filter((e) => !q || [e.name, e.id, ...e.stages.map((s) => kindLabel(s.type))].some((v) => v.toLowerCase().includes(q)));
 	});
 	let off = $derived(list.effects.filter((e) => !e.enabled).length);
 	let yours = $derived(list.effects.filter((e) => layerOf(e)?.kind === 'overlay').length);
@@ -50,17 +62,17 @@
 	// A number as a recipe's settings read: a true minus sign, and no
 	// trailing zeros beyond what's needed.
 	const number = (v: unknown) => (typeof v === 'number' ? String(Number(v.toFixed(3))).replace('-', '−') : String(v ?? '—'));
-	function paramText(pm: StageParam, v: unknown): string {
+	function paramText(type: string, pm: StageParam, v: unknown): string {
 		if (pm.suggest) return String(v);
-		const unit = pm.unit ? ` ${v === 1 && pm.unit.endsWith('s') ? pm.unit.slice(0, -1) : pm.unit}` : '';
-		return `${number(v)}${unit}`;
+		const unit = unitOf(type, pm.name, v);
+		return unit ? `${number(v)} ${unit}` : number(v);
 	}
 	// A stage in a line: its settings, named unless there's only one.
 	function stageText(s: Stage): string {
 		const k = kindOf(s.type);
 		if (!k) return Object.entries(s.params).map(([n, v]) => `${n} ${number(v)}`).join(' · ');
-		if (k.params.length === 1) return paramText(k.params[0]!, s.params[k.params[0]!.name]);
-		return k.params.map((pm) => `${pm.label.toLowerCase()} ${paramText(pm, s.params[pm.name])}`).join(' · ');
+		if (k.params.length === 1) return paramText(s.type, k.params[0]!, s.params[k.params[0]!.name]);
+		return k.params.map((pm) => `${paramLabel(s.type, pm.name).toLowerCase()} ${paramText(s.type, pm, s.params[pm.name])}`).join(' · ');
 	}
 
 	let saving = $state(false);
@@ -104,9 +116,9 @@
 		const mine = e && mineOf(e);
 		if (!e || !mine) return;
 		const below = e.providers.find((p) => p !== mine);
-		const next = below ? `the one from ${layerName(list.layers[below.layer])} applies again` : 'the effect is gone, since only you had it';
-		if (!confirm(`Remove your copy of ${e.name}? A backup is kept, and ${next}.`)) return;
-		run(e.id, () => removeRecordCopy(e.path, { modified: mine.modified }), below ? 'Removed your copy. The one below applies again.' : `Removed ${e.name}.`);
+		const next = below ? msg.nextBelow({ layer: layerName(list.layers[below.layer]) }) : msg.nextNone;
+		if (!confirm(m.records.removeCopyConfirm({ name: e.name, next }))) return;
+		run(e.id, () => removeRecordCopy(e.path, { modified: mine.modified }), below ? m.records.removedCopyBelow : msg.removed({ name: e.name }));
 	}
 
 	// Editing (?mode=edit) and making a new effect (?mode=new) are states of
@@ -176,7 +188,7 @@
 				}
 				const x = Number(v);
 				if (v.trim() === '' || Number.isNaN(x)) {
-					error = `Stage ${i + 1} (${(k?.label ?? d.type).toLowerCase()}): ${(pm?.label ?? n).toLowerCase()} needs a number.`;
+					error = msg.needsNumber({ n: i + 1, stage: kindLabel(d.type).toLowerCase(), param: (pm ? paramLabel(d.type, pm.name) : n).toLowerCase() });
 					return;
 				}
 				params[n] = x;
@@ -184,8 +196,8 @@
 			stages.push({ type: d.type, params });
 		}
 		const mine = mode === 'edit' && current ? mineOf(current) : undefined;
-		const done = mode === 'new' ? `Made ${draftName.trim()}.` : mine ? 'Saved your copy.' : 'Saved as your own copy, in place of the one below.';
-		if (await run(id, () => saveVoiceEffect(id, { modified: mine?.modified ?? 0, name: draftName, sample: draftSample, stages }), `${done} SkyrimNet uses it from the next time it starts.`)) {
+		const done = mode === 'new' ? msg.made({ name: draftName.trim() }) : mine ? msg.savedCopy : msg.savedAsCopy;
+		if (await run(id, () => saveVoiceEffect(id, { modified: mine?.modified ?? 0, name: draftName, sample: draftSample, stages }), done)) {
 			await setParams({ item: id, mode: null });
 		}
 	}
@@ -194,25 +206,25 @@
 		const reading = mode === 'read';
 		const mine = current && mineOf(current);
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !reading, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !reading, run: () => selection.move(-1) },
-			{ key: 'n', shown: 'N', label: 'New effect', hidden: !reading, disabled: readOnly, run: startNew },
-			{ key: 'e', shown: 'E', label: mine ? 'Edit' : 'Edit as your copy', hidden: !reading || !current, disabled: readOnly, run: startEdit },
-			{ key: 'o', shown: 'O', label: current?.enabled === false ? 'Switch on' : 'Switch off', hidden: !reading || !current, disabled: readOnly || saving, run: () => toggle() },
-			...deleteShortcuts({ label: 'Remove your copy', hidden: !reading || !mine, disabled: readOnly || saving, run: remove }),
-			{ key: 'Enter', label: 'Save', command: true, hidden: reading, disabled: saving, run: submit },
-			{ key: 'Escape', shown: 'Esc', label: 'Cancel', hidden: reading, run: () => leave('mode') }
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !reading, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !reading, run: () => selection.move(-1) },
+			{ key: 'n', shown: 'N', label: msg.newEffect, hidden: !reading, disabled: readOnly, run: startNew },
+			{ key: 'e', shown: 'E', label: mine ? m.common.edit : m.records.editCopy, hidden: !reading || !current, disabled: readOnly, run: startEdit },
+			{ key: 'o', shown: 'O', label: current?.enabled === false ? m.common.switchOn : m.common.switchOff, hidden: !reading || !current, disabled: readOnly || saving, run: () => toggle() },
+			...deleteShortcuts({ label: m.records.removeCopy, hidden: !reading || !mine, disabled: readOnly || saving, run: remove }),
+			{ key: 'Enter', label: m.common.save, command: true, hidden: reading, disabled: saving, run: submit },
+			{ key: 'Escape', shown: 'Esc', label: m.common.cancel, hidden: reading, run: () => leave('mode') }
 		];
 	});
 </script>
 
 {#if mode !== 'read'}
 	<header class="editing">
-		<LimitsNotice title="Limits Hermaeus can’t check">{limits}</LimitsNotice>
-		<h1 class="caps">{mode === 'new' ? 'New voice effect' : current?.name}</h1>
+		<LimitsNotice title={m.records.limitsTitle}>{msg.limits}</LimitsNotice>
+		<h1 class="caps">{mode === 'new' ? msg.newVoiceEffect : current?.name}</h1>
 		{#if mode === 'edit' && current}
 			<p class="muted">
-				{#if mineOf(current)}Editing <b class="changed">your own copy</b>, which SkyrimNet uses in place of any other.{:else}Starting from the one from {layerName(layerOf(current))}. Saving makes your own copy, which replaces it.{/if}
+				{#if mineOf(current)}<Fill text={msg.editingOwn.text}>{#snippet yourCopy()}<b class="changed">{m.records.yourOwnCopy}</b>{/snippet}</Fill>{:else}{msg.startingFrom({ layer: layerName(layerOf(current)) })}{/if}
 			</p>
 		{/if}
 		{#if error}<p class="notice error" role="alert">{error}</p>{/if}
@@ -221,45 +233,45 @@
 		<div class="fields">
 			{#if mode === 'new'}
 				<label>
-					<span class="caps">Id</span>
+					<span class="caps">{msg.id}</span>
 					<input type="text" bind:value={draftId} placeholder="frost_atronach" autocomplete="off" spellcheck="false" />
-					<span class="muted small">The id of the effect, which is how triggers and scripts refer to it when assigning it to a character. This will also be used in the name of the yaml file for the effect. Lowercase letters, digits, and underscores only. It can’t change later.</span>
+					<span class="muted small">{msg.idHint}</span>
 				</label>
 			{/if}
 			<label>
-				<span class="caps">Name</span>
-				<input type="text" bind:value={draftName} placeholder="Frost atronach" autocomplete="off" />
+				<span class="caps">{msg.name}</span>
+				<input type="text" bind:value={draftName} placeholder={msg.namePlaceholder} autocomplete="off" />
 			</label>
 			<label>
-				<span class="caps">Replacement voice sample</span>
-				<input type="text" bind:value={draftSample} placeholder="None" autocomplete="off" spellcheck="false" />
-				<span class="muted small">The file name of a .wav recording cloned in place of the speaker’s usual voice while the effect is on. Upload the recording with SkyrimNet’s dashboard. Leave it empty to keep the speaker’s voice.</span>
+				<span class="caps">{msg.sampleLabel}</span>
+				<input type="text" bind:value={draftSample} placeholder={msg.samplePlaceholder} autocomplete="off" spellcheck="false" />
+				<span class="muted small">{msg.sampleHint}</span>
 			</label>
 		</div>
 
-		<h2 class="caps">Stages</h2>
-		<p class="muted small">Applied to the voice in order, top to bottom.</p>
+		<h2 class="caps">{msg.stages}</h2>
+		<p class="muted small">{msg.order}</p>
 		<ol class="stages">
 			{#each draftStages as d, i (i)}
 				{@const k = kindOf(d.type)}
 				<li class="stage">
 					<div class="stagehead">
 						<span class="n muted">{i + 1}</span>
-						<select value={d.type} onchange={(e) => retype(i, e.currentTarget.value)} aria-label="Stage {i + 1}">
-							{#each list.kinds as kk (kk.type)}<option value={kk.type}>{kk.label}</option>{/each}
+						<select value={d.type} onchange={(e) => retype(i, e.currentTarget.value)} aria-label={msg.stage({ n: i + 1 })}>
+							{#each list.kinds as kk (kk.type)}<option value={kk.type}>{kindLabel(kk.type)}</option>{/each}
 							{#if !k}<option value={d.type}>{d.type}</option>{/if}
 						</select>
-						<span class="muted small what">{k?.what ?? ''}</span>
+						<span class="muted small what">{k ? (stageCopy(k.type)?.what ?? '') : ''}</span>
 						<span class="order">
-							<button type="button" class="textbutton" onclick={() => move(i, -1)} disabled={i === 0} aria-label="Move stage {i + 1} up">Up</button>
-							<button type="button" class="textbutton" onclick={() => move(i, 1)} disabled={i === draftStages.length - 1} aria-label="Move stage {i + 1} down">Down</button>
-							<button type="button" class="textbutton" onclick={() => (draftStages = draftStages.filter((_, j) => j !== i))} aria-label="Remove stage {i + 1}">Remove</button>
+							<button type="button" class="textbutton" onclick={() => move(i, -1)} disabled={i === 0} aria-label={msg.moveStageUp({ n: i + 1 })}>{m.common.up}</button>
+							<button type="button" class="textbutton" onclick={() => move(i, 1)} disabled={i === draftStages.length - 1} aria-label={msg.moveStageDown({ n: i + 1 })}>{m.common.down}</button>
+							<button type="button" class="textbutton" onclick={() => (draftStages = draftStages.filter((_, j) => j !== i))} aria-label={msg.removeStage({ n: i + 1 })}>{m.common.remove}</button>
 						</span>
 					</div>
 					<div class="params">
 						{#each k?.params ?? [] as pm (pm.name)}
 							<label>
-								<span class="caps">{pm.label}</span>
+								<span class="caps">{paramLabel(d.type, pm.name)}</span>
 								{#if pm.suggest}
 									<input type="text" list="suggest-{pm.name}" bind:value={d.params[pm.name]} autocomplete="off" spellcheck="false" />
 									<datalist id="suggest-{pm.name}">
@@ -267,63 +279,63 @@
 									</datalist>
 								{:else}
 									<input type="number" step={pm.whole ? 1 : 'any'} value={d.params[pm.name]} oninput={(e) => (d.params[pm.name] = e.currentTarget.value)} />
-									{#if pm.unit}<span class="muted small">{pm.unit}</span>{/if}
+									{#if unitOf(d.type, pm.name)}<span class="muted small">{unitOf(d.type, pm.name)}</span>{/if}
 								{/if}
 							</label>
 						{/each}
 					</div>
 				</li>
 			{:else}
-				<li class="muted">No stages: the voice is left as it is.</li>
+				<li class="muted">{msg.noDraftStages}</li>
 			{/each}
 		</ol>
 		<label class="add">
-			<span class="sr">Add a stage</span>
+			<span class="sr">{msg.addStage}</span>
 			<select bind:value={adding} onchange={() => addStage(adding)}>
-				<option value="">Add a stage…</option>
-				{#each list.kinds as k (k.type)}<option value={k.type}>{k.label}</option>{/each}
+				<option value="">{msg.addStageMenu}</option>
+				{#each list.kinds as k (k.type)}<option value={k.type}>{kindLabel(k.type)}</option>{/each}
 			</select>
 		</label>
 
 		<div class="buttons" use:aboveHints>
-			<button type="submit" class="button primary" disabled={saving}>Save</button>
-			<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+			<button type="submit" class="button primary" disabled={saving}>{m.common.save}</button>
+			<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 		</div>
 	</form>
 {:else}
 	<div class="bar">
-		<h1 class="caps">Voice effects</h1>
-		<span class="muted n" use:clipped>{plural(list.effects.length, 'effect', 'effects')}{yours ? ` · ${yours} yours` : ''}{off ? ` · ${off} off` : ''}</span>
-		<button type="button" class="button" onclick={startNew} disabled={readOnly}>New effect</button>
-		<input type="search" bind:value={query} placeholder="Search effects" aria-label="Search effects" />
+		<h1 class="caps">{msg.title}</h1>
+		<span class="muted n" use:clipped>{msg.count({ count: list.effects.length })}{yours ? ` · ${m.records.yoursCount({ count: yours })}` : ''}{off ? ` · ${m.records.offCount({ count: off })}` : ''}</span>
+		<button type="button" class="button" onclick={startNew} disabled={readOnly}>{msg.newEffect}</button>
+		<input type="search" bind:value={query} placeholder={msg.search} aria-label={msg.search} />
 	</div>
-	<p class="muted lead">Recipes that change how a voice sounds, such as a draugr’s or a ghost’s, applied to speech one stage at a time. A recipe doesn’t say whom it’s for: a trigger puts it on a character, a mod’s script can, and SkyrimNet uses two itself, for the narrator and your thoughts. Each names the recipe by its id.</p>
-	<LimitsNotice title="Limits Hermaeus can’t check">{limits}</LimitsNotice>
-	{#if readOnly}<p class="notice warn">Skyrim is running, so effects can only be read.</p>{/if}
+	<p class="muted lead">{msg.lead}</p>
+	<LimitsNotice title={m.records.limitsTitle}>{msg.limits}</LimitsNotice>
+	{#if readOnly}<p class="notice warn">{msg.readOnly}</p>{/if}
 
 	<div class="split">
 		<div class="list">
 			{#if !list.effects.length}
-				<p class="muted">No voice effects in SkyrimNet’s defaults, your plugins, or your own edits.</p>
+				<p class="muted">{msg.none}</p>
 			{:else if !shown.length}
-				<p class="muted">Nothing matches “{query}”.</p>
+				<p class="muted">{m.records.noMatch({ query })}</p>
 			{:else}
 				<table>
 					<thead>
 						<tr>
-							<th class="mark" aria-label="Selected"></th>
-							<th class="caps">Effect</th>
-							<th class="caps chain">Stages</th>
-							<th class="caps from">From</th>
+							<th class="mark" aria-label={m.common.selected}></th>
+							<th class="caps">{msg.effect}</th>
+							<th class="caps chain">{msg.stages}</th>
+							<th class="caps from">{m.records.from}</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each shown as e (e.id)}
 							<tr aria-selected={selection.is(e)} class:off={!e.enabled} onclick={() => selection.select(e)}>
 								<td class="mark">{#if selection.is(e)}<Diamond />{/if}</td>
-								<td use:clipped>{e.name}{#if !e.enabled}<span class="flag">off</span>{/if}{#if e.error}<span class="flag bad">can’t be read</span>{/if}</td>
-								<td class="chain muted" use:clipped>{e.stages.map((s) => kindOf(s.type)?.label ?? s.type).join(' › ') || 'None'}</td>
-								<td class="from muted" use:clipped>{#if layerOf(e)?.kind === 'overlay'}<span class="changed">Your edits</span>{:else}{layerName(layerOf(e))}{/if}</td>
+								<td use:clipped>{e.name}{#if !e.enabled}<span class="flag">{m.common.off}</span>{/if}{#if e.error}<span class="flag bad">{m.records.cantBeRead}</span>{/if}</td>
+								<td class="chain muted" use:clipped>{e.stages.map((s) => kindLabel(s.type)).join(' › ') || msg.noChain}</td>
+								<td class="from muted" use:clipped>{#if layerOf(e)?.kind === 'overlay'}<span class="changed">{m.records.yourEdits}</span>{:else}{layerName(layerOf(e))}{/if}</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -331,52 +343,56 @@
 			{/if}
 		</div>
 
-		<aside class="pane" use:fitToViewport aria-label="Voice effect">
+		<aside class="pane" use:fitToViewport aria-label={msg.voiceEffect}>
 			{#if current}
 				{@const e = current}
 				{@const from = layerOf(e)}
 				{#key e.id}
 					<div in:fly={{ y: 6, duration: 180 }}>
 						<h2 class="caps">{e.name}</h2>
-						<p class="muted small"><span class="id">{e.id}</span> · <a href={contentHref(save, e.path)}>its file</a></p>
+						<p class="muted small"><span class="id">{e.id}</span> · <a href={contentHref(save, e.path)}>{msg.itsFile}</a></p>
 						<p class="small">
-							{#if from?.kind === 'pack'}From <a href={pluginHref(save, from.id)}>{from.source}</a>{:else if from?.kind === 'overlay'}<span class="changed">Your own</span>{:else}From SkyrimNet’s defaults{/if}{#if e.providers.length > 1}, in place of {e.providers
+							<Fill
+								text={(e.providers.length > 1 ? m.records.originInPlaceOf : m.records.origin).text}
+								layers={e.providers
 									.slice(1)
 									.map((p) => layerName(list.layers[p.layer]))
-									.join(', then ')}{/if}.
+									.join(m.records.thenJoin)}
+								>{#snippet source()}{#if from?.kind === 'pack'}<Fill text={m.records.fromPlugin.text}>{#snippet plugin()}<a href={pluginHref(save, from.id)}>{from.source}</a>{/snippet}</Fill>{:else if from?.kind === 'overlay'}<span class="changed">{msg.own}</span>{:else}{m.records.fromDefaults}{/if}{/snippet}</Fill
+							>
 						</p>
-						{#if e.error}<p class="notice error">SkyrimNet can’t read this file: {e.error}</p>{/if}
-						{#if !e.enabled}<p class="notice">Off: SkyrimNet doesn’t use it.</p>{/if}
+						{#if e.error}<p class="notice error">{m.records.unreadable({ error: e.error })}</p>{/if}
+						{#if !e.enabled}<p class="notice">{m.records.isOff}</p>{/if}
 						<Overridden override={e.override} disabled={readOnly || saving} onfollow={() => toggle(true)} />
 						{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 						{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 						<div class="buttons">
-							<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{e.enabled ? 'Switch off' : 'Switch on'}</button>
-							<button type="button" class="button" onclick={startEdit} disabled={readOnly || !!e.error}>{mineOf(e) ? 'Edit' : 'Edit as your copy'}</button>
-							{#if mineOf(e)}<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>Remove your copy</button>{/if}
+							<button type="button" class="button" onclick={() => toggle()} disabled={readOnly || saving}>{e.enabled ? m.common.switchOff : m.common.switchOn}</button>
+							<button type="button" class="button" onclick={startEdit} disabled={readOnly || !!e.error}>{mineOf(e) ? m.common.edit : m.records.editCopy}</button>
+							{#if mineOf(e)}<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>{m.records.removeCopy}</button>{/if}
 						</div>
-						<h3 class="caps">Stages</h3>
+						<h3 class="caps">{msg.stages}</h3>
 						{#if e.stages.length}
 							<ol class="chainlist">
 								{#each e.stages as s, i (i)}
-									<li><span class="caps label">{kindOf(s.type)?.label ?? s.type}</span><span class="small">{stageText(s)}</span></li>
+									<li><span class="caps label">{kindLabel(s.type)}</span><span class="small">{stageText(s)}</span></li>
 								{/each}
 							</ol>
 						{:else}
-							<p class="muted small">None: the voice is left as it is.</p>
+							<p class="muted small">{msg.noStages}</p>
 						{/if}
-						<h3 class="caps">Sample</h3>
-						<p class="small" class:muted={!e.sample}>{#if e.sample}<span class="id">{e.sample}</span>{:else}None: the speaker’s own voice is cloned.{/if}</p>
-						<h3 class="caps">Used by</h3>
+						<h3 class="caps">{msg.sample}</h3>
+						<p class="small" class:muted={!e.sample}>{#if e.sample}<span class="id">{e.sample}</span>{:else}{msg.noSample}{/if}</p>
+						<h3 class="caps">{msg.usedBy}</h3>
 						<ul class="uses small">
-							{#if e.id === 'narrator_effect'}<li>The narrator, when <a href="{href(save, 'speech')}?item=tts.enableNarratorAudioEffect">Narrator effect</a> is on.</li>{/if}
-							{#if e.id === 'player_thought_effect'}<li>Your thoughts, when <a href="{href(save, 'speech')}?item=tts.enablePlayerThoughtAudioEffect">Thoughts effect</a> is on.</li>{/if}
+							{#if e.id === 'narrator_effect'}<li><Fill text={msg.narrator.text}>{#snippet setting()}<a href="{href(save, 'speech')}?item=tts.enableNarratorAudioEffect">{msg.narratorSetting}</a>{/snippet}</Fill></li>{/if}
+							{#if e.id === 'player_thought_effect'}<li><Fill text={msg.thoughts.text}>{#snippet setting()}<a href="{href(save, 'speech')}?item=tts.enablePlayerThoughtAudioEffect">{msg.thoughtsSetting}</a>{/snippet}</Fill></li>{/if}
 							{#each e.triggers as t (t.path)}
-								<li>{t.activates ? 'Switched on' : 'Switched off'} by <a href={href(save, 'triggers', `?item=${encodeURIComponent(t.path)}`)}>{t.name}</a><span class="muted"> · {t.source}{t.enabled ? '' : ' · off'}</span></li>
+								<li><Fill text={(t.activates ? msg.switchedOnBy : msg.switchedOffBy).text}>{#snippet trigger()}<a href={href(save, 'triggers', `?item=${encodeURIComponent(t.path)}`)}>{t.name}</a>{/snippet}</Fill><span class="muted"> · {t.source}{t.enabled ? '' : ` · ${m.common.off}`}</span></li>
 							{/each}
-							{#if !e.triggers.length && e.id !== 'narrator_effect' && e.id !== 'player_thought_effect'}<li class="muted">No trigger switches it on.</li>{/if}
+							{#if !e.triggers.length && e.id !== 'narrator_effect' && e.id !== 'player_thought_effect'}<li class="muted">{msg.noTrigger}</li>{/if}
 						</ul>
-						<p class="muted small">A mod’s script can also put it on a character, with SkyrimNet’s SetVoiceEffect and the id <span class="id">{e.id}</span>. Who has an effect is kept in your saves, so it isn’t listed here.</p>
+						<p class="muted small"><Fill text={msg.script.text}>{#snippet id()}<span class="id">{e.id}</span>{/snippet}</Fill></p>
 					</div>
 				{/key}
 			{/if}

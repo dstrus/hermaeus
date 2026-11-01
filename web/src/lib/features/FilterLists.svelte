@@ -8,9 +8,11 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { List, ListsResponse } from '#lib/api/types/filters.ts';
-	import { plural } from '#lib/format.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { createList, filterFields, filtersDependency, removeList, saveList, type FilterKind } from './filters.ts';
+
+	const t = m.features.filters;
 
 	let { kind, lists, canEdit }: { kind: FilterKind; lists: ListsResponse; canEdit: boolean } = $props();
 
@@ -24,12 +26,12 @@
 	let error = $state('');
 	let saving = $state(false);
 
-	const origin = (l: List) => (l.layerKind === 'overlay' ? (l.replaces ? `Your copy of the one in ${l.replaces}` : 'Yours') : l.layerKind === 'base' ? 'Built-in' : l.source);
+	const origin = (l: List) => (l.layerKind === 'overlay' ? (l.replaces ? t.copyIn({ plugin: l.replaces }) : t.yours) : l.layerKind === 'base' ? t.builtIn : l.source);
 	const counts = (l: List) =>
 		filterFields
 			.filter((f) => l.entries[f.key]?.length)
-			.map((f) => `${f.label}: ${l.entries[f.key]!.length}`)
-			.join(' · ') || 'Empty';
+			.map((f) => t.count({ label: f.label, count: l.entries[f.key]!.length }))
+			.join(' · ') || t.empty;
 
 	// The form, set up when a list opens for editing or a new one starts.
 	let name = $state('');
@@ -76,7 +78,7 @@
 		if (adding) {
 			run(async () => {
 				const r = await createList(kind, edit());
-				return { note: `Added ${r.created.name}.`, opened: r.created.id };
+				return { note: t.added({ name: r.created.name }), opened: r.created.id };
 			});
 			return;
 		}
@@ -84,21 +86,21 @@
 		run(async () => {
 			// Your own file carries its time; a first copy of another layer's has none yet.
 			await saveList(kind, l.id, { ...edit(), modified: l.layerKind === 'overlay' ? l.modified : 0 });
-			return { note: l.layerKind === 'overlay' ? `Saved ${name}.` : `Saved your copy of ${l.name}. It replaces the original until you remove it.` };
+			return { note: l.layerKind === 'overlay' ? t.saved({ name }) : t.savedCopy({ name: l.name }) };
 		});
 	}
 
 	function remove(l: List) {
 		run(async () => {
 			await removeList(kind, l.id, l.modified);
-			return { note: l.replaces ? `Removed your copy of ${l.name}; the one in ${l.replaces} applies again.` : `Removed ${l.name}.` };
+			return { note: l.replaces ? t.removedCopy({ name: l.name, plugin: l.replaces }) : t.removed({ name: l.name }) };
 		});
 	}
 </script>
 
 <section class="effect">
-	<h2 class="caps">In effect</h2>
-	<p class="muted small">What every list below adds up to, with the lists each entry comes from.</p>
+	<h2 class="caps">{t.inEffect}</h2>
+	<p class="muted small">{t.inEffectWhat}</p>
 	<dl>
 		{#each filterFields as f (f.key)}
 			{@const entries = lists.inEffect[f.key] ?? []}
@@ -111,7 +113,7 @@
 						{/each}
 					</ul>
 				{:else}
-					<span class="muted">Nothing</span>
+					<span class="muted">{t.nothing}</span>
 				{/if}
 			</dd>
 		{/each}
@@ -120,41 +122,41 @@
 
 <section class="lists">
 	<div class="head">
-		<h2 class="caps">Lists</h2>
+		<h2 class="caps">{t.lists}</h2>
 		{#if !readOnly && !adding}
-			<button type="button" class="button" onclick={() => setParams({ list: null, mode: 'list-new' })}>New list</button>
+			<button type="button" class="button" onclick={() => setParams({ list: null, mode: 'list-new' })}>{t.newList}</button>
 		{/if}
 	</div>
-	<p class="muted small">Every list adds its entries. Editing a built-in or plugin list saves your own copy over it; remove the copy to bring the original back. To drop one of them entirely, edit it and empty it.</p>
+	<p class="muted small">{t.listsWhat}</p>
 	{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 	{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
 	{#snippet form(title: string)}
 		<form class="listform" onsubmit={submit}>
 			<h3 class="caps">{title}</h3>
-			<label class="field"><span class="caps label">Name</span><input bind:this={nameField} type="text" bind:value={name} autocomplete="off" /></label>
-			<label class="field"><span class="caps label">Description</span><input type="text" bind:value={description} autocomplete="off" /></label>
+			<label class="field"><span class="caps label">{t.name}</span><input bind:this={nameField} type="text" bind:value={name} autocomplete="off" /></label>
+			<label class="field"><span class="caps label">{t.description}</span><input type="text" bind:value={description} autocomplete="off" /></label>
 			<div class="grid">
 				{#each filterFields as f (f.key)}
 					<label class="field">
 						<span class="caps label">{f.label}</span>
-						<textarea bind:value={fields[f.key]} rows="3" spellcheck="false" placeholder={'placeholder' in f ? f.placeholder : `One ${f.noun} per line, by editor ID`}></textarea>
+						<textarea bind:value={fields[f.key]} rows="3" spellcheck="false" placeholder={'placeholder' in f ? f.placeholder : t.perLine({ noun: f.noun })}></textarea>
 					</label>
 				{/each}
 			</div>
 			<div class="buttons">
-				<button type="submit" class="button primary" disabled={saving}>{adding ? 'Add' : 'Save'}</button>
-				<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+				<button type="submit" class="button primary" disabled={saving}>{adding ? t.add : m.common.save}</button>
+				<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 			</div>
 		</form>
 	{/snippet}
 
-	{#if adding}{@render form('New list')}{/if}
+	{#if adding}{@render form(t.newList)}{/if}
 	<ul class="rows">
 		{#each lists.lists as l (l.id)}
 			<li class:open={open === l.id}>
 				{#if editingId === l.id}
-					{@render form(l.layerKind === 'overlay' ? `Edit ${l.name}` : `Your copy of ${l.name}`)}
+					{@render form(l.layerKind === 'overlay' ? t.edit({ name: l.name }) : t.yourCopy({ name: l.name }))}
 				{:else}
 					<div class="row">
 						<div class="text">
@@ -165,9 +167,9 @@
 						</div>
 						{#if !readOnly}
 							<div class="actions">
-								<button type="button" class="textbutton small" onclick={() => setParams({ list: l.id, mode: 'list' })}>{l.layerKind === 'overlay' ? 'Edit' : 'Edit a copy'}</button>
+								<button type="button" class="textbutton small" onclick={() => setParams({ list: l.id, mode: 'list' })}>{l.layerKind === 'overlay' ? m.common.edit : t.editCopy}</button>
 								{#if l.layerKind === 'overlay'}
-									<button type="button" class="textbutton small" onclick={() => remove(l)} disabled={saving}>{l.replaces ? 'Remove copy' : 'Remove'}</button>
+									<button type="button" class="textbutton small" onclick={() => remove(l)} disabled={saving}>{l.replaces ? t.removeCopy : m.common.remove}</button>
 								{/if}
 							</div>
 						{/if}
@@ -175,10 +177,10 @@
 				{/if}
 			</li>
 		{:else}
-			<li class="muted">No {kind} filter lists in any layer.</li>
+			<li class="muted">{t.none[kind]}</li>
 		{/each}
 	</ul>
-	<p class="muted small">{plural(lists.lists.length, 'list', 'lists')}, from SkyrimNet’s defaults, your plugins, and your own.</p>
+	<p class="muted small">{t.total({ count: lists.lists.length })}</p>
 </section>
 
 <style>

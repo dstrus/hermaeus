@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { DiaryChanges, DiaryEntry } from '#lib/api/types/memories.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { commonEmotions, parseTags } from './api.ts';
 
 	let {
@@ -50,20 +51,20 @@
 </script>
 
 <form onsubmit={submit}>
-	<label class="field"><span class="caps">Entry</span><textarea bind:value={f.content} required rows="14"></textarea></label>
+	<label class="field"><span class="caps">{m.memories.form.entry}</span><textarea bind:value={f.content} required rows="14"></textarea></label>
 	<div class="pair">
-		<label class="field"><span class="caps">Mood</span><input bind:value={f.emotion} list="diary-emotions" /></label>
-		<label class="field"><span class="caps">Importance</span><input type="number" bind:value={f.importance} min="0" max="1" step="0.05" required /></label>
+		<label class="field"><span class="caps">{m.memories.mood}</span><input bind:value={f.emotion} list="diary-emotions" /></label>
+		<label class="field"><span class="caps">{m.memories.importance}</span><input type="number" bind:value={f.importance} min="0" max="1" step="0.05" required /></label>
 	</div>
 	<datalist id="diary-emotions">
 		{#each commonEmotions as e (e)}<option value={e}></option>{/each}
 	</datalist>
-	<label class="field"><span class="caps">Place</span><input bind:value={f.location} /></label>
-	<label class="field"><span class="caps">Tags</span><input bind:value={f.tags} placeholder="Separated by commas" /></label>
-	<p class="muted small">Its memory copy is kept in step with the text, mood, place, and importance.</p>
+	<label class="field"><span class="caps">{m.memories.place}</span><input bind:value={f.location} /></label>
+	<label class="field"><span class="caps">{m.memories.tags}</span><input bind:value={f.tags} placeholder={m.memories.form.tagsPlaceholder} /></label>
+	<p class="muted small">{m.memories.form.diaryNote}</p>
 	<div class="buttons">
-		<button class="button primary" disabled={saving}>{entry ? 'Save' : 'Add entry'}</button>
-		<button type="button" class="button" onclick={oncancel} disabled={saving}>Cancel</button>
+		<button class="button primary" disabled={saving}>{entry ? m.common.save : m.memories.form.addEntry}</button>
+		<button type="button" class="button" onclick={oncancel} disabled={saving}>{m.common.cancel}</button>
 	</div>
 </form>
 

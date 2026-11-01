@@ -4,7 +4,8 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import type { Playthrough } from '#lib/api/types/store.ts';
 	import type { Summary } from '#lib/api/types/summary.ts';
-	import { count, plural } from '#lib/format.ts';
+	import { m } from '#lib/copy/messages.ts';
+	import { count } from '#lib/format.ts';
 	import { dayLabel } from '#lib/memories/dates.ts';
 	import { doorways, getSummary } from './api.ts';
 
@@ -38,18 +39,18 @@
 </script>
 
 <div class="title">
-	<h2 class="caps">{p.player || 'No player yet'}</h2>
-	<a class="button primary" href={base}>Open</a>
+	<h2 class="caps">{p.player || m.overview.noPlayer}</h2>
+	<a class="button primary" href={base}>{m.common.open}</a>
 </div>
 <p class="muted id">{p.id}</p>
 {#if error}
 	<p class="notice error">{error}</p>
 {:else if summary}
 	{#if summary.now}
-		<p class="now">{summary.now.time}, {summary.now.day}</p>
-		<p class="muted small">{plural(summary.days, 'game day', 'game days')} recorded since {summary.began?.day}</p>
+		<p class="now">{m.memories.dateTime(summary.now)}</p>
+		<p class="muted small">{m.overview.daysSince({ count: summary.days, day: summary.began?.day ?? '' })}</p>
 	{/if}
-	<ul class="doors" aria-label="Stored">
+	<ul class="doors" aria-label={m.overview.stored}>
 		{#each doors as d (d.id)}
 			<li>
 				<a class="caps" href={d.href}>{d.label}</a>
@@ -59,11 +60,11 @@
 		{/each}
 	</ul>
 	{#if summary.company.length}
-		<p class="small"><span class="caps label">Company</span> {summary.company.map((c) => c.name || 'Unnamed').join(', ')}</p>
+		<p class="small"><span class="caps label">{m.overview.company}</span> {summary.company.map((c) => c.name || m.characters.noName).join(', ')}</p>
 	{/if}
 	{#if latest}
 		<section class="latest">
-			<h3 class="caps">Latest diary · {dayLabel(latest)}</h3>
+			<h3 class="caps">{m.overview.latestDiaryOn({ day: dayLabel(latest) })}</h3>
 			<p>{latest.content.replace(/\n\s*\n/g, '\n')}</p>
 		</section>
 	{/if}

@@ -14,10 +14,8 @@ import (
 // kept in a file and resets when the game restarts, so it's left out here.
 
 type Toggle struct {
-	ID     string `json:"id"`
-	Label  string `json:"label"` // short, for a row of them
-	What   string `json:"what"`  // a sentence saying what it switches
-	File   string `json:"file"`  // settings name, as in File
+	ID     string `json:"id"`   // the frontend names and describes each by its id
+	File   string `json:"file"` // settings name, as in File
 	Key    string `json:"key"`
 	Master bool   `json:"master,omitempty"` // when off, SkyrimNet makes no AI calls at all
 
@@ -27,16 +25,16 @@ type Toggle struct {
 }
 
 var toggles = []Toggle{
-	{ID: "skyrimnet", Label: "AI", What: "SkyrimNet’s AI altogether. Off, SkyrimNet makes no AI calls at all.", File: "game", Key: "general.globalAIEnabled", Master: true},
-	{ID: "gamemaster", Label: "GameMaster", What: "The GameMaster agent, which sets scenes and moves the story along.", File: "game", Key: "gamemaster.agentEnabled"},
-	{ID: "npc_reactions", Label: "NPC reactions", What: "NPCs reacting to what happens around them.", File: "Events", Key: "global.npcReactionsEnabled"},
-	{ID: "player_reactions", Label: "Player reactions", What: "AI-written lines spoken by your own character.", File: "PlayerDialogue", Key: "enabled"},
-	{ID: "narration", Label: "Narration", What: "A narrator describing what happens.", File: "game", Key: "narration.enabled"},
-	{ID: "bard_singing", Label: "Bards", What: "Bards singing AI-written songs.", File: "BardSinging", Key: "bard_singing.enabled"},
-	{ID: "universal_translator", Label: "Translator", What: "The Universal Translator, which replaces NPCs’ recorded lines with AI-written ones in their speech patterns.", File: "UniversalTranslator", Key: "enabled"},
-	{ID: "dynamic_bios", Label: "Dynamic bios", What: "SkyrimNet rewriting characters’ dynamic bios as you play.", File: "DynamicBio", Key: "enabled"},
-	{ID: "memory_generation", Label: "Memories", What: "Making new memories from events, in the background.", File: "Memory", Key: "performance.enable_background_processing"},
-	{ID: "omnisight", Label: "OmniSight", What: "OmniSight: NPCs seeing what’s on screen.", File: "OmniSight", Key: "omnisight.enabled"},
+	{ID: "skyrimnet", File: "game", Key: "general.globalAIEnabled", Master: true},
+	{ID: "gamemaster", File: "game", Key: "gamemaster.agentEnabled"},
+	{ID: "npc_reactions", File: "Events", Key: "global.npcReactionsEnabled"},
+	{ID: "player_reactions", File: "PlayerDialogue", Key: "enabled"},
+	{ID: "narration", File: "game", Key: "narration.enabled"},
+	{ID: "bard_singing", File: "BardSinging", Key: "bard_singing.enabled"},
+	{ID: "universal_translator", File: "UniversalTranslator", Key: "enabled"},
+	{ID: "dynamic_bios", File: "DynamicBio", Key: "enabled"},
+	{ID: "memory_generation", File: "Memory", Key: "performance.enable_background_processing"},
+	{ID: "omnisight", File: "OmniSight", Key: "omnisight.enabled"},
 }
 
 type ToggleList struct {

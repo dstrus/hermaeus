@@ -4,6 +4,8 @@
 <script lang="ts">
 	import { fly } from 'svelte/transition';
 	import type { Character, Event, EventsResponse } from '#lib/api/types/characters.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { count, realTime } from '#lib/format.ts';
 	import { dayLabel, timeLabel } from '#lib/memories/dates.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
@@ -17,7 +19,7 @@
 	let {
 		save,
 		uuid,
-		name = 'They',
+		name = m.events.they,
 		events: response,
 		characters
 	}: {
@@ -77,8 +79,8 @@
 	});
 
 	useShortcuts(() => [
-		{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) }
+		{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+		{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) }
 	]);
 </script>
 
@@ -88,46 +90,55 @@
 	{#if href}<a class="name" class:own {href}>{name}</a>{:else}<span class="name" class:own>{name}</span>{/if}
 {/snippet}
 
+<!-- A line of dialogue: who spoke it, to whom if anyone, and the line. -->
+{#snippet spoken(e: Event)}
+	{#if e.listener}
+		<Fill text={m.events.spokeTo.text} line={e.line ?? ''}>{#snippet speaker()}{@render who(e.speaker ?? '', pageOf(e.speakerUuid), self(e.speakerUuid))}{/snippet}{#snippet listener()}{@render who(e.listener ?? '', pageOf(e.listenerUuid), self(e.listenerUuid))}{/snippet}</Fill>
+	{:else}
+		<Fill text={m.events.spoke.text} line={e.line ?? ''}>{#snippet speaker()}{@render who(e.speaker ?? '', pageOf(e.speakerUuid), self(e.speakerUuid))}{/snippet}</Fill>
+	{/if}
+{/snippet}
+
 <div class="tools">
-	<span class="muted">{count(response.events.length)} {response.events.length === 1 ? 'event' : 'events'}</span>
-	<select bind:value={type} aria-label="Type">
-		<option value="">Every type</option>
+	<span class="muted">{m.events.count({ count: response.events.length })}</span>
+	<select bind:value={type} aria-label={m.events.type}>
+		<option value="">{m.events.everyType}</option>
 		{#each response.types as t (t.type)}
 			<option value={t.type}>{t.label} · {count(t.count)}</option>
 		{/each}
 	</select>
 	{#if uuid}
-		<select bind:value={role} aria-label="Their part">
-			<option value="">Any part</option>
-			<option value="part">Acting or acted on</option>
-			<option value="present">Only present</option>
+		<select bind:value={role} aria-label={m.events.theirPart}>
+			<option value="">{m.events.anyPart}</option>
+			<option value="part">{m.events.acting}</option>
+			<option value="present">{m.events.onlyPresent}</option>
 		</select>
 	{:else}
-		<select bind:value={actor} aria-label="Character">
-			<option value="">Everyone</option>
+		<select bind:value={actor} aria-label={m.characters.character}>
+			<option value="">{m.characters.everyone}</option>
 			{#each characters as c (c.uuid)}
 				<option value={c.uuid}>{characterName(c)}</option>
 			{/each}
 		</select>
 	{/if}
-	<input type="search" bind:value={query} placeholder="Filter events" aria-label="Filter events" />
+	<input type="search" bind:value={query} placeholder={m.events.filter} aria-label={m.events.filter} />
 </div>
 
 <div class="split" class:everyone={!uuid}>
 	<div class="list">
 		{#if !response.events.length}
-			<p class="muted">SkyrimNet hasn’t recorded {name} taking part in anything yet.</p>
+			<p class="muted">{m.events.none({ name })}</p>
 		{:else if !shown.length}
-			<p class="muted">No events match.</p>
+			<p class="muted">{m.events.noMatch}</p>
 		{:else}
 			<table>
 				<thead>
 					<tr>
-						<th class="mark" aria-label="Selected"></th>
-						<th class="caps when">When</th>
-						{#if !uuid}<th class="caps who">Who</th>{/if}
-						<th class="caps text">Event</th>
-						<th class="caps type">Type</th>
+						<th class="mark" aria-label={m.common.selected}></th>
+						<th class="caps when">{m.events.when}</th>
+						{#if !uuid}<th class="caps who">{m.events.who}</th>{/if}
+						<th class="caps text">{m.events.event}</th>
+						<th class="caps type">{m.events.type}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -146,7 +157,7 @@
 							<td class="text">
 								<span class="line">
 									{#if e.speaker && e.line}
-										{@render who(e.speaker, pageOf(e.speakerUuid), self(e.speakerUuid))}{#if e.listener}{' to '}{@render who(e.listener, pageOf(e.listenerUuid), self(e.listenerUuid))}{/if}{': '}“{e.line}”
+										{@render spoken(e)}
 									{:else}
 										{e.summary}
 									{/if}
@@ -159,37 +170,37 @@
 			</table>
 			{#if matching.length > shown.length}
 				<p class="more">
-					<button type="button" class="textbutton" onclick={() => (limit += page)}>Show {count(Math.min(page, matching.length - shown.length))} more</button>
-					<span class="muted">of {count(matching.length - shown.length)} further</span>
+					<button type="button" class="textbutton" onclick={() => (limit += page)}>{m.events.more({ count: Math.min(page, matching.length - shown.length) })}</button>
+					<span class="muted">{m.events.further({ count: matching.length - shown.length })}</span>
 				</p>
 			{/if}
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Event">
+	<aside class="pane" use:fitToViewport aria-label={m.events.event}>
 		{#if current}
 			{#key current.id}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2 class="caps">{current.label}</h2>
-					<p class="muted">{current.date ? `${current.date.time}, ${current.date.day}` : dayLabel(current)}</p>
+					<p class="muted">{current.date ? m.memories.dateTime(current.date) : dayLabel(current)}</p>
 					<p class="content">
 						{#if current.speaker && current.line}
-							{@render who(current.speaker, pageOf(current.speakerUuid), self(current.speakerUuid))}{#if current.listener}{' to '}{@render who(current.listener, pageOf(current.listenerUuid), self(current.listenerUuid))}{/if}{': '}“{current.line}”
+							{@render spoken(current)}
 						{:else}
 							{current.text || current.summary}
 						{/if}
 					</p>
 					<dl>
-						{#if current.location}<dt class="caps">Place</dt><dd>{current.location}</dd>{/if}
-						{#if current.role}<dt class="caps">{name}’s part</dt><dd>{current.role}</dd>{/if}
-						{#if !uuid && current.from}<dt class="caps">From</dt><dd>{@render who(current.from, pageOf(current.fromUuid), false)}</dd>{/if}
-						{#if !uuid && current.to}<dt class="caps">To</dt><dd>{@render who(current.to, pageOf(current.toUuid), false)}</dd>{/if}
-						{#if current.present}<dt class="caps">Present</dt><dd>{count(current.present)} {current.present === 1 ? 'character' : 'characters'}</dd>{/if}
-						{#if current.written}<dt class="caps">Recorded</dt><dd>{realTime(current.written)}</dd>{/if}
-						<dt class="caps">Event</dt><dd>#{current.id}</dd>
+						{#if current.location}<dt class="caps">{m.events.place}</dt><dd>{current.location}</dd>{/if}
+						{#if current.role}<dt class="caps">{m.events.part({ name })}</dt><dd>{current.role}</dd>{/if}
+						{#if !uuid && current.from}<dt class="caps">{m.events.from}</dt><dd>{@render who(current.from, pageOf(current.fromUuid), false)}</dd>{/if}
+						{#if !uuid && current.to}<dt class="caps">{m.events.to}</dt><dd>{@render who(current.to, pageOf(current.toUuid), false)}</dd>{/if}
+						{#if current.present}<dt class="caps">{m.events.present}</dt><dd>{m.events.presentCount({ count: current.present })}</dd>{/if}
+						{#if current.written}<dt class="caps">{m.events.recorded}</dt><dd>{realTime(current.written)}</dd>{/if}
+						<dt class="caps">{m.events.event}</dt><dd>#{current.id}</dd>
 					</dl>
 					{#if fields.length}
-						<h3 class="caps">Details</h3>
+						<h3 class="caps">{m.events.details}</h3>
 						<dl>
 							{#each fields as f (f.key)}
 								<dt class="caps">{f.label}</dt><dd>{f.value}</dd>

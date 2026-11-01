@@ -2,6 +2,7 @@ import { request } from '#lib/api/client.ts';
 import { href } from '#lib/nav.ts';
 import type { Catalog } from '#lib/api/types/bios.ts';
 import type { Character } from '#lib/api/types/characters.ts';
+import { m } from '#lib/copy/messages.ts';
 import type { Import, ImportResult, Rule, Translator, TranslatorEdit } from '#lib/api/types/settings.ts';
 import { templateName } from '#lib/bios/api.ts';
 import { modelsHref } from '#lib/models/api.ts';
@@ -45,9 +46,9 @@ export function editOf(t: Translator): TranslatorEdit {
 }
 
 export const entityTypes: { value: Rule['entityType']; label: string }[] = [
-	{ value: 'npc', label: 'NPC' },
-	{ value: 'faction', label: 'Faction' },
-	{ value: 'race', label: 'Race' }
+	{ value: 'npc', label: m.translator.entities.npc },
+	{ value: 'faction', label: m.translator.entities.faction },
+	{ value: 'race', label: m.translator.entities.race }
 ];
 
 export function entityLabel(type: string): string {

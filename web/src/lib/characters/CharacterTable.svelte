@@ -14,6 +14,7 @@
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { count } from '#lib/format.ts';
 	import { characterName, charactersDependency, setPinned } from './api.ts';
 
@@ -23,7 +24,7 @@
 	let sort = $state<Sort>({ key: 'group', descending: false });
 	let error = $state('');
 
-	const groupNames: Record<Group, string> = { player: 'You', pinned: 'Pinned', busy: `${BusyMemories}+ memories`, other: 'Everyone else' };
+	const groupNames: Record<Group, string> = { ...m.characters.groups, busy: m.characters.groups.busy({ n: BusyMemories }) };
 
 	let shown = $derived.by(() => {
 		const q = query.trim().toLowerCase();
@@ -66,13 +67,13 @@
 	useShortcuts(() => {
 		const c = selection.current;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !c, run: () => c && goto(href(c)) },
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+			{ key: 'Enter', shown: 'Enter', label: m.common.open, disabled: !c, run: () => c && goto(href(c)) },
 			{
 				key: 'p',
 				shown: 'P',
-				label: c?.pinned ? 'Unpin' : 'Pin',
+				label: c?.pinned ? m.characters.unpin : m.characters.pin,
 				disabled: !c || c.group === 'player' || live.gameRunning,
 				run: () => c && togglePin(c)
 			}
@@ -81,36 +82,36 @@
 </script>
 
 <div class="bar">
-	<h1 class="caps">Characters</h1>
+	<h1 class="caps">{m.characters.title}</h1>
 	<Segmented
 		value="here"
 		options={[
-			{ value: 'here', label: 'This playthrough', title: 'Everyone with something stored in this playthrough' },
-			{ value: 'all', label: 'Every bio', title: 'Everyone SkyrimNet or a plugin ships a bio for, met or not' }
+			{ value: 'here', label: m.characters.which.here, title: m.characters.which.hereTitle },
+			{ value: 'all', label: m.characters.which.all, title: m.characters.which.allTitle }
 		]}
-		label="Which characters"
+		label={m.characters.which.label}
 		onchange={(v) => v === 'all' && goto(catalogHref(save))}
 	/>
-	<span class="muted n" use:clipped>{count(characters.length)} with something stored</span>
-	<input type="search" bind:value={query} placeholder="Filter by name or bio" aria-label="Filter characters" />
+	<span class="muted n" use:clipped>{m.characters.table.stored({ count: characters.length })}</span>
+	<input type="search" bind:value={query} placeholder={m.characters.table.filter} aria-label={m.characters.table.filterLabel} />
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
 {#if !characters.length}
-	<p class="muted">No one has anything stored in this playthrough yet.</p>
+	<p class="muted">{m.characters.table.none}</p>
 {:else if !shown.length}
-	<p class="muted">No one matches “{query}”.</p>
+	<p class="muted">{m.characters.noMatch({ query })}</p>
 {:else}
 	<div class="split">
 	<table>
 		<thead>
 			<tr>
-				<th class="mark" aria-label="Selected"></th>
-				<SortHeader label="Name" key="name" bind:sort />
-				<SortHeader label="Memories" key="memories" bind:sort descendingFirst align="end" />
-				<SortHeader label="Diary" key="diaries" bind:sort descendingFirst align="end" />
-				<th class="plugin caps">Plugin</th>
-				<th class="pin" aria-label="Pinned"></th>
+				<th class="mark" aria-label={m.common.selected}></th>
+				<SortHeader label={m.characters.table.name} key="name" bind:sort />
+				<SortHeader label={m.characters.table.memories} key="memories" bind:sort descendingFirst align="end" />
+				<SortHeader label={m.characters.table.diary} key="diaries" bind:sort descendingFirst align="end" />
+				<th class="plugin caps">{m.characters.plugin}</th>
+				<th class="pin" aria-label={m.characters.groups.pinned}></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -122,7 +123,7 @@
 					<td class="mark">{#if selection.is(c)}<Diamond />{/if}</td>
 					<td class="name">
 						<a href={href(c)}>{characterName(c)}</a>
-						{#if c.formerNames.length}<span class="muted"> · was {c.formerNames.map((n) => n || 'unnamed').join(', ')}</span>{/if}
+						{#if c.formerNames.length}<span class="muted"> · {m.characters.table.was({ names: c.formerNames.map((n) => n || m.characters.noNameLower).join(', ') })}</span>{/if}
 					</td>
 					<td class="n">{count(c.memories)}</td>
 					<td class="n">{c.diaries ? count(c.diaries) : ''}</td>
@@ -136,29 +137,29 @@
 			{/each}
 		</tbody>
 	</table>
-	<aside class="pane" aria-label="Character" use:fitToViewport>
+	<aside class="pane" aria-label={m.characters.character} use:fitToViewport>
 		{#if current}
 			<div class="title">
 				<h2 class="caps">{characterName(current)}</h2>
 				{#if current.group !== 'player'}
-					<PinButton always size={16} pinned={current.pinned} name={characterName(current)} disabled={live.gameRunning} reason="Close Skyrim to change pins" onclick={() => togglePin(current!)} />
+					<PinButton always size={16} pinned={current.pinned} name={characterName(current)} disabled={live.gameRunning} reason={m.characters.closeToPin} onclick={() => togglePin(current!)} />
 				{/if}
 			</div>
-			<p class="muted">{groupNames[current.group]}{#if current.formerNames.length}{' · previously '}{current.formerNames.map((n) => n || 'unnamed').join(', ')}{/if}</p>
+			<p class="muted">{groupNames[current.group]}{#if current.formerNames.length}{' · '}{m.characters.table.previously({ names: current.formerNames.map((n) => n || m.characters.noNameLower).join(', ') })}{/if}</p>
 			<dl>
-				<dt class="caps">Memories</dt><dd>{count(current.memories)}</dd>
-				<dt class="caps">Diary</dt><dd>{count(current.diaries)} {current.diaries === 1 ? 'entry' : 'entries'}</dd>
-				{#if current.modFile}<dt class="caps">Plugin</dt><dd>{current.modFile}</dd>{/if}
-				{#if current.bio}<dt class="caps">Bio template</dt><dd>{current.bio}</dd>{/if}
-				<dt class="caps">SkyrimNet ID</dt><dd>{current.uuid}</dd>
+				<dt class="caps">{m.characters.table.memories}</dt><dd>{count(current.memories)}</dd>
+				<dt class="caps">{m.characters.table.diary}</dt><dd>{m.characters.table.entries({ count: current.diaries })}</dd>
+				{#if current.modFile}<dt class="caps">{m.characters.plugin}</dt><dd>{current.modFile}</dd>{/if}
+				{#if current.bio}<dt class="caps">{m.characters.bioTemplate}</dt><dd>{current.bio}</dd>{/if}
+				<dt class="caps">{m.characters.skyrimNetId}</dt><dd>{current.uuid}</dd>
 			</dl>
 			<div class="actions">
-				<a class="button primary" href={href(current)}>Open</a>
+				<a class="button primary" href={href(current)}>{m.common.open}</a>
 			</div>
-			{#if live.gameRunning && current.group !== 'player'}<p class="notice warn">Close Skyrim to change pins.</p>{/if}
+			{#if live.gameRunning && current.group !== 'player'}<p class="notice warn">{m.characters.closeToPinNotice}</p>{/if}
 			{#if preview}
 				<section class="preview">
-					<h3 class="caps">Bio · {preview.kind}</h3>
+					<h3 class="caps">{m.bios.previewHeading({ kind: preview.kind })}</h3>
 					<p>{preview.text}</p>
 				</section>
 			{/if}

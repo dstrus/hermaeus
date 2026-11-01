@@ -1,4 +1,5 @@
 import { request } from '#lib/api/client.ts';
+import { m } from '#lib/copy/messages.ts';
 import { href } from '#lib/nav.ts';
 import type { Layer } from '#lib/api/types/layers.ts';
 import type { Document, Edit, Matches, PinsResponse, PromptList, Revert, Saved } from '#lib/api/types/prompts.ts';
@@ -58,7 +59,7 @@ export function promptFolder(path: string): string {
 
 // layerLabel is a layer as the versions switch names it.
 export function layerLabel(l: Layer): string {
-	if (l.kind === 'overlay') return 'Yours';
-	if (l.kind === 'base') return 'Default';
+	if (l.kind === 'overlay') return m.prompts.yours;
+	if (l.kind === 'base') return m.prompts.default;
 	return l.source;
 }

@@ -71,7 +71,7 @@ func TestProvidersReadWithoutKeys(t *testing.T) {
 		t.Fatalf("Providers() = %+v, %v", r, err)
 	}
 	or := r.Providers[0]
-	if !or.HasKey || !or.Builtin || or.Style != "chat" || !or.Streaming || or.Sorting != "latency" || or.CacheTTL != "5m" || !strings.Contains(or.Settings, `"route":"fallback"`) || strings.Join(or.Tasks, ",") != "Dialogue,Memory,Sever background" {
+	if !or.HasKey || !or.Builtin || or.Style != "chat" || !or.Streaming || or.Sorting != "latency" || or.CacheTTL != "5m" || !strings.Contains(or.Settings, `"route":"fallback"`) || strings.Join(or.Tasks, ",") != "default,memory,sever_background" {
 		t.Errorf("openrouter = %+v", or)
 	}
 	if d := r.Providers[2]; d.HasKey || d.KeyFrom != "openrouter" || d.Style != "decisions" || d.Settings != "" || len(d.Tasks) != 0 {
@@ -159,6 +159,9 @@ func TestProvidersChange(t *testing.T) {
 	h.config("OpenRouter.yaml", strings.Replace(modelsYAML, "provider_id: nanogpt", "provider_id: used", 1))
 	_, err = h.settings.RemoveProvider("used", r2.Modified)
 	kindOf(t, err, apperr.Conflict)
+	if err == nil || !strings.Contains(err.Error(), "used by Combat.") {
+		t.Errorf("in use: %v, want the task named", err)
+	}
 	r = r2
 	e = edit(r.Providers[0])
 	e.Endpoint = "openrouter.ai"

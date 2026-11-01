@@ -2,19 +2,21 @@
      and your own edits. -->
 <script lang="ts">
 	import type { ActionList } from '#lib/api/types/records.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import Inja from '#lib/ui/Inja.svelte';
 	import RecordsPage from './RecordsPage.svelte';
 	import { words } from './api.ts';
 
 	let { list }: { list: ActionList } = $props();
+	const msg = m.records.actions;
 </script>
 
 <RecordsPage
-	title="Actions"
-	noun={['action', 'actions']}
-	lead="What NPCs can do, beyond speaking: the model reads each action’s description and picks one when it fits. Each comes from a plugin or your own edits."
+	title={msg.title}
+	copy={msg}
+	lead={msg.lead}
 	records={list.actions}
-	columns={[{ label: 'Category', class: 'category' }, { label: 'Priority', class: 'priority' }]}
+	columns={[{ label: msg.category, class: 'category' }, { label: msg.priority, class: 'priority' }]}
 >
 	{#snippet cells(a)}
 		<td class="category muted">{a.category ? words(a.category) : ''}</td>
@@ -23,25 +25,25 @@
 	{#snippet pane(a)}
 		<p class="text"><Inja text={a.description} /></p>
 		<dl>
-			{#if a.category}<dt class="caps">Category</dt><dd>{words(a.category)}</dd>{/if}
-			{#if a.priority !== undefined}<dt class="caps">Priority</dt><dd>{a.priority}</dd>{/if}
-			<dt class="caps">Who may</dt><dd>{a.rules ? `${a.rules} eligibility ${a.rules === 1 ? 'rule' : 'rules'}` : 'Anyone, at any time'}</dd>
-			{#if a.function}<dt class="caps">Runs</dt><dd class="id">{a.script}.{a.function}</dd>{/if}
-			{#if a.quest}<dt class="caps">Quest</dt><dd class="id">{a.quest}</dd>{/if}
-			{#if a.event}<dt class="caps">Event text</dt><dd class="id">{a.event}</dd>{/if}
-			{#if a.confirm}<dt class="caps">Confirm</dt><dd>Asks you first</dd>{/if}
+			{#if a.category}<dt class="caps">{msg.category}</dt><dd>{words(a.category)}</dd>{/if}
+			{#if a.priority !== undefined}<dt class="caps">{msg.priority}</dt><dd>{a.priority}</dd>{/if}
+			<dt class="caps">{msg.whoMay}</dt><dd>{a.rules ? msg.rules({ count: a.rules }) : msg.anyone}</dd>
+			{#if a.function}<dt class="caps">{msg.runs}</dt><dd class="id">{a.script}.{a.function}</dd>{/if}
+			{#if a.quest}<dt class="caps">{msg.quest}</dt><dd class="id">{a.quest}</dd>{/if}
+			{#if a.event}<dt class="caps">{msg.eventText}</dt><dd class="id">{a.event}</dd>{/if}
+			{#if a.confirm}<dt class="caps">{msg.confirm}</dt><dd>{msg.asksFirst}</dd>{/if}
 		</dl>
 		{#if a.params.length}
-			<h3 class="caps">The model fills in</h3>
+			<h3 class="caps">{msg.fillsIn}</h3>
 			<ul class="params">
 				{#each a.params as p (p.name)}
-					<li><span class="id">{p.name}</span><span class="muted kind">· {words(p.type)}{p.optional ? ', optional' : ''}</span>{#if p.description}<br /><span class="small">{p.description}</span>{/if}</li>
+					<li><span class="id">{p.name}</span><span class="muted kind">· {p.optional ? msg.optional({ kind: words(p.type) }) : words(p.type)}</span>{#if p.description}<br /><span class="small">{p.description}</span>{/if}</li>
 				{/each}
 			</ul>
 		{/if}
 	{/snippet}
 	{#snippet note()}
-		SkyrimNet also has a few actions built in, such as continuing a conversation, which aren’t files and aren’t listed. Actions are edited and made on the Content page.
+		{msg.note}
 	{/snippet}
 </RecordsPage>
 

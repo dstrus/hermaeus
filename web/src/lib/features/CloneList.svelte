@@ -2,7 +2,10 @@
      most recently used first. SkyrimNet keeps the list; this only reads it. -->
 <script lang="ts">
 	import type { CloneCache } from '#lib/api/types/settings.ts';
-	import { plural, realTime } from '#lib/format.ts';
+	import { m } from '#lib/copy/messages.ts';
+	import { realTime } from '#lib/format.ts';
+
+	const t = m.features.clones;
 
 	let { cache, label }: { cache: CloneCache; label: string } = $props();
 
@@ -11,18 +14,18 @@
 
 <section class="clones">
 	{#if !cache.voices.length && !cache.unnamed}
-		<p class="muted small">None yet. SkyrimNet’s dashboard can clone voice types into your {label} account all at once with its bulk clone.</p>
+		<p class="muted small">{t.none({ account: label })}</p>
 	{:else}
 		<p class="muted small">
-			{plural(cache.voices.length + cache.unnamed, 'voice', 'voices')} in your {label} account{cache.maxVoices > 0 ? `, of up to ${cache.maxVoices.toLocaleString()} kept` : ''}{cache.maxVoices > 0 ? '. Before cloning past the limit, SkyrimNet deletes the voice used longest ago' : ''}.
+			{cache.maxVoices > 0 ? t.countKept({ count: cache.voices.length + cache.unnamed, account: label, max: cache.maxVoices.toLocaleString() }) : t.count({ count: cache.voices.length + cache.unnamed, account: label })}
 		</p>
-		{#if over}<p class="notice warn small">More than the limit. Each time SkyrimNet clones another voice, it first deletes the one used longest ago, but never one cloned outside SkyrimNet.</p>{/if}
+		{#if over}<p class="notice warn small">{t.over}</p>{/if}
 		<table>
 			<thead>
 				<tr>
-					<th class="caps">Voice type</th>
-					<th class="caps lang">Language</th>
-					<th class="caps when">Last used</th>
+					<th class="caps">{t.voiceType}</th>
+					<th class="caps lang">{t.language}</th>
+					<th class="caps when">{t.lastUsed}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -35,7 +38,7 @@
 				{/each}
 			</tbody>
 		</table>
-		{#if cache.unnamed}<p class="muted small">{plural(cache.unnamed, 'other voice', 'other voices')} with a name Hermaeus can’t read.</p>{/if}
+		{#if cache.unnamed}<p class="muted small">{t.unnamed({ count: cache.unnamed })}</p>{/if}
 	{/if}
 </section>
 

@@ -49,8 +49,6 @@ export interface ModelList {
  */
 export interface Task {
   id: string; // default for Dialogue; otherwise the variant's name
-  label: string;
-  what: string;
   known: boolean; // one of SkyrimNet's own tasks; others come from plugins
   slots: Slot[]; // in rotation order
   params: Params;
@@ -176,7 +174,7 @@ export interface ProviderDetails {
   settings: string; // provider_settings as JSON, "" for none
   sorting: string; // provider_sorting: how OpenRouter picks among its upstreams
   cacheTTL: string;
-  tasks: string[]; // the tasks with a slot on it, by label
+  tasks: string[]; // the tasks with a slot on it, by id
 }
 export interface ProvidersResponse {
   found: boolean;
@@ -285,8 +283,8 @@ export interface File {
   pinned: boolean; // kept at the top of the Settings page
   /**
    * A file with a page of its own, in its feature's terms: the page's path
-   * under the playthrough, and its name. The Settings page lists the page
-   * in place of the file.
+   * under the playthrough, and, for a plugin's page, the name its schema
+   * gives it. The Settings page lists the page in place of the file.
    */
   page?: string;
   pageLabel?: string;
@@ -328,7 +326,6 @@ export interface FileList {
  */
 export interface OwnPage {
   Name: string; // the file's name, as in File
-  Label: string; // the page's name
   Page: string; // the page's path under the playthrough
 }
 
@@ -357,9 +354,7 @@ export interface SpeechEdit {
 // source: toggles.go
 
 export interface Toggle {
-  id: string;
-  label: string; // short, for a row of them
-  what: string; // a sentence saying what it switches
+  id: string; // the frontend names and describes each by its id
   file: string; // settings name, as in File
   key: string;
   master?: boolean; // when off, SkyrimNet makes no AI calls at all

@@ -1,0 +1,49 @@
+{
+  "title": "Choose the landing page's structure",
+  "question": "The world is the app's own, rendered bolder. These three structures differ in how the page persuades. Lock one, steer, or re-roll.",
+  "options": [
+    {
+      "id": "memory",
+      "kind": "assigned",
+      "label": "What SkyrimNet Remembers",
+      "kicker": "THE ROLL",
+      "lineage": "the app's diary dateline and memory table",
+      "thesis": "Open on one NPC's own diary entry at reading scale, then show where it lives and how Hermaeus lets you change it.",
+      "palette": ["#0b0b0b", "#1c1c1c", "#f2efe6", "#a8a293", "#7fb8a0", "#d2996b"],
+      "materials": ["smoked-glass ground", "hairline rules", "tracked condensed caps"],
+      "viewport": "A made-up NPC's diary entry in large Jost under its dateline fills the left two-thirds; the name, the one-line hook, and three download buttons sit in a column at the right; the hint strip runs along the bottom.",
+      "risk": "If the entry reads as fiction rather than as SkyrimNet's data, the visitor misses the product; it needs its file and row stated beside it.",
+      "raised": [
+        { "from": "streaming-title-card-wall", "raise": "As you scroll, the screen in focus brightens and the rest of the page dims behind it." }
+      ],
+      "html": ".impeccable/mocks/site/memory.html"
+    },
+    {
+      "id": "dossier",
+      "kind": "dealt",
+      "label": "The Character Sheet",
+      "lineage": "the app's character Overview, annotated like a field guide",
+      "thesis": "One made-up NPC's Overview, drawn at large scale as the real interface, with every part labeled with what Hermaeus can read or change there.",
+      "palette": ["#0b0b0b", "#121212", "#f2efe6", "#a8a293", "#7fb8a0", "#d2996b"],
+      "materials": ["the app's own screen at large scale", "leader-line annotations in label caps"],
+      "viewport": "The app's top bar and an NPC's Overview fill the viewport at large scale; annotations in the margins name each part; the hook and the download buttons are set where the page title sits.",
+      "risk": "Annotated screens can read as a manual rather than an offer; the hook has to land before the annotations do.",
+      "html": ".impeccable/mocks/site/dossier.html"
+    },
+    {
+      "id": "menu",
+      "kind": "dealt",
+      "label": "The Menu You Already Know",
+      "lineage": "the app's shell: sections column, item table, details pane, hint strip",
+      "thesis": "The landing page is a Hermaeus screen: features are rows in an item table, the details pane shows each one, and the arrow keys move through them.",
+      "palette": ["#0b0b0b", "#1c1c1c", "#121212", "#f2efe6", "#a8a293", "#7fb8a0"],
+      "materials": ["smoked-glass ground", "item table with diamond marker", "opaque details pane"],
+      "viewport": "Top bar with the mark and SKYRIM CLOSED; a sections column of page sections; an item table of what Hermaeus reads and edits; a details pane with a real screen and Download in its footer; the hint strip below.",
+      "risk": "Inside a working menu, the hook can get lost; a first-time visitor needs a one-line answer before the table.",
+      "html": ".impeccable/mocks/site/menu.html"
+    }
+  ],
+  "reroll": true,
+  "steer": true,
+  "buildPath": { "value": "code" }
+}

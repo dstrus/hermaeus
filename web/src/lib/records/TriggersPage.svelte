@@ -2,6 +2,7 @@
      plugins and your own edits. -->
 <script lang="ts">
 	import type { TriggerList } from '#lib/api/types/records.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import Inja from '#lib/ui/Inja.svelte';
 	import RecordsPage from './RecordsPage.svelte';
 	import { words } from './api.ts';
@@ -9,15 +10,16 @@
 	import { href } from '#lib/nav.ts';
 
 	let { list }: { list: TriggerList } = $props();
-	const seconds = (s: number) => (s >= 60 && s % 60 === 0 ? `${s / 60} min` : `${s} s`);
+	const msg = m.records.triggers;
+	const seconds = (s: number) => (s >= 60 && s % 60 === 0 ? msg.minutes({ value: s / 60 }) : msg.seconds({ value: s }));
 </script>
 
 <RecordsPage
-	title="Triggers"
-	noun={['trigger', 'triggers']}
-	lead="How SkyrimNet responds when something happens in the game: a kind of event, the conditions it must meet, and what follows, such as narration or a diary entry."
+	title={msg.title}
+	copy={msg}
+	lead={msg.lead}
 	records={list.triggers}
-	columns={[{ label: 'When', class: 'when' }, { label: 'Then', class: 'then' }, { label: 'Cooldown', class: 'cooldown' }]}
+	columns={[{ label: msg.when, class: 'when' }, { label: msg.then, class: 'then' }, { label: msg.cooldown, class: 'cooldown' }]}
 >
 	{#snippet cells(t)}
 		<td class="when muted">{words(t.eventType)}</td>
@@ -27,33 +29,33 @@
 	{#snippet pane(t)}
 		<p class="text">{t.description}</p>
 		<dl>
-			<dt class="caps">When</dt><dd><span class="id">{t.eventType}</span></dd>
+			<dt class="caps">{msg.when}</dt><dd><span class="id">{t.eventType}</span></dd>
 			{#if t.conditions.length}
-				<dt class="caps">And</dt>
+				<dt class="caps">{msg.and}</dt>
 				<dd>
 					<ul class="conditions">
 						{#each t.conditions as c, i (i)}<li><span class="id">{c.field}</span> {words(c.operator)} <span class="id">{c.value === '' ? '""' : c.value}</span></li>{/each}
 					</ul>
 				</dd>
 			{/if}
-			{#if t.probability !== undefined}<dt class="caps">Chance</dt><dd>{Math.round(t.probability * 100)}%</dd>{/if}
-			{#if t.responseType}<dt class="caps">Then</dt><dd>{words(t.responseType)}{t.targetScope ? `, for ${words(t.targetScope)}` : ''}</dd>{/if}
+			{#if t.probability !== undefined}<dt class="caps">{msg.chance}</dt><dd>{Math.round(t.probability * 100)}%</dd>{/if}
+			{#if t.responseType}<dt class="caps">{msg.then}</dt><dd>{t.targetScope ? msg.forScope({ response: words(t.responseType), scope: words(t.targetScope) }) : words(t.responseType)}</dd>{/if}
 			{#if t.responseType === 'activate_voice_effect' || t.responseType === 'deactivate_voice_effect'}
-				<dt class="caps">Effect</dt>
-				<dd>{#if t.effectId}<a href={href(page.params.save ?? '', 'effects', `?item=${encodeURIComponent(t.effectId)}`)}>{t.effectId}</a>{:else}Whichever the target has{/if}</dd>
+				<dt class="caps">{msg.effect}</dt>
+				<dd>{#if t.effectId}<a href={href(page.params.save ?? '', 'effects', `?item=${encodeURIComponent(t.effectId)}`)}>{t.effectId}</a>{:else}{msg.whicheverTarget}{/if}</dd>
 			{/if}
-			{#if t.audience}<dt class="caps">Who hears</dt><dd>{words(t.audience)}</dd>{/if}
-			{#if t.cooldown !== undefined}<dt class="caps">Cooldown</dt><dd>{seconds(t.cooldown)}</dd>{/if}
-			{#if t.priority !== undefined}<dt class="caps">Priority</dt><dd>{t.priority}</dd>{/if}
-			{#if t.interrupt}<dt class="caps">Interrupts</dt><dd>Whoever is speaking</dd>{/if}
+			{#if t.audience}<dt class="caps">{msg.whoHears}</dt><dd>{words(t.audience)}</dd>{/if}
+			{#if t.cooldown !== undefined}<dt class="caps">{msg.cooldown}</dt><dd>{seconds(t.cooldown)}</dd>{/if}
+			{#if t.priority !== undefined}<dt class="caps">{msg.priority}</dt><dd>{t.priority}</dd>{/if}
+			{#if t.interrupt}<dt class="caps">{msg.interrupts}</dt><dd>{msg.whoeverSpeaking}</dd>{/if}
 		</dl>
 		{#if t.content}
-			<h3 class="caps">What it says</h3>
+			<h3 class="caps">{msg.whatItSays}</h3>
 			<p class="text content"><Inja text={t.content} /></p>
 		{/if}
 	{/snippet}
 	{#snippet note()}
-		Triggers are edited and made on the Content page.
+		{msg.note}
 	{/snippet}
 </RecordsPage>
 

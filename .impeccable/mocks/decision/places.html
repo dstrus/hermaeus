@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hermaeus · Overview · Where you've been</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#7fb8a0;--on-accent:#0e1a15;--ink:#f2efe6;--muted:#a8a293;--rule:#2a2a2a;--rule-strong:#3a3a3a;--panel:#121212;--select:rgb(242 239 230 / 0.07);--changed:#d2996b;--warn:#d9a441}
+*{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:#0b0b0b;color:var(--ink);font:400 15px/1.5 Jost,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+#root{width:1440px;height:900px;overflow:hidden;position:relative;background:radial-gradient(ellipse at 65% 25%,#1c1c1c,#0b0b0b) fixed;display:grid;grid-template-rows:auto auto 1fr;grid-template-columns:13rem 1fr}
+.caps,.label,.title,.headline,.display,.key,.nav a,th,.switch span,.toggle{font-family:"Barlow Condensed",Jost,sans-serif;text-transform:uppercase;letter-spacing:.12em}
+.label{font-size:13px;font-weight:500}.title{font-size:18px;font-weight:500}.headline{font-size:22px;font-weight:600}.display{font-size:40px;font-weight:600;line-height:1}
+.muted{color:var(--muted)}.accent{color:var(--accent)}.small{font-size:13px}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:7px 32px;border-bottom:1px solid var(--rule)}
+.topbar .mark{font-size:1.3em;margin-right:.3em;vertical-align:-.06em}
+.topbar .right{display:flex;align-items:center;gap:20px}
+.field{background:rgb(0 0 0 / 0.38);border:1px solid var(--rule-strong);border-radius:3px;padding:3px 32px 3px 10px;position:relative;min-width:8rem;font-size:15px;letter-spacing:0;text-transform:none;font-family:Jost}
+.field::after{content:"";position:absolute;right:11px;top:10px;border:4px solid transparent;border-top:5px solid var(--muted)}
+.switch{display:inline-flex;border:1px solid var(--rule-strong);border-radius:3px;overflow:hidden}
+.switch span{font-size:13px;font-weight:500;padding:3px 10px;color:var(--muted)}.switch span+span{border-left:1px solid var(--rule-strong)}
+.switch .on{background:var(--accent);color:var(--on-accent);font-weight:600}
+.toggles{grid-column:1/-1;display:flex;align-items:center;gap:22px;white-space:nowrap;padding:6px 32px;border-bottom:1px solid var(--rule);font-size:13px;font-weight:500}
+.toggle{display:inline-flex;align-items:center;gap:7px;color:var(--ink)}
+.box{width:12px;height:12px;border:1px solid var(--rule-strong);border-radius:2px;position:relative}
+.box.on{border-color:var(--accent)}.box.on::after{content:"";position:absolute;left:3px;top:0;width:3px;height:7px;border:solid var(--accent);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+.nav{border-right:1px solid var(--rule);padding:20px 24px 0}
+.nav a{display:block;color:var(--muted);text-decoration:none;font-size:18px;font-weight:500;line-height:1.25}
+.nav a.cur{color:var(--accent);font-weight:600}
+.nav .group{font-size:13px;font-weight:500;color:var(--muted);margin:10px 0 2px}
+.nav .group~a{font-size:16px}
+main{display:grid;grid-template-columns:1fr clamp(18rem,26vw,24rem);min-height:0}
+.left{padding:24px 32px 5rem}
+.head{display:flex;align-items:baseline;gap:18px}
+.stats{margin-top:2px}
+h2.sec{color:var(--accent);font-size:13px;font-weight:500;padding-bottom:5px;border-bottom:1px solid var(--rule-strong);margin-top:16px}
+table{border-collapse:collapse;width:100%;table-layout:fixed}td,th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+th{text-align:left;color:var(--muted);font-size:13px;font-weight:500;padding:8px 12px;border-bottom:1px solid var(--rule-strong)}
+td{padding:8px 12px;border-bottom:1px solid var(--rule)}
+th.n,td.n{text-align:right}
+.dia{width:1.5rem;padding:8px 0 8px 6px;color:var(--accent);font-size:9px}
+tr.sel{background:var(--select)}
+.bar{display:block;height:2px;background:var(--accent);opacity:.55}
+.caption{margin-top:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;margin-top:0}
+.stat{display:flex;justify-content:space-between;align-items:flex-end;padding:3px 0 0;line-height:1.25}
+.stat .name{flex:1;margin-right:16px}.stat .name i{display:block;height:2px;background:var(--accent);opacity:.55;margin-top:1px}
+.doors a{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;line-height:1.2;border-bottom:1px solid var(--rule);color:var(--ink);text-decoration:none}
+.tune{grid-column:1/-1;margin-top:4px;font-size:13px;white-space:nowrap}
+.tune b{font-weight:400;color:var(--ink);font-family:Jost;text-transform:none;letter-spacing:0}
+.pane{background:var(--panel);border-left:1px solid var(--rule-strong);padding:24px}
+.pane h2.sec{margin-top:20px}
+.lately div{padding:6px 0;border-bottom:1px solid var(--rule);font-size:13px}
+.lately span{color:var(--muted)}
+.shot{aspect-ratio:16/9;border:1px solid var(--rule-strong);display:flex;align-items:center;justify-content:center;margin-top:10px;color:var(--muted);font-size:13px;font-weight:500}
+.links{margin-top:18px;display:flex;gap:20px;white-space:nowrap}.links a{color:var(--accent);text-decoration:none;font-size:18px;font-weight:500}
+.hints{position:absolute;left:0;right:0;bottom:0;height:40px;background:#0b0b0b;border-top:1px solid var(--rule);display:flex;justify-content:flex-end;align-items:center;gap:24px;padding:0 32px;color:var(--muted);font-size:15px;font-weight:500}
+.key{display:inline-block;border:1px solid var(--rule-strong);border-radius:3px;color:var(--ink);min-width:1.6em;padding:0 .4em;text-align:center;margin-right:8px;line-height:1.4;text-transform:none}
+</style>
+</head>
+<body>
+<div id="root">
+<header class="topbar">
+<span class="headline"><span class="mark">◉</span>HERMAEUS</span>
+<div class="right">
+<span class="label muted">Playthrough</span><span class="field">Gram</span>
+<span class="label muted">Skyrim closed</span>
+<span class="switch"><span class="on">System</span><span>Dark</span><span>Light</span></span>
+</div>
+</header>
+<div class="toggles">
+<span class="label muted" style="margin-right:4px">Quick toggles</span>
+<span class="toggle"><i class="box on"></i>AI</span><span class="toggle"><i class="box on"></i>GameMaster</span><span class="toggle"><i class="box on"></i>NPC reactions</span><span class="toggle"><i class="box on"></i>Player reactions</span><span class="toggle"><i class="box"></i>Narration</span><span class="toggle"><i class="box on"></i>Bards</span><span class="toggle"><i class="box on"></i>Translator</span><span class="toggle"><i class="box on"></i>Dynamic bios</span><span class="toggle"><i class="box on"></i>Memories</span><span class="toggle"><i class="box on"></i>Omnisight</span>
+</div>
+<nav class="nav">
+<a class="cur" href="#">Overview</a><a href="#">Characters</a><a href="#">History</a><a href="#">Screenshots</a><a href="#">Bard songs</a>
+<div class="group label">Behavior</div><a href="#">Prompts</a><a href="#">Actions</a><a href="#">Triggers</a><a href="#">Translator</a><a href="#">GameMaster</a><a href="#">Narration</a>
+<div class="group label">Memory</div><a href="#">Memories</a><a href="#">Memory filter</a><a href="#">Diaries</a><a href="#">Dynamic bios</a>
+<div class="group label">Voice</div><a href="#">Speech</a><a href="#">Engines</a><a href="#">Voice effects</a>
+<div class="group label">AI</div><a href="#">Models</a><a href="#">Providers</a>
+<div class="group label">Library</div><a href="#">Plugins</a><a href="#">Content</a><a href="#">Overrides</a>
+<div class="group label">General</div><a href="#">Hotkeys</a><a href="#">Other</a>
+</nav>
+<main>
+<section class="left">
+<div class="head"><h1 class="display">Gram</h1><span class="muted">1:04 PM, Tirdas, 15th of Hearthfire, 4E 201 · last written Tuesday</span></div>
+<p class="stats muted small">90 characters · 823 memories · 156 diary entries · 7,205 events · 305 screenshots · 3 songs</p>
+<h2 class="sec caps">Places</h2>
+<table>
+<colgroup><col style="width:1.5rem"><col style="width:196px"><col style="width:216px"><col style="width:72px"><col style="width:150px"><col></colgroup>
+<thead><tr><th class="dia"></th><th>Place</th><th></th><th class="n">Events</th><th>Last there</th><th>With</th></tr></thead>
+<tbody>
+<tr class="sel"><td class="dia">◆</td><td>Septimus Signus' Outpost</td><td><i class="bar" style="width:28px"></i></td><td class="n muted">93</td><td class="muted">1:04 PM today</td><td class="muted small">Serana</td></tr>
+<tr><td class="dia"></td><td>Soul Cairn Outskirts</td><td><i class="bar" style="width:200px"></i></td><td class="n muted">673</td><td class="muted">9th of Hearthfire</td><td class="muted small">Serana</td></tr>
+<tr><td class="dia"></td><td>Castle Volkihar</td><td><i class="bar" style="width:113px"></i></td><td class="n muted">380</td><td class="muted">6th of Hearthfire</td><td class="muted small">Serana, Agmaer</td></tr>
+<tr><td class="dia"></td><td>Bleak Falls Barrow</td><td><i class="bar" style="width:94px"></i></td><td class="n muted">318</td><td class="muted">29th of Last Seed</td><td class="muted small">Vilja</td></tr>
+<tr><td class="dia"></td><td>Ansilvund</td><td><i class="bar" style="width:91px"></i></td><td class="n muted">307</td><td class="muted">2nd of Hearthfire</td><td class="muted small">Laurina Cedalius</td></tr>
+<tr><td class="dia"></td><td>Dimhollow Crypt</td><td><i class="bar" style="width:89px"></i></td><td class="n muted">299</td><td class="muted">24th of Last Seed</td><td class="muted small">Vilja, Aya</td></tr>
+<tr><td class="dia"></td><td>Fort Dawnguard</td><td><i class="bar" style="width:82px"></i></td><td class="n muted">276</td><td class="muted">23rd of Last Seed</td><td class="muted small">Agmaer</td></tr>
+<tr><td class="dia"></td><td>Frostfruit Inn</td><td><i class="bar" style="width:74px"></i></td><td class="n muted">250</td><td class="muted">18th of Last Seed</td><td class="muted small">Vilja</td></tr>
+<tr><td class="dia"></td><td>Mistwatch</td><td><i class="bar" style="width:68px"></i></td><td class="n muted">230</td><td class="muted">1st of Hearthfire</td><td class="muted small">Meresine</td></tr>
+<tr><td class="dia"></td><td>College of Winterhold</td><td><i class="bar" style="width:33px"></i></td><td class="n muted">112</td><td class="muted">14th of Hearthfire</td><td class="muted small">Serana</td></tr>
+</tbody>
+</table>
+<p class="caption muted small">The places SkyrimNet recorded the most, by events. Select one to see what happened there.</p>
+<div class="grid2">
+<div>
+<h2 class="sec caps">Companions and pinned</h2>
+<div class="stat"><span class="name">Serana <span class="muted small">(pinned)</span><i style="width:100%"></i></span><span class="muted">142</span></div>
+<div class="stat"><span class="name">Vilja <span class="muted small">(pinned)</span><i style="width:68%"></i></span><span class="muted">96</span></div>
+<div class="stat"><span class="name">Agmaer<i style="width:43%"></i></span><span class="muted">61</span></div>
+<div class="stat"><span class="name">Laurina Cedalius<i style="width:27%"></i></span><span class="muted">38</span></div>
+</div>
+<div>
+<h2 class="sec caps">Sections</h2>
+<div class="doors">
+<a href="#"><span class="title">Characters</span><span class="muted">90</span></a>
+<a href="#"><span class="title">History</span><span class="muted">7,205 events</span></a>
+<a href="#"><span class="title">Screenshots</span><span class="muted">305</span></a>
+<a href="#"><span class="title">Bard songs</span><span class="muted">3</span></a>
+</div>
+</div>
+<p class="tune label muted">Dialogue <b>google/gemma-4-31b-it</b> &nbsp;·&nbsp; Voice <b>Inworld</b> &nbsp;·&nbsp; Toggles <b>9 of 10 on</b></p>
+</div>
+</section>
+<aside class="pane">
+<h2 class="headline">Septimus Signus' Outpost</h2>
+<p class="muted small">Hold · 93 events · first there 10:55 AM today</p>
+<h2 class="sec caps">Lately</h2>
+<div class="lately">
+<div><span>1:04 PM · </span>Septimus Signus: "Two things I have for you. Two shapes. One edged, one round…"</div>
+<div><span>1:04 PM · </span>Gram: "How do I get in?"</div>
+<div><span>12:53 PM · </span>Septimus Signus: "Under deep. Below the dark. The hidden keep. Tower Mzark. Alftand…"</div>
+<div><span>12:34 PM · </span>Gram: "Can you help me get the Elder Scroll or not?"</div>
+</div>
+<h2 class="sec caps">Screenshots here</h2>
+<div class="shot caps">11:39 AM · Septimus Signus' Outpost</div>
+<p class="muted small" style="margin-top:6px">11:36 AM · outside</p>
+<h2 class="sec caps">Written here</h2>
+<p class="muted" style="margin-top:6px">No diary entries yet.</p>
+<div class="links"><a href="#" class="caps">All events here</a><a href="#" class="caps">Screenshots here</a></div>
+</aside>
+</main>
+<footer class="hints"><span><span class="key">Enter</span>Open</span><span><span class="key">/</span>Find</span></footer>
+</div>
+</body>
+</html>

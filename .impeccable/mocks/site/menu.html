@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sketch: The Menu You Already Know</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --ground:#0b0b0b; --smoke:#1c1c1c; --panel:#121212; --ink:#f2efe6; --muted:#a8a293; --rule:#2a2a2a; --rule-strong:#3a3a3a; --accent:#7fb8a0; --on-accent:#0e1a15; --select:rgb(242 239 230 / .07); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1440px; height: 900px; overflow: hidden; }
+  body { background: radial-gradient(ellipse at 65% 25%, var(--smoke), var(--ground) 70%); color: var(--ink); font: 400 15px/1.5 Jost, sans-serif; display: grid; grid-template-rows: auto 1fr 46px; }
+  .caps { font-family: "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .12em; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; border-bottom: 1px solid var(--rule); }
+  .brand { display: flex; gap: 12px; align-items: center; font-size: 22px; font-weight: 600; }
+  .eye { width: 24px; height: 24px; border: 2px solid var(--ink); border-radius: 50%; position: relative; }
+  .eye::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--ink); }
+  .status { display: flex; gap: 24px; font-size: 13px; color: var(--muted); }
+  .shell { display: grid; grid-template-columns: 220px 1fr 470px; min-height: 0; }
+  .sections { border-right: 1px solid var(--rule); padding: 28px 32px; display: grid; align-content: start; gap: 14px; font-size: 18px; color: var(--muted); }
+  .sections .on { color: var(--accent); font-weight: 600; }
+  .main { padding: 28px 32px; }
+  h1 { font-size: 64px; font-weight: 600; line-height: 1; }
+  .hook { font-size: 22px; line-height: 1.35; margin-top: 14px; max-width: 34ch; }
+  table { width: 100%; border-collapse: collapse; margin-top: 30px; font-size: 16px; }
+  th { text-align: left; color: var(--muted); font-size: 13px; font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--rule-strong); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+  td.m { width: 24px; color: var(--accent); font-size: 11px; }
+  td.n { font-family: "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .12em; font-size: 17px; }
+  td.c { color: var(--muted); }
+  tr.sel td { background: var(--select); }
+  .pane { background: var(--panel); border-left: 1px solid var(--rule-strong); padding: 28px 28px 0; display: grid; grid-template-rows: auto auto 1fr auto; }
+  .pane h2 { font-size: 26px; font-weight: 600; }
+  .pane p { color: var(--muted); margin-top: 8px; font-size: 16px; }
+  .shot { margin-top: 20px; border: 1px solid var(--rule-strong); height: 300px; background: linear-gradient(var(--ground), var(--ground)); display: grid; grid-template-columns: 70px 1fr; }
+  .shot i { border-right: 1px solid var(--rule); }
+  .shot div { padding: 14px; display: grid; gap: 9px; align-content: start; }
+  .shot b { display: block; height: 7px; background: var(--rule-strong); }
+  dl { display: grid; grid-template-columns: 110px 1fr; row-gap: 8px; margin-top: 18px; font-size: 15px; align-self: start; }
+  dt { color: var(--muted); font-size: 12px; padding-top: 3px; }
+  .foot { border-top: 1px solid var(--rule); padding: 14px 0; display: flex; gap: 10px; }
+  .btn { padding: 7px 14px; border: 1px solid var(--rule-strong); border-radius: 3px; font-size: 16px; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
+  .hints { display: flex; justify-content: flex-end; align-items: center; gap: 26px; padding: 0 32px; background: var(--ground); border-top: 1px solid var(--rule); font-size: 15px; color: var(--muted); }
+  .key { display: inline-block; min-width: 1.6em; text-align: center; border: 1px solid var(--rule-strong); border-radius: 3px; color: var(--ink); padding: 0 .4em; margin-right: 8px; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand caps"><span class="eye"></span>Hermaeus</div>
+    <div class="status caps"><span>Unofficial · for SkyrimNet</span><span style="color:var(--ink)">Skyrim closed</span></div>
+  </header>
+  <div class="shell">
+    <nav class="sections caps"><span class="on">What it does</span><span>Safety</span><span>Install</span><span>Docs</span><span>Download</span></nav>
+    <section class="main">
+      <h1 class="caps">Hermaeus</h1>
+      <p class="hook">Read and edit what SkyrimNet stores, from your own installation, with Skyrim closed.</p>
+      <table>
+        <thead><tr><th></th><th class="caps">Page</th><th class="caps">What you can do</th></tr></thead>
+        <tbody>
+          <tr class="sel"><td class="m">◆</td><td class="n">Characters</td><td class="c">Every NPC SkyrimNet knows, with their stats</td></tr>
+          <tr><td class="m"></td><td class="n">Memories</td><td class="c">Read, edit, and delete each memory</td></tr>
+          <tr><td class="m"></td><td class="n">Diary</td><td class="c">Read and correct diary entries</td></tr>
+          <tr><td class="m"></td><td class="n">Bios</td><td class="c">Edit bios, restore an earlier one</td></tr>
+          <tr><td class="m"></td><td class="n">History</td><td class="c">Events, in the game's own dates</td></tr>
+          <tr><td class="m"></td><td class="n">Prompts</td><td class="c">Your own copies, checked before saving</td></tr>
+          <tr><td class="m"></td><td class="n">Settings</td><td class="c">Compared with SkyrimNet's defaults</td></tr>
+          <tr><td class="m"></td><td class="n">Bard songs</td><td class="c">Words and audio</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <aside class="pane">
+      <div><h2 class="caps">Characters</h2><p>Every NPC SkyrimNet has met, with pins, stats, and each one's memories and diary.</p></div>
+      <div class="shot"><i></i><div><b style="width:60%"></b><b></b><b style="width:80%"></b><b></b><b style="width:70%"></b><b></b><b style="width:50%"></b></div></div>
+      <dl><dt class="caps">Reads</dt><dd>The playthrough's database</dd><dt class="caps">Changes</dt><dd>Pins, in one transaction</dd></dl>
+      <div class="foot caps"><span class="btn primary">Download for Windows</span><span class="btn">macOS</span><span class="btn">Linux</span></div>
+    </aside>
+  </div>
+  <div class="hints caps"><span><span class="key">↑↓</span>Choose</span><span><span class="key">D</span>Download</span><span><span class="key">S</span>Safety</span></div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Overview sketch: the journal spread</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--accent:#7fb8a0;--on-accent:#0e1a15;--ground:#0b0b0b;--smoke:#1c1c1c;--panel:#121212;--glass:rgb(0 0 0 / 0.38);--select:rgb(242 239 230 / 0.07);--ink:#f2efe6;--muted:#a8a293;--rule:#2a2a2a;--rule-strong:#3a3a3a;--changed:#d2996b;--warn:#d9a441}
+*{box-sizing:border-box;margin:0;padding:0}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 15px/1.5 Jost,system-ui,sans-serif;font-variant-numeric:tabular-nums}
+#root{position:relative;width:1440px;height:900px;overflow:hidden;background:radial-gradient(ellipse at 65% 25%,var(--smoke),var(--ground)) fixed;display:grid;grid-template-rows:auto auto 1fr;grid-template-columns:13rem 1fr}
+a{color:inherit;text-decoration:none}
+.caps,.label,.title,.headline,.display,th{font-family:"Barlow Condensed",Jost,sans-serif;text-transform:uppercase;letter-spacing:.12em}
+.label{font-size:13px;font-weight:500}.title{font-size:18px;font-weight:500}.headline{font-size:22px;font-weight:600}.display{font-size:40px;font-weight:600;line-height:1}
+.muted{color:var(--muted)}.accent{color:var(--accent)}.small{font-size:13px}
+.topbar{grid-column:1/3;display:flex;align-items:center;justify-content:space-between;padding:10px 32px;border-bottom:1px solid var(--rule)}
+.brand{display:flex;align-items:center;gap:.4em}.brand .mark{font-size:1.3em;letter-spacing:0;line-height:1}
+.right{display:flex;align-items:center;gap:24px}.field{display:inline-flex;align-items:center;gap:1.5em;background:var(--glass);border:1px solid var(--rule-strong);border-radius:3px;padding:4px 10px;font-size:15px;margin-left:12px}
+.switch{display:inline-flex;border:1px solid var(--rule-strong);border-radius:3px;overflow:hidden}.switch span{padding:4px 12px}.switch .on{background:var(--accent);color:var(--on-accent);font-weight:600}
+.toggles{grid-column:1/3;display:flex;align-items:center;gap:24px;padding:8px 32px;border-bottom:1px solid var(--rule)}
+.tg{display:inline-flex;align-items:center;gap:8px}.box{width:12px;height:12px;border:1px solid var(--rule-strong);border-radius:2px;position:relative}
+.box.c::after{content:"";position:absolute;left:3px;top:0;width:4px;height:7px;border:solid var(--accent);border-width:0 1.5px 1.5px 0;transform:rotate(45deg)}
+nav{border-right:1px solid var(--rule);padding:24px 16px 0 32px;overflow:hidden}nav a{display:block;color:var(--muted);line-height:1.35}nav .cur{color:var(--accent);font-weight:600}
+nav .grp{margin-top:10px;margin-bottom:2px}nav a.sub{font-size:16px;line-height:1.35}
+main{display:grid;grid-template-columns:1fr clamp(18rem,26vw,24rem);overflow:hidden}
+.col{padding:24px 32px 5rem;overflow:hidden}
+.head{display:flex;align-items:baseline;gap:24px;margin-bottom:20px}
+h2.sec{color:var(--accent);border-bottom:1px solid var(--rule-strong);padding-bottom:6px;margin:0 0 12px}
+.entry{max-width:65ch;margin-bottom:14px}.entry p{line-height:1.6;margin:2px 0 4px}.entry .foot{display:flex;gap:12px;font-size:13px}.entry .foot a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.lately{margin-top:10px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+th{color:var(--muted);font-size:13px;font-weight:500;border-bottom-color:var(--rule-strong)}
+td.g{color:var(--accent);font-family:"Barlow Condensed",Jost,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:13px;font-weight:500;padding-top:24px;border-bottom-color:var(--rule-strong)}
+tr.sel td{background:var(--select)}.dia{color:var(--accent);font-size:9px;text-align:center;padding:8px 0}
+td.where{color:var(--muted);font-size:13px}
+aside{background:var(--panel);border-left:1px solid var(--rule-strong);padding:24px;overflow:hidden}
+.stat{list-style:none;margin:0 0 8px}.stat li{display:grid;grid-template-columns:1.5rem 1fr auto;align-items:center;padding:6px 8px 6px 0}
+.stat .name{display:block;color:var(--ink);padding-bottom:4px}.stat .bar{display:block;height:2px;background:var(--accent);opacity:.55;min-width:3px}
+.stat .n{color:var(--muted);align-self:start}.stat li.sel{background:var(--select)}.stat .d{color:var(--accent);font-size:9px;text-align:center}
+.dl{display:grid;grid-template-columns:7.5rem 1fr;row-gap:6px;margin-bottom:12px}.dl dt{color:var(--muted);font-size:13px;align-self:baseline}
+.links a{color:var(--accent)}.links .dot{color:var(--muted);margin:0 .5em}
+.hints{position:absolute;left:0;right:0;bottom:0;height:40px;background:var(--ground);border-top:1px solid var(--rule);display:flex;justify-content:flex-end;align-items:center;gap:24px;padding:0 32px;font-size:15px}
+.hints span{display:inline-flex;align-items:center;gap:8px;color:var(--muted)}.key{display:inline-block;min-width:1.6em;padding:0 .4em;border:1px solid var(--rule-strong);border-radius:3px;color:var(--ink);text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="root">
+  <header class="topbar">
+    <div class="brand headline"><span class="mark">◉</span>Hermaeus</div>
+    <div class="right">
+      <span class="label muted">Playthrough<span class="field" style="color:var(--ink);font-family:Jost,sans-serif;letter-spacing:0;text-transform:none;font-weight:400">Gram <span class="muted">▾</span></span></span>
+      <span class="label muted">Skyrim closed</span>
+      <span class="switch label"><span class="on">System</span><span>Dark</span><span>Light</span></span>
+    </div>
+  </header>
+  <div class="toggles label">
+    <span class="muted">Quick toggles</span>
+    <span class="tg"><i class="box c"></i>AI</span><span class="tg"><i class="box c"></i>GameMaster</span><span class="tg"><i class="box c"></i>NPC reactions</span><span class="tg"><i class="box c"></i>Player reactions</span><span class="tg muted"><i class="box"></i>Narration</span><span class="tg"><i class="box c"></i>Bards</span><span class="tg"><i class="box c"></i>Translator</span><span class="tg"><i class="box c"></i>Dynamic bios</span><span class="tg"><i class="box c"></i>Memories</span><span class="tg"><i class="box c"></i>OmniSight</span>
+  </div>
+  <nav class="title">
+    <a class="cur" href="#">Overview</a><a href="#">Characters</a><a href="#">History</a><a href="#">Screenshots</a><a href="#">Bard songs</a>
+    <div class="label muted grp">Behavior</div><a class="sub" href="#">Prompts</a><a class="sub" href="#">Actions</a><a class="sub" href="#">Triggers</a><a class="sub" href="#">Translator</a><a class="sub" href="#">GameMaster</a><a class="sub" href="#">Narration…</a>
+    <div class="label muted grp">Memory</div><a class="sub" href="#">Memories</a><a class="sub" href="#">Memory filter</a><a class="sub" href="#">Diaries</a><a class="sub" href="#">Dynamic bios</a>
+    <div class="label muted grp">Voice</div><a class="sub" href="#">Speech</a><a class="sub" href="#">Engines</a><a class="sub" href="#">Voice effects…</a>
+    <div class="label muted grp">AI</div><a class="sub" href="#">Models</a><a class="sub" href="#">Providers</a>
+    <div class="label muted grp">Library</div><a class="sub" href="#">Plugins</a><a class="sub" href="#">Content</a><a class="sub" href="#">Overrides</a>
+    <div class="label muted grp">General</div><a class="sub" href="#">Hotkeys</a><a class="sub" href="#">Other</a>
+  </nav>
+  <main>
+    <section class="col">
+      <div class="head"><h1 class="display">Gram</h1><span class="label muted">1:04 PM, Tirdas, 15th of Hearthfire, 4E 201 · 59 game days · Last written Tuesday</span></div>
+      <h2 class="sec label">The latest diary</h2>
+      <article class="entry"><div class="label muted">Morndas, 14th of Hearthfire · The Frozen Hearth · Determined</div><p>The Frozen Hearth. Winterhold's perpetual gloom has seeped into the timbers of this place, a damp chill that smells of wet wool and old smoke. Serana sits across from me, pretending not to listen to the innkeeper.</p><div class="foot"><span class="muted">Gram</span><a href="#">Open</a></div></article>
+      <article class="entry"><div class="label muted">Morndas, 14th of Hearthfire · College of Winterhold · Thoughtful</div><p>The College of Winterhold is… quieter than I expected. After the bleakness of the Soul Cairn, the sound of snow falling on stone, the rustle of turning pages, feels like a kind of mercy.</p><div class="foot"><span class="muted">Gram</span><a href="#">Open</a></div></article>
+      <article class="entry"><div class="label muted">Sundas, 13th of Hearthfire · Winterhold Docks · Weary</div><p>Septimus Signus is as mad as they said. Two shapes, one edged, one round, and he wants both before he'll say where the Scroll is.</p><div class="foot"><span class="muted">Gram</span><a href="#">Open</a></div></article>
+      <h2 class="sec label lately">Lately</h2>
+      <table>
+        <colgroup><col style="width:1.5rem"><col style="width:6.5rem"><col style="width:9.5rem"><col><col style="width:12rem"></colgroup>
+        <thead><tr><th></th><th>Time</th><th>Who</th><th>What</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td class="g" colspan="5">Tirdas, 15th of Hearthfire</td></tr>
+          <tr class="sel"><td class="dia">◆</td><td class="muted">1:04 PM</td><td>Septimus Signus</td><td>"Two things I have for you. Two shapes. One edged, one round. The round one, for tuning…"</td><td class="where">Septimus Signus' Outpost</td></tr>
+          <tr><td></td><td class="muted">1:04 PM</td><td>Gram</td><td>"How do I get in?"</td><td class="where"></td></tr>
+          <tr><td></td><td class="muted">12:53 PM</td><td>Septimus Signus</td><td>"Under deep. Below the dark. The hidden keep. Tower Mzark. Alftand…"</td><td class="where"></td></tr>
+          <tr><td></td><td class="muted">12:53 PM</td><td>Gram</td><td>"Where is this "Blackreach"?"</td><td class="where"></td></tr>
+          <tr><td></td><td class="muted">11:39 AM</td><td>OmniSight</td><td>Screenshot of Septimus Signus' Outpost</td><td class="where"></td></tr>
+          <tr><td></td><td class="muted">10:55 AM</td><td>Gram</td><td>Arrived at Winterhold Docks</td><td class="where"></td></tr>
+          <tr><td class="g" colspan="5">Morndas, 14th of Hearthfire</td></tr>
+          <tr><td></td><td class="muted">8:50 PM</td><td>Narrator</td><td>The fire in the Frozen Hearth gutters as the door opens…</td><td class="where">The Frozen Hearth</td></tr>
+          <tr><td></td><td class="muted">8:12 PM</td><td>Serana</td><td>"You're thinking about the Scroll again. I can tell."</td><td class="where">The Frozen Hearth</td></tr>
+        </tbody>
+      </table>
+    </section>
+    <aside>
+      <div class="headline">This playthrough</div>
+      <div class="muted small" style="margin-bottom:20px">1791685096394-371331</div>
+      <h2 class="sec label">Stored</h2>
+      <ul class="stat">
+        <li class="sel"><span class="d">◆</span><span><a class="name title" href="#">Characters</a><i class="bar" style="width:1.3%"></i></span><span class="n">90</span></li>
+        <li><span></span><span><a class="name title" href="#">Memories</a><i class="bar" style="width:11.4%"></i></span><span class="n">823</span></li>
+        <li><span></span><span><a class="name title" href="#">Diary entries</a><i class="bar" style="width:2.2%"></i></span><span class="n">156</span></li>
+        <li><span></span><span><a class="name title" href="#">Events</a><i class="bar" style="width:100%"></i></span><span class="n">7,205</span></li>
+        <li><span></span><span><a class="name title" href="#">Screenshots</a><i class="bar" style="width:4.2%"></i></span><span class="n">305</span></li>
+        <li><span></span><span><a class="name title" href="#">Bard songs</a><i class="bar" style="width:.1%"></i></span><span class="n">3</span></li>
+        <li><span></span><span><a class="name title" href="#">Knowledge packs</a><i class="bar" style="width:.1%"></i></span><span class="n">2</span></li>
+      </ul>
+      <div class="muted small" style="margin-bottom:20px">Enter opens the marked section.</div>
+      <h2 class="sec label">Companions</h2>
+      <p class="muted" style="margin-bottom:20px">Serana (pinned), Vilja (pinned), Agmaer, Laurina Cedalius, Meresine, Aya</p>
+      <h2 class="sec label">Tuning</h2>
+      <dl class="dl"><dt class="caps">Dialogue</dt><dd>google/gemma-4-31b-it</dd><dt class="caps">Voice</dt><dd>Inworld · inworld-tts-2</dd><dt class="caps">Toggles</dt><dd>9 of 10 on · Narration off</dd></dl>
+      <div class="links title"><a href="#">Models</a><span class="dot">·</span><a href="#">Engines</a><span class="dot">·</span><a href="#">Prompts</a></div>
+    </aside>
+  </main>
+  <footer class="hints caps"><span><b class="key">Enter</b>Open</span><span><b class="key">/</b>Find</span></footer>
+</div>
+</body>
+</html>

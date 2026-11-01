@@ -1,5 +1,6 @@
 import { playthroughPath, request } from '#lib/api/client.ts';
 import type { Summary } from '#lib/api/types/summary.ts';
+import { m } from '#lib/copy/messages.ts';
 
 export function getSummary(save: string, fetchFn?: typeof fetch): Promise<Summary> {
 	return request<Summary>('GET', playthroughPath(save, 'summary'), undefined, fetchFn);
@@ -11,19 +12,19 @@ export interface Doorway {
 	label: string;
 	href: string;
 	n: number;
-	unit: [string, string]; // what's counted, one and many
+	unit: (p: { count: number }) => string; // what's counted, by how many
 }
 
 export function doorways(save: string, s: Summary): Doorway[] {
 	const base = `/${encodeURIComponent(save)}`;
 	const c = s.counts;
 	return [
-		{ id: 'characters', label: 'Characters', href: `${base}/characters`, n: c.characters, unit: ['with something stored', 'with something stored'] },
-		{ id: 'events', label: 'Events', href: `${base}/history/events`, n: c.events, unit: ['event', 'events'] },
-		{ id: 'memories', label: 'Memories', href: `${base}/history/memories`, n: c.memories, unit: ['memory', 'memories'] },
-		{ id: 'diary', label: 'Diary', href: `${base}/history/diary`, n: c.diary, unit: ['entry', 'entries'] },
-		{ id: 'knowledge', label: 'Knowledge', href: `${base}/history/knowledge`, n: c.knowledge, unit: ['entry', 'entries'] },
-		{ id: 'screenshots', label: 'Screenshots', href: `${base}/screenshots`, n: c.screenshots, unit: ['screenshot', 'screenshots'] },
-		{ id: 'songs', label: 'Bard songs', href: `${base}/songs`, n: c.songs, unit: ['song', 'songs'] }
+		{ id: 'characters', ...m.overview.doors.characters, href: `${base}/characters`, n: c.characters },
+		{ id: 'events', ...m.overview.doors.events, href: `${base}/history/events`, n: c.events },
+		{ id: 'memories', ...m.overview.doors.memories, href: `${base}/history/memories`, n: c.memories },
+		{ id: 'diary', ...m.overview.doors.diary, href: `${base}/history/diary`, n: c.diary },
+		{ id: 'knowledge', ...m.overview.doors.knowledge, href: `${base}/history/knowledge`, n: c.knowledge },
+		{ id: 'screenshots', ...m.overview.doors.screenshots, href: `${base}/screenshots`, n: c.screenshots },
+		{ id: 'songs', ...m.overview.doors.songs, href: `${base}/songs`, n: c.songs }
 	];
 }

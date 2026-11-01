@@ -8,7 +8,9 @@
 	import { ApiError } from '#lib/api/client.ts';
 	import { live } from '#lib/api/live.svelte.ts';
 	import type { Changes, List, Song } from '#lib/api/types/songs.ts';
-	import { plural, realTime } from '#lib/format.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
+	import { realTime } from '#lib/format.ts';
 	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
@@ -82,14 +84,14 @@
 
 	async function submit() {
 		const s = current;
-		if (s && (await run(s, () => saveSong(save, s.id, draft), 'Saved. The recording is as it was; bards sing it as before.'))) await leave('mode');
+		if (s && (await run(s, () => saveSong(save, s.id, draft), m.songs.saved))) await leave('mode');
 	}
 
 	async function remove() {
 		const s = current;
-		if (!s || !confirm(`Delete “${s.title}”? Bards stop singing it. The database is backed up first, and the audio file stays in the bard songs folder.`)) return;
+		if (!s || !confirm(m.songs.confirmDelete({ title: s.title }))) return;
 		const at = shown.indexOf(s);
-		if (await run(s, () => deleteSong(save, s.id), `Deleted “${s.title}”.`)) {
+		if (await run(s, () => deleteSong(save, s.id), m.songs.deleted({ title: s.title }))) {
 			const next = shown[Math.min(at, shown.length - 1)];
 			noticeFor = next?.id;
 			setParams({ item: next ? String(next.id) : null }, 'replace');
@@ -99,47 +101,47 @@
 	useShortcuts(() => {
 		const reading = mode === 'read';
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, disabled: !reading, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, disabled: !reading, run: () => selection.move(-1) },
-			{ key: 'e', shown: 'E', label: 'Edit', hidden: !reading || !current, disabled: readOnly, run: startEdit },
-			...deleteShortcuts({ label: 'Delete song', hidden: !reading || !current, disabled: readOnly || saving, run: remove }),
-			{ key: 'Enter', label: 'Save', command: true, hidden: reading, disabled: saving, run: submit },
-			{ key: 'Escape', shown: 'Esc', label: 'Cancel', hidden: reading, run: () => leave('mode') }
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, disabled: !reading, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, disabled: !reading, run: () => selection.move(-1) },
+			{ key: 'e', shown: 'E', label: m.common.edit, hidden: !reading || !current, disabled: readOnly, run: startEdit },
+			...deleteShortcuts({ label: m.songs.delete, hidden: !reading || !current, disabled: readOnly || saving, run: remove }),
+			{ key: 'Enter', label: m.common.save, command: true, hidden: reading, disabled: saving, run: submit },
+			{ key: 'Escape', shown: 'Esc', label: m.common.cancel, hidden: reading, run: () => leave('mode') }
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Bard songs</h1>
-	<span class="muted n" use:clipped>{plural(list.songs.length, 'song', 'songs')}{composers ? ` by ${plural(composers, 'bard', 'bards')}` : ''}</span>
-	<input type="search" bind:value={query} placeholder="Search songs" aria-label="Search songs" />
+	<h1 class="caps">{m.songs.title}</h1>
+	<span class="muted n" use:clipped>{composers ? m.songs.songsBy({ songs: m.songs.count({ count: list.songs.length }), bards: m.songs.bards({ count: composers }) }) : m.songs.count({ count: list.songs.length })}</span>
+	<input type="search" bind:value={query} placeholder={m.songs.search} aria-label={m.songs.search} />
 </div>
-<p class="muted lead">Songs the bards of this playthrough composed and sang, from what was happening around them. A bard can sing any of them again. How bards compose, and how often, is set under <a href={href(save, 'bard-singing')}>Bard singing</a>.</p>
-{#if readOnly}<p class="notice warn">Skyrim is running, so songs can only be listened to.</p>{/if}
+<p class="muted lead"><Fill text={m.songs.lead.text}>{#snippet link()}<a href={href(save, 'bard-singing')}>{m.songs.bardSinging}</a>{/snippet}</Fill></p>
+{#if readOnly}<p class="notice warn">{m.songs.gameRunning}</p>{/if}
 
 <div class="split">
 	<div class="list">
 		{#if !list.songs.length}
-			<p class="muted">No bard has composed a song in this playthrough yet. Ask one to, with bard singing switched on.</p>
+			<p class="muted">{m.songs.none}</p>
 		{:else if !shown.length}
-			<p class="muted">Nothing matches “{query}”.</p>
+			<p class="muted">{m.songs.noMatch({ query })}</p>
 		{:else}
 			<table>
 				<thead>
 					<tr>
-						<th class="mark" aria-label="Selected"></th>
-						<th class="caps">Song</th>
-						<th class="caps by">Composed by</th>
-						<th class="caps when">Composed</th>
-						<th class="caps plays">Plays</th>
+						<th class="mark" aria-label={m.common.selected}></th>
+						<th class="caps">{m.songs.song}</th>
+						<th class="caps by">{m.songs.composedBy}</th>
+						<th class="caps when">{m.songs.composed}</th>
+						<th class="caps plays">{m.songs.plays}</th>
 					</tr>
 				</thead>
 				<tbody>
 					{#each shown as s (s.id)}
 						<tr aria-selected={selection.is(s)} onclick={() => selection.select(s)}>
 							<td class="mark">{#if selection.is(s)}<Diamond />{/if}</td>
-							<td use:clipped>{s.title}{#if s.instrumental}<span class="flag">instrumental</span>{/if}{#if !s.hasAudio}<span class="flag">no audio</span>{/if}</td>
-							<td class="by muted" use:clipped>{s.composer || 'Unknown'}</td>
+							<td use:clipped>{s.title}{#if s.instrumental}<span class="flag">{m.songs.instrumental}</span>{/if}{#if !s.hasAudio}<span class="flag">{m.songs.noAudio}</span>{/if}</td>
+							<td class="by muted" use:clipped>{s.composer || m.songs.unknown}</td>
 							<td class="when muted">{new Date(createdMs(s.created)).toLocaleDateString(undefined, { dateStyle: 'medium' })}</td>
 							<td class="plays muted">{s.plays}</td>
 						</tr>
@@ -149,50 +151,50 @@
 		{/if}
 	</div>
 
-	<aside class="pane" use:fitToViewport aria-label="Song">
+	<aside class="pane" use:fitToViewport aria-label={m.songs.song}>
 		{#if current}
 			{@const s = current}
 			{#key s.id}
 				<div in:fly={{ y: 6, duration: 180 }}>
 					<h2>{s.title}</h2>
 					<p class="muted small">
-						{#if s.composer}By {#if s.composerUUID}<a href={npcHref(s.composerUUID)}>{s.composer}</a>{:else}{s.composer}{/if}{' · '}{/if}{realTime(createdMs(s.created))}{' · '}{plural(s.plays, 'play', 'plays')}{s.voice ? ` · ${s.voice} voice` : ''}
+						{#if s.composer}<Fill text={m.songs.by.text}>{#snippet composer()}{#if s.composerUUID}<a href={npcHref(s.composerUUID)}>{s.composer}</a>{:else}{s.composer}{/if}{/snippet}</Fill>{' · '}{/if}{realTime(createdMs(s.created))}{' · '}{m.songs.playCount({ count: s.plays })}{s.voice ? ` · ${m.songs.voice({ voice: s.voice })}` : ''}
 					</p>
 					{#if s.hasAudio}
 						<div class="player"><Player path={audioPath(save, s.id)} label={s.title} /></div>
 					{:else}
-						<p class="notice"><span class="id">{s.file}</span> isn’t in <span class="id">{list.folder}</span>, so it can’t be played.</p>
+						<p class="notice"><Fill text={m.songs.missing.text}>{#snippet file()}<span class="id">{s.file}</span>{/snippet}{#snippet folder()}<span class="id">{list.folder}</span>{/snippet}</Fill></p>
 					{/if}
 					{#if error}<p class="notice error" role="alert">{error}</p>{/if}
 					{#if notice}<p class="notice" role="status">{notice}</p>{/if}
 
 					{#if mode === 'edit'}
 						<div class="form">
-							<p class="muted small">Changing the words doesn’t change the recording.</p>
+							<p class="muted small">{m.songs.wordsOnly}</p>
 							<label>
-								<span class="caps">Title</span>
+								<span class="caps">{m.songs.titleLabel}</span>
 								<input type="text" bind:value={draft.title} />
 							</label>
 							<label>
-								<span class="caps">Style</span>
+								<span class="caps">{m.songs.style}</span>
 								<textarea bind:value={draft.style} rows="3"></textarea>
 							</label>
 							<label>
-								<span class="caps">Lyrics</span>
+								<span class="caps">{m.songs.lyrics}</span>
 								<textarea class="lyrics-edit" bind:value={draft.lyrics} rows="18"></textarea>
 							</label>
 							<div class="buttons">
-								<button type="button" class="button primary" onclick={submit} disabled={saving}>Save</button>
-								<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>Cancel</button>
+								<button type="button" class="button primary" onclick={submit} disabled={saving}>{m.common.save}</button>
+								<button type="button" class="button" onclick={() => leave('mode')} disabled={saving}>{m.common.cancel}</button>
 							</div>
 						</div>
 					{:else}
 						<div class="buttons">
-							<button type="button" class="button" onclick={startEdit} disabled={readOnly}>Edit</button>
-							<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>Delete song</button>
+							<button type="button" class="button" onclick={startEdit} disabled={readOnly}>{m.common.edit}</button>
+							<button type="button" class="button" onclick={remove} disabled={readOnly || saving}>{m.songs.delete}</button>
 						</div>
 						{#if s.style}
-							<p class="small style"><span class="caps muted">Style</span> {s.style}</p>
+							<p class="small style"><span class="caps muted">{m.songs.style}</span> {s.style}</p>
 						{/if}
 						<div class="lyrics">
 							{#each parts(s.lyrics) as p, i (i)}

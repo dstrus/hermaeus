@@ -4,6 +4,8 @@
      a pane or a header it always shows. The P shortcut does the same for
      the selected row. -->
 <script lang="ts">
+	import { m } from '#lib/copy/messages.ts';
+
 	let {
 		pinned,
 		name,
@@ -29,8 +31,8 @@
 	class:pinned
 	class:always
 	aria-pressed={pinned}
-	aria-label={pinned ? `Unpin ${name}` : `Pin ${name}`}
-	title={disabled && reason ? reason : pinned ? 'Unpin' : 'Pin'}
+	aria-label={pinned ? m.ui.unpinName({ name }) : m.ui.pinName({ name })}
+	title={disabled && reason ? reason : pinned ? m.ui.unpin : m.ui.pin}
 	style:--size="{size}px"
 	{disabled}
 	onclick={(e) => {

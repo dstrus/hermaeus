@@ -8,10 +8,13 @@
 	import type { Models } from '#lib/api/types/settings.ts';
 	import type { Summary } from '#lib/api/types/summary.ts';
 	import type { Toggle } from '#lib/api/types/settings.ts';
+	import Fill from '#lib/copy/Fill.svelte';
+	import { m } from '#lib/copy/messages.ts';
 	import { engineByValue, noVoice } from '#lib/features/voice.ts';
-	import { count, plural, realTime } from '#lib/format.ts';
+	import { count, realTime } from '#lib/format.ts';
 	import { dayLabel, groupByDay, timeLabel } from '#lib/memories/dates.ts';
 	import { href as pageHref } from '#lib/nav.ts';
+	import { toggleCopy } from '#lib/settings/api.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { clipped } from '#lib/ui/clipped.ts';
 	import { fitToViewport } from '#lib/ui/fit.ts';
@@ -57,7 +60,7 @@
 
 	// Tuning, as far as SkyrimNet's settings files say.
 	let dialogue = $derived(models?.tasks.find((t) => t.id === 'default'));
-	let voice = $derived(engine === null ? '' : engine === noVoice ? 'None' : (engineByValue(engine)?.label ?? engine));
+	let voice = $derived(engine === null ? '' : engine === noVoice ? m.overview.noVoice : (engineByValue(engine)?.label ?? engine));
 	let on = $derived(toggles.filter((t) => t.available && t.on));
 	let off = $derived(toggles.filter((t) => t.available && !t.on));
 	let master = $derived(toggles.find((t) => t.master));
@@ -65,9 +68,9 @@
 	let nothing = $derived(!s.counts.events && !s.counts.memories && !s.counts.diary);
 
 	useShortcuts(() => [
-		{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-		{ key: 'Enter', label: marked ? `Open ${marked.label}` : 'Open', disabled: !marked, run: () => marked && goto(marked.href) }
+		{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+		{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+		{ key: 'Enter', label: marked ? m.overview.openDoor({ label: marked.label }) : m.common.open, disabled: !marked, run: () => marked && goto(marked.href) }
 	]);
 </script>
 
@@ -77,38 +80,47 @@
 	{#if to}<a class="name" href={to}>{name}</a>{:else}<span class="name">{name}</span>{/if}
 {/snippet}
 
+<!-- A line of dialogue: who spoke it, to whom if anyone, and the line. -->
+{#snippet spoken(e: Event)}
+	{#if e.listener}
+		<Fill text={m.events.spokeTo.text} line={e.line ?? ''}>{#snippet speaker()}{@render who(e.speaker ?? '', e.speakerUuid)}{/snippet}{#snippet listener()}{@render who(e.listener ?? '', e.listenerUuid)}{/snippet}</Fill>
+	{:else}
+		<Fill text={m.events.spoke.text} line={e.line ?? ''}>{#snippet speaker()}{@render who(e.speaker ?? '', e.speakerUuid)}{/snippet}</Fill>
+	{/if}
+{/snippet}
+
 <div class="split">
 	<div class="story">
 		<header>
-			<h1 class="caps">{player || 'No player yet'}</h1>
+			<h1 class="caps">{player || m.overview.noPlayer}</h1>
 			<p class="status caps">
-				{#if s.now}<span>{s.now.time}, {s.now.day}</span>{/if}
-				{#if s.days}<span>{plural(s.days, 'game day', 'game days')} recorded</span>{/if}
-				{#if s.written}<span>last event recorded {realTime(s.written)}</span>{/if}
+				{#if s.now}<span>{m.memories.dateTime(s.now)}</span>{/if}
+				{#if s.days}<span>{m.overview.daysRecorded({ count: s.days })}</span>{/if}
+				{#if s.written}<span>{m.overview.lastEvent({ when: realTime(s.written) })}</span>{/if}
 			</p>
 		</header>
 
 		{#if nothing}
-			<p class="empty">SkyrimNet hasn’t recorded anything in this playthrough yet. It starts when you play with it: events as they happen, then memories and diary entries made from them.</p>
+			<p class="empty">{m.overview.empty}</p>
 		{:else}
 			<section class="diary">
-				<h2 class="caps">The latest diary</h2>
+				<h2 class="caps">{m.overview.latestDiary}</h2>
 				{#each s.diary as d (d.id)}
 					<article>
 						<p class="dateline">
 							{#if d.actor}{@render who(d.actor, d.actorUuid)}{/if}
 							<span class="caps when" use:clipped>{shortDay(dayLabel(d))}{#if d.location}{' · '}{place(d.location)}{/if}{#if d.emotion}{' · '}{d.emotion}{/if}</span>
-							<a class="textbutton" href={diaryHref(d.id)}>Read it in History</a>
+							<a class="textbutton" href={diaryHref(d.id)}>{m.overview.readInHistory}</a>
 						</p>
 						<p class="entry">{excerpt(d.content)}</p>
 					</article>
 				{:else}
-					<p class="muted">No diary entries yet. SkyrimNet’s characters write them as the days go by.</p>
+					<p class="muted">{m.overview.noDiary}</p>
 				{/each}
 			</section>
 
 			<section class="lately">
-				<h2 class="caps">Lately</h2>
+				<h2 class="caps">{m.overview.lately}</h2>
 				{#if s.events.length}
 					<table>
 						<tbody>
@@ -121,7 +133,7 @@
 										<td class="text" colspan={where ? 1 : 2}>
 											<span class="line" use:clipped>
 												{#if e.speaker && e.line}
-													{@render who(e.speaker, e.speakerUuid)}{#if e.listener}{' to '}{@render who(e.listener, e.listenerUuid)}{/if}{': '}“{e.line}”
+													{@render spoken(e)}
 												{:else}
 													{e.summary}
 												{/if}
@@ -133,21 +145,21 @@
 							{/each}
 						</tbody>
 					</table>
-					<a class="textbutton more" href="{base}/history/events">Every event, in History</a>
+					<a class="textbutton more" href="{base}/history/events">{m.overview.everyEvent}</a>
 				{:else}
-					<p class="muted">No events yet.</p>
+					<p class="muted">{m.overview.noEvents}</p>
 				{/if}
 			</section>
 		{/if}
 	</div>
 
-	<aside class="pane" aria-label="This playthrough" use:fitToViewport>
-		<h2 class="caps title">This playthrough</h2>
+	<aside class="pane" aria-label={m.overview.thisPlaythrough} use:fitToViewport>
+		<h2 class="caps title">{m.overview.thisPlaythrough}</h2>
 		<p class="muted id">{save}</p>
 
 		<section>
-			<h3 class="caps">Stored</h3>
-			<ul class="doors" aria-label="Sections">
+			<h3 class="caps">{m.overview.stored}</h3>
+			<ul class="doors" aria-label={m.overview.sections}>
 				{#each doors as d (d.id)}
 					<li aria-current={selection.is(d) ? 'true' : undefined}>
 						<span class="mark">{#if selection.is(d)}<Diamond />{/if}</span>
@@ -161,41 +173,41 @@
 
 		{#if s.company.length}
 			<section>
-				<h3 class="caps">Company</h3>
+				<h3 class="caps">{m.overview.company}</h3>
 				<p class="company">
-					{#each s.company as c, i (c.uuid)}{#if i}{', '}{/if}<a href={npc(c.uuid)}>{c.name || 'Unnamed'}</a>{#if c.pinned}{' '}<span class="muted">(pinned)</span>{/if}{/each}
+					{#each s.company as c, i (c.uuid)}{#if i}{', '}{/if}<a href={npc(c.uuid)}>{c.name || m.characters.noName}</a>{#if c.pinned}{' '}<span class="muted">{m.overview.pinned}</span>{/if}{/each}
 				</p>
-				{#if s.company.some((c) => c.traveling)}<p class="muted note">{plural(s.company.filter((c) => c.traveling).length, 'travels', 'travel')} with you.</p>{/if}
+				{#if s.company.some((c) => c.traveling)}<p class="muted note">{m.overview.travel({ count: s.company.filter((c) => c.traveling).length })}</p>{/if}
 			</section>
 		{/if}
 
 		<section>
-			<h3 class="caps">Tuning</h3>
+			<h3 class="caps">{m.overview.tuning}</h3>
 			<dl>
 				{#if dialogue}
-					<dt class="caps">Dialogue</dt>
+					<dt class="caps">{m.overview.dialogue}</dt>
 					<dd>
-						{dialogue.slots[0]?.model ?? 'No model yet'}
-						{#if dialogue.slots.length > 1}<span class="muted">and {plural(dialogue.slots.length - 1, 'other', 'others')} in turn</span>{/if}
+						{dialogue.slots[0]?.model ?? m.overview.noModel}
+						{#if dialogue.slots.length > 1}<span class="muted">{m.overview.othersInTurn({ count: dialogue.slots.length - 1 })}</span>{/if}
 					</dd>
 				{/if}
-				{#if voice}<dt class="caps">Voice</dt><dd>{voice}</dd>{/if}
+				{#if voice}<dt class="caps">{m.overview.voice}</dt><dd>{voice}</dd>{/if}
 				{#if toggles.length}
-					<dt class="caps">Toggles</dt>
+					<dt class="caps">{m.overview.toggles}</dt>
 					<dd>
 						{#if master && !master.on}
-							<span class="off">AI off: SkyrimNet makes no AI calls</span>
+							<span class="off">{m.overview.aiOff}</span>
 						{:else}
-							{count(on.length)} of {count(on.length + off.length)} on
-							{#if off.length}<span class="muted">Off: {off.map((t) => t.label).join(', ')}</span>{/if}
+							{m.overview.togglesOn({ count: on.length, total: count(on.length + off.length) })}
+							{#if off.length}<span class="muted">{m.overview.togglesOff({ names: off.map((t) => toggleCopy(t.id).label).join(', ') })}</span>{/if}
 						{/if}
 					</dd>
 				{/if}
 			</dl>
 			<p class="links">
-				<a class="textbutton" href={pageHref(save, 'models')}>Models</a>
-				<a class="textbutton" href={pageHref(save, 'engines')}>Engines</a>
-				<a class="textbutton" href={pageHref(save, 'prompts')}>Prompts</a>
+				<a class="textbutton" href={pageHref(save, 'models')}>{m.overview.models}</a>
+				<a class="textbutton" href={pageHref(save, 'engines')}>{m.overview.engines}</a>
+				<a class="textbutton" href={pageHref(save, 'prompts')}>{m.overview.prompts}</a>
 			</p>
 		</section>
 	</aside>

@@ -5,6 +5,7 @@
 	import { goto, invalidate } from '$app/navigation';
 	import { ApiError } from '#lib/api/client.ts';
 	import type { FileValues } from '#lib/api/types/settings.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { count } from '#lib/format.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import PinButton from '#lib/ui/PinButton.svelte';
@@ -13,6 +14,8 @@
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { sorted, type Sort } from '#lib/ui/sort.ts';
 	import { changedPage, fileLabel, setFilePinned, settingsDependency, settingsHref } from './api.ts';
+
+	const t = m.settings;
 
 	let { save, files: all }: { save: string; files: FileValues[] } = $props(); // pinned files first, in the order they were pinned, then by name
 
@@ -36,7 +39,7 @@
 	});
 	// In their natural order, files sit under Pinned or Everything else.
 	let grouped = $derived(sort.key === 'group' && files.some((f) => f.file.pinned));
-	const groupName = (f: FileValues) => (f.file.pinned ? 'Pinned' : 'Everything else');
+	const groupName = (f: FileValues) => (f.file.pinned ? t.pinned : t.everythingElse);
 
 	async function togglePin(f: FileValues) {
 		error = '';
@@ -55,41 +58,41 @@
 	useShortcuts(() => {
 		const f = selection.current;
 		return [
-			{ key: 'ArrowDown', label: 'Next', hidden: true, run: () => selection.move(1) },
-			{ key: 'ArrowUp', label: 'Previous', hidden: true, run: () => selection.move(-1) },
-			{ key: 'Enter', shown: 'Enter', label: 'Open', disabled: !f, run: () => f && goto(href(f)) },
-			{ key: 'p', shown: 'P', label: f?.file.pinned ? 'Unpin' : 'Pin', disabled: !f, run: () => f && togglePin(f) },
-			{ key: 'c', shown: 'C', label: 'Changed settings', disabled: !changed, run: () => goto(settingsHref(save, changedPage)) }
+			{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+			{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+			{ key: 'Enter', shown: 'Enter', label: m.common.open, disabled: !f, run: () => f && goto(href(f)) },
+			{ key: 'p', shown: 'P', label: f?.file.pinned ? m.ui.unpin : m.ui.pin, disabled: !f, run: () => f && togglePin(f) },
+			{ key: 'c', shown: 'C', label: t.changedSettings, disabled: !changed, run: () => goto(settingsHref(save, changedPage)) }
 		];
 	});
 </script>
 
 <div class="bar">
-	<h1 class="caps">Other settings</h1>
+	<h1 class="caps">{t.title}</h1>
 	{#if changed}
-		<a class="changed n" href={settingsHref(save, changedPage)}>{count(changed)} changed from the defaults</a>
+		<a class="changed n" href={settingsHref(save, changedPage)}>{t.changed({ count: changed })}</a>
 	{:else}
-		<span class="muted n" use:clipped>Nothing differs from the defaults</span>
+		<span class="muted n" use:clipped>{t.unchanged}</span>
 	{/if}
-	<input type="search" bind:value={query} placeholder="Filter by file" aria-label="Filter settings files" />
+	<input type="search" bind:value={query} placeholder={t.filterFiles} aria-label={t.filterFilesLabel} />
 </div>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
-<p class="muted lead">Every settings file without a page of its own, as SkyrimNet writes it.</p>
+<p class="muted lead">{t.lead}</p>
 {#if !files.length}
-	<p class="muted">No settings files were found in SkyrimNet’s config folder.</p>
+	<p class="muted">{t.noFiles}</p>
 {:else if !shown.length}
-	<p class="muted">Nothing matches “{query}”.</p>
+	<p class="muted">{t.noMatch({ query })}</p>
 {:else}
 	<div class="split">
 		<table>
 			<thead>
 				<tr>
-					<th class="mark" aria-label="Selected"></th>
-					<SortHeader label="File" key="group" bind:sort />
-					<SortHeader label="Settings" key="settings" bind:sort descendingFirst align="end" />
-					<SortHeader label="Changed" key="changed" bind:sort descendingFirst align="end" />
-					<th class="pin" aria-label="Pinned"></th>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<SortHeader label={t.file} key="group" bind:sort />
+					<SortHeader label={t.settings} key="settings" bind:sort descendingFirst align="end" />
+					<SortHeader label={t.changedColumn} key="changed" bind:sort descendingFirst align="end" />
+					<th class="pin" aria-label={t.pinned}></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -101,7 +104,7 @@
 						<td class="mark">{#if selection.is(f)}<Diamond />{/if}</td>
 						<td class="name">
 							<a href={href(f)}>{fileLabel(f.file)}</a>
-							{#if !f.file.exists}<span class="muted"> · not created yet</span>{/if}
+							{#if !f.file.exists}<span class="muted"> · {t.notCreated}</span>{/if}
 						</td>
 						<td class="n">{count(f.file.settings)}</td>
 						<td class="n">{#if f.file.changed}<span class="changed">{count(f.file.changed)}</span>{/if}</td>
@@ -110,7 +113,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<aside class="pane" aria-label="Settings file">
+		<aside class="pane" aria-label={t.settingsFile}>
 			{#if current}
 				<div class="title">
 					<h2 class="caps">{fileLabel(current.file)}</h2>
@@ -118,15 +121,15 @@
 				</div>
 				<p class="path">{current.file.path}</p>
 				<dl>
-					<dt class="caps">Settings</dt><dd>{count(current.file.settings)}</dd>
-					<dt class="caps">Changed</dt><dd>{current.file.changed ? count(current.file.changed) : 'None'}</dd>
-					<dt class="caps">Defaults</dt><dd>{current.file.hasDefaults ? 'Recorded by SkyrimNet' : 'None recorded'}</dd>
+					<dt class="caps">{t.settings}</dt><dd>{count(current.file.settings)}</dd>
+					<dt class="caps">{t.changedColumn}</dt><dd>{current.file.changed ? count(current.file.changed) : t.none}</dd>
+					<dt class="caps">{t.defaults}</dt><dd>{current.file.hasDefaults ? t.recorded : t.noneRecorded}</dd>
 				</dl>
 				{#if !current.file.exists}
-					<p class="notice">SkyrimNet hasn’t created this file yet; it will the next time it starts. Until then its defaults can be read but not changed.</p>
+					<p class="notice">{t.notCreatedNotice}</p>
 				{/if}
 				<div class="actions">
-					<a class="button primary" href={href(current)}>Open</a>
+					<a class="button primary" href={href(current)}>{m.common.open}</a>
 				</div>
 			{/if}
 		</aside>

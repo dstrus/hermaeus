@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sketch: What SkyrimNet Remembers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --ground:#0b0b0b; --smoke:#1c1c1c; --ink:#f2efe6; --muted:#a8a293; --rule:#2a2a2a; --rule-strong:#3a3a3a; --accent:#7fb8a0; --on-accent:#0e1a15; --changed:#d2996b; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1440px; height: 900px; overflow: hidden; }
+  body { background: radial-gradient(ellipse at 65% 25%, var(--smoke), var(--ground) 70%); color: var(--ink); font: 400 15px/1.5 Jost, sans-serif; position: relative; }
+  .caps { font-family: "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .12em; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 22px 56px; border-bottom: 1px solid var(--rule); }
+  .brand { display: flex; gap: 12px; align-items: center; font-size: 22px; font-weight: 600; }
+  .eye { width: 26px; height: 26px; border: 2px solid var(--ink); border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; position: relative; }
+  .eye::after { content: ""; position: absolute; inset: 7px; border-radius: 50%; background: var(--ink); }
+  nav { display: flex; gap: 32px; font-size: 16px; color: var(--muted); }
+  main { display: grid; grid-template-columns: 1fr 400px; gap: 80px; padding: 72px 56px 0; }
+  .dateline { display: flex; gap: 14px; align-items: baseline; font-size: 14px; color: var(--muted); padding-bottom: 14px; border-bottom: 1px solid var(--rule-strong); }
+  .dateline b { color: var(--ink); font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+  .entry { font-size: 34px; line-height: 1.42; max-width: 30ch; padding-top: 30px; }
+  .locus { display: flex; gap: 28px; margin-top: 34px; padding-top: 14px; border-top: 1px solid var(--rule); font-size: 13px; color: var(--muted); }
+  .locus span em { font-style: normal; color: var(--ink); font-family: Jost, sans-serif; letter-spacing: 0; text-transform: none; font-size: 14px; margin-left: 8px; }
+  .locus .copper { color: var(--changed); }
+  .offer { border-left: 1px solid var(--rule-strong); padding-left: 40px; padding-top: 4px; }
+  h1 { font-size: 104px; line-height: .9; font-weight: 600; }
+  .hook { font-size: 24px; line-height: 1.35; margin-top: 26px; }
+  .hook-sub { color: var(--muted); margin-top: 14px; font-size: 16px; }
+  .dl { margin-top: 36px; display: grid; gap: 10px; }
+  .btn { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border: 1px solid var(--rule-strong); border-radius: 3px; font-size: 18px; font-weight: 500; }
+  .btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
+  .btn small { font-family: Jost, sans-serif; letter-spacing: 0; text-transform: none; font-size: 13px; opacity: .75; }
+  .fine { margin-top: 22px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .hints { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: flex-end; gap: 26px; padding: 12px 56px; background: var(--ground); border-top: 1px solid var(--rule); font-size: 15px; color: var(--muted); }
+  .key { display: inline-block; min-width: 1.6em; text-align: center; border: 1px solid var(--rule-strong); border-radius: 3px; color: var(--ink); padding: 0 .4em; margin-right: 8px; }
+  .label-synth { position: absolute; left: 56px; bottom: 64px; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <header>
+    <div class="brand caps"><span class="eye"></span>Hermaeus</div>
+    <nav class="caps"><span>What it does</span><span>Safety</span><span>Docs</span><span style="color:var(--ink)">Download</span></nav>
+  </header>
+  <main>
+    <section>
+      <div class="dateline caps"><b>Hjordis Ashen-Hand</b><span>Tirdas, 4th of Hearthfire, 4E 201</span><span>·</span><span>Falkreath</span><span>·</span><span>Uneasy</span></div>
+      <p class="entry">The stranger paid for three nights and slept for one. Asked about the barrow on the ridge, then asked again as if I hadn't answered. I told them what I tell everyone: the dead keep to themselves if you keep to yourself.</p>
+      <div class="locus caps">
+        <span>Diary entry<em>143 of 212</em></span>
+        <span>Stored in<em>the playthrough's database</em></span>
+        <span>Importance<em>7</em></span>
+        <span class="copper">Edited by you</span>
+      </div>
+    </section>
+    <aside class="offer">
+      <h1 class="caps">Hermaeus</h1>
+      <p class="hook">Read and edit what SkyrimNet remembers, with Skyrim closed.</p>
+      <p class="hook-sub">Memories, diaries, bios, prompts, and settings, from your own installation.</p>
+      <div class="dl caps">
+        <span class="btn primary">Download for Windows <small>.exe</small></span>
+        <span class="btn">macOS <small>Apple silicon and Intel</small></span>
+        <span class="btn">Linux <small>x86-64</small></span>
+      </div>
+      <p class="fine">Unofficial. Works with SkyrimNet, isn't part of it, and isn't affiliated with or endorsed by Fateless.Ai.</p>
+    </aside>
+  </main>
+  <p class="label-synth caps">From a made-up playthrough</p>
+  <div class="hints caps"><span><span class="key">D</span>Download</span><span><span class="key">S</span>Safety</span><span><span class="key">↓</span>Next</span></div>
+</body>
+</html>

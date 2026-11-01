@@ -1,7 +1,10 @@
 // How SkyrimNet gives characters voices: Speech, from SkyrimNet.yaml, picks
 // the engine and covers what every engine shares (the narrator, silent
 // NPCs, subtitles); each engine has a page of its own file's settings.
+import { m } from '#lib/copy/messages.ts';
 import type { Feature, Field, Section } from './schema.ts';
+
+const eng = m.features.engines;
 
 // An engine as SkyrimNet names it in tts.engine, and its settings file.
 export interface Engine {
@@ -14,16 +17,16 @@ export interface Engine {
 }
 
 export const engines: Engine[] = [
-	{ id: 'pockettts', value: 'pocket_tts', file: 'PocketTTS', label: 'PocketTTS', what: 'Voices made on your own machine, cloned from each voice type’s sample. It needs nothing else installed.', local: true },
-	{ id: 'piper', value: 'piper', file: 'Piper', label: 'Piper', what: 'Fast voices made on your own machine from voice model files, which are installed as a mod of their own.', local: true },
-	{ id: 'inworld', value: 'inworld', file: 'Inworld', label: 'Inworld', what: 'Inworld’s service, with voices cloned from each voice type’s sample. It needs an Inworld account and key.', local: false },
-	{ id: 'elevenlabs', value: 'elevenlabs', file: 'ElevenLabs', label: 'ElevenLabs', what: 'ElevenLabs’s service, with voices cloned from each voice type’s sample. It needs an ElevenLabs key.', local: false },
-	{ id: 'fateless', value: 'fateless', file: 'FatelessTTS', label: 'Fateless', what: 'Fateless’s service, from SkyrimNet Beta 29: characters speak in their own in-game voices, with no server or key to set up. It needs a Fateless subscription, signed in from SkyrimNet’s dashboard.', local: false },
-	{ id: 'xtts', value: 'xtts', file: 'XTTS', label: 'XTTS', what: 'Cloned voices from an XTTS server you run, on your own machine or rented through VastAI.', local: true },
-	{ id: 'zonos', value: 'zonos', file: 'Zonos', label: 'Zonos', what: 'Voices that follow a character’s mood, from a Zonos server you run, on your own machine or rented through VastAI.', local: true },
-	{ id: 'chatterbox', value: 'chatterbox', file: 'Chatterbox', label: 'Chatterbox', what: 'Expressive voices that take emotion tags, from a Chatterbox server you run.', local: true },
-	{ id: 'higgs', value: 'higgs', file: 'Higgs', label: 'Higgs', what: 'Voices from a Higgs Audio server you run, with tags for emotion, pace, and style.', local: true },
-	{ id: 'openai-compatible', value: 'openai_compatible', file: 'OpenAICompatibleTTS', label: 'OpenAI-compatible', what: 'Any speech service with an OpenAI-style API that clones voices, such as Boson.ai’s Higgs or a server you run yourself.', local: true }
+	{ id: 'pockettts', value: 'pocket_tts', file: 'PocketTTS', label: eng.pockettts.label, what: eng.pockettts.what, local: true },
+	{ id: 'piper', value: 'piper', file: 'Piper', label: eng.piper.label, what: eng.piper.what, local: true },
+	{ id: 'inworld', value: 'inworld', file: 'Inworld', label: eng.inworld.label, what: eng.inworld.what, local: false },
+	{ id: 'elevenlabs', value: 'elevenlabs', file: 'ElevenLabs', label: eng.elevenlabs.label, what: eng.elevenlabs.what, local: false },
+	{ id: 'fateless', value: 'fateless', file: 'FatelessTTS', label: eng.fateless.label, what: eng.fateless.what, local: false },
+	{ id: 'xtts', value: 'xtts', file: 'XTTS', label: eng.xtts.label, what: eng.xtts.what, local: true },
+	{ id: 'zonos', value: 'zonos', file: 'Zonos', label: eng.zonos.label, what: eng.zonos.what, local: true },
+	{ id: 'chatterbox', value: 'chatterbox', file: 'Chatterbox', label: eng.chatterbox.label, what: eng.chatterbox.what, local: true },
+	{ id: 'higgs', value: 'higgs', file: 'Higgs', label: eng.higgs.label, what: eng.higgs.what, local: true },
+	{ id: 'openai-compatible', value: 'openai_compatible', file: 'OpenAICompatibleTTS', label: eng.openaiCompatible.label, what: eng.openaiCompatible.what, local: true }
 ];
 
 export const noVoice = 'noop'; // tts.engine when SkyrimNet speaks with no engine
@@ -36,183 +39,199 @@ export function engineById(id: string): Engine | undefined {
 	return engines.find((e) => e.id === id);
 }
 
+const sp = m.features.speech;
+
 export const speech: Feature = {
 	id: 'speech',
 	file: 'game',
-	title: 'Speech',
-	what: 'Which engine gives characters their voices, and what every engine shares: the narrator, characters without voice lines of their own, and subtitles. Each engine’s own settings are under Engines.',
+	title: sp.title,
+	what: sp.what,
 	sections: [
 		{
-			title: 'Engine',
+			title: sp.engine.title,
 			fields: [
 				{
 					key: 'tts.engine',
-					label: 'Engine',
-					what: 'What turns characters’ lines into speech. Without one, they aren’t spoken at all.',
+					label: sp.engine.ttsEngine.label,
+					what: sp.engine.ttsEngine.what,
 					kind: 'choice',
-					choices: [...engines.map((e) => ({ value: e.value, label: e.label, what: e.local ? 'runs on a machine of yours' : 'a service you sign up for' })), { value: noVoice, label: 'None', what: 'lines are only shown, never spoken' }]
+					choices: [
+						...engines.map((x) => ({ value: x.value, label: x.label, what: x.local ? sp.engine.ttsEngine.local : sp.engine.ttsEngine.service })),
+						{ value: noVoice, label: sp.engine.ttsEngine.choices.noop.label, what: sp.engine.ttsEngine.choices.noop.what }
+					]
 				},
-				{ key: 'tts.maxSegmentWords', label: 'Words sent at once', what: 'Lines go to the engine a sentence at a time. Above 0, short sentences in a row are joined, up to this many words, before they’re sent. At 0, every sentence goes on its own.', kind: 'count', unit: 'words', zero: 'Each sentence' }
+				{ key: 'tts.maxSegmentWords', label: sp.engine.ttsMaxSegmentWords.label, what: sp.engine.ttsMaxSegmentWords.what, kind: 'count', unit: sp.engine.ttsMaxSegmentWords.unit, zero: sp.engine.ttsMaxSegmentWords.zero }
 			]
 		},
 		{
-			title: 'Narrator',
+			title: sp.narrator.title,
 			fields: [
-				{ key: 'tts.enableNarratorAudioEffect', label: 'Narrator effect', what: 'Play narration through an audio effect, so the narrator sounds apart from the characters.', kind: 'switch' },
-				{ key: 'tts.enablePlayerThoughtAudioEffect', label: 'Thoughts effect', what: 'Play your character’s thoughts through an audio effect, so they sound apart from speech.', kind: 'switch' },
-				{ key: 'tts.useKokoroForNarrator', label: 'Kokoro narrator', what: 'Narrate with Kokoro, a small voice model that runs on your own machine, rather than the engine.', kind: 'switch' },
-				{ key: 'tts.kokoroNarratorVoice', label: 'Kokoro voice', what: 'Which of Kokoro’s voices narrates.', kind: 'text', placeholder: 'af_bella' },
-				{ key: 'tts.kokoroVolumeLevel', label: 'Kokoro volume', what: 'How loud Kokoro’s narration plays.', kind: 'percent' }
+				{ key: 'tts.enableNarratorAudioEffect', label: sp.narrator.ttsEnableNarratorAudioEffect.label, what: sp.narrator.ttsEnableNarratorAudioEffect.what, kind: 'switch' },
+				{ key: 'tts.enablePlayerThoughtAudioEffect', label: sp.narrator.ttsEnablePlayerThoughtAudioEffect.label, what: sp.narrator.ttsEnablePlayerThoughtAudioEffect.what, kind: 'switch' },
+				{ key: 'tts.useKokoroForNarrator', label: sp.narrator.ttsUseKokoroForNarrator.label, what: sp.narrator.ttsUseKokoroForNarrator.what, kind: 'switch' },
+				{ key: 'tts.kokoroNarratorVoice', label: sp.narrator.ttsKokoroNarratorVoice.label, what: sp.narrator.ttsKokoroNarratorVoice.what, kind: 'text', placeholder: 'af_bella' },
+				{ key: 'tts.kokoroVolumeLevel', label: sp.narrator.ttsKokoroVolumeLevel.label, what: sp.narrator.ttsKokoroVolumeLevel.what, kind: 'percent' }
 			]
 		},
 		{
-			title: 'Game dialogue',
-			what: 'The game’s own dialogue: the lines you pick, and characters with no recording of a line.',
+			title: sp.gameDialogue.title,
+			what: sp.gameDialogue.what,
 			fields: [
-				{ key: 'vanillaDialogue.voicePlayerChoices', was: 'dbvo.enabled', label: 'Voice your choices', what: 'Speak the line you pick in the dialogue menu in your character’s voice before the NPC answers.', kind: 'switch' },
-				{ key: 'vanillaDialogue.voiceSilentNPCs', was: 'dbvo.voiceSilentNPCs', label: 'Voice silent characters', what: 'Speak the game’s own lines for characters who have no recording of them. Universal Translator depends on it.', kind: 'switch' },
-				{ key: 'vanillaDialogue.fixSubtitleDuringTTS', was: 'dbvo.fixSubtitleDuringTTS', label: 'Subtitle fix', what: 'SkyrimNet’s fix for the game’s subtitle while such a line is spoken.', kind: 'switch' }
+				{ key: 'vanillaDialogue.voicePlayerChoices', was: 'dbvo.enabled', label: sp.gameDialogue.vanillaDialogueVoicePlayerChoices.label, what: sp.gameDialogue.vanillaDialogueVoicePlayerChoices.what, kind: 'switch' },
+				{ key: 'vanillaDialogue.voiceSilentNPCs', was: 'dbvo.voiceSilentNPCs', label: sp.gameDialogue.vanillaDialogueVoiceSilentNPCs.label, what: sp.gameDialogue.vanillaDialogueVoiceSilentNPCs.what, kind: 'switch' },
+				{ key: 'vanillaDialogue.fixSubtitleDuringTTS', was: 'dbvo.fixSubtitleDuringTTS', label: sp.gameDialogue.vanillaDialogueFixSubtitleDuringTTS.label, what: sp.gameDialogue.vanillaDialogueFixSubtitleDuringTTS.what, kind: 'switch' }
 			]
 		},
 		{
-			title: 'Subtitles',
+			title: sp.subtitles.title,
 			fields: [
-				{ key: 'subtitles.enableNPCSubtitles', label: 'Characters’ lines', what: 'Show what characters say as subtitles.', kind: 'switch' },
-				{ key: 'subtitles.enablePlayerSubtitles', label: 'Your lines', what: 'Show what you say as subtitles.', kind: 'switch' },
-				{ key: 'subtitles.enableConsoleOutput', label: 'In the console', what: 'Also write lines to the game’s console.', kind: 'switch' }
+				{ key: 'subtitles.enableNPCSubtitles', label: sp.subtitles.subtitlesEnableNPCSubtitles.label, what: sp.subtitles.subtitlesEnableNPCSubtitles.what, kind: 'switch' },
+				{ key: 'subtitles.enablePlayerSubtitles', label: sp.subtitles.subtitlesEnablePlayerSubtitles.label, what: sp.subtitles.subtitlesEnablePlayerSubtitles.what, kind: 'switch' },
+				{ key: 'subtitles.enableConsoleOutput', label: sp.subtitles.subtitlesEnableConsoleOutput.label, what: sp.subtitles.subtitlesEnableConsoleOutput.what, kind: 'switch' }
 			]
 		},
 		{
-			title: 'Volume',
-			fields: [{ key: 'audio.universalMaxVolume', label: 'Loudest', what: 'The most any of SkyrimNet’s audio plays at. 1 is full volume.', kind: 'number', min: 0, max: 1 }]
+			title: sp.volume.title,
+			fields: [{ key: 'audio.universalMaxVolume', label: sp.volume.audioUniversalMaxVolume.label, what: sp.volume.audioUniversalMaxVolume.what, kind: 'number', min: 0, max: 1 }]
 		}
 	]
 };
 
-const seconds = (key: string, label: string, what: string): Field => ({ key, label, what, kind: 'count', unit: 'seconds' });
-const tune = (key: string, label: string, what: string, min?: number, max?: number): Field => ({ key, label, what, kind: 'number', min, max });
+type Text = { label: string; what: string };
+const seconds = (key: string, t: Text & { unit: string }): Field => ({ key, label: t.label, what: t.what, kind: 'count', unit: t.unit });
+const tune = (key: string, t: Text, min?: number, max?: number): Field => ({ key, label: t.label, what: t.what, kind: 'number', min, max });
 
 // The connection settings every engine file has.
 function connection(e: Engine): Section {
+	const c = eng.connection;
 	const endpoint: Field =
 		e.id === 'inworld'
-			? { key: 'endpoint', label: 'Address', what: 'Where Inworld’s service is reached. It can name your account, so it’s kept like a key: Hermaeus never shows it.', kind: 'secret' }
-			: { key: 'endpoint', label: 'Address', what: e.id === 'piper' || e.id === 'pockettts' ? 'Left empty for the engine that comes with SkyrimNet.' : 'Where the server is reached.', kind: 'text', placeholder: 'http://localhost:7860' };
+			? { key: 'endpoint', label: c.endpoint.label, what: c.endpoint.whatInworld, kind: 'secret' }
+			: { key: 'endpoint', label: c.endpoint.label, what: e.id === 'piper' || e.id === 'pockettts' ? c.endpoint.whatBundled : c.endpoint.what, kind: 'text', placeholder: 'http://localhost:7860' };
 	return {
-		title: 'Connection',
+		title: c.title,
 		fields: [
 			// Fateless speaks through the gateway SkyrimNet's sign-in pairs with.
 			...(e.id === 'fateless' ? [] : [endpoint]),
-			{ key: 'language', label: 'Language', what: 'The language lines are spoken in, as the engine names it.', kind: 'text', placeholder: 'en' },
-			seconds('timeout', 'Wait for a line', 'How long to wait for the engine to speak a line before giving up.'),
-			seconds('connect_timeout', 'Wait to connect', 'How long to wait to reach the engine.'),
-			{ key: 'max_parallel_requests', label: 'Lines at once', what: 'How many lines the engine may work on at the same time. More starts speech sooner but takes more of the machine or account.', kind: 'count', unit: 'lines' },
-			{ key: 'max_retries', label: 'Retries', what: 'How many times to ask again when the engine fails with a server error. At 0, a failed line isn’t retried.', kind: 'count', zero: 'None' },
-			{ key: 'stream_audio', label: 'Stream', what: 'Start playing a line while the rest of it is still being made, so speech begins sooner.', kind: 'switch' }
+			{ key: 'language', label: c.language.label, what: c.language.what, kind: 'text', placeholder: 'en' },
+			seconds('timeout', c.timeout),
+			seconds('connect_timeout', c.connectTimeout),
+			{ key: 'max_parallel_requests', label: c.maxParallelRequests.label, what: c.maxParallelRequests.what, kind: 'count', unit: c.maxParallelRequests.unit },
+			{ key: 'max_retries', label: c.maxRetries.label, what: c.maxRetries.what, kind: 'count', zero: c.maxRetries.zero },
+			{ key: 'stream_audio', label: c.streamAudio.label, what: c.streamAudio.what, kind: 'switch' }
 		]
 	};
 }
 
 // What each engine has of its own.
+const pocket = eng.pockettts.voice;
+const piper = eng.piper.voice;
+const fateless = eng.fateless.voice;
+const inworld = eng.inworld;
+const eleven = eng.elevenlabs;
+const zonos = eng.zonos;
+const chatterbox = eng.chatterbox;
+const higgs = eng.higgs.voice;
+const openai = eng.openaiCompatible;
 const own: Record<string, Section[]> = {
 	pockettts: [
 		{
-			title: 'Voice',
+			title: pocket.title,
 			fields: [
-				{ key: 'max_lsd_steps', label: 'Steps', what: 'How many passes go into each line. More sound better but take longer.', kind: 'count' },
-				tune('temperature', 'Variety', 'How much each line varies. Lower is steadier; higher is livelier.'),
+				{ key: 'max_lsd_steps', label: pocket.maxLsdSteps.label, what: pocket.maxLsdSteps.what, kind: 'count' },
+				tune('temperature', pocket.temperature),
 				{
 					key: 'model_precision',
-					label: 'Precision',
-					what: 'How the model runs.',
+					label: pocket.modelPrecision.label,
+					what: pocket.modelPrecision.what,
 					kind: 'choice',
 					choices: [
-						{ value: 'FP32', label: 'FP32', what: 'better quality, best on a graphics card' },
-						{ value: 'INT8', label: 'INT8', what: 'faster on the processor, a little rougher' }
+						{ value: 'FP32', label: 'FP32', what: pocket.modelPrecision.choices.fp32.what },
+						{ value: 'INT8', label: 'INT8', what: pocket.modelPrecision.choices.int8.what }
 					]
 				},
-				{ key: 'device_index', label: 'Device', what: 'Which graphics card to use, counting from 0.', kind: 'count' }
+				{ key: 'device_index', label: pocket.deviceIndex.label, what: pocket.deviceIndex.what, kind: 'count' }
 			]
 		}
 	],
 	piper: [
 		{
-			title: 'Voice',
+			title: piper.title,
 			fields: [
-				{ key: 'enable_preloading', label: 'Load at start', what: 'Load the voice models when the game starts, rather than when each is first needed.', kind: 'switch' },
-				tune('piper_settings.noise_scale', 'Expressiveness', 'How much feeling voices carry. 1 is normal; higher is more dramatic, lower is flatter.', 0, 5),
-				tune('piper_settings.noise_w', 'Rhythm', 'How natural the pacing sounds. 1 is normal; higher varies more, lower is more mechanical.', 0, 5),
-				tune('piper_settings.length_scale', 'Slowness', 'How drawn out speech is. 1 is normal; higher is slower, lower is faster.', 0.1, 5),
-				{ key: 'piper_settings.num_threads', label: 'Threads', what: 'How many of the processor’s threads Piper uses.', kind: 'count' },
-				{ key: 'speaker_id', label: 'Speaker', what: 'Which speaker to use in a model with several, counting from 0. The usual English models have one.', kind: 'count' }
+				{ key: 'enable_preloading', label: piper.enablePreloading.label, what: piper.enablePreloading.what, kind: 'switch' },
+				tune('piper_settings.noise_scale', piper.piperSettingsNoiseScale, 0, 5),
+				tune('piper_settings.noise_w', piper.piperSettingsNoiseW, 0, 5),
+				tune('piper_settings.length_scale', piper.piperSettingsLengthScale, 0.1, 5),
+				{ key: 'piper_settings.num_threads', label: piper.piperSettingsNumThreads.label, what: piper.piperSettingsNumThreads.what, kind: 'count' },
+				{ key: 'speaker_id', label: piper.speakerId.label, what: piper.speakerId.what, kind: 'count' }
 			]
 		}
 	],
 	fateless: [
 		{
-			title: 'Voice',
+			title: fateless.title,
 			fields: [
 				{
 					key: 'model',
-					label: 'Model',
-					what: 'Which of Fateless’s speech models speaks. Directions such as [say bitterly in a low voice] need fateless/speech-plus; fateless/speech is faster and cheaper, and plays only sounds such as [sigh].',
+					label: fateless.model.label,
+					what: fateless.model.what,
 					kind: 'choice',
 					custom: true,
 					choices: [
-						{ value: 'fateless/speech-plus', label: 'Speech Plus', what: 'the default, with directions' },
-						{ value: 'fateless/speech', label: 'Speech', what: 'faster and cheaper, sounds only' }
+						{ value: 'fateless/speech-plus', label: fateless.model.choices.fatelessSpeechPlus.label, what: fateless.model.choices.fatelessSpeechPlus.what },
+						{ value: 'fateless/speech', label: fateless.model.choices.fatelessSpeech.label, what: fateless.model.choices.fatelessSpeech.what }
 					]
 				},
-				tune('speed', 'Speed', 'How fast lines are spoken. 1 is normal.', 0.5, 1.5),
-				tune('temperature', 'Variety', 'How much each line varies.', 0, 2)
+				tune('speed', fateless.speed, 0.5, 1.5),
+				tune('temperature', fateless.temperature, 0, 2)
 			]
 		}
 	],
 	inworld: [
 		{
-			title: 'Account',
+			title: inworld.account.title,
 			fields: [
-				{ key: 'api_key_base64', label: 'Key', what: 'Your Inworld key, as Inworld gives it, encoded in Base64.', kind: 'secret' },
-				{ key: 'workspace_id', label: 'Workspace', what: 'The Inworld workspace voices are cloned into.', kind: 'secret' }
+				{ key: 'api_key_base64', label: inworld.account.apiKeyBase64.label, what: inworld.account.apiKeyBase64.what, kind: 'secret' },
+				{ key: 'workspace_id', label: inworld.account.workspaceId.label, what: inworld.account.workspaceId.what, kind: 'secret' }
 			]
 		},
 		{
-			title: 'Voice',
+			title: inworld.voice.title,
 			fields: [
 				{
 					key: 'model_id',
-					label: 'Model',
-					what: 'Which of Inworld’s models speaks.',
+					label: inworld.voice.modelId.label,
+					what: inworld.voice.modelId.what,
 					kind: 'choice',
 					custom: true,
 					choices: [
-						{ value: 'inworld-tts-2', label: 'inworld-tts-2', what: 'the best quality' },
-						{ value: 'inworld-tts-2-flash', label: 'inworld-tts-2-flash', what: 'the fastest and cheapest' }
+						{ value: 'inworld-tts-2', label: 'inworld-tts-2', what: inworld.voice.modelId.choices.inworldTts2.what },
+						{ value: 'inworld-tts-2-flash', label: 'inworld-tts-2-flash', what: inworld.voice.modelId.choices.inworldTts2Flash.what }
 					]
 				},
-				tune('temperature', 'Variety', 'How much each line varies, from 0 to 2. Higher is more expressive.', 0, 2),
-				tune('speaking_rate', 'Speed', 'How fast lines are spoken. 1 is normal.'),
-				{ key: 'sample_rate_hz', label: 'Sample rate', what: 'The quality of the audio Inworld sends back.', kind: 'count', min: 8000, max: 48000, unit: 'Hz' },
-				{ key: 'clone_cache.max_voices', label: 'Cloned voices kept', what: 'How many voices may be cloned into the account. Past it, the voice used longest ago is deleted first; voices cloned outside SkyrimNet count, but are never deleted. At 0, there’s no limit.', kind: 'count', unit: 'voices', zero: 'No limit' }
+				tune('temperature', inworld.voice.temperature, 0, 2),
+				tune('speaking_rate', inworld.voice.speakingRate),
+				{ key: 'sample_rate_hz', label: inworld.voice.sampleRateHz.label, what: inworld.voice.sampleRateHz.what, kind: 'count', min: 8000, max: 48000, unit: inworld.voice.sampleRateHz.unit },
+				{ key: 'clone_cache.max_voices', label: inworld.voice.cloneCacheMaxVoices.label, what: inworld.voice.cloneCacheMaxVoices.what, kind: 'count', unit: inworld.voice.cloneCacheMaxVoices.unit, zero: inworld.voice.cloneCacheMaxVoices.zero }
 			]
 		}
 	],
 	elevenlabs: [
 		{
-			title: 'Account',
+			title: eleven.account.title,
 			fields: [
-				{ key: 'api_key', label: 'Key', what: 'Your ElevenLabs key.', kind: 'secret' },
-				{ key: 'clone_cache.shared_account', label: 'Shared account', what: 'Switch on when more than one SkyrimNet install uses the account, so they reuse each other’s cloned voices rather than cloning over them.', kind: 'switch' },
-				{ key: 'clone_cache.max_voices', label: 'Cloned voices kept', what: 'How many voices may be cloned into the account. Past it, the voice used longest ago is deleted first. At 0, there’s no limit.', kind: 'count', unit: 'voices', zero: 'No limit' }
+				{ key: 'api_key', label: eleven.account.apiKey.label, what: eleven.account.apiKey.what, kind: 'secret' },
+				{ key: 'clone_cache.shared_account', label: eleven.account.cloneCacheSharedAccount.label, what: eleven.account.cloneCacheSharedAccount.what, kind: 'switch' },
+				{ key: 'clone_cache.max_voices', label: eleven.account.cloneCacheMaxVoices.label, what: eleven.account.cloneCacheMaxVoices.what, kind: 'count', unit: eleven.account.cloneCacheMaxVoices.unit, zero: eleven.account.cloneCacheMaxVoices.zero }
 			]
 		},
 		{
-			title: 'Voice',
+			title: eleven.voice.title,
 			fields: [
 				{
 					key: 'model_id',
-					label: 'Model',
-					what: 'Which of ElevenLabs’s models speaks.',
+					label: eleven.voice.modelId.label,
+					what: eleven.voice.modelId.what,
 					kind: 'choice',
 					custom: true,
 					choices: [
@@ -220,138 +239,154 @@ const own: Record<string, Section[]> = {
 						{ value: 'eleven_multilingual_v2', label: 'eleven_multilingual_v2' }
 					]
 				},
-				{ key: 'voice_settings.stability', label: 'Stability', what: 'How consistent a voice is from line to line.', kind: 'percent' },
-				{ key: 'voice_settings.similarity_boost', label: 'Likeness', what: 'How closely a voice keeps to the sample it was cloned from.', kind: 'percent' },
-				{ key: 'voice_settings.style', label: 'Style', what: 'How much a voice exaggerates its delivery.', kind: 'percent' },
-				{ key: 'voice_settings.use_speaker_boost', label: 'Speaker boost', what: 'Make voices clearer.', kind: 'switch' },
-				{ key: 'use_request_context', label: 'Earlier lines as context', what: 'Send a speaker’s earlier lines with each request, for a steadier delivery. Only eleven_v4_turbo uses it, and lines are then made one at a time.', kind: 'switch' },
-				{ key: 'output_format', label: 'Audio format', what: 'The audio ElevenLabs sends back. Streaming needs a PCM format.', kind: 'text', placeholder: 'pcm_16000' },
-				{ key: 'optimize_streaming_latency', label: 'Speed over quality', what: 'From 0 to 4: higher starts speech sooner, at some cost to quality.', kind: 'count', min: 0, max: 4 }
+				{ key: 'voice_settings.stability', label: eleven.voice.voiceSettingsStability.label, what: eleven.voice.voiceSettingsStability.what, kind: 'percent' },
+				{ key: 'voice_settings.similarity_boost', label: eleven.voice.voiceSettingsSimilarityBoost.label, what: eleven.voice.voiceSettingsSimilarityBoost.what, kind: 'percent' },
+				{ key: 'voice_settings.style', label: eleven.voice.voiceSettingsStyle.label, what: eleven.voice.voiceSettingsStyle.what, kind: 'percent' },
+				{ key: 'voice_settings.use_speaker_boost', label: eleven.voice.voiceSettingsUseSpeakerBoost.label, what: eleven.voice.voiceSettingsUseSpeakerBoost.what, kind: 'switch' },
+				{ key: 'use_request_context', label: eleven.voice.useRequestContext.label, what: eleven.voice.useRequestContext.what, kind: 'switch' },
+				{ key: 'output_format', label: eleven.voice.outputFormat.label, what: eleven.voice.outputFormat.what, kind: 'text', placeholder: 'pcm_16000' },
+				{ key: 'optimize_streaming_latency', label: eleven.voice.optimizeStreamingLatency.label, what: eleven.voice.optimizeStreamingLatency.what, kind: 'count', min: 0, max: 4 }
 			]
 		}
 	],
-	xtts: [{ title: 'Voice', fields: [{ key: 'enable_live_cloning', label: 'Clone as needed', what: 'Clone a voice from its sample the first time it’s used, and keep it for next time.', kind: 'switch' }] }],
+	xtts: [{ title: eng.xtts.voice.title, fields: [{ key: 'enable_live_cloning', label: eng.xtts.voice.enableLiveCloning.label, what: eng.xtts.voice.enableLiveCloning.what, kind: 'switch' }] }],
 	zonos: [
 		{
-			title: 'Voice',
+			title: zonos.voice.title,
 			fields: [
 				{
 					key: 'model',
-					label: 'Model',
-					what: 'Which Zonos model speaks.',
+					label: zonos.voice.model.label,
+					what: zonos.voice.model.what,
 					kind: 'choice',
 					custom: true,
 					choices: [
-						{ value: 'Zyphra/Zonos-v0.1-hybrid', label: 'Hybrid' },
-						{ value: 'Zyphra/Zonos-v0.1-transformer', label: 'Transformer' }
+						{ value: 'Zyphra/Zonos-v0.1-hybrid', label: zonos.voice.model.choices.zyphraZonosV01Hybrid.label },
+						{ value: 'Zyphra/Zonos-v0.1-transformer', label: zonos.voice.model.choices.zyphraZonosV01Transformer.label }
 					]
 				},
-				tune('speaking_rate', 'Speed', 'How fast lines are spoken. Lower is slower.', 0.1, 50),
-				tune('pitch_std', 'Pitch variation', 'How much the pitch moves. Higher is more varied.'),
-				tune('cfg_scale', 'Guidance', 'How closely speech follows the voice and mood it’s given.', 1, 20),
-				tune('vq_score', 'VQ score', 'Trades audio quality against speed.'),
-				tune('dnsmos_overall', 'Clarity target', 'The audio quality aimed for, from 1 to 5.', 1, 5),
-				{ key: 'fmax', label: 'Highest frequency', what: 'The highest frequency in the audio.', kind: 'count', unit: 'Hz' },
-				{ key: 'denoise_speaker', label: 'Clean the sample', what: 'Remove noise from a voice’s sample before cloning it.', kind: 'switch' },
-				{ key: 'randomize_seed', label: 'New seed each line', what: 'Vary every line, rather than repeating the same delivery.', kind: 'switch' },
-				{ key: 'unconditional_keys', label: 'Unconditioned', what: 'Conditions Zonos leaves for itself to decide, by name.', kind: 'lines', noun: ['condition', 'conditions'] }
+				tune('speaking_rate', zonos.voice.speakingRate, 0.1, 50),
+				tune('pitch_std', zonos.voice.pitchStd),
+				tune('cfg_scale', zonos.voice.cfgScale, 1, 20),
+				tune('vq_score', zonos.voice.vqScore),
+				tune('dnsmos_overall', zonos.voice.dnsmosOverall, 1, 5),
+				{ key: 'fmax', label: zonos.voice.fmax.label, what: zonos.voice.fmax.what, kind: 'count', unit: zonos.voice.fmax.unit },
+				{ key: 'denoise_speaker', label: zonos.voice.denoiseSpeaker.label, what: zonos.voice.denoiseSpeaker.what, kind: 'switch' },
+				{ key: 'randomize_seed', label: zonos.voice.randomizeSeed.label, what: zonos.voice.randomizeSeed.what, kind: 'switch' },
+				{ key: 'unconditional_keys', label: zonos.voice.unconditionalKeys.label, what: zonos.voice.unconditionalKeys.what, kind: 'lines', noun: zonos.voice.unconditionalKeys.noun }
 			]
 		},
 		{
-			title: 'Sampling',
+			title: zonos.sampling.title,
 			fields: [
-				tune('top_p', 'Top P', 'A sampling setting. 0 leaves it off.', 0, 1),
-				tune('min_k', 'Min K', 'A sampling setting. 0 leaves it off.'),
-				tune('min_p', 'Min P', 'A sampling setting. 0 leaves it off.', 0, 1),
-				tune('linear', 'Linear', 'A sampling setting.'),
-				tune('confidence', 'Confidence', 'A sampling setting.'),
-				tune('quadratic', 'Quadratic', 'A sampling setting.')
+				tune('top_p', zonos.sampling.topP, 0, 1),
+				tune('min_k', zonos.sampling.minK),
+				tune('min_p', zonos.sampling.minP, 0, 1),
+				tune('linear', zonos.sampling.linear),
+				tune('confidence', zonos.sampling.confidence),
+				tune('quadratic', zonos.sampling.quadratic)
 			]
 		}
 	],
 	chatterbox: [
 		{
-			title: 'Voice',
+			title: chatterbox.voice.title,
 			fields: [
-				tune('exaggeration', 'Expressiveness', 'How dramatic emotions sound. Higher is more expressive.'),
-				tune('cfg_weight', 'Pace', 'How the pace of speech is held.', 0, 1),
-				tune('temperature', 'Variety', 'How much each line varies.', 0.05, 5),
-				{ key: 'seed', label: 'Seed', what: 'Repeat the same delivery for the same line. At -1, every line varies.', kind: 'count' },
-				{ key: 'voice_sample_rate', label: 'Sample rate', what: 'The quality voice samples are sent at for cloning.', kind: 'count', min: 8000, max: 48000, unit: 'Hz' }
+				tune('exaggeration', chatterbox.voice.exaggeration),
+				tune('cfg_weight', chatterbox.voice.cfgWeight, 0, 1),
+				tune('temperature', chatterbox.voice.temperature, 0.05, 5),
+				{ key: 'seed', label: chatterbox.voice.seed.label, what: chatterbox.voice.seed.what, kind: 'count' },
+				{ key: 'voice_sample_rate', label: chatterbox.voice.voiceSampleRate.label, what: chatterbox.voice.voiceSampleRate.what, kind: 'count', min: 8000, max: 48000, unit: chatterbox.voice.voiceSampleRate.unit }
 			]
 		},
-		{ title: 'Sampling', fields: [tune('min_p', 'Min P', 'A sampling setting.', 0, 1), tune('top_p', 'Top P', 'A sampling setting.', 0, 1), tune('repetition_penalty', 'Repetition penalty', 'Discourages the same sounds repeating.')] }
+		{ title: chatterbox.sampling.title, fields: [tune('min_p', chatterbox.sampling.minP, 0, 1), tune('top_p', chatterbox.sampling.topP, 0, 1), tune('repetition_penalty', chatterbox.sampling.repetitionPenalty)] }
 	],
 	higgs: [
 		{
-			title: 'Voice',
-			fields: [{ key: 'model', label: 'Model', what: 'Which model the server uses.', kind: 'text' }, tune('temperature', 'Variety', 'How much each line varies.', 0.05, 5), { key: 'enable_tag_propagation', label: 'Carry tags on', what: 'A tag for emotion, style, or pace in one sentence of a reply carries on to the sentences after it.', kind: 'switch' }]
+			title: higgs.title,
+			fields: [
+				{ key: 'model', label: higgs.model.label, what: higgs.model.what, kind: 'text' },
+				tune('temperature', higgs.temperature, 0.05, 5),
+				{ key: 'enable_tag_propagation', label: higgs.enableTagPropagation.label, what: higgs.enableTagPropagation.what, kind: 'switch' }
+			]
 		}
 	],
 	'openai-compatible': [
 		{
-			title: 'Account',
+			title: openai.account.title,
 			fields: [
-				{ key: 'service_profile', label: 'Service', what: 'Your own server, or Boson.ai’s Higgs, whose address and model are fixed.', kind: 'choice', custom: true, choices: [{ value: 'self_hosted', label: 'Your own server' }] },
-				{ key: 'api_key', label: 'Key', what: 'Boson.ai’s key, or a token your own server asks for. Leave it empty if it asks for none.', kind: 'secret' }
+				{ key: 'service_profile', label: openai.account.serviceProfile.label, what: openai.account.serviceProfile.what, kind: 'choice', custom: true, choices: [{ value: 'self_hosted', label: openai.account.serviceProfile.choices.selfHosted.label }] },
+				{ key: 'api_key', label: openai.account.apiKey.label, what: openai.account.apiKey.what, kind: 'secret' }
 			]
 		},
 		{
-			title: 'Voice',
+			title: openai.voice.title,
 			fields: [
-				{ key: 'model', label: 'Model', what: 'Which model the service uses.', kind: 'text' },
-				tune('temperature', 'Variety', 'How much each line varies.'),
-				tune('speed', 'Speed', 'How fast lines are spoken. 1 is normal.', 0.25, 4),
-				tune('top_p', 'Top P', 'A sampling setting.'),
-				{ key: 'top_k', label: 'Top K', what: 'A sampling setting.', kind: 'count' },
-				{ key: 'transcribe_missing_reference_samples', label: 'Transcribe samples', what: 'When a voice’s sample has no transcript, make one with your speech recognition. Off, your own server gets an empty transcript.', kind: 'switch' },
-				{ key: 'enable_higgs_tags', label: 'Higgs tags', what: 'Turn SkyrimNet’s tags into Higgs’s own. Switch off for a model whose tags are written differently.', kind: 'switch' },
-				{ key: 'enable_tag_propagation', label: 'Carry tags on', what: 'A tag for emotion, style, or pace in one sentence of a reply carries on to the sentences after it.', kind: 'switch' }
+				{ key: 'model', label: openai.voice.model.label, what: openai.voice.model.what, kind: 'text' },
+				tune('temperature', openai.voice.temperature),
+				tune('speed', openai.voice.speed, 0.25, 4),
+				tune('top_p', openai.voice.topP),
+				{ key: 'top_k', label: openai.voice.topK.label, what: openai.voice.topK.what, kind: 'count' },
+				{ key: 'transcribe_missing_reference_samples', label: openai.voice.transcribeMissingReferenceSamples.label, what: openai.voice.transcribeMissingReferenceSamples.what, kind: 'switch' },
+				{ key: 'enable_higgs_tags', label: openai.voice.enableHiggsTags.label, what: openai.voice.enableHiggsTags.what, kind: 'switch' },
+				{ key: 'enable_tag_propagation', label: openai.voice.enableTagPropagation.label, what: openai.voice.enableTagPropagation.what, kind: 'switch' }
 			]
 		}
 	]
 };
 
 // The settings for what's said, and voices to fall back on, every engine has.
+const tags = eng.tags;
+const say = eng.pronunciation.pronunciationDictionary;
+const narrative = eng.narration;
+const fallback = eng.fallbackVoices;
 const shared: Section[] = [
 	{
-		title: 'Tags',
-		what: 'Tags the model writes into a line, such as [sighs], for how it’s spoken.',
+		title: tags.title,
+		what: tags.what,
 		fields: [
-			{ key: 'enable_audio_tags', label: 'Use tags', what: 'Pass tags on to the engine. Only engines that understand them do anything with them.', kind: 'switch' },
-			{ key: 'allowed_audio_tags', label: 'Allowed tags', what: 'The tags passed on; others are taken out of the line.', kind: 'lines', noun: ['tag', 'tags'] }
+			{ key: 'enable_audio_tags', label: tags.enableAudioTags.label, what: tags.enableAudioTags.what, kind: 'switch' },
+			{ key: 'allowed_audio_tags', label: tags.allowedAudioTags.label, what: tags.allowedAudioTags.what, kind: 'lines', noun: tags.allowedAudioTags.noun }
 		]
 	},
 	{
-		title: 'Pronunciation',
+		title: eng.pronunciation.title,
 		fields: [
 			{
 				key: 'pronunciation_dictionary',
-				label: 'Pronunciations',
-				what: 'Words the engine says wrong, each spelled the way it should sound.',
+				label: say.label,
+				what: say.what,
 				kind: 'pairs',
-				columns: ['Word', 'Say it as'],
+				columns: [say.columns.first, say.columns.second],
 				pairKeys: ['original', 'replacement'],
-				noun: ['word', 'words']
+				noun: say.noun,
+				add: say.add
 			}
 		]
 	},
 	{
-		title: 'Narration',
+		title: narrative.title,
 		fields: [
-			{ key: 'narrative.enabled', label: 'Speak narration', what: 'Speak the narrator’s lines through this engine.', kind: 'switch' },
-			{ key: 'narrative.use_narrator_voice', label: 'Narrator’s voice', what: 'Narrate in a narrator’s voice of its own.', kind: 'switch' },
-			{ key: 'narrative.show_narrative_in_subtitles', label: 'Narration subtitles', what: 'Show narration as subtitles too.', kind: 'switch' }
+			{ key: 'narrative.enabled', label: narrative.narrativeEnabled.label, what: narrative.narrativeEnabled.what, kind: 'switch' },
+			{ key: 'narrative.use_narrator_voice', label: narrative.narrativeUseNarratorVoice.label, what: narrative.narrativeUseNarratorVoice.what, kind: 'switch' },
+			{ key: 'narrative.show_narrative_in_subtitles', label: narrative.narrativeShowNarrativeInSubtitles.label, what: narrative.narrativeShowNarrativeInSubtitles.what, kind: 'switch' }
 		]
 	},
 	{
-		title: 'Fallback voices',
-		what: 'Voices used when a character’s own voice can’t be made.',
+		title: fallback.title,
+		what: fallback.what,
 		fields: [
-			{ key: 'voice_fallback.enabled', label: 'Fall back', what: 'Speak in a fallback voice when a character’s own fails, rather than not at all.', kind: 'switch' },
-			{ key: 'voice_fallback.default_fallback_voice_male', label: 'Men', what: 'The voice type a man falls back to, when his race has none below.', kind: 'text', placeholder: 'malecommoner' },
-			{ key: 'voice_fallback.default_fallback_voice_female', label: 'Women', what: 'The voice type a woman falls back to, when her race has none below.', kind: 'text', placeholder: 'femaleeventoned' },
-			{ key: 'voice_fallback.race_gender_fallbacks', label: 'By race', what: 'The voice type each race and gender falls back to, before the two above.', kind: 'map', columns: ['Race and gender', 'Voice type'], noun: ['voice', 'voices'] }
+			{ key: 'voice_fallback.enabled', label: fallback.voiceFallbackEnabled.label, what: fallback.voiceFallbackEnabled.what, kind: 'switch' },
+			{ key: 'voice_fallback.default_fallback_voice_male', label: fallback.voiceFallbackDefaultFallbackVoiceMale.label, what: fallback.voiceFallbackDefaultFallbackVoiceMale.what, kind: 'text', placeholder: 'malecommoner' },
+			{ key: 'voice_fallback.default_fallback_voice_female', label: fallback.voiceFallbackDefaultFallbackVoiceFemale.label, what: fallback.voiceFallbackDefaultFallbackVoiceFemale.what, kind: 'text', placeholder: 'femaleeventoned' },
+			{
+				key: 'voice_fallback.race_gender_fallbacks',
+				label: fallback.voiceFallbackRaceGenderFallbacks.label,
+				what: fallback.voiceFallbackRaceGenderFallbacks.what,
+				kind: 'map',
+				columns: [fallback.voiceFallbackRaceGenderFallbacks.columns.first, fallback.voiceFallbackRaceGenderFallbacks.columns.second],
+				noun: fallback.voiceFallbackRaceGenderFallbacks.noun
+			}
 		]
 	}
 ];
@@ -361,121 +396,126 @@ export function engineFeature(e: Engine): Feature {
 	return { id: `engines/${e.id}`, file: e.file, title: e.label, what: e.what, sections: [connection(e), ...(own[e.id] ?? []), ...shared] };
 }
 
+const backends = m.features.speechToText.recognizer.backend.choices;
 const sttBackends = [
-	{ value: 'whisper', label: 'Whisper', what: 'runs on your machine' },
-	{ value: 'parakeet', label: 'Parakeet', what: 'runs on your machine, and tells languages apart itself' },
-	{ value: 'external_whisper', label: 'Whisper service', what: 'any OpenAI-style transcription API; a hosted one needs a key' },
-	{ value: 'fateless', label: 'Fateless', what: 'fateless.ai, with an account there' },
-	{ value: 'none', label: 'None', what: 'no microphone; you can still type' }
+	{ value: 'whisper', label: backends.whisper.label, what: backends.whisper.what },
+	{ value: 'parakeet', label: backends.parakeet.label, what: backends.parakeet.what },
+	{ value: 'external_whisper', label: backends.externalWhisper.label, what: backends.externalWhisper.what },
+	{ value: 'fateless', label: backends.fateless.label, what: backends.fateless.what },
+	{ value: 'none', label: backends.none.label, what: backends.none.what }
 ];
+
+const stt = m.features.speechToText;
 
 export const speechToText: Feature = {
 	id: 'speech-to-text',
 	file: 'STT',
-	title: 'Speech to text',
-	what: 'How what you say into your microphone becomes text for characters to answer: which recognizer listens, and when it decides you’ve finished speaking.',
+	title: stt.title,
+	what: stt.what,
 	sections: [
 		{
-			title: 'Recognizer',
+			title: stt.recognizer.title,
 			fields: [
-				{ key: 'backend', label: 'Recognizer', what: 'What turns your speech into text.', kind: 'choice', custom: true, choices: sttBackends },
-				{ key: 'language', label: 'Language', what: 'The language you speak, as a two-letter code. Whisper also takes auto-detect.', kind: 'text', placeholder: 'en' },
-				{ key: 'name_hints', label: 'Name hints', what: 'Tell the recognizer the names of you, nearby and pinned characters, and nearby places, so they come back spelled right. The stt_hints prompt sets what’s sent. Whisper on your machine has its own switch, under Whisper.', kind: 'switch' },
-				{ key: 'enable_partial_results', label: 'Text as you speak', what: 'Show what’s been recognized so far while you’re still speaking.', kind: 'switch' }
+				{ key: 'backend', label: stt.recognizer.backend.label, what: stt.recognizer.backend.what, kind: 'choice', custom: true, choices: sttBackends },
+				{ key: 'language', label: stt.recognizer.language.label, what: stt.recognizer.language.what, kind: 'text', placeholder: 'en' },
+				{ key: 'name_hints', label: stt.recognizer.nameHints.label, what: stt.recognizer.nameHints.what, kind: 'switch' },
+				{ key: 'enable_partial_results', label: stt.recognizer.enablePartialResults.label, what: stt.recognizer.enablePartialResults.what, kind: 'switch' }
 			]
 		},
 		{
-			title: 'Whisper',
-			what: 'When the recognizer is Whisper.',
+			title: stt.whisper.title,
+			what: stt.whisper.what,
 			fields: [
-				{ key: 'whisper.name_hints', label: 'Name hints', what: 'Send Whisper the names, as above. Off unless set: with the names sent, Whisper can sometimes turn a whole message into a stray word.', kind: 'switch' },
+				{ key: 'whisper.name_hints', label: stt.whisper.whisperNameHints.label, what: stt.whisper.whisperNameHints.what, kind: 'switch' },
 				{
 					key: 'whisper.model',
-					label: 'Model',
-					what: 'Larger models are more accurate, and slower. A model is downloaded the first time it’s used.',
+					label: stt.whisper.whisperModel.label,
+					what: stt.whisper.whisperModel.what,
 					kind: 'choice',
 					custom: true,
 					choices: ['tiny', 'base', 'small', 'medium', 'large-v1', 'large-v2', 'large-v3', 'large-v3-turbo'].map((v) => ({ value: v, label: v }))
 				},
-				{ key: 'whisper.use_whisper_finetune', label: 'Skyrim’s version', what: 'Use a version of the model trained for the game’s words, where there is one.', kind: 'switch' },
-				{ key: 'whisper.use_gpu', label: 'Graphics card', what: 'Run on the graphics card rather than the processor.', kind: 'switch' },
-				{ key: 'whisper.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count' },
-				{ key: 'whisper.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count' },
-				{ key: 'whisper.input_sample_rate', label: 'Sample rate', what: 'The sample rate of the microphone’s audio as it reaches Whisper.', kind: 'count', unit: 'Hz' }
+				{ key: 'whisper.use_whisper_finetune', label: stt.whisper.whisperUseWhisperFinetune.label, what: stt.whisper.whisperUseWhisperFinetune.what, kind: 'switch' },
+				{ key: 'whisper.use_gpu', label: stt.whisper.whisperUseGpu.label, what: stt.whisper.whisperUseGpu.what, kind: 'switch' },
+				{ key: 'whisper.gpu_device_index', label: stt.whisper.whisperGpuDeviceIndex.label, what: stt.whisper.whisperGpuDeviceIndex.what, kind: 'count' },
+				{ key: 'whisper.threads', label: stt.whisper.whisperThreads.label, what: stt.whisper.whisperThreads.what, kind: 'count' },
+				{ key: 'whisper.input_sample_rate', label: stt.whisper.whisperInputSampleRate.label, what: stt.whisper.whisperInputSampleRate.what, kind: 'count', unit: stt.whisper.whisperInputSampleRate.unit }
 			]
 		},
 		{
-			title: 'Parakeet',
-			what: 'When the recognizer is Parakeet.',
+			title: stt.parakeet.title,
+			what: stt.parakeet.what,
 			fields: [
 				{
 					key: 'parakeet.model',
-					label: 'Model',
-					what: 'Smaller versions are faster; larger ones are more accurate.',
+					label: stt.parakeet.parakeetModel.label,
+					what: stt.parakeet.parakeetModel.what,
 					kind: 'choice',
 					custom: true,
 					choices: [
-						{ value: 'q8_0', label: 'Q8_0', what: 'recommended' },
+						{ value: 'q8_0', label: 'Q8_0', what: stt.parakeet.parakeetModel.choices.q80.what },
 						{ value: 'q4_k', label: 'Q4_K' },
 						{ value: 'q4_0', label: 'Q4_0' },
-						{ value: 'f16', label: 'F16', what: 'the largest' }
+						{ value: 'f16', label: 'F16', what: stt.parakeet.parakeetModel.choices.f16.what }
 					]
 				},
-				{ key: 'parakeet.use_gpu', label: 'Graphics card', what: 'Run on the graphics card rather than the processor.', kind: 'switch' },
-				{ key: 'parakeet.gpu_device_index', label: 'Card', what: 'Which graphics card, counting from 0.', kind: 'count' },
-				{ key: 'parakeet.threads', label: 'Threads', what: 'How many of the processor’s threads it uses.', kind: 'count' }
+				{ key: 'parakeet.use_gpu', label: stt.parakeet.parakeetUseGpu.label, what: stt.parakeet.parakeetUseGpu.what, kind: 'switch' },
+				{ key: 'parakeet.gpu_device_index', label: stt.parakeet.parakeetGpuDeviceIndex.label, what: stt.parakeet.parakeetGpuDeviceIndex.what, kind: 'count' },
+				{ key: 'parakeet.threads', label: stt.parakeet.parakeetThreads.label, what: stt.parakeet.parakeetThreads.what, kind: 'count' }
 			]
 		},
 		{
-			title: 'Fateless',
-			what: 'When the recognizer is Fateless, through SkyrimNet’s Fateless sign-in.',
+			title: stt.fateless.title,
+			what: stt.fateless.what,
 			fields: [
-				{ key: 'fateless_model', label: 'Model', what: 'Which of Fateless’s transcription models listens.', kind: 'text', placeholder: 'fateless/transcribe' },
-				{ key: 'fateless_streaming', label: 'Stream while talking', what: 'With push-to-talk, send your voice while you hold the key, once it hears you speak, so the text is ready moments after you let go. It costs a little more per minute.', kind: 'switch' }
+				{ key: 'fateless_model', label: stt.fateless.fatelessModel.label, what: stt.fateless.fatelessModel.what, kind: 'text', placeholder: 'fateless/transcribe' },
+				{ key: 'fateless_streaming', label: stt.fateless.fatelessStreaming.label, what: stt.fateless.fatelessStreaming.what, kind: 'switch' }
 			]
 		},
 		{
-			title: 'Whisper service',
-			what: 'When the recognizer is a Whisper service.',
+			title: stt.whisperService.title,
+			what: stt.whisperService.what,
 			fields: [
-				{ key: 'external_whisper.api_endpoint', label: 'Address', what: 'The service’s transcription address.', kind: 'text' },
-				{ key: 'external_whisper.api_key', label: 'Key', what: 'The service’s key. A server of your own may not need one.', kind: 'secret' },
-				{ key: 'external_whisper.model', label: 'Model', what: 'The model as the service names it, such as openai/whisper-1 on OpenRouter or whisper-1 on OpenAI.', kind: 'text' },
-				{ key: 'external_whisper.timeout_ms', label: 'Wait for text', what: 'How long to wait for the service before giving up.', kind: 'count', unit: 'ms' }
+				{ key: 'external_whisper.api_endpoint', label: stt.whisperService.externalWhisperApiEndpoint.label, what: stt.whisperService.externalWhisperApiEndpoint.what, kind: 'text' },
+				{ key: 'external_whisper.api_key', label: stt.whisperService.externalWhisperApiKey.label, what: stt.whisperService.externalWhisperApiKey.what, kind: 'secret' },
+				{ key: 'external_whisper.model', label: stt.whisperService.externalWhisperModel.label, what: stt.whisperService.externalWhisperModel.what, kind: 'text' },
+				{ key: 'external_whisper.timeout_ms', label: stt.whisperService.externalWhisperTimeoutMs.label, what: stt.whisperService.externalWhisperTimeoutMs.what, kind: 'count', unit: stt.whisperService.externalWhisperTimeoutMs.unit }
 			]
 		},
 		{
-			title: 'Open mic',
-			what: 'Listening without a key held down.',
+			title: stt.openMic.title,
+			what: stt.openMic.what,
 			fields: [
-				{ key: 'streaming.silence_threshold', label: 'Speech threshold', what: 'How sure the voice detector must be that a sound is speech, in your microphone and in characters’ voice files.', kind: 'percent' },
-				{ key: 'streaming.silence_duration', label: 'Pause that ends it', what: 'How long you must be quiet before what you said is sent.', kind: 'count', unit: 'ms' },
-				{ key: 'streaming.chunks', label: 'Chunks held', what: 'How many pieces of audio are held at once for recognizing.', kind: 'count' },
-				{ key: 'streaming.openMicVerbose', label: 'Notices', what: 'Show a notice when open mic hears you and when it sends what you said.', kind: 'switch' }
+				{ key: 'streaming.silence_threshold', label: stt.openMic.streamingSilenceThreshold.label, what: stt.openMic.streamingSilenceThreshold.what, kind: 'percent' },
+				{ key: 'streaming.silence_duration', label: stt.openMic.streamingSilenceDuration.label, what: stt.openMic.streamingSilenceDuration.what, kind: 'count', unit: stt.openMic.streamingSilenceDuration.unit },
+				{ key: 'streaming.chunks', label: stt.openMic.streamingChunks.label, what: stt.openMic.streamingChunks.what, kind: 'count' },
+				{ key: 'streaming.openMicVerbose', label: stt.openMic.streamingOpenMicVerbose.label, what: stt.openMic.streamingOpenMicVerbose.what, kind: 'switch' }
 			]
 		}
 	]
 };
 
+const vs = m.features.voiceSamples;
+
 export const voiceSamples: Feature = {
 	id: 'samples',
 	file: 'VoiceSamples',
-	title: 'Voice samples',
-	what: 'The recordings voices are cloned from: which of the game’s own lines may serve as a voice type’s sample, and the sample each voice type uses.',
+	title: vs.title,
+	what: vs.what,
 	sections: [
 		{
-			title: 'Which lines may be samples',
+			title: vs.whichLines.title,
 			fields: [
-				{ key: 'filtering.min_duration_seconds', label: 'Shortest', what: 'Lines shorter than this aren’t used as samples.', kind: 'number' },
-				{ key: 'filtering.max_duration_seconds', label: 'Longest', what: 'Lines longer than this aren’t used as samples.', kind: 'number' },
-				{ key: 'filtering.banned_keywords', label: 'Left out by word', what: 'Lines whose file name has one of these words aren’t used, such as screams, music, and coughs.', kind: 'lines', noun: ['word', 'words'] },
-				{ key: 'filtering.banned_voice_types', label: 'Voice types left out', what: 'Voice types never cloned.', kind: 'lines', noun: ['voice type', 'voice types'] },
-				{ key: 'filtering.excluded_plugins', label: 'Plugins left out', what: 'Game plugins whose lines are left out of the new audio scan and found the older way instead.', kind: 'lines', noun: ['plugin', 'plugins'] }
+				{ key: 'filtering.min_duration_seconds', label: vs.whichLines.filteringMinDurationSeconds.label, what: vs.whichLines.filteringMinDurationSeconds.what, kind: 'number' },
+				{ key: 'filtering.max_duration_seconds', label: vs.whichLines.filteringMaxDurationSeconds.label, what: vs.whichLines.filteringMaxDurationSeconds.what, kind: 'number' },
+				{ key: 'filtering.banned_keywords', label: vs.whichLines.filteringBannedKeywords.label, what: vs.whichLines.filteringBannedKeywords.what, kind: 'lines', noun: vs.whichLines.filteringBannedKeywords.noun },
+				{ key: 'filtering.banned_voice_types', label: vs.whichLines.filteringBannedVoiceTypes.label, what: vs.whichLines.filteringBannedVoiceTypes.what, kind: 'lines', noun: vs.whichLines.filteringBannedVoiceTypes.noun },
+				{ key: 'filtering.excluded_plugins', label: vs.whichLines.filteringExcludedPlugins.label, what: vs.whichLines.filteringExcludedPlugins.what, kind: 'lines', noun: vs.whichLines.filteringExcludedPlugins.noun }
 			]
 		},
 		{
-			title: 'Samples',
-			fields: [{ key: 'voice_types', leaf: 'selected_sample', label: 'Chosen samples', what: 'The recording each voice type is cloned from: a voice file in the game’s data, or an audio file of your own.', kind: 'map', columns: ['Voice type', 'Sample'], noun: ['voice type', 'voice types'] }]
+			title: vs.samples.title,
+			fields: [{ key: 'voice_types', leaf: 'selected_sample', label: vs.samples.voiceTypes.label, what: vs.samples.voiceTypes.what, kind: 'map', columns: [vs.samples.voiceTypes.columns.first, vs.samples.voiceTypes.columns.second], noun: vs.samples.voiceTypes.noun }]
 		}
 	]
 };

@@ -3,6 +3,7 @@
      player first plays. -->
 <script lang="ts">
 	import { ApiError, mediaURL } from '#lib/api/client.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import { clock } from './api.ts';
 
 	let { path, label }: { path: string; label: string } = $props();
@@ -43,14 +44,14 @@
 </script>
 
 <div class="player">
-	<button type="button" class="play" onclick={toggle} aria-label={playing ? `Pause ${label}` : `Play ${label}`} disabled={loading}>
+	<button type="button" class="play" onclick={toggle} aria-label={playing ? m.songs.pause({ label }) : m.songs.play({ label })} disabled={loading}>
 		{#if playing}
 			<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3 2h2v8H3zM7 2h2v8H7z" fill="currentColor" /></svg>
 		{:else}
 			<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M3.5 1.8v8.4L10 6z" fill="currentColor" /></svg>
 		{/if}
 	</button>
-	<input type="range" min="0" max={isFinite(duration) ? duration : 0} step="0.1" value={time} oninput={seek} disabled={!src || !isFinite(duration)} aria-label="Position in {label}" style:--done="{isFinite(duration) && duration ? (time / duration) * 100 : 0}%" />
+	<input type="range" min="0" max={isFinite(duration) ? duration : 0} step="0.1" value={time} oninput={seek} disabled={!src || !isFinite(duration)} aria-label={m.songs.position({ label })} style:--done="{isFinite(duration) && duration ? (time / duration) * 100 : 0}%" />
 	<span class="time muted">{clock(time)} / {src ? clock(duration) : '–:––'}</span>
 	<audio bind:this={audio} {src} preload="metadata" bind:currentTime={time} bind:duration onplay={() => (playing = true)} onpause={() => (playing = false)} onended={() => (playing = false)}></audio>
 </div>

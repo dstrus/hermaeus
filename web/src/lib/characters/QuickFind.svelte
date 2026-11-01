@@ -2,6 +2,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Character } from '#lib/api/types/characters.ts';
+	import { m } from '#lib/copy/messages.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { characterName } from './api.ts';
@@ -40,22 +41,22 @@
 		e.preventDefault();
 	}
 
-	useShortcuts(() => [{ key: '/', label: 'Find', run: open }]);
+	useShortcuts(() => [{ key: '/', label: m.characters.find.shortcut, run: open }]);
 </script>
 
-<dialog bind:this={dialog} aria-label="Find a character" onclick={(e) => e.target === dialog && dialog.close()}>
+<dialog bind:this={dialog} aria-label={m.characters.find.title} onclick={(e) => e.target === dialog && dialog.close()}>
 	<input
 		bind:this={input}
 		bind:value={query}
 		oninput={() => (at = 0)}
 		onkeydown={keys}
-		placeholder="Find a character"
-		aria-label="Character name"
+		placeholder={m.characters.find.title}
+		aria-label={m.characters.find.input}
 		spellcheck="false"
 		autocomplete="off"
 	/>
 	{#if matches.length}
-		<ul role="listbox" aria-label="Matching characters">
+		<ul role="listbox" aria-label={m.characters.find.matches}>
 			{#each matches as c, i (c.uuid)}
 				<li role="option" aria-selected={i === at}>
 					<button type="button" onclick={() => go(c)} onmouseenter={() => (at = i)}>
@@ -65,7 +66,7 @@
 			{/each}
 		</ul>
 	{:else}
-		<p class="muted">No one matches “{query}”.</p>
+		<p class="muted">{m.characters.noMatch({ query })}</p>
 	{/if}
 </dialog>
 
