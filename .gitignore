@@ -13,6 +13,8 @@ coverage.*
 
 # Frontend
 /web/build/
+/site/dist/
+/site/.astro/
 /web/.svelte-kit/
 node_modules/
 .vite/
