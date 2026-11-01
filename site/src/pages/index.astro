@@ -1,0 +1,906 @@
+---
+import Base from '../layouts/Base.astro';
+import Mark from '../components/Mark.astro';
+import Screen from '../components/Screen.astro';
+import Diamond from '../components/Diamond.astro';
+import { downloads, repository, releases, issues, license } from '../links';
+
+import memoriesDark from '../assets/screens/memories-dark.png';
+import memoriesLight from '../assets/screens/memories-light.png';
+import diaryDark from '../assets/screens/diary-dark.png';
+import diaryLight from '../assets/screens/diary-light.png';
+import charactersDark from '../assets/screens/characters-dark.png';
+import charactersLight from '../assets/screens/characters-light.png';
+import historyDark from '../assets/screens/history-dark.png';
+import historyLight from '../assets/screens/history-light.png';
+
+// Screens of the app running on a made-up playthrough, in story order.
+const screens = [
+	{
+		title: 'Memories',
+		text: 'Every memory an NPC holds: what happened, when in the game’s calendar, and how much it mattered to them. Correct one, move it to the NPC it belongs to, or delete what never should have stuck.',
+		dark: memoriesDark,
+		light: memoriesLight,
+		alt: 'Hermaeus showing Hjordis Ashen-Hand’s memories in a table, one selected, with its details beside it.'
+	},
+	{
+		title: 'Diaries',
+		text: 'Each NPC’s diary, as they wrote it. Fix an entry the model got wrong, add one, or remove one.',
+		dark: diaryDark,
+		light: diaryLight,
+		alt: 'Hermaeus showing Hjordis Ashen-Hand’s diary, with the entry about the barrow selected.'
+	},
+	{
+		title: 'Characters',
+		text: 'Everyone SkyrimNet has met in a playthrough, with their stats, their bios, and pins for the ones you keep coming back to.',
+		dark: charactersDark,
+		light: charactersLight,
+		alt: 'Hermaeus listing the characters in a playthrough, with Hjordis Ashen-Hand selected.'
+	},
+	{
+		title: 'History',
+		text: 'What SkyrimNet recorded happening, dated the way the game dates it.',
+		dark: historyDark,
+		light: historyLight,
+		alt: 'Hermaeus listing a playthrough’s events by in-game day.'
+	}
+];
+
+// The rest of what Hermaeus opens, grouped as its own sections column is.
+const rest = [
+	{
+		group: 'Playthrough',
+		pages: [
+			['Bios', 'Edit an NPC’s bio for this playthrough, and restore an earlier version.'],
+			['Knowledge', 'Add what an NPC knows, and edit knowledge packs.'],
+			['Screenshots', 'Read and correct what OmniSight saw in each screenshot.'],
+			['Bard songs', 'Read the words, play the song, and fix or remove it.']
+		]
+	},
+	{
+		group: 'Behavior and memory',
+		pages: [
+			['Prompts', 'Edit SkyrimNet’s prompts as your own copies, with their markup checked before you save.'],
+			['Settings', 'Each settings file compared with SkyrimNet’s defaults, with <span class="changed">what you changed</span> set apart, and changed in place.'],
+			['Quick toggles', 'The switches you flip most, in one place.']
+		]
+	},
+	{
+		group: 'AI and library',
+		pages: [
+			['Models', 'Choose the model for each task, from OpenRouter’s list.'],
+			['Providers', 'Set API keys. A key never reaches the browser, only whether one is set.'],
+			['Plugins', 'Turn SkyrimNet’s plugins on and off, and change their order.'],
+			['Content', 'SkyrimNet’s content records, edited in forms rather than raw YAML.']
+		]
+	}
+];
+
+const safety = [
+	{
+		rule: 'Hands off while Skyrim runs',
+		text: 'SkyrimNet keeps its database open while the game is running, so Hermaeus says <span class="running caps">Skyrim running · read-only</span> and refuses to save until you close it. You can still look around.'
+	},
+	{
+		rule: 'A backup before the first change',
+		text: 'Before the first change to each database in a session, a copy goes to hermaeus-backups in the SkyrimNet folder.'
+	},
+	{
+		rule: 'All or nothing',
+		text: 'Every save happens in one transaction. If any part of it fails, nothing changes.'
+	},
+	{
+		rule: 'Only what you changed',
+		text: 'Files SkyrimNet reads are rewritten with the smallest change that does the job, in SkyrimNet’s own format, with their line endings kept.'
+	},
+	{
+		rule: 'Your machine only',
+		text: 'Hermaeus listens only on 127.0.0.1, and every request has to carry a token from its own page, so other websites open in your browser can’t reach your data.'
+	}
+];
+---
+
+<Base
+	title="Hermaeus: read and edit what SkyrimNet remembers, with Skyrim closed"
+	description="An unofficial, offline dashboard for SkyrimNet. Read and edit memories, diaries, bios, prompts, and settings from your own installation while Skyrim is closed."
+>
+	<a class="skip caps" href="#main">Skip to content</a>
+
+	<header class="top">
+		<a class="brand caps" href="#top" aria-label="Hermaeus, to the top"><Mark size="1.35em" /> Hermaeus</a>
+		<nav class="sections caps" aria-label="On this page">
+			<a href="#screens">What it does</a>
+			<a href="#safety">Safety</a>
+			<a href="#download">Download</a>
+		</nav>
+		<div class="theme caps" role="group" aria-label="Theme">
+			<button type="button" data-theme-choice="system" aria-pressed="true">Auto</button>
+			<button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+			<button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+		</div>
+	</header>
+
+	<main id="main">
+		<section class="hero" id="top" aria-labelledby="name">
+			<div class="offer">
+				<h1 id="name" class="caps">Hermaeus</h1>
+				<p class="hook">Read and edit what SkyrimNet remembers, with Skyrim closed.</p>
+				<p class="sub">Memories, diaries, bios, prompts, and settings, straight from your own installation. No game to launch.</p>
+				<div class="downloads" data-downloads>
+					{
+						downloads.map((d, i) => (
+							<a class:list={['button', { primary: i === 0 }]} href={d.href} data-os={d.os}>
+								<span>
+									<Diamond />
+									<span class="for">Download for </span>
+									{d.label}
+								</span>
+								{d.note && <small>{d.note}</small>}
+							</a>
+						))
+					}
+				</div>
+				<p class="fine">Unofficial. Works with SkyrimNet, isn’t part of it, and isn’t affiliated with or endorsed by Fateless.Ai.</p>
+			</div>
+
+			<figure class="entry" aria-label="A diary entry, as SkyrimNet stores it">
+				<figcaption class="dateline caps">
+					<span class="author">Hjordis Ashen-Hand</span>
+					<span class="when">Tirdas, 4th of Hearthfire, 4E 201 <span aria-hidden="true">·</span> Falkreath <span aria-hidden="true">·</span> Uneasy</span>
+				</figcaption>
+				<blockquote>
+					<p>
+						The stranger paid for three nights and slept for one. Asked about the barrow on the ridge, then asked again as if I hadn’t answered. I told
+						them what I tell everyone: the dead keep to themselves if you keep to yourself. They left before the fog lifted. I’ve moved the good knives
+						back under the bar.
+					</p>
+				</blockquote>
+				<div class="locus">
+					<dl>
+					<div>
+						<dt class="caps">Kept in</dt>
+						<dd>the playthrough’s database</dd>
+					</div>
+					<div>
+						<dt class="caps">Importance</dt>
+						<dd>7</dd>
+					</div>
+					<div>
+						<dt class="caps">Diary entry</dt>
+						<dd>9 of 12</dd>
+					</div>
+					</dl>
+					<a class="see caps" href="#screens">See it in Hermaeus</a>
+				</div>
+				<p class="synthetic caps">From a made-up playthrough</p>
+			</figure>
+		</section>
+
+		<section class="block" id="screens" aria-labelledby="screens-title">
+			<div class="intro">
+				<h2 id="screens-title" class="caps">SkyrimNet writes it down. Hermaeus reads it back.</h2>
+				<p>
+					Everything SkyrimNet remembers about a playthrough is in files on your own machine. Hermaeus opens them in your browser, as one more menu of the
+					game you just closed, and saves your changes back where SkyrimNet will find them.
+				</p>
+			</div>
+			<ol class="shots" data-shots>
+				{
+					screens.map((s, i) => (
+						<li class="shot">
+							<div class="caption">
+								<h3 class="caps">
+									<Diamond />
+									{s.title}
+								</h3>
+								<p>{s.text}</p>
+							</div>
+							<Screen dark={s.dark} light={s.light} alt={s.alt} eager={i === 0} />
+						</li>
+					))
+				}
+			</ol>
+			<p class="synthetic caps">Screens from a made-up playthrough</p>
+		</section>
+
+		<section class="block" id="rest" aria-labelledby="rest-title">
+			<div class="intro">
+				<h2 id="rest-title" class="caps">And the rest of SkyrimNet</h2>
+				<p>The settings and content SkyrimNet’s own dashboard covers, without starting the game to reach them.</p>
+			</div>
+			<table class="items">
+				<caption class="visually-hidden">What else Hermaeus opens</caption>
+				<thead>
+					<tr>
+						<th scope="col" class="caps">Page</th>
+						<th scope="col" class="caps">What you can do there</th>
+					</tr>
+				</thead>
+				{
+					rest.map((g) => (
+						<tbody>
+							<tr class="group">
+								<th scope="colgroup" colspan="2" class="caps">
+									{g.group}
+								</th>
+							</tr>
+							{g.pages.map(([name, text]) => (
+								<tr>
+									<th scope="row" class="caps">
+										{name}
+									</th>
+									<td set:html={text} />
+								</tr>
+							))}
+						</tbody>
+					))
+				}
+			</table>
+		</section>
+
+		<section class="block" id="safety" aria-labelledby="safety-title">
+			<div class="intro">
+				<h2 id="safety-title" class="caps">Before you point it at your saves</h2>
+				<p>Hermaeus changes files SkyrimNet depends on, so it’s careful in exactly these ways.</p>
+			</div>
+			<dl class="rules">
+				{
+					safety.map((s) => (
+						<div>
+							<dt class="caps">{s.rule}</dt>
+							<dd set:html={s.text} />
+						</div>
+					))
+				}
+			</dl>
+		</section>
+
+		<section class="block" id="download" aria-labelledby="download-title">
+			<div class="intro">
+				<h2 id="download-title" class="caps">Download</h2>
+				<p>
+					One program for each system. Put it in your Skyrim folder or beside Mod Organizer 2, and run it: it opens in your browser and finds SkyrimNet
+					from there. If it can’t, it asks you where SkyrimNet is.
+				</p>
+			</div>
+			<ul class="systems">
+				{
+					downloads.map((d) => (
+						<li data-os={d.os}>
+							<span class="os caps">
+								<Diamond />
+								{d.label}
+							</span>
+							<span class="note">{d.note}</span>
+							<a class="button" href={d.href} data-os={d.os}>
+								Download<span class="visually-hidden"> for {d.label}</span>
+							</a>
+						</li>
+					))
+				}
+			</ul>
+			<p class="after">
+				Every release is on <a href={releases}>GitHub</a>, with what changed in it. Close Skyrim before you save anything; Hermaeus will tell you if you
+				haven’t.
+			</p>
+		</section>
+	</main>
+
+	<footer class="foot">
+		<Mark size="2.5rem" />
+		<div class="legal">
+			<p>
+				Hermaeus works with SkyrimNet but isn’t part of it, and isn’t affiliated with or endorsed by Fateless.Ai. It includes none of SkyrimNet’s files.
+				The Elder Scrolls V: Skyrim is a trademark of ZeniMax Media Inc.
+			</p>
+			<p>Released under the <a href={license}>MIT License</a>. Copyright © 2026 Davey Strus.</p>
+		</div>
+		<nav class="links caps" aria-label="Elsewhere">
+			<a href={repository}>Source</a>
+			<a href={releases}>Releases</a>
+			<a href={issues}>Issues</a>
+		</nav>
+	</footer>
+
+	<nav class="hints caps" aria-label="Keyboard shortcuts">
+		<button type="button" data-key="d"><kbd>D</kbd>Download</button>
+		<button type="button" data-key="s"><kbd>S</kbd>Safety</button>
+		<button type="button" data-key="n"><kbd>N</kbd>Next</button>
+	</nav>
+</Base>
+
+<script>
+	// The theme switch: Auto follows the OS; Dark and Light are remembered.
+	const root = document.documentElement;
+	const choices = document.querySelectorAll<HTMLButtonElement>('[data-theme-choice]');
+	function showTheme() {
+		const current = root.dataset.theme ?? 'system';
+		choices.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeChoice === current)));
+	}
+	choices.forEach((b) =>
+		b.addEventListener('click', () => {
+			const t = b.dataset.themeChoice;
+			if (t === 'dark' || t === 'light') root.dataset.theme = t;
+			else delete root.dataset.theme;
+			try {
+				if (t === 'dark' || t === 'light') localStorage.setItem('hermaeus-theme', t);
+				else localStorage.removeItem('hermaeus-theme');
+			} catch {}
+			showTheme();
+		})
+	);
+	showTheme();
+
+	// The visitor's own system leads the downloads.
+	const platform = ((navigator as any).userAgentData?.platform ?? navigator.platform ?? '').toLowerCase();
+	const os = platform.startsWith('mac') ? 'macos' : platform.includes('linux') ? 'linux' : platform.startsWith('win') ? 'windows' : '';
+	const list = document.querySelector('[data-downloads]');
+	const mine = os && list?.querySelector<HTMLElement>(`[data-os="${os}"]`);
+	if (list && mine && mine !== list.firstElementChild) {
+		list.querySelector('.primary')?.classList.remove('primary');
+		mine.classList.add('primary');
+		list.prepend(mine);
+	}
+	const row = os && document.querySelector<HTMLElement>(`.systems [data-os="${os}"]`);
+	if (row) {
+		row.classList.add('mine');
+		row.querySelector('.button')?.classList.add('primary');
+		row.parentElement?.prepend(row);
+	}
+
+	// The screen nearest the middle of the window is lit; the rest dim.
+	const shots = document.querySelector('[data-shots]');
+	if (shots && 'IntersectionObserver' in window) {
+		const items = [...shots.children];
+		const io = new IntersectionObserver(
+			(entries) => {
+				for (const e of entries) if (e.isIntersecting) items.forEach((li) => li.classList.toggle('lit', li === e.target));
+			},
+			{ rootMargin: '-45% 0px -45% 0px' }
+		);
+		items.forEach((li) => io.observe(li));
+		shots.classList.add('dimming');
+	}
+
+	// The hint strip: every hint is a real shortcut, and clicking it does the same.
+	const order = ['top', 'screens', 'rest', 'safety', 'download'];
+	function next() {
+		const y = window.scrollY + 8;
+		const id = order.find((id) => (document.getElementById(id)?.offsetTop ?? 0) > y);
+		go(id ?? 'top');
+	}
+	function go(id: string) {
+		document.getElementById(id)?.scrollIntoView();
+		if (id === 'download') document.querySelector<HTMLElement>('#download .button')?.focus({ preventScroll: true });
+	}
+	const actions: Record<string, () => void> = { d: () => go('download'), s: () => go('safety'), n: next };
+	document.querySelectorAll<HTMLButtonElement>('.hints [data-key]').forEach((b) => b.addEventListener('click', () => actions[b.dataset.key!]()));
+	document.addEventListener('keydown', (e) => {
+		if (e.metaKey || e.ctrlKey || e.altKey || e.defaultPrevented) return;
+		const t = e.target as HTMLElement;
+		if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+		const run = actions[e.key.toLowerCase()];
+		if (run) {
+			e.preventDefault();
+			run();
+		}
+	});
+</script>
+
+<style>
+	.skip {
+		position: absolute;
+		left: var(--gutter);
+		top: -4rem;
+		padding: var(--space-2) var(--space-3);
+		background: var(--accent);
+		color: var(--on-accent);
+		z-index: 3;
+	}
+	.skip:focus {
+		top: var(--space-2);
+	}
+
+	/* The top bar, as the app's: the name at left, the rest at right. */
+	.top {
+		display: flex;
+		align-items: center;
+		gap: var(--space-6);
+		padding: var(--space-4) var(--gutter);
+		border-bottom: 1px solid var(--rule);
+	}
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		font-size: var(--step-2);
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.sections {
+		display: flex;
+		gap: var(--space-6);
+		margin-left: auto;
+		font-size: var(--step-1);
+	}
+	.sections a {
+		color: var(--muted);
+		text-decoration: none;
+	}
+	.sections a:hover {
+		color: var(--ink);
+	}
+	.theme {
+		display: flex;
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--radius);
+		overflow: hidden;
+	}
+	.theme button {
+		font: 500 var(--step--1) / 1 var(--font-label);
+		letter-spacing: var(--track);
+		text-transform: uppercase;
+		color: var(--muted);
+		background: none;
+		border: 0;
+		padding: var(--space-2) var(--space-3);
+		cursor: pointer;
+	}
+	.theme button:hover {
+		color: var(--ink);
+	}
+	.theme button[aria-pressed='true'] {
+		background: var(--accent);
+		color: var(--on-accent);
+		font-weight: 600;
+	}
+
+	/* The first viewport: the entry leads, the offer stands beside it. */
+	.hero {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(19rem, 26rem);
+		grid-template-areas: 'entry offer';
+		column-gap: clamp(var(--space-6), 6vw, 6rem);
+		align-items: center;
+		min-height: calc(100svh - 4.5rem - 2.75rem);
+		padding: var(--space-8) var(--gutter) var(--space-9);
+	}
+	@media (min-width: 80rem) {
+		.hero {
+			grid-template-columns: minmax(0, 1fr) 28rem;
+		}
+	}
+	.offer {
+		grid-area: offer;
+		container-type: inline-size;
+		border-left: 1px solid var(--rule-strong);
+		padding-left: clamp(var(--space-5), 3vw, var(--space-7));
+	}
+	h1 {
+		font-size: min(var(--step-5), 24cqi); /* the name fills its column, never past it */
+		font-weight: 600;
+		line-height: 0.9;
+		letter-spacing: 0.06em;
+		margin-left: -0.04em;
+	}
+	.hook {
+		font-size: var(--step-2);
+		line-height: 1.35;
+		margin-top: var(--space-5);
+		text-wrap: balance;
+	}
+	.sub {
+		color: var(--muted);
+		margin-top: var(--space-3);
+		max-width: 34ch;
+	}
+	.downloads {
+		display: grid;
+		gap: var(--space-2);
+		margin-top: var(--space-6);
+	}
+	.downloads .button:not(.primary) .for {
+		display: none;
+	}
+	.fine {
+		margin-top: var(--space-5);
+		font-size: var(--step--1);
+		color: var(--muted);
+		max-width: 38ch;
+	}
+
+	.entry {
+		grid-area: entry;
+		max-width: 46rem;
+	}
+	.dateline {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1) var(--space-4);
+		align-items: baseline;
+		padding-bottom: var(--space-3);
+		border-bottom: 1px solid var(--rule-strong);
+		color: var(--muted);
+		font-size: var(--step--1);
+	}
+	.author {
+		color: var(--ink);
+		font-size: var(--step-0);
+		font-weight: 500;
+	}
+	blockquote p {
+		padding-top: var(--space-6);
+		font-size: var(--step-3);
+		line-height: 1.45;
+		max-width: 32ch;
+		text-wrap: pretty;
+	}
+	.locus {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--space-2) var(--space-6);
+		margin-top: var(--space-7);
+		padding-top: var(--space-3);
+		border-top: 1px solid var(--rule);
+	}
+	.locus dl {
+		display: contents;
+	}
+	.locus dl div {
+		display: flex;
+		gap: var(--space-2);
+		align-items: baseline;
+	}
+	.locus dt {
+		color: var(--muted);
+		font-size: var(--step--1);
+	}
+	.see {
+		margin-left: auto;
+		color: var(--accent);
+		font-size: var(--step--1);
+		text-decoration: underline;
+	}
+	.synthetic {
+		margin-top: var(--space-3);
+		color: var(--muted);
+		font-size: var(--step--1);
+	}
+
+	/* The diamond marks what's selected: the lit screen, the visitor's system. */
+	:global(.diamond) {
+		display: none;
+		color: var(--accent);
+		margin-right: 0.5em;
+		vertical-align: 0.15em;
+	}
+	.downloads .primary :global(.diamond),
+	.dimming .shot.lit :global(.diamond),
+	.systems .mine :global(.diamond) {
+		display: inline-block;
+	}
+	.downloads .primary :global(.diamond) {
+		color: var(--on-accent);
+	}
+	.systems .mine .os {
+		color: var(--ink);
+	}
+	.systems .mine {
+		background: var(--select);
+	}
+	/* As in the app's tables, the diamond has a column of its own. */
+	.systems li {
+		position: relative;
+	}
+	.systems :global(.diamond) {
+		position: absolute;
+		left: var(--space-3);
+		top: 50%;
+		translate: 0 -50%;
+		margin: 0;
+	}
+
+	/* Sections share one rhythm: a title and its lead, then the material. */
+	.block {
+		padding: var(--space-9) var(--gutter) 0;
+	}
+	.intro {
+		max-width: 52rem;
+		margin-bottom: var(--space-8);
+	}
+	h2 {
+		font-size: var(--step-4);
+		font-weight: 600;
+		line-height: 1;
+		text-wrap: balance;
+	}
+	.intro p {
+		margin-top: var(--space-5);
+		font-size: var(--step-1);
+		color: var(--muted);
+		max-width: 60ch;
+	}
+
+	/* The screens: a caption beside each, the one in view lit. */
+	.shots {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: var(--space-9);
+	}
+	.shot {
+		display: grid;
+		grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+		gap: clamp(var(--space-5), 4vw, var(--space-8));
+		align-items: start;
+	}
+	.caption {
+		position: sticky;
+		top: var(--space-6);
+		padding-top: var(--space-3);
+		border-top: 1px solid var(--rule-strong);
+	}
+	h3 {
+		font-size: var(--step-2);
+		font-weight: 600;
+	}
+	.caption p {
+		margin-top: var(--space-3);
+		color: var(--muted);
+	}
+	/* Only the screen dims; its caption stays readable. */
+	.dimming .shot :global(.screen) {
+		opacity: 0.38;
+		filter: saturate(0.4);
+		transition:
+			opacity 600ms cubic-bezier(0.16, 1, 0.3, 1),
+			filter 600ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+	.dimming .shot.lit :global(.screen) {
+		opacity: 1;
+		filter: none;
+	}
+	.dimming .shot.lit h3 {
+		color: var(--accent);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.dimming .shot :global(.screen) {
+			transition: none;
+		}
+	}
+	#screens > .synthetic {
+		margin-top: var(--space-6);
+	}
+
+	/* The rest: the app's item table, grouped under accent headings. */
+	.items {
+		width: 100%;
+		max-width: 64rem;
+		border-collapse: collapse;
+	}
+	.items thead th {
+		text-align: left;
+		color: var(--muted);
+		font-size: var(--step--1);
+		font-weight: 500;
+		padding: var(--space-2) var(--space-3);
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	.items .group th {
+		text-align: left;
+		color: var(--accent);
+		font-size: var(--step--1);
+		font-weight: 500;
+		padding: var(--space-6) var(--space-3) var(--space-2);
+		border-bottom: 1px solid var(--rule-strong);
+	}
+	.items tbody th[scope='row'] {
+		width: 14rem;
+		text-align: left;
+		font-size: var(--step-1);
+		font-weight: 500;
+		vertical-align: baseline;
+	}
+	.items tbody th[scope='row'],
+	.items td {
+		padding: var(--space-3);
+		border-bottom: 1px solid var(--rule);
+	}
+
+	/* Safety: the rules as the app would say them. */
+	.rules :global(.running) {
+		color: var(--warn);
+		font-size: var(--step--1);
+		white-space: nowrap;
+	}
+	.items :global(.changed) {
+		color: var(--changed);
+	}
+	.rules {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+		gap: var(--space-7) clamp(var(--space-6), 5vw, var(--space-8));
+		max-width: 80rem;
+	}
+	.rules div {
+		padding-top: var(--space-3);
+		border-top: 1px solid var(--rule-strong);
+	}
+	.rules dt {
+		font-size: var(--step-2);
+		font-weight: 600;
+	}
+	.rules dd {
+		margin-top: var(--space-2);
+		color: var(--muted);
+		max-width: 44ch;
+	}
+
+	/* Download: one row per system. */
+	.systems {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-width: 48rem;
+		border-top: 1px solid var(--rule-strong);
+	}
+	.systems li {
+		display: grid;
+		grid-template-columns: 1fr auto auto;
+		gap: var(--space-5);
+		align-items: center;
+		padding: var(--space-4) var(--space-3) var(--space-4) var(--space-6);
+		border-bottom: 1px solid var(--rule);
+	}
+	.systems .os {
+		font-size: var(--step-4);
+		font-weight: 600;
+		line-height: 1;
+	}
+	.systems .note {
+		color: var(--muted);
+	}
+	.after {
+		margin-top: var(--space-6);
+		max-width: 60ch;
+		color: var(--muted);
+	}
+
+	.foot {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		gap: var(--space-6);
+		align-items: start;
+		margin-top: var(--space-9);
+		padding: var(--space-7) var(--gutter) 6rem;
+		border-top: 1px solid var(--rule);
+		color: var(--muted);
+		font-size: var(--step--1);
+	}
+	.legal {
+		display: grid;
+		gap: var(--space-2);
+		max-width: 70ch;
+	}
+	.links {
+		display: flex;
+		gap: var(--space-5);
+		font-size: var(--step-0);
+	}
+
+	/* The game's button hints, along the bottom of the window. */
+	.hints {
+		position: fixed;
+		inset: auto 0 0 0;
+		display: flex;
+		justify-content: flex-end;
+		gap: var(--space-2) var(--space-5);
+		padding: var(--space-2) var(--gutter);
+		background: var(--ground);
+		border-top: 1px solid var(--rule);
+		z-index: 2;
+	}
+	.hints button {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		background: none;
+		border: 0;
+		padding: 0;
+		color: var(--muted);
+		font: 500 var(--step-0) / 1.5 var(--font-label);
+		letter-spacing: var(--track);
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+	.hints button:hover {
+		color: var(--ink);
+	}
+	kbd {
+		font: inherit;
+		color: var(--ink);
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--radius);
+		padding: 0 0.4em;
+		min-width: 1.6em;
+		text-align: center;
+	}
+
+	@media (max-width: 60rem) {
+		.sections {
+			display: none;
+		}
+		.theme {
+			margin-left: auto;
+		}
+		.hero {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-areas: 'entry' 'offer';
+			row-gap: var(--space-8);
+			min-height: 0;
+			padding-top: var(--space-7);
+		}
+		.offer {
+			border-left: 0;
+			padding-left: 0;
+		}
+		.shot {
+			grid-template-columns: minmax(0, 1fr);
+			gap: var(--space-4);
+		}
+		.caption {
+			position: static;
+		}
+		.dimming .shot :global(.screen) {
+			opacity: 1;
+			filter: none;
+		}
+		.items tbody th[scope='row'] {
+			width: auto;
+		}
+		.foot {
+			grid-template-columns: minmax(0, 1fr);
+			padding-bottom: var(--space-7);
+		}
+	}
+
+	/* Shortcuts are for keyboards; on touch screens the strip goes. */
+	@media (max-width: 60rem), (pointer: coarse) {
+		.hints {
+			display: none;
+		}
+	}
+
+	@media (max-width: 30rem) {
+		.items thead {
+			display: none;
+		}
+		.items tbody tr:not(.group) {
+			display: grid;
+			border-bottom: 1px solid var(--rule);
+		}
+		.items tbody th[scope='row'],
+		.items td {
+			border-bottom: 0;
+			padding: var(--space-1) 0;
+		}
+		.items tbody th[scope='row'] {
+			padding-top: var(--space-3);
+		}
+		.items td {
+			padding-bottom: var(--space-3);
+			color: var(--muted);
+		}
+		.items .group th {
+			padding-inline: 0;
+		}
+		.systems li {
+			grid-template-columns: 1fr auto;
+		}
+		.systems .note {
+			display: none;
+		}
+	}
+</style>

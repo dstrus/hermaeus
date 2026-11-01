@@ -1,0 +1,555 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-01T02:56:01+00:00",
+  "title": "Design System: Hermaeus (web site)",
+  "extensions": {
+    "colorMeta": {
+      "accent": {
+        "role": "primary",
+        "displayName": "Verdigris",
+        "canonical": "#7fb8a0",
+        "tonalRamp": [
+          "#050d09",
+          "#162a22",
+          "#244b3c",
+          "#396d59",
+          "#589079",
+          "#7eb29c",
+          "#abd4c2",
+          "#def5ea"
+        ]
+      },
+      "on-accent": {
+        "role": "primary",
+        "displayName": "Accent Ink",
+        "canonical": "#0e1a15",
+        "tonalRamp": [
+          "#090c0b",
+          "#212624",
+          "#3b4540",
+          "#58655f",
+          "#788680",
+          "#9ba9a2",
+          "#c1ccc7",
+          "#eaf0ed"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Menu Black",
+        "canonical": "#0b0b0b",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "smoke": {
+        "role": "neutral",
+        "displayName": "Smoke Heart",
+        "canonical": "#1c1c1c",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "select": {
+        "role": "neutral",
+        "displayName": "Selected Row Haze",
+        "canonical": "rgb(242 239 230 / 0.07)",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#64615a",
+          "#85827a",
+          "#a7a59d",
+          "#cbc9c3",
+          "#efeeeb"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Parchment Ink",
+        "canonical": "#f2efe6",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#64615a",
+          "#85827a",
+          "#a7a59d",
+          "#cbc9c3",
+          "#efeeeb"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Weathered Ink",
+        "canonical": "#a8a293",
+        "tonalRamp": [
+          "#0c0b09",
+          "#272520",
+          "#464238",
+          "#666154",
+          "#888273",
+          "#aaa597",
+          "#cdc9be",
+          "#f1eee8"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#2a2a2a",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "rule-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "#3a3a3a",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "changed": {
+        "role": "secondary",
+        "displayName": "Copper Changed",
+        "canonical": "#d2996b",
+        "tonalRamp": [
+          "#120903",
+          "#342010",
+          "#5d3818",
+          "#85542a",
+          "#ab7447",
+          "#cd986e",
+          "#eabf9e",
+          "#ffeadb"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Amber Warning",
+        "canonical": "#d9a441",
+        "tonalRamp": [
+          "#120900",
+          "#332201",
+          "#583c00",
+          "#7f5900",
+          "#a97801",
+          "#cc9c43",
+          "#eac382",
+          "#ffeccd"
+        ]
+      },
+      "accent-light": {
+        "role": "primary",
+        "displayName": "Frost Blue",
+        "canonical": "#2a5f86",
+        "tonalRamp": [
+          "#040c13",
+          "#142736",
+          "#204661",
+          "#35668b",
+          "#5388b1",
+          "#7aabd3",
+          "#a7cfef",
+          "#e1f1ff"
+        ]
+      },
+      "on-accent-light": {
+        "role": "primary",
+        "displayName": "Accent Ink (light)",
+        "canonical": "#eef4f9",
+        "tonalRamp": [
+          "#080c0f",
+          "#212629",
+          "#3e4347",
+          "#5d6266",
+          "#7e8388",
+          "#a0a6aa",
+          "#c4cacf",
+          "#e9eff4"
+        ]
+      },
+      "ground-light": {
+        "role": "neutral",
+        "displayName": "Menu Black (light)",
+        "canonical": "#e4e3df",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262522",
+          "#43423f",
+          "#62615e",
+          "#83827f",
+          "#a6a5a1",
+          "#cac9c5",
+          "#efeeea"
+        ]
+      },
+      "smoke-light": {
+        "role": "neutral",
+        "displayName": "Smoke Heart (light)",
+        "canonical": "#f3f2ef",
+        "tonalRamp": [
+          "#0c0b09",
+          "#262523",
+          "#43423f",
+          "#62615f",
+          "#83827f",
+          "#a6a5a2",
+          "#cac9c6",
+          "#efeeeb"
+        ]
+      },
+      "select-light": {
+        "role": "neutral",
+        "displayName": "Selected Row Haze (light)",
+        "canonical": "rgb(27 26 23 / 0.06)",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#43423e",
+          "#62615d",
+          "#83827e",
+          "#a6a5a1",
+          "#cac9c5",
+          "#f0eeea"
+        ]
+      },
+      "ink-light": {
+        "role": "neutral",
+        "displayName": "Parchment Ink (light)",
+        "canonical": "#1b1a17",
+        "tonalRamp": [
+          "#0c0b08",
+          "#262522",
+          "#43423e",
+          "#62615d",
+          "#83827e",
+          "#a6a5a1",
+          "#cac9c5",
+          "#f0eeea"
+        ]
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Weathered Ink (light)",
+        "canonical": "#5d5a52",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#646159",
+          "#85827a",
+          "#a8a59d",
+          "#cbc9c2",
+          "#f0eeeb"
+        ]
+      },
+      "rule-light": {
+        "role": "neutral",
+        "displayName": "Hairline (light)",
+        "canonical": "#cdcbc4",
+        "tonalRamp": [
+          "#0c0b07",
+          "#272520",
+          "#44423c",
+          "#63615b",
+          "#84827c",
+          "#a7a59e",
+          "#cbc9c2",
+          "#f0eee7"
+        ]
+      },
+      "rule-strong-light": {
+        "role": "neutral",
+        "displayName": "Strong Hairline (light)",
+        "canonical": "#b3b0a7",
+        "tonalRamp": [
+          "#0c0b0a",
+          "#262522",
+          "#44423c",
+          "#646159",
+          "#85827a",
+          "#a8a59d",
+          "#cbc9c2",
+          "#f0eeeb"
+        ]
+      },
+      "changed-light": {
+        "role": "secondary",
+        "displayName": "Copper Changed (light)",
+        "canonical": "#9a4a20",
+        "tonalRamp": [
+          "#150702",
+          "#3a1c0d",
+          "#683012",
+          "#944923",
+          "#bc6940",
+          "#df8e68",
+          "#fab89a",
+          "#feeae1"
+        ]
+      },
+      "warn-light": {
+        "role": "status",
+        "displayName": "Amber Warning (light)",
+        "canonical": "#8a5a00",
+        "tonalRamp": [
+          "#120901",
+          "#332107",
+          "#5b3a01",
+          "#845708",
+          "#a9772e",
+          "#cb9b5b",
+          "#e9c290",
+          "#ffebd3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The name in the hero only; capped at 24cqi so it fills the offer column and never passes it."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles and each system's name in the download rows."
+      },
+      "entry": {
+        "displayName": "Entry",
+        "purpose": "The diary entry in the hero, at a 32ch measure; nothing else."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Screen captions, safety rule names, and the name in the top bar."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The hook under the name."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Prose, captions, and table cells; section leads at 1.125rem muted, 60ch."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Buttons and section links; 600 on the primary."
+      },
+      "hint": {
+        "displayName": "Hint",
+        "purpose": "The bottom hint strip."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Dateline details, locus terms, column and group heads, theme options, and provenance lines."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "screen-dim",
+        "value": "opacity 600ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Unlit screens dim and desaturate (saturate 0.4) as the visitor scrolls; the screen nearest the middle of the window is lit. Off under 60rem; no transition under reduced motion."
+      },
+      {
+        "name": "smooth-scroll",
+        "value": "scroll-behavior: smooth",
+        "purpose": "Section jumps from the nav and hint strip, only when the visitor hasn't asked for reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact",
+        "value": "30rem",
+        "purpose": "Item table rows stack; download notes hide."
+      },
+      {
+        "name": "stack",
+        "value": "60rem",
+        "purpose": "Hero and screen captions stack, section links hide, dimming and the hint strip turn off."
+      },
+      {
+        "name": "wide",
+        "value": "80rem",
+        "purpose": "The offer column widens to 28rem."
+      },
+      {
+        "name": "coarse-pointer",
+        "value": "(pointer: coarse)",
+        "purpose": "The hint strip hides on touch screens."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Outlined caps that light up in the accent on hover.",
+      "html": "<a class=\"ds-button\" href=\"#\"><span>Linux</span></a>",
+      "css": ".ds-button{display:inline-flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:.75rem 1.5rem;border:1px solid var(--rule-strong,#3a3a3a);border-radius:3px;background:transparent;color:var(--ink,#f2efe6);font:500 1.125rem/1.2 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;text-decoration:none;cursor:pointer}.ds-button:hover{border-color:var(--accent,#7fb8a0)}.ds-button:focus-visible{outline:2px solid var(--accent,#7fb8a0);outline-offset:2px}"
+    },
+    {
+      "name": "Primary Download Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The download for the visitor's own system: accent fill, the diamond, and a Jost note.",
+      "html": "<a class=\"ds-button ds-primary\" href=\"#\"><span><svg class=\"ds-diamond\" width=\"9\" height=\"9\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><path d=\"M5 0 10 5 5 10 0 5Z\" fill=\"currentColor\"/></svg>Download for Windows</span><small>64-bit</small></a>",
+      "css": ".ds-button{display:inline-flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:.75rem 1.5rem;border:1px solid var(--rule-strong,#3a3a3a);border-radius:3px;font:500 1.125rem/1.2 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;text-decoration:none;cursor:pointer}.ds-primary{background:var(--accent,#7fb8a0);border-color:var(--accent,#7fb8a0);color:var(--on-accent,#0e1a15);font-weight:600}.ds-primary small{font:400 .8125rem/1 'Jost',system-ui,sans-serif;text-transform:none;letter-spacing:0;opacity:.8}.ds-diamond{display:inline-block;margin-right:.5em;vertical-align:.15em;color:var(--on-accent,#0e1a15)}.ds-button:focus-visible{outline:2px solid var(--accent,#7fb8a0);outline-offset:2px}"
+    },
+    {
+      "name": "Theme Switch",
+      "kind": "chip",
+      "refersTo": "theme-option-selected",
+      "description": "The app's segmented choice; the chosen option fills with the accent.",
+      "html": "<div class=\"ds-theme\" role=\"group\" aria-label=\"Theme\"><button aria-pressed=\"true\">Auto</button><button aria-pressed=\"false\">Dark</button><button aria-pressed=\"false\">Light</button></div>",
+      "css": ".ds-theme{display:inline-flex;border:1px solid var(--rule-strong,#3a3a3a);border-radius:3px;overflow:hidden}.ds-theme button{font:500 .8125rem/1 'Barlow Condensed','Jost',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--muted,#a8a293);background:none;border:0;padding:.5rem .75rem;cursor:pointer}.ds-theme button:hover{color:var(--ink,#f2efe6)}.ds-theme button[aria-pressed=true]{background:var(--accent,#7fb8a0);color:var(--on-accent,#0e1a15);font-weight:600}.ds-theme button:focus-visible{outline:2px solid var(--accent,#7fb8a0);outline-offset:2px}"
+    },
+    {
+      "name": "Top Bar Navigation",
+      "kind": "nav",
+      "refersTo": "section-link",
+      "description": "Section links in muted button caps, ink on hover.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\">What it does</a><a href=\"#\">Safety</a><a href=\"#\">Download</a></nav>",
+      "css": ".ds-nav{display:flex;gap:2rem;font:500 1.125rem/1.55 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em}.ds-nav a{color:var(--muted,#a8a293);text-decoration:none}.ds-nav a:hover{color:var(--ink,#f2efe6)}.ds-nav a:focus-visible{outline:2px solid var(--accent,#7fb8a0);outline-offset:2px}"
+    },
+    {
+      "name": "Diary Entry",
+      "kind": "custom",
+      "refersTo": "entry",
+      "description": "The hero: the app's dateline, an NPC's entry at reading scale, and the locus row.",
+      "html": "<figure class=\"ds-entry\"><figcaption class=\"ds-dateline\"><span class=\"ds-author\">Hjordis Ashen-Hand</span><span>Tirdas, 4th of Hearthfire, 4E 201 · Falkreath · Uneasy</span></figcaption><blockquote><p>The stranger paid for three nights and slept for one.</p></blockquote><div class=\"ds-locus\"><span><b>Importance</b> 7</span><span><b>Diary entry</b> 9 of 12</span><a href=\"#\">See it in Hermaeus</a></div></figure>",
+      "css": ".ds-entry{margin:0;max-width:46rem;color:var(--ink,#f2efe6);font-family:'Jost',system-ui,sans-serif}.ds-dateline{display:flex;flex-wrap:wrap;gap:.25rem 1rem;align-items:baseline;padding-bottom:.75rem;border-bottom:1px solid var(--rule-strong,#3a3a3a);color:var(--muted,#a8a293);font:500 .8125rem 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em}.ds-author{color:var(--ink,#f2efe6);font-size:1rem}.ds-entry blockquote{margin:0}.ds-entry p{margin:0;padding-top:2rem;font-size:clamp(1.375rem,1rem + 1.5vw,2.125rem);line-height:1.45;max-width:32ch}.ds-locus{display:flex;flex-wrap:wrap;gap:.5rem 2rem;align-items:baseline;margin-top:2.5rem;padding-top:.75rem;border-top:1px solid var(--rule,#2a2a2a)}.ds-locus b{font:500 .8125rem 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--muted,#a8a293);margin-right:.5rem}.ds-locus a{margin-left:auto;color:var(--accent,#7fb8a0);font:500 .8125rem 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em}.ds-locus a:focus-visible{outline:2px solid var(--accent,#7fb8a0);outline-offset:2px}"
+    },
+    {
+      "name": "Screen With Caption",
+      "kind": "card",
+      "refersTo": "screen-frame",
+      "description": "A framed screen of the app beside a sticky caption; the lit one shows the diamond and an accent title, the others dim.",
+      "html": "<div class=\"ds-shot\"><div class=\"ds-caption\"><h3><svg class=\"ds-diamond\" width=\"9\" height=\"9\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><path d=\"M5 0 10 5 5 10 0 5Z\" fill=\"currentColor\"/></svg>Diaries</h3><p>Each NPC's diary, as they wrote it.</p></div><div class=\"ds-screen\"></div></div><div class=\"ds-shot ds-dim\"><div class=\"ds-caption\"><h3>Characters</h3><p>Everyone SkyrimNet has met.</p></div><div class=\"ds-screen\"></div></div>",
+      "css": ".ds-shot{display:grid;grid-template-columns:minmax(10rem,14rem) 1fr;gap:1.5rem;margin-bottom:2rem;transition:opacity 600ms cubic-bezier(.16,1,.3,1),filter 600ms cubic-bezier(.16,1,.3,1)}.ds-caption{padding-top:.75rem;border-top:1px solid var(--rule-strong,#3a3a3a)}.ds-caption h3{margin:0;font:600 1.375rem 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;color:var(--accent,#7fb8a0)}.ds-caption p{margin:.75rem 0 0;color:var(--muted,#a8a293);font-family:'Jost',system-ui,sans-serif}.ds-diamond{margin-right:.5em;vertical-align:.15em;color:var(--accent,#7fb8a0)}.ds-screen{aspect-ratio:16/10;border:1px solid var(--rule-strong,#3a3a3a);border-radius:3px;background:var(--ground,#0b0b0b)}.ds-dim{filter:saturate(.4)}.ds-dim h3{color:var(--ink,#f2efe6)}.ds-shot:hover{opacity:1;filter:none}"
+    },
+    {
+      "name": "Download Row",
+      "kind": "custom",
+      "refersTo": "download-row-mine",
+      "description": "One row per system; the visitor's own system leads with the diamond, the select haze, and a primary button.",
+      "html": "<ul class=\"ds-systems\"><li class=\"ds-mine\"><svg class=\"ds-diamond\" width=\"9\" height=\"9\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><path d=\"M5 0 10 5 5 10 0 5Z\" fill=\"currentColor\"/></svg><span class=\"ds-os\">Windows</span><span class=\"ds-note\">64-bit</span><a class=\"ds-dl ds-dl-primary\" href=\"#\">Download</a></li><li><span class=\"ds-os\">Linux</span><span class=\"ds-note\"></span><a class=\"ds-dl\" href=\"#\">Download</a></li></ul>",
+      "css": ".ds-systems{list-style:none;margin:0;padding:0;max-width:48rem;border-top:1px solid var(--rule-strong,#3a3a3a)}.ds-systems li{position:relative;display:grid;grid-template-columns:1fr auto auto;gap:1.5rem;align-items:center;padding:1rem .75rem 1rem 2rem;border-bottom:1px solid var(--rule,#2a2a2a);color:var(--muted,#a8a293)}.ds-os{font:600 clamp(2.25rem,1.5rem + 3vw,3.75rem)/1 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em}.ds-mine{background:var(--select,rgb(242 239 230 / .07))}.ds-mine .ds-os{color:var(--ink,#f2efe6)}.ds-diamond{position:absolute;left:.75rem;top:50%;translate:0 -50%;color:var(--accent,#7fb8a0)}.ds-note{font-family:'Jost',system-ui,sans-serif}.ds-dl{padding:.75rem 1.5rem;border:1px solid var(--rule-strong,#3a3a3a);border-radius:3px;color:var(--ink,#f2efe6);font:500 1.125rem/1.2 'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;text-decoration:none}.ds-dl:hover{border-color:var(--accent,#7fb8a0)}.ds-dl-primary{background:var(--accent,#7fb8a0);border-color:var(--accent,#7fb8a0);color:var(--on-accent,#0e1a15);font-weight:600}.ds-dl:focus-visible{outline:2px solid var(--accent,#7fb8a0);outline-offset:2px}"
+    },
+    {
+      "name": "Item Table",
+      "kind": "custom",
+      "refersTo": "item-group-head",
+      "description": "The app's item table at page scale, grouped under accent headings, with copper on what the player changed.",
+      "html": "<table class=\"ds-items\"><thead><tr><th>Page</th><th>What you can do there</th></tr></thead><tbody><tr class=\"ds-group\"><th colspan=\"2\">Behavior and memory</th></tr><tr><th scope=\"row\">Settings</th><td>Each settings file compared with SkyrimNet's defaults, with <span class=\"ds-changed\">what you changed</span> set apart.</td></tr></tbody></table>",
+      "css": ".ds-items{width:100%;border-collapse:collapse;color:var(--ink,#f2efe6);font:400 1rem/1.55 'Jost',system-ui,sans-serif}.ds-items th{text-align:left;font-family:'Barlow Condensed','Jost',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:500}.ds-items thead th{color:var(--muted,#a8a293);font-size:.8125rem;padding:.5rem .75rem;border-bottom:1px solid var(--rule-strong,#3a3a3a)}.ds-group th{color:var(--accent,#7fb8a0);font-size:.8125rem;padding:2rem .75rem .5rem;border-bottom:1px solid var(--rule-strong,#3a3a3a)}.ds-items tbody th[scope=row]{width:14rem;font-size:1.125rem;vertical-align:baseline}.ds-items tbody th[scope=row],.ds-items td{padding:.75rem;border-bottom:1px solid var(--rule,#2a2a2a)}.ds-changed{color:var(--changed,#d2996b)}"
+    },
+    {
+      "name": "Button-Hint Strip",
+      "kind": "nav",
+      "refersTo": "hint-strip",
+      "description": "The game's button hints along the bottom; every hint is a real shortcut.",
+      "html": "<nav class=\"ds-hints\" aria-label=\"Keyboard shortcuts\"><button><kbd>D</kbd>Download</button><button><kbd>S</kbd>Safety</button><button><kbd>N</kbd>Next</button></nav>",
+      "css": ".ds-hints{display:flex;justify-content:flex-end;gap:.5rem 1.5rem;padding:.5rem 2rem;background:var(--ground,#0b0b0b);border-top:1px solid var(--rule,#2a2a2a)}.ds-hints button{display:flex;align-items:center;gap:.5rem;background:none;border:0;padding:0;color:var(--muted,#a8a293);font:500 1rem/1.5 'Barlow Condensed','Jost',sans-serif;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}.ds-hints button:hover{color:var(--ink,#f2efe6)}.ds-hints button:focus-visible{outline:2px solid var(--accent,#7fb8a0);outline-offset:2px}.ds-hints kbd{font:inherit;color:var(--ink,#f2efe6);border:1px solid var(--rule-strong,#3a3a3a);border-radius:3px;padding:0 .4em;min-width:1.6em;text-align:center}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Game's Own Menus, Set Larger",
+    "overview": "**Creative North Star: \"The Game's Own Menus, Set Larger\"**\n\nThe site is the app's world, the one recorded in the repository's root `DESIGN.md`, rendered bolder for a page that has to persuade. It keeps the app's token set role for role (the same smoked-glass ground, the same ink, hairlines, verdigris and frost blue accent, copper, 3px corners, and the same two typefaces), so a visitor who downloads Hermaeus opens a program that looks like the page they just left. What changes is scale and pacing: the app is a dense menu read at 15px; the site is a sequence of sections read top to bottom, with type steps up to 6rem and gaps between sections of up to 9rem.\n\nThe page leads with content, not a pitch: a diary entry, one NPC's own words at reading scale, with the app's diary dateline above it and a locus row below that says where it's kept. The name and the offer stand beside it behind a strong hairline. Real screens of the app follow, each with a sticky caption, and the one nearest the middle of the window is lit while the others dim. The rest of the app is listed in the app's own item table, the safety rules sit under hairlines, and the downloads are one row per system, with the visitor's own system first. The game's button-hint strip runs along the bottom of the window, and every hint in it is a working shortcut.\n\nWhere the site shares the app: every color token and its light counterpart; Jost for reading and tracked Barlow Condensed caps for labeling; 1px hairlines in two strengths; one 3px radius; the diamond marker; the hint strip with real shortcuts and key caps; the outlined button with an accent-filled primary; the segmented theme switch; the item table with accent group headings; copper only on what the player changed. Where the site departs: a longer type scale (display, headline, and the diary entry step are site-only), a 1rem body instead of 15px, larger buttons, a section rhythm with no app equivalent, full-width sections instead of a shell with a sections column and details pane, the diary entry as the hero, framed screens with scroll dimming, downloads ordered by the visitor's operating system, and the diamond widened from \"the selected row\" to \"the selected thing\" (the lit screen, the visitor's system).",
+    "keyCharacteristics": [
+      "The app's smoked-glass ground and token set, unchanged, in both themes.",
+      "Larger steps: a 6rem name, 3.75rem section titles, and a diary entry at up to 2.125rem.",
+      "One section rhythm: a caps title, a muted lead, then the material, with large gaps between sections.",
+      "Content first: the diary entry is the hero, and real screens are the proof.",
+      "Hairlines, not cards: no section, screen, or row is a filled tile, and nothing has a shadow.",
+      "The bottom hint strip, D, S, and N, each a real shortcut."
+    ],
+    "rules": [
+      {
+        "name": "The Same Token Set Rule",
+        "body": "The site doesn't define colors of its own. A color the site needs is a role the app already has, with the app's dark and light values; a new role ships in both, as a pair, or not at all.",
+        "section": "colors"
+      },
+      {
+        "name": "The Changed Rule",
+        "body": "Copper means the player changed this from what SkyrimNet ships, and the site shows it only where the app does. It is never a highlight, a warning, or a way to make something stand out.",
+        "section": "colors"
+      },
+      {
+        "name": "The Scarce Accent Rule",
+        "body": "The accent marks what's selected, what's actionable, and group headings inside a list. The largest accent fill is the primary download button.",
+        "section": "colors"
+      },
+      {
+        "name": "The Label Versus Read Rule",
+        "body": "As in the app: anything that labels is tracked condensed caps; anything that's read is Jost in sentence case. A note inside a button (such as \"64-bit\") switches back to Jost at 0.8125rem with no tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Entry Rule",
+        "body": "The entry step is for an NPC's own words at reading scale. It is not a pull-quote style for marketing copy.",
+        "section": "typography"
+      },
+      {
+        "name": "The Section Rhythm Rule",
+        "body": "Every section after the hero is the same: the largest spacing step above it (5 to 9rem), a caps headline with a muted lead under it (up to 52rem wide), a 4rem gap, then the material. Sections don't get backgrounds or borders of their own to set them apart; the rhythm does that.",
+        "section": "layout"
+      },
+      {
+        "name": "The No Lift Rule",
+        "body": "Nothing on the page floats, so nothing has a shadow. Emphasis comes from light (the lit screen), the accent, and the diamond.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Your System First Rule",
+        "body": "The download for the visitor's own operating system leads, both in the hero and in Download, with the diamond on it. In the hero it is the one primary button and the only one that says \"Download for\"; the others give the system's name alone. In Download it moves to the top row, gets the `select` haze and an ink name, and its button becomes primary. Without script, or on a system it doesn't recognize, Windows leads in the hero and no row in Download is marked.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do use the app's tokens role for role, in both themes, and add a new color only as a dark and light pair.",
+      "Do give every section the same rhythm: the largest spacing step above it, a caps headline and muted lead, then the material.",
+      "Do show the real app in hairline frames, in both themes, and label made-up data as made up.",
+      "Do put the diamond on the selected thing, and only there.",
+      "Do lead the downloads with the visitor's own system.",
+      "Do back every hint in the strip with a working shortcut, and hide the strip where there's no keyboard."
+    ],
+    "donts": [
+      "Don't use cards, filled tiles, or section backgrounds; separate with hairlines and the section rhythm.",
+      "Don't put a shadow on anything, screens included.",
+      "Don't use copper anywhere the app wouldn't, or as a highlight.",
+      "Don't add a second accent, or use the accent for decoration.",
+      "Don't set marketing copy in the entry step; it is for an NPC's own words."
+    ]
+  }
+}
