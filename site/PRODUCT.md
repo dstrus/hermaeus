@@ -45,7 +45,7 @@ SkyrimNet's own dashboard needs the game running. Hermaeus works with the game c
 ## Brand Commitments
 
 - Name: Hermaeus, after Hermaeus Mora. The mark (the eye of Hermaeus Mora among his tentacles) is in `assets/`: `hermaeus-mark.svg`, `hermaeus-icon.svg`, and `hermaeus-icon-small.svg`.
-- Voice: plain and precise, with a dry, slightly wry edge. It says exactly what is saved, where, and when, and what isn't possible and why.
+- Voice: Davey's own, as in the README and the MGO tutorial site: first person, conversational, and honest about Hermaeus's limits (including that most people should use SkyrimNet's own dashboard). Dry, self-aware humor goes in asides, parentheticals, and leads, never in download steps or safety rules, which stay plain and exact about what is saved, where, and when. No hype.
 - The unofficial-status and trademark statements stay, as the README words them: Hermaeus works with SkyrimNet but isn't part of it, isn't affiliated with or endorsed by Fateless.Ai, and includes none of SkyrimNet's files; The Elder Scrolls V: Skyrim is a trademark of ZeniMax Media Inc.
 - American English spelling and the serial comma.
 

@@ -18,28 +18,28 @@ import historyLight from '../assets/screens/history-light.png';
 const screens = [
 	{
 		title: 'Memories',
-		text: 'Every memory an NPC holds: what happened, when in the game’s calendar, and how much it mattered to them. Correct one, move it to the NPC it belongs to, or delete what never should have stuck.',
+		text: 'Every memory an NPC holds: what happened, when in the game’s calendar, and how much it mattered to them. Correct one, move it to the NPC it actually belongs to, or delete the one that never should have stuck.',
 		dark: memoriesDark,
 		light: memoriesLight,
 		alt: 'Hermaeus showing Hjordis Ashen-Hand’s memories in a table, one selected, with its details beside it.'
 	},
 	{
 		title: 'Diaries',
-		text: 'Each NPC’s diary, as they wrote it. Fix an entry the model got wrong, add one, or remove one.',
+		text: 'Each NPC’s diary, in their own words. Fix an entry the model got wrong, add one, or remove one.',
 		dark: diaryDark,
 		light: diaryLight,
 		alt: 'Hermaeus showing Hjordis Ashen-Hand’s diary, with the entry about the barrow selected.'
 	},
 	{
 		title: 'Characters',
-		text: 'Everyone SkyrimNet has met in a playthrough, with their stats, their bios, and pins for the ones you keep coming back to.',
+		text: 'Everyone SkyrimNet has met in a playthrough, with their stats, their bios, and pins for your favorites.',
 		dark: charactersDark,
 		light: charactersLight,
 		alt: 'Hermaeus listing the characters in a playthrough, with Hjordis Ashen-Hand selected.'
 	},
 	{
 		title: 'History',
-		text: 'What SkyrimNet recorded happening, dated the way the game dates it.',
+		text: 'What SkyrimNet recorded happening, dated the way the game dates it (Tirdas, 4th of Hearthfire, and so on).',
 		dark: historyDark,
 		light: historyLight,
 		alt: 'Hermaeus listing a playthrough’s events by in-game day.'
@@ -109,6 +109,7 @@ const safety = [
 	<header class="top">
 		<a class="brand caps" href="#top" aria-label="Hermaeus, to the top"><Mark size="1.35em" /> Hermaeus</a>
 		<nav class="sections caps" aria-label="On this page">
+			<a href="#why">Why</a>
 			<a href="#screens">What it does</a>
 			<a href="#safety">Safety</a>
 			<a href="#download">Download</a>
@@ -125,7 +126,7 @@ const safety = [
 			<div class="offer">
 				<h1 id="name" class="caps">Hermaeus</h1>
 				<p class="hook">Read and edit what SkyrimNet remembers, with Skyrim closed.</p>
-				<p class="sub">Memories, diaries, bios, prompts, and settings, straight from your own installation. No game to launch.</p>
+				<p class="sub">Memories, diaries, bios, prompts, and settings, straight from your own installation. No game to launch, no headset to strap on.</p>
 				<div class="downloads" data-downloads>
 					{
 						downloads.map((d, i) => (
@@ -174,18 +175,48 @@ const safety = [
 				<p class="synthetic caps">From a made-up playthrough</p>
 			</figure>
 
-			<a class="more caps" href="#screens">
-				See it in Hermaeus
+			<a class="more caps" href="#why">
+				Why does this exist?
 				<svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M7 1v13M1 8l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
 			</a>
+		</section>
+
+		<section class="block why" id="why" aria-labelledby="why-title">
+			<div class="intro">
+				<h2 id="why-title" class="caps">I made this for myself</h2>
+				<p>
+					SkyrimNet’s own dashboard is excellent, but it only works while the game is running. I play Skyrim VR with <a href="https://synergyvr.org/mgo">around 1,700 mods</a>,
+					so launching the game and loading a save takes several minutes, and I have to wear my headset the whole time.
+				</p>
+				<p>
+					Everything I usually want to change is sitting in files on my own machine. Finding the right file (and the right <em>copy</em> of that
+					file) isn’t always straightforward, so I built something that knows where to look.
+				</p>
+			</div>
+			<div class="asides">
+				<aside class="btw" aria-labelledby="btw-dashboard">
+					<p id="btw-dashboard" class="btw-title caps">By the way…</p>
+					<p>
+						You should probably use SkyrimNet’s dashboard unless you have a good reason not to. Hermaeus isn’t a 1:1 replacement: plenty of things
+						really do need the game running, so it sticks to what I (and maybe you) most want to change offline.
+					</p>
+				</aside>
+				<aside class="btw" aria-labelledby="btw-name">
+					<p id="btw-name" class="btw-title caps">Why “Hermaeus”?</p>
+					<p>
+						Hermaeus Mora is the Daedric Prince of knowledge, memory, fate, etc. SkyrimNet gives NPCs memories, and he hoards them. Seemed
+						fitting.
+					</p>
+				</aside>
+			</div>
 		</section>
 
 		<section class="block" id="screens" aria-labelledby="screens-title">
 			<div class="intro">
 				<h2 id="screens-title" class="caps">SkyrimNet writes it down. Hermaeus reads it back.</h2>
 				<p>
-					Everything SkyrimNet remembers about a playthrough is in files on your own machine. Hermaeus opens them in your browser, as one more menu of the
-					game you just closed, and saves your changes back where SkyrimNet will find them.
+					Everything SkyrimNet remembers about a playthrough is in files on your machine. Hermaeus opens them in your browser, looking like one more
+					menu of the game you just closed, and saves your changes back where SkyrimNet will find them.
 				</p>
 			</div>
 			<ol class="shots" data-shots>
@@ -210,7 +241,7 @@ const safety = [
 		<section class="block" id="rest" aria-labelledby="rest-title">
 			<div class="intro">
 				<h2 id="rest-title" class="caps">And the rest of SkyrimNet</h2>
-				<p>The settings and content SkyrimNet’s own dashboard covers, without starting the game to reach them.</p>
+				<p>Not everything, mind you. Some things really do need the game running. This is the stuff I (and maybe you) most want to change without launching Skyrim.</p>
 			</div>
 			<table class="items">
 				<caption class="visually-hidden">What else Hermaeus opens</caption>
@@ -245,7 +276,7 @@ const safety = [
 		<section class="block" id="safety" aria-labelledby="safety-title">
 			<div class="intro">
 				<h2 id="safety-title" class="caps">Before you point it at your saves</h2>
-				<p>Hermaeus changes files SkyrimNet depends on, so it’s careful in exactly these ways.</p>
+				<p>Hermaeus edits files SkyrimNet depends on, so I’ve tried hard not to break anything. Here’s exactly how.</p>
 			</div>
 			<dl class="rules">
 				{
@@ -257,14 +288,29 @@ const safety = [
 					))
 				}
 			</dl>
+			<aside class="btw" aria-labelledby="btw-vibes">
+				<p id="btw-vibes" class="btw-title caps">Yes, it’s vibe-coded</p>
+				<p>
+					But at least it’s vibe-coded by a professional software engineer with lots of experience. 🤷🏻‍♂️ If something does go wrong, your
+					backups are in <code>hermaeus-backups</code>, and I’d like to <a href={issues}>hear&nbsp;about&nbsp;it</a>.
+				</p>
+			</aside>
 		</section>
 
 		<section class="block" id="download" aria-labelledby="download-title">
 			<div class="intro">
 				<h2 id="download-title" class="caps">Download</h2>
+				<p>One program for each system. On Windows:</p>
+				<ul class="steps">
+					<li><strong>MO2 users:</strong> put <code>Hermaeus.exe</code> in your MO2 installation folder (the same folder as <code>ModOrganizer.exe</code>).</li>
+					<li>
+						<strong>Everyone else (including Vortex users):</strong> put <code>Hermaeus.exe</code> in your Skyrim installation folder (the same
+						folder as <code>Skyrim.exe</code> or <code>SkyrimVR.exe</code>).
+					</li>
+				</ul>
 				<p>
-					One program for each system. Put it in your Skyrim folder or beside Mod Organizer 2, and run it: it opens in your browser and finds SkyrimNet
-					from there. If it can’t, it asks you where SkyrimNet is.
+					Then run it. It opens in your browser and finds SkyrimNet from there. If it can’t, it asks you where SkyrimNet is. On macOS or Linux, or
+					from a terminal, there are fancy command-line switches; <a href={`${repository}#running-it`}>the README</a> has them.
 				</p>
 			</div>
 			<ul class="systems">
@@ -293,6 +339,10 @@ const safety = [
 	<footer class="foot">
 		<Mark size="2.5rem" />
 		<div class="legal">
+			<p class="who">
+				Made by Davey, a software engineer for somewhere in the neighborhood of a quarter-century, who plays way too much Skyrim VR and
+				spends <em>even more</em> time fiddling with it.
+			</p>
 			<p>
 				Hermaeus works with SkyrimNet but isn’t part of it, and isn’t affiliated with or endorsed by Fateless.Ai. It includes none of SkyrimNet’s files.
 			</p>
@@ -369,7 +419,7 @@ const safety = [
 	}
 
 	// The hint strip: every hint is a real shortcut, and clicking it does the same.
-	const order = ['screens', 'rest', 'safety', 'download'];
+	const order = ['why', 'screens', 'rest', 'safety', 'download'];
 	// The next section is the first whose top is still below where scrolling
 	// to a section leaves it (the page's scroll padding), so the one just
 	// reached doesn't count. After the last, back to the top.
@@ -640,6 +690,72 @@ const safety = [
 		margin: 0;
 	}
 
+	/* Why: the story beside its asides. */
+	.why {
+		display: grid;
+		grid-template-columns: minmax(0, 52rem) minmax(16rem, 24rem);
+		gap: var(--space-6) clamp(var(--space-6), 5vw, var(--space-8));
+		align-items: start;
+	}
+	.why .intro {
+		margin-bottom: 0;
+	}
+	.intro p a,
+	.after a {
+		color: var(--ink);
+	}
+	.asides {
+		display: grid;
+		gap: var(--space-5);
+		padding-top: var(--space-2);
+	}
+
+	/* By the way…: tangents, caveats, and jokes, pulled out of the main
+	   flow, in the app's details-pane material. */
+	.btw {
+		background: var(--panel);
+		border: 1px solid var(--rule-strong);
+		border-radius: var(--radius);
+		padding: var(--space-4) var(--space-5);
+		color: var(--muted);
+		max-width: 44rem;
+	}
+	#safety .btw {
+		margin-top: var(--space-8);
+	}
+	.btw-title {
+		color: var(--ink);
+		font-size: var(--step-1);
+		font-weight: 600;
+		margin-bottom: var(--space-2);
+	}
+	.btw a {
+		color: var(--ink);
+	}
+	code {
+		font-family: inherit;
+		color: var(--ink);
+		background: var(--select);
+		border-radius: var(--radius);
+		padding: 0.05em 0.35em;
+	}
+	.steps {
+		margin: var(--space-4) 0 0;
+		padding-left: 1.25rem;
+		color: var(--muted);
+		font-size: var(--step-1);
+		max-width: 60ch;
+		display: grid;
+		gap: var(--space-2);
+	}
+	.steps strong {
+		color: var(--ink);
+		font-weight: 500;
+	}
+	.who {
+		color: var(--ink);
+	}
+
 	/* Sections share one rhythm: a title and its lead, then the material. */
 	.block {
 		padding: var(--space-9) var(--gutter) 0;
@@ -885,6 +1001,9 @@ const safety = [
 		.offer {
 			border-left: 0;
 			padding-left: 0;
+		}
+		.why {
+			grid-template-columns: minmax(0, 1fr);
 		}
 		.shot {
 			grid-template-columns: minmax(0, 1fr);

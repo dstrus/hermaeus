@@ -174,7 +174,8 @@ The app's near-monochrome palette, unchanged: off-white on near-black in dark, n
 ### Neutral
 - **Menu Black** (`ground` / `ground-light`): the outer ground and edge of the radial gradient, the hint strip's opaque fill, and the backing of each screen frame.
 - **Smoke Heart** (`smoke` / `smoke-light`): the lighter center of the fixed radial gradient (an ellipse 70% by 60% at 65% 25%, fading to the ground at 75%).
-- **Selected Row Haze** (`select` / `select-light`): the visitor's own system in the download rows.
+- **Pane Glass** (`panel` / `panel-light`): the fill of each "By the way…" aside.
+- **Selected Row Haze** (`select` / `select-light`): the visitor's own system in the download rows, and the backing of inline file names.
 - **Parchment Ink** (`ink` / `ink-light`): reading text, the diary entry, titles, key caps, the dateline's author, and the visitor's own system name.
 - **Weathered Ink** (`muted` / `muted-light`): leads, captions, the dateline's day and place, locus terms, section links and hints at rest, the theme options at rest, the footer, and provenance lines.
 - **Hairline** (`rule` / `rule-light`): the top bar's underline, the locus row's top edge, item rows, download rows, the footer's top edge, and the hint strip's top edge.
@@ -258,10 +259,13 @@ The app's segmented choice: a 3px outlined group of label caps (Auto, Dark, and 
 Section links in the top bar use button caps in muted ink, turning ink on hover; they hide under 60rem. The footer's links (Source, Releases, Issues) are body-size caps.
 
 ### Diary Entry (signature)
-The hero's content: the app's diary dateline (the author in ink at body size, then the day, place, and mood in muted label caps joined by middots, over a strong hairline), the entry in the entry step, then a locus row over a hairline, with muted caps terms beside Jost values and an accent text link at its right end. A provenance line in muted label caps says the playthrough is made up.
+The hero's content: the app's diary dateline (the author in ink at body size, then the day, place, and mood in muted label caps joined by middots, over a strong hairline), the entry in the entry step, then a locus row over a hairline, with muted caps terms beside Jost values. A provenance line in muted label caps says the playthrough is made up. Under it, at the foot of the first window, an outlined caps control in the accent ("Why does this exist?") with a drawn down-arrow that nudges three times after load, unless reduced motion is set, leads to the next section.
 
 ### Screens
 A screen of the app in both themes, showing the one that matches the page, in a 1px strong-hairline frame with 3px corners and no shadow. Each has a caption with a title-step caps name over a strong hairline and a muted description; the screen dims until it's lit, its caption never does; when lit, its name turns the accent and shows the diamond. A provenance line follows the list.
+
+### By the Way… Aside
+Tangents, caveats, and jokes pulled out of the main flow, as the MGO tutorial site's asides are: the app's details-pane material (Pane Glass fill, a strong hairline, 3px corners), a short title in ink at the title step in label caps, then muted Jost. The Why section stacks two beside its story; the safety section ends with one. Load-bearing text (download steps, safety rules) never goes in an aside.
 
 ### Item Table
 The app's item table at page scale: muted label-caps column heads over a strong hairline, group heads in the accent with a strong hairline, page names in button-size caps, descriptions in Jost, and a hairline under each row. No row hover or selection; the table is read, not used.
