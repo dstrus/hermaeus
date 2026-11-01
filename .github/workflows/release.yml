@@ -30,8 +30,10 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Test
         run: make test
+      # The downloads carry the notices written here, so they name the Go
+      # release that built them, which can be newer than the committed copy's.
       - name: Check that THIRD_PARTY_NOTICES.txt is current
-        run: make notices && git diff --exit-code THIRD_PARTY_NOTICES.txt
+        run: make notices && git diff --exit-code -I '^The Go standard library' -I '^  The Go standard library' THIRD_PARTY_NOTICES.txt
       - name: Build the downloads
         run: make release VERSION="$GITHUB_REF_NAME"
       - name: Draft the release
