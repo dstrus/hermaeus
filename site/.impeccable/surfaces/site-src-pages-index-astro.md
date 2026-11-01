@@ -7,7 +7,7 @@ related_targets: []
 
 # Landing page (site/src/pages/index.astro)
 
-Mode: Persuade. Audience: SkyrimNet players deciding whether to install Hermaeus. Job: in under a minute, know what it is, that it's unofficial and careful with their files, and where to download. Action: per-OS download (Windows first) linking to GitHub Releases (placeholder URL until the repository is public). Proof: real screens of the app running on a made-up playthrough, labeled as made up; the safety rules as the README states them. Constraints: static Astro, base /hermaeus, both themes (dark default from the app's world, light via prefers-color-scheme), WCAG AA, no testimonials or counts, no mention of any earlier version or a Nexus page.
+Mode: Persuade. Audience: SkyrimNet players deciding whether to install Hermaeus. Job: in under a minute, know what it is, that it's unofficial and careful with their files, and where to download. Action: per-OS download (Windows first) linking to the latest GitHub release of github.com/dstrus/hermaeus. Proof: real screens of the app running on a made-up playthrough, labeled as made up; the safety rules as the README states them. Constraints: static Astro, base /hermaeus, both themes (dark default from the app's world, light via prefers-color-scheme), WCAG AA, no testimonials or counts, no mention of any earlier version or a Nexus page.
 
 ## Direction contract
 
@@ -31,5 +31,5 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 - The download for the visitor's own system leads, in the first viewport and in Download, marked with the diamond.
 
 ## Unresolved
-- Repository, Releases, and Issues URLs are placeholders until the repository is public.
-- The license (MIT) links to the repository's LICENSE, a placeholder URL like the others.
+- The repository is public, but it has no releases yet, so the download links land on an empty Releases page until the first one is published.
+- Each download opens the latest release's page; linking each system's file directly waits on the release file names.

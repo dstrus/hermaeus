@@ -10,7 +10,7 @@ web
 
 Astro, building static HTML for GitHub Pages. User documentation is written as Markdown; Svelte components may be used for interactive parts. The site lives in `site/` of the Hermaeus repository, with its own `package.json`, apart from the app's build: the Go program embeds `web/build` only, and no Go files go under `site/`.
 
-Served at `https://synergyvr.org/hermaeus`, a project site of the `synergyvr-org` GitHub organization, whose Pages sites share the custom domain `synergyvr.org`. Astro's `site` is `https://synergyvr.org` and its `base` is `/hermaeus`, so every link and asset path carries the base.
+Served at `https://daveystrus.com/hermaeus`. Astro's `site` is `https://daveystrus.com` and its `base` is `/hermaeus`, so every link and asset path carries the base.
 
 ## Users
 
@@ -32,7 +32,7 @@ SkyrimNet's own dashboard needs the game running. Hermaeus works with the game c
 
 - Visitors arrive from wherever SkyrimNet players talk and find mods; where Hermaeus is announced is not decided.
 - Downloads are builds attached to GitHub Releases in the public repository: one program each for Windows, macOS, and Linux. A Nexus Mods page may follow after more testing; until it exists, the site doesn't mention or link one.
-- The repository is not public yet. Links to it, its releases, and its issues are placeholders until it is.
+- The repository is public at `https://github.com/dstrus/hermaeus`. It has no releases yet, so the download links, which open the latest release, land on an empty Releases page until the first one is published.
 
 ## Capabilities and Constraints
 
