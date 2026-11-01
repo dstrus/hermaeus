@@ -3,7 +3,7 @@
 
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
-.PHONY: build windows web types test dev icons clean
+.PHONY: build windows web notices types test dev icons clean
 
 # The program, for this machine.
 build: web
@@ -16,6 +16,13 @@ windows: web
 		--product-name Hermaeus --file-description "Hermaeus, an unofficial dashboard for SkyrimNet" \
 		--original-filename Hermaeus.exe --out cmd/hermaeus/rsrc
 	GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.version=$(VERSION)" -o Hermaeus.exe ./cmd/hermaeus
+
+# THIRD_PARTY_NOTICES.txt: the license of everything built into the program,
+# from its Go modules and the npm packages in its pages, which the frontend's
+# build records. Run it after changing dependencies; releases ship it beside
+# LICENSE.
+notices: web
+	go run ./cmd/notices
 
 # The frontend, into web/build, where the program embeds it from.
 web: web/node_modules

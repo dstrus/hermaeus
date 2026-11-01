@@ -28,6 +28,7 @@ You need Go 1.26 or later and Node 22.17 or later.
 ```sh
 make build              # the frontend, then the program, as ./hermaeus
 make windows            # the program for 64-bit Windows, with its icon, as ./Hermaeus.exe
+make notices            # THIRD_PARTY_NOTICES.txt, from the licenses of everything built into the program
 make test               # Go tests, then type-checking the frontend
 make dev DIR=/path/to/SkyrimNet   # Hermaeus plus Vite's dev server at http://localhost:5173
 make types              # regenerate the API's TypeScript types after changing them in Go
@@ -40,6 +41,7 @@ make types              # regenerate the API's TypeScript types after changing t
 | Path | Purpose |
 | --- | --- |
 | `cmd/hermaeus/` | Flags, startup, and opening the browser |
+| `cmd/notices/` | Writes THIRD_PARTY_NOTICES.txt, with `web/third-party.ts`, which records the npm packages the frontend's build includes |
 | `internal/server/` | The web server: host and token checks, serving the frontend, mounting each domain's routes |
 | `internal/httpapi/` | Turning typed Go functions into JSON handlers |
 | `internal/apperr/` | Errors meant for the user, by kind; the server maps kinds to HTTP statuses |
@@ -73,4 +75,4 @@ Domain packages own their logic, request and response types, routes, and tests. 
 
 ## License
 
-Copyright (c) 2026 Davey Strus.
+Hermaeus is released under the [MIT License](LICENSE). Copyright (c) 2026 Davey Strus. It includes other people's software and fonts, each under its own license; [THIRD_PARTY_NOTICES.txt](THIRD_PARTY_NOTICES.txt) lists them with their license texts, and releases include it.

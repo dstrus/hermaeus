@@ -39,7 +39,8 @@ SkyrimNet's own dashboard needs the game running. Hermaeus works with the game c
 - Static hosting only: no server code, no accounts, no forms that need a back end.
 - What Hermaeus can do is in the root `PRODUCT.md` and `README.md`; the site describes only what the app actually does, in its terms (SkyrimNet, playthrough, NPC, memory, diary entry, event, bio, knowledge pack, plugin, trigger, action, filter, voice effect, quick toggle).
 - The site never describes Hermaeus as a rewrite, port, or successor of anything, and never mentions an earlier version.
-- Undecided: the software license (the README says only "Copyright (c) 2026 Davey Strus."), developer documentation's scope, and where Hermaeus is announced.
+- Hermaeus is released under the MIT License (`LICENSE` at the repository root).
+- Undecided: developer documentation's scope, and where Hermaeus is announced.
 
 ## Brand Commitments
 
