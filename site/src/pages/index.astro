@@ -18,21 +18,21 @@ import historyLight from '../assets/screens/history-light.png';
 const screens = [
 	{
 		title: 'Memories',
-		text: 'Every memory an NPC holds: what happened, when in the game’s calendar, and how much it mattered to them. Correct one, move it to the NPC it actually belongs to, or delete the one that never should have stuck.',
+		text: 'Every memory an NPC holds: what happened, when in the game’s calendar, and how much it mattered to them. Change one, move it to a different NPC, or send it to Oblivion.',
 		dark: memoriesDark,
 		light: memoriesLight,
 		alt: 'Hermaeus showing Hjordis Ashen-Hand’s memories in a table, one selected, with its details beside it.'
 	},
 	{
 		title: 'Diaries',
-		text: 'Each NPC’s diary, in their own words. Fix an entry the model got wrong, add one, or remove one.',
+		text: 'Each NPC’s diary entries. Rewrite an entry, add a new one, or remove one entirely.',
 		dark: diaryDark,
 		light: diaryLight,
-		alt: 'Hermaeus showing Hjordis Ashen-Hand’s diary, with the entry about the barrow selected.'
+		alt: 'Hermaeus showing Hjordis Ashen-Hand’s diary, with an entry about the barrow selected.'
 	},
 	{
 		title: 'Characters',
-		text: 'Everyone SkyrimNet has met in a playthrough, with their stats, their bios, and pins for your favorites.',
+		text: 'Everyone you’ve met in a playthrough, with their stats, their bios, and pins for your favorites.',
 		dark: charactersDark,
 		light: charactersLight,
 		alt: 'Hermaeus listing the characters in a playthrough, with Hjordis Ashen-Hand selected.'
@@ -51,8 +51,8 @@ const rest = [
 	{
 		group: 'Playthrough',
 		pages: [
-			['Bios', 'Edit an NPC’s bio for this playthrough, and restore an earlier version.'],
-			['Knowledge', 'Add what an NPC knows, and edit knowledge packs.'],
+			['Bios', 'Edit an NPC’s bio for this playthrough, or restore an earlier version.'],
+			['Knowledge', 'Add what NPCs know, and edit knowledge packs.'],
 			['Screenshots', 'Read and correct what OmniSight saw in each screenshot.'],
 			['Bard songs', 'Read the words, play the song, and fix or remove it.']
 		]
@@ -61,15 +61,15 @@ const rest = [
 		group: 'Behavior and memory',
 		pages: [
 			['Prompts', 'Edit SkyrimNet’s prompts as your own copies, with their markup checked before you save.'],
-			['Settings', 'Each settings file compared with SkyrimNet’s defaults, with <span class="changed">what you changed</span> set apart, and changed in place.'],
+			['Settings', 'Each settings file compared with SkyrimNet’s defaults, with <span class="changed">what you changed</span> highlighted, and changed in place.'],
 			['Quick toggles', 'The switches you flip most, in one place.']
 		]
 	},
 	{
 		group: 'AI and library',
 		pages: [
-			['Models', 'Choose the model for each task, from OpenRouter’s list.'],
-			['Providers', 'Set API keys. A key never reaches the browser, only whether one is set.'],
+			['Models', 'Choose the model for each task from your provider’s list.'],
+			['Providers', 'Set API keys. Once it’s set, it never reaches the browser again.'],
 			['Plugins', 'Turn SkyrimNet’s plugins on and off, and change their order.'],
 			['Content', 'SkyrimNet’s content records, edited in forms rather than raw YAML.']
 		]
@@ -172,7 +172,7 @@ const safety = [
 					</div>
 					</dl>
 				</div>
-				<p class="synthetic caps">From a made-up playthrough</p>
+				<p class="synthetic caps">(From a fake playthrough)</p>
 			</figure>
 
 			<a class="more caps" href="#why">
@@ -183,13 +183,13 @@ const safety = [
 
 		<section class="block why" id="why" aria-labelledby="why-title">
 			<div class="intro">
-				<h2 id="why-title" class="caps">I made this for myself</h2>
+				<h2 id="why-title" class="caps">Because I wanted it</h2>
 				<p>
 					SkyrimNet’s own dashboard is excellent, but it only works while the game is running. I play Skyrim VR with <a href="https://synergyvr.org/mgo">around 1,700 mods</a>,
 					so launching the game and loading a save takes several minutes, and I have to wear my headset the whole time.
 				</p>
 				<p>
-					Everything I usually want to change is sitting in files on my own machine. Finding the right file (and the right <em>copy</em> of that
+					Everything I usually want to change is sitting in simple files. Finding the right file (and the right <em>copy</em> of that
 					file) isn’t always straightforward, so I built something that knows where to look.
 				</p>
 			</div>
@@ -197,15 +197,14 @@ const safety = [
 				<aside class="btw" aria-labelledby="btw-dashboard">
 					<p id="btw-dashboard" class="btw-title caps">By the way…</p>
 					<p>
-						You should probably use SkyrimNet’s dashboard unless you have a good reason not to. Hermaeus isn’t a 1:1 replacement: plenty of things
+						You should probably use SkyrimNet’s dashboard unless you have a good reason not to. Hermaeus isn’t a 1:1 replacement. Plenty of things
 						really do need the game running, so it sticks to what I (and maybe you) most want to change offline.
 					</p>
 				</aside>
 				<aside class="btw" aria-labelledby="btw-name">
 					<p id="btw-name" class="btw-title caps">Why “Hermaeus”?</p>
 					<p>
-						Hermaeus Mora is the Daedric Prince of knowledge, memory, fate, etc. SkyrimNet gives NPCs memories, and he hoards them. Seemed
-						fitting.
+						Hermaeus Mora is the Daedric Prince of knowledge, memory, etc. SkyrimNet hoards knowledge and memories too!
 					</p>
 				</aside>
 			</div>
@@ -213,10 +212,10 @@ const safety = [
 
 		<section class="block" id="screens" aria-labelledby="screens-title">
 			<div class="intro">
-				<h2 id="screens-title" class="caps">SkyrimNet writes it down. Hermaeus reads it back.</h2>
+				<h2 id="screens-title" class="caps">Browse and edit all the things.</h2>
 				<p>
-					Everything SkyrimNet remembers about a playthrough is in files on your machine. Hermaeus opens them in your browser, looking like one more
-					menu of the game you just closed, and saves your changes back where SkyrimNet will find them.
+					Everything SkyrimNet remembers about a playthrough is in files on your machine, nearly all of it in files that are easy to edit. Hermaeus opens them in your browser
+					and saves your changes back where SkyrimNet will find them.
 				</p>
 			</div>
 			<ol class="shots" data-shots>
@@ -235,7 +234,7 @@ const safety = [
 					))
 				}
 			</ol>
-			<p class="synthetic caps">Screens from a made-up playthrough</p>
+			<p class="synthetic caps">Data from a fake playthrough</p>
 		</section>
 
 		<section class="block" id="rest" aria-labelledby="rest-title">
@@ -276,7 +275,7 @@ const safety = [
 		<section class="block" id="safety" aria-labelledby="safety-title">
 			<div class="intro">
 				<h2 id="safety-title" class="caps">Before you point it at your saves</h2>
-				<p>Hermaeus edits files SkyrimNet depends on, so I’ve tried hard not to break anything. Here’s exactly how.</p>
+				<p>Hermaeus edits files SkyrimNet depends on, so I’ve tried hard not to break anything. Here’s how.</p>
 			</div>
 			<dl class="rules">
 				{
@@ -300,7 +299,7 @@ const safety = [
 		<section class="block" id="download" aria-labelledby="download-title">
 			<div class="intro">
 				<h2 id="download-title" class="caps">Download</h2>
-				<p>One program for each system. On Windows:</p>
+				<p>One executable for each system. On Windows:</p>
 				<ul class="steps">
 					<li><strong>MO2 users:</strong> put <code>Hermaeus.exe</code> in your MO2 installation folder (the same folder as <code>ModOrganizer.exe</code>).</li>
 					<li>
@@ -309,8 +308,10 @@ const safety = [
 					</li>
 				</ul>
 				<p>
-					Then run it. It opens in your browser and finds SkyrimNet from there. If it can’t, it asks you where SkyrimNet is. On macOS or Linux, or
-					from a terminal, there are fancy command-line switches; <a href={`${repository}#running-it`}>the README</a> has them.
+					Then run it! It opens in your browser and finds SkyrimNet’s data automatically. If it can’t, it asks. There are fancy command-line switches listed in <a href={`${repository}#running-it`}>the README</a>.
+				</p>
+				<p>
+					Close Skyrim before you save anything. Hermaeus will tell you if you haven’t.
 				</p>
 			</div>
 			<ul class="systems">
@@ -330,8 +331,7 @@ const safety = [
 				}
 			</ul>
 			<p class="after">
-				Every release is on <a href={releases}>GitHub</a>, with what changed in it. Close Skyrim before you save anything; Hermaeus will tell you if you
-				haven’t.
+				Every release is on <a href={releases}>GitHub</a>, listing what changed.
 			</p>
 		</section>
 	</main>
