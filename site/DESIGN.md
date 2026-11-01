@@ -189,12 +189,12 @@ The app's near-monochrome palette, unchanged: off-white on near-black in dark, n
 
 **The Changed Rule.** Copper means the player changed this from what SkyrimNet ships, and the site shows it only where the app does. It is never a highlight, a warning, or a way to make something stand out.
 
-**The Scarce Accent Rule.** The accent marks what's selected, what's actionable, and group headings inside a list. The largest accent fill is the primary download button.
+**The Scarce Accent Rule.** The accent marks what's selected, what's actionable, and group headings inside a list. The largest accent fill is the primary download button. One exception, by request: the hook's promise, "with Skyrim closed", is set in the accent, as text and never as a fill.
 
 ## Typography
 
 **Display Font:** Barlow Condensed 500 and 600 (with Jost, sans-serif), self-hosted via @fontsource
-**Body Font:** Jost 400 and 500 (with system-ui, sans-serif), self-hosted via @fontsource
+**Body Font:** Jost 400, 500, and 600 (with system-ui, sans-serif), self-hosted via @fontsource
 
 **Character:** The app's pairing, at the scale of a page: tracked condensed capitals are the game's menu voice, now large enough to carry the name and section titles; Jost carries everything that's read, from the diary entry at reading scale down to the fine print. The site uses no monospace face.
 
@@ -203,7 +203,7 @@ The app's near-monochrome palette, unchanged: off-white on near-black in dark, n
 - **Headline** (Barlow Condensed 600, up to 3.75rem, line-height 1, label tracking, uppercase): section titles, and each system's name in the download rows.
 - **Entry** (Jost 400, up to 2.125rem, line-height 1.45, 32ch measure): the diary entry in the hero, and nothing else.
 - **Title** (Barlow Condensed 600, 1.375rem, uppercase): screen captions, safety rule names, and the name in the top bar.
-- **Lead** (Jost 400, 1.375rem, line-height 1.35): the hook under the name.
+- **Lead** (Jost 400, 1.375rem, line-height 1.35): the hook under the name, whose promise ("with Skyrim closed") is set in Jost 600 in the accent and never breaks across lines.
 - **Body** (Jost 400, 1rem, line-height 1.55, tabular figures): prose, captions, table cells. Section leads run at 1.125rem in muted ink with a 60ch measure; rule text holds 44ch.
 - **Button** (Barlow Condensed 500, 1.125rem, label tracking, uppercase; 600 on the primary): buttons and section links.
 - **Hint** (Barlow Condensed 500, 1rem, label tracking, uppercase): the hint strip.

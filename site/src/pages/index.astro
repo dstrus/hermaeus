@@ -125,7 +125,7 @@ const safety = [
 		<section class="hero" id="top" aria-labelledby="name">
 			<div class="offer">
 				<h1 id="name" class="caps">Hermaeus</h1>
-				<p class="hook">Read and edit what SkyrimNet remembers, with Skyrim closed.</p>
+				<p class="hook">Read and edit what SkyrimNet remembers, <strong>with Skyrim closed</strong>.</p>
 				<p class="sub">Memories, diaries, bios, prompts, and settings, straight from your own installation. No game to launch, no headset to strap on.</p>
 				<div class="downloads" data-downloads>
 					{
@@ -583,6 +583,11 @@ const safety = [
 		line-height: 1.35;
 		margin-top: var(--space-5);
 		text-wrap: balance;
+	}
+	.hook strong {
+		color: var(--accent);
+		font-weight: 600;
+		white-space: nowrap;
 	}
 	.sub {
 		color: var(--muted);
