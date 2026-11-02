@@ -77,7 +77,8 @@ const rest = [
 ];
 
 // Loading-screen tips for the hint strip, as Skyrim shows while you wait:
-// each one true, one picked at random per visit, the next on a click.
+// each one true, one picked at random per visit, another on a click and
+// whenever a new section reaches the middle of the window.
 const tips = [
 	'Read all you want while Skyrim is running. You just can’t save until you close it.',
 	'Your first change to a database each session gets a backup first, in hermaeus-backups.',
@@ -371,7 +372,7 @@ const safety = [
 	</footer>
 
 	<div class="strip">
-		<button type="button" class="tip" data-tips={JSON.stringify(tips)} aria-live="polite">
+		<button type="button" class="tip" data-tips={JSON.stringify(tips)}>
 			<span data-tip>{tips[0]}</span><span class="visually-hidden"> (Another tip)</span>
 		</button>
 		<nav class="hints caps" aria-label="Keyboard shortcuts">
@@ -477,20 +478,43 @@ const safety = [
 		}
 	});
 
-	// A tip at random per visit; a click shows the next, never the same one twice running.
+	// The tips in a random order per visit, the next one on a click or when a
+	// new section reaches the middle of the window, as Skyrim shows a new one
+	// at each loading screen. None repeats until every one has been shown.
 	const tip = document.querySelector<HTMLButtonElement>('.tip');
 	const tipText = tip?.querySelector<HTMLElement>('[data-tip]');
 	if (tip && tipText) {
 		const all: string[] = JSON.parse(tip.dataset.tips ?? '[]');
-		let at = Math.floor(Math.random() * all.length);
+		for (let i = all.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[all[i], all[j]] = [all[j], all[i]];
+		}
+		let at = 0;
 		tipText.textContent = all[at];
-		tip.addEventListener('click', () => {
-			at = (at + 1 + Math.floor(Math.random() * (all.length - 1))) % all.length;
+		const another = () => {
+			at = (at + 1) % all.length;
 			tipText.textContent = all[at];
 			tip.classList.remove('fresh');
 			void tip.offsetWidth;
 			tip.classList.add('fresh');
-		});
+		};
+		tip.addEventListener('click', another);
+
+		if ('IntersectionObserver' in window) {
+			let current: Element | null = null;
+			const io = new IntersectionObserver(
+				(entries) => {
+					for (const e of entries) {
+						if (!e.isIntersecting || e.target === current) continue;
+						// The section in view at load keeps the tip it came with.
+						if (current) another();
+						current = e.target;
+					}
+				},
+				{ rootMargin: '-50% 0px -50% 0px' }
+			);
+			document.querySelectorAll('main > section').forEach((s) => io.observe(s));
+		}
 	}
 </script>
 

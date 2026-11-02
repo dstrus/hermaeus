@@ -273,7 +273,7 @@ The app's item table at page scale: muted label-caps column heads over a strong 
 ### Button-Hint Strip (signature)
 As in the app: fixed along the bottom on opaque ground, a hairline above, hints right-aligned. Each hint is a button, a key cap (1px strong-hairline border, 3px radius, ink, at least 1.6em wide) then the action in muted caps, turning ink on hover. The site has three: D jumps to Download and focuses its first button, S jumps to Safety, and N moves to the next section. Every hint is a real shortcut, ignored while a modifier is held or focus is in a field, and clicking it does the same thing. Whichever way a hint runs, its key cap presses in: it dips 2px and lights in the accent for a moment, unless reduced motion is set.
 
-**Loading-screen tips.** The strip's left end shows a tip, as Skyrim's loading screens do: muted Jost at 0.8125rem, one at random per visit, the next on a click (fading in from a slight blur). Every tip is a true fact about Hermaeus in Davey's voice, kept short enough to fit on one line at 75rem; below that width the tip is hidden, and the strip keeps only the hints.
+**Loading-screen tips.** The strip's left end shows a tip, as Skyrim's loading screens do: muted Jost at 0.8125rem, in a random order per visit, the next on a click or whenever a new section reaches the middle of the window, as Skyrim shows a new one at each loading screen (fading in from a slight blur). None repeats until every one has been shown, and changes aren't announced to screen readers, since scrolling would set them off at every section. Every tip is a true fact about Hermaeus in Davey's voice, kept short enough to fit on one line at 75rem; below that width the tip is hidden, and the strip keeps only the hints.
 
 ## Do's and Don'ts
 
