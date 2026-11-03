@@ -37,6 +37,7 @@ SkyrimNet's own dashboard needs the game running. Hermaeus works with the game c
 ## Capabilities and Constraints
 
 - Static hosting only: no server code, no accounts, no forms that need a back end.
+- Hermaeus requires SkyrimNet Beta 25 or newer. The site says so under the hero's downloads and at the top of the Download section.
 - What Hermaeus can do is in the root `PRODUCT.md` and `README.md`; the site describes only what the app actually does, in its terms (SkyrimNet, playthrough, NPC, memory, diary entry, event, bio, knowledge pack, plugin, trigger, action, filter, voice effect, quick toggle).
 - The site never describes Hermaeus as a rewrite, port, or successor of anything, and never mentions an earlier version.
 - Hermaeus is released under the MIT License (`LICENSE` at the repository root).

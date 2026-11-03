@@ -154,6 +154,7 @@ const safety = [
 						))
 					}
 				</div>
+				<p class="needs">Requires SkyrimNet Beta 25 or newer.</p>
 				<p class="fine"><strong>Unofficial.</strong> Works with SkyrimNet, isn’t part of it, and isn’t affiliated with or endorsed by Fateless.Ai.</p>
 			</div>
 
@@ -312,7 +313,7 @@ const safety = [
 		<section class="block" id="download" aria-labelledby="download-title">
 			<div class="intro">
 				<h2 id="download-title" class="caps">Download</h2>
-				<p>One executable for each system. On Windows:</p>
+				<p>You’ll need SkyrimNet Beta 25 or newer. Then grab one executable for your system. On Windows:</p>
 				<ul class="steps">
 					<li><strong>MO2 users:</strong> put <code>Hermaeus.exe</code> in your MO2 installation folder (the same folder as <code>ModOrganizer.exe</code>).</li>
 					<li>
@@ -674,8 +675,12 @@ const safety = [
 	.downloads .button:not(.primary) .for {
 		display: none;
 	}
+	.needs {
+		margin-top: var(--space-4);
+		font-size: var(--step--1);
+	}
 	.fine {
-		margin-top: var(--space-5);
+		margin-top: var(--space-2);
 		font-size: var(--step--1);
 		color: var(--muted);
 		max-width: 38ch;
