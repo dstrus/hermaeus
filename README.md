@@ -61,6 +61,7 @@ You need Go 1.26 or later and Node 22.17 or later.
 make build              # the frontend, then the program, as ./hermaeus
 make windows            # the program for 64-bit Windows, with its icon, as ./Hermaeus.exe
 make release            # every download, into dist/ (on macOS)
+make release-notes VERSION=v0.2.0   # that version's release notes, from CHANGELOG.md, into dist/
 make notices            # THIRD_PARTY_NOTICES.txt, from the licenses of everything built into the program
 make test               # Go tests, then type-checking the frontend
 make dev DIR=/path/to/SkyrimNet   # Hermaeus plus Vite's dev server at http://localhost:5173
@@ -69,7 +70,7 @@ make types              # regenerate the API's TypeScript types after changing t
 
 `go test ./internal/...` works without Node. Building the program, or `go vet ./...`, needs the frontend built first, since it's embedded from `web/build`.
 
-To release a version, push an annotated tag such as `v0.2.0` whose message is the release notes. The Release workflow tests, builds the downloads, and attaches them to a draft release, which goes live when you publish it.
+To release a version, add its section to [CHANGELOG.md](CHANGELOG.md) (`make release-notes VERSION=v0.2.0` shows the notes it makes), then push a tag such as `v0.2.0`. The Release workflow tests, builds the downloads, and attaches them to a draft release with those notes, which goes live when you publish it.
 
 ## Layout
 
