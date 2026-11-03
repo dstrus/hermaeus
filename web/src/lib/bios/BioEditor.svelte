@@ -224,10 +224,10 @@
 	{#if version}
 		<span class="muted">{kinds[version.kind]?.what}{#if version.source}{' '}{version.shared ? m.bios.editor.fromShared({ source: version.source, shared: version.shared }) : m.bios.editor.from({ source: version.source })}{/if}</span>
 	{/if}
-	{#if version?.kind === 'default' && !hasBaseline && !readOnly && mode === 'read'}
-		<button type="button" class="button primary" onclick={create} disabled={saving}>{m.bios.editor.createFromThis}</button>
-	{/if}
 </div>
+{#if version?.kind === 'default' && !hasBaseline && !readOnly && mode === 'read'}
+	<div class="create"><button type="button" class="button primary" onclick={create} disabled={saving}>{m.bios.editor.createFromThis}</button></div>
+{/if}
 {#if notice}<p class="notice" role="status">{notice}</p>{/if}
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
@@ -367,6 +367,11 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-4);
+		margin-bottom: var(--space-4);
+	}
+	/* The action gets its own line at the left, just above the bio it
+	   copies. */
+	.create {
 		margin-bottom: var(--space-4);
 	}
 	.id {
