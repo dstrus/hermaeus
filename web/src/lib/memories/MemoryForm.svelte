@@ -6,10 +6,12 @@
 
 	let {
 		memory,
+		fresh = {},
 		onsave,
 		oncancel
 	}: {
 		memory?: Memory; // the memory to edit, or none for a new one
+		fresh?: Partial<Pick<Memory, 'type' | 'importance'>>; // where a new one starts, if not as an experience of middling importance
 		onsave: (changes: MemoryChanges) => Promise<void>;
 		oncancel: () => void;
 	} = $props();
@@ -17,12 +19,12 @@
 	// The form edits a snapshot of the memory as it was when the form opened
 	// (untrack says so); the memory itself changes only once it's saved.
 	const start = untrack(() => ({
-		type: memory?.type ?? 'EXPERIENCE',
+		type: memory?.type ?? fresh.type ?? 'EXPERIENCE',
 		title: memory?.title ?? '',
 		content: memory?.content ?? '',
 		location: memory?.location ?? '',
 		emotion: memory?.emotion ?? '',
-		importance: memory?.importance ?? 0.5,
+		importance: memory?.importance ?? fresh.importance ?? 0.5,
 		tags: (memory?.tags ?? []).join(', '),
 		active: memory?.active ?? true,
 		alwaysInject: memory?.alwaysInject ?? false,

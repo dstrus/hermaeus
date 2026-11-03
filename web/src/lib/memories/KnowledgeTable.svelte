@@ -196,7 +196,7 @@
 		{#if mode === 'new'}
 			<h2 class="caps">{m.memories.knowledge.newTitle}</h2>
 			<p class="muted small">{pack && pack !== 'none' ? m.memories.knowledge.into({ pack: packs.get(Number(pack))?.name ?? m.memories.knowledge.thePack }) : m.memories.knowledge.inNoPack}</p>
-			<MemoryForm onsave={saveForm} oncancel={() => close()} />
+			<MemoryForm fresh={{ type: 'KNOWLEDGE', importance: 0.7 }} onsave={saveForm} oncancel={() => close()} />
 		{:else if current}
 			{#key `${current.id}:${mode}`}
 				<div in:fly={{ y: 6, duration: 180 }}>
