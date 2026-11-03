@@ -2319,6 +2319,10 @@ characters:
 
   # The Characters page.
   table:
+    lead: >-
+      Hermaeus only knows about characters with bios, memories, events, or
+      diaries. If a character is missing, you must meet them in-game or add a
+      bio in SkyrimNet’s dashboard while playing.
     stored: "{count} with something stored"
     filter: Filter by name or bio
     filterLabel: Filter characters
@@ -2502,6 +2506,10 @@ bios:
 
   # Every bio SkyrimNet or a plugin ships.
   catalog:
+    lead: >-
+      Hermaeus cannot create a character’s first bio, so only characters who
+      already have one are shown here. Create bios in SkyrimNet’s dashboard
+      while playing, and you can edit them here afterward.
     fromPlugin: "{count} from {plugin}"
     withBio:
       one: "{bios} with a bio, from {count} layer"

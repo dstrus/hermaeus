@@ -95,6 +95,7 @@
 	<span class="muted n" use:clipped>{m.characters.table.stored({ count: characters.length })}</span>
 	<input type="search" bind:value={query} placeholder={m.characters.table.filter} aria-label={m.characters.table.filterLabel} />
 </div>
+<p class="muted lead">{m.characters.table.lead}</p>
 {#if error}<p class="notice error" role="alert">{error}</p>{/if}
 
 {#if !characters.length}
@@ -199,6 +200,10 @@
 		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+	.lead {
+		max-width: 65ch;
+		margin-bottom: var(--space-4);
 	}
 	.bar input {
 		margin-left: auto;

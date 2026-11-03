@@ -113,6 +113,7 @@
 	{/if}
 	<input type="search" bind:value={query} placeholder={m.bios.catalog.filter} aria-label={m.bios.catalog.filterLabel} />
 </div>
+<p class="muted lead">{m.bios.catalog.lead}</p>
 
 {#if !catalog.bios.length}
 	<p class="muted">{m.bios.catalog.none}</p>
@@ -194,6 +195,10 @@
 		min-width: 0;
 		overflow: hidden;
 		text-overflow: ellipsis;
+	}
+	.lead {
+		max-width: 65ch;
+		margin-bottom: var(--space-4);
 	}
 	.bar input {
 		margin-left: auto;
