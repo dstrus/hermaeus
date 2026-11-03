@@ -818,25 +818,31 @@ const safety = [
 	.btw a {
 		color: var(--ink);
 	}
+	/* A file name keeps the color of the text around it; only its backing
+	   sets it apart. */
 	code {
 		font-family: inherit;
-		color: var(--ink);
+		color: inherit;
 		background: var(--select);
 		border-radius: var(--radius);
 		padding: 0.05em 0.35em;
 	}
+	/* The install steps are instructions, so each one reads in one ink, its
+	   label set apart by weight alone. */
 	.steps {
 		margin: var(--space-4) 0 0;
 		padding-left: 1.25rem;
-		color: var(--muted);
+		color: var(--ink);
 		font-size: var(--step-1);
 		max-width: 60ch;
 		display: grid;
 		gap: var(--space-2);
 	}
 	.steps strong {
-		color: var(--ink);
-		font-weight: 500;
+		font-weight: 600;
+	}
+	.steps ::marker {
+		color: var(--muted);
 	}
 	.who {
 		color: var(--ink);
