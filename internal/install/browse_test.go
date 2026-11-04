@@ -17,6 +17,7 @@ func TestBrowseMarksSkyrimNetFolders(t *testing.T) {
 		os.Mkdir(filepath.Join(root, d), 0o755)
 	}
 	os.WriteFile(filepath.Join(root, "notes.txt"), nil, 0o644)
+	os.WriteFile(filepath.Join(root, ".DS_Store"), nil, 0o644)
 
 	got, err := Browse(root, SkyrimNet)
 	if err != nil {
@@ -34,6 +35,9 @@ func TestBrowseMarksSkyrimNetFolders(t *testing.T) {
 		if got.Folders[i] != want[i] {
 			t.Errorf("folder %d = %+v, want %+v", i, got.Folders[i], want[i])
 		}
+	}
+	if len(got.Files) != 1 || got.Files[0] != "notes.txt" {
+		t.Errorf("Browse listed files %v, want [notes.txt]", got.Files)
 	}
 	if got.Path != root || got.Parent != filepath.Dir(root) || got.Mark != MarkNone || len(got.Roots) == 0 {
 		t.Errorf("Browse = path %q, parent %q, mark %q, roots %v", got.Path, got.Parent, got.Mark, got.Roots)

@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import type { Character } from '#lib/api/types/characters.ts';
 	import { m } from '#lib/copy/messages.ts';
+	import { closeOnBackdrop } from '#lib/ui/backdrop.ts';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import { characterName } from './api.ts';
@@ -44,7 +45,7 @@
 	useShortcuts(() => [{ key: '/', label: m.characters.find.shortcut, run: open }]);
 </script>
 
-<dialog bind:this={dialog} aria-label={m.characters.find.title} onclick={(e) => e.target === dialog && dialog.close()}>
+<dialog bind:this={dialog} aria-label={m.characters.find.title} {...closeOnBackdrop(() => dialog.close())}>
 	<input
 		bind:this={input}
 		bind:value={query}

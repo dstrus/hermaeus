@@ -21,5 +21,6 @@ export interface Listing {
   parent: string; // "" at the top of a drive
   mark: Mark; // the listed folder's own
   folders: Folder[];
+  files: string[]; // the names of its files, shown to tell where you are
   roots: string[]; // where browsing can start over: the drives on Windows, / elsewhere
 }

@@ -3681,10 +3681,12 @@ folders:
   # The folder picker, which opens under a field.
   picker:
     browse: Browse…
-    label: Choose a folder
+    titleSkyrimNet: Choose SkyrimNet’s folder
+    titleMod: Choose SkyrimNet’s mod folder
     drive: Drive
+    path: Folder path, listed when you press Enter
     up: Up a folder
-    empty: No folders here.
+    empty: This folder is empty.
     choose: Choose this folder
     skyrimNet: SkyrimNet folder
     skyrimNetInside: SkyrimNet folder inside

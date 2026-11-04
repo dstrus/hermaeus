@@ -34,11 +34,13 @@ type Listing struct {
 	Parent  string   `json:"parent"` // "" at the top of a drive
 	Mark    Mark     `json:"mark"`   // the listed folder's own
 	Folders []Folder `json:"folders"`
+	Files   []string `json:"files"` // the names of its files, shown to tell where you are
 	Roots   []string `json:"roots"` // where browsing can start over: the drives on Windows, / elsewhere
 }
 
-// Browse lists the subfolders of dir, or of the folder Hermaeus runs from
-// when dir is "", marking them for t. Hidden folders are left out.
+// Browse lists what's in dir, or in the folder Hermaeus runs from when dir
+// is "": its subfolders, marked for t, and its files. Hidden ones are left
+// out.
 func Browse(dir string, t Target) (Listing, error) {
 	dir = strings.TrimSpace(dir)
 	if dir == "" {
@@ -55,7 +57,7 @@ func Browse(dir string, t Target) (Listing, error) {
 		}
 		return Listing{}, apperr.New(apperr.Invalid, "Can't open %s: %v", abs, err)
 	}
-	out := Listing{Path: abs, Mark: t.mark(abs).Mark, Folders: []Folder{}, Roots: roots()}
+	out := Listing{Path: abs, Mark: t.mark(abs).Mark, Folders: []Folder{}, Files: []string{}, Roots: roots()}
 	if parent := filepath.Dir(abs); parent != abs {
 		out.Parent = parent
 	}
@@ -65,7 +67,8 @@ func Browse(dir string, t Target) (Listing, error) {
 			continue
 		}
 		p := filepath.Join(abs, name)
-		if !IsDir(p) { // a link to a folder counts
+		if !IsDir(p) { // a link to a folder counts as a folder
+			out.Files = append(out.Files, name)
 			continue
 		}
 		f := t.mark(p)
@@ -74,6 +77,9 @@ func Browse(dir string, t Target) (Listing, error) {
 	}
 	sort.Slice(out.Folders, func(i, j int) bool {
 		return strings.ToLower(out.Folders[i].Name) < strings.ToLower(out.Folders[j].Name)
+	})
+	sort.Slice(out.Files, func(i, j int) bool {
+		return strings.ToLower(out.Files[i]) < strings.ToLower(out.Files[j])
 	})
 	return out, nil
 }
