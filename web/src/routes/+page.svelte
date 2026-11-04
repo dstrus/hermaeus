@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import FolderForm from '#lib/folders/FolderForm.svelte';
 	import Preview from '#lib/summary/Preview.svelte';
 	import Diamond from '#lib/ui/Diamond.svelte';
 	import { fitToViewport } from '#lib/ui/fit.ts';
+	import { leave, param, setParams } from '#lib/ui/address.svelte.ts';
 	import { Selection } from '#lib/ui/selection.svelte.ts';
 	import { useShortcuts } from '#lib/ui/shortcuts.svelte.ts';
 	import Fill from '#lib/copy/Fill.svelte';
@@ -17,53 +19,68 @@
 	const selection = new Selection(() => playthroughs, (p) => p.id, { param: 'item' });
 	const open = (p: Playthrough) => goto(`/${encodeURIComponent(p.id)}`);
 
-	useShortcuts(() => [
-		{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
-		{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
-		{ key: 'Enter', label: m.common.open, disabled: !selection.current, run: () => selection.current && open(selection.current) }
-	]);
+	// Changing the SkyrimNet folder has its own address, so Back ends it.
+	let changing = $derived(param('mode') === 'folder');
+	const closeFolder = () => leave('mode');
+
+	useShortcuts(() =>
+		changing
+			? [{ key: 'Escape', shown: 'Esc', label: m.common.cancel, run: closeFolder }]
+			: [
+					{ key: 'ArrowDown', label: m.common.next, hidden: true, run: () => selection.move(1) },
+					{ key: 'ArrowUp', label: m.common.previous, hidden: true, run: () => selection.move(-1) },
+					{ key: 'Enter', label: m.common.open, disabled: !selection.current, run: () => selection.current && open(selection.current) }
+				]
+	);
 </script>
 
-<h1 class="caps">{m.playthroughs.title}</h1>
-<p class="muted"><Fill text={m.playthroughs.in.text}>{#snippet path()}<span class="path">{data.status.skyrimNetDir}</span>{/snippet}</Fill></p>
-<p class="muted defaults">
-	{#if data.status.modDir}
-		<Fill text={(data.status.modDirDetected ? m.playthroughs.modDirFound : m.playthroughs.modDirSet).text}>{#snippet path()}<span class="path">{data.status.modDir}</span>{/snippet}</Fill>
-	{:else if !data.status.defaultBios}
-		<Fill text={m.playthroughs.noDefaults.text}>{#snippet flag()}<code>-mod-dir</code>{/snippet}</Fill>
-	{/if}
-</p>
-
-{#if !playthroughs.length}
-	<p class="empty">{m.playthroughs.none}</p>
+{#if changing}
+	<FolderForm current={{ path: data.status.skyrimNetDir, modPath: data.status.modDirDetected ? '' : data.status.modDir }} close={closeFolder} />
 {:else}
-	<div class="split">
-	<table>
-		<thead>
-			<tr>
-				<th class="mark" aria-label={m.common.selected}></th>
-				<th class="caps">{m.playthroughs.player}</th>
-				<th class="caps">{m.playthroughs.saveId}</th>
-				<th class="caps">{m.playthroughs.lastWritten}</th>
-				<th class="caps n">{m.playthroughs.size}</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each playthroughs as p (p.id)}
-				<tr aria-selected={selection.is(p)} onclick={() => selection.select(p)} ondblclick={() => open(p)}>
-					<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
-					<td><a href="/{encodeURIComponent(p.id)}">{p.player || m.overview.noPlayer}</a></td>
-					<td class="muted">{p.id}</td>
-					<td>{realTime(p.modified)}</td>
-					<td class="n muted">{m.playthroughs.kb({ size: count(Math.round(p.size / 1024)) })}</td>
+	<h1 class="caps">{m.playthroughs.title}</h1>
+	<p class="muted">
+		<Fill text={m.playthroughs.in.text}>{#snippet path()}<span class="path">{data.status.skyrimNetDir}</span>{/snippet}</Fill>
+		· <button type="button" class="textbutton" onclick={() => setParams({ mode: 'folder' })}>{m.playthroughs.changeFolder}</button>
+	</p>
+	<p class="muted defaults">
+		{#if data.status.modDir}
+			<Fill text={(data.status.modDirDetected ? m.playthroughs.modDirFound : m.playthroughs.modDirSet).text}>{#snippet path()}<span class="path">{data.status.modDir}</span>{/snippet}</Fill>
+		{:else if !data.status.defaultBios}
+			<Fill text={m.playthroughs.noDefaults.text}>{#snippet flag()}<code>-mod-dir</code>{/snippet}</Fill>
+		{/if}
+	</p>
+
+	{#if !playthroughs.length}
+		<p class="empty">{m.playthroughs.none}</p>
+	{:else}
+		<div class="split">
+		<table>
+			<thead>
+				<tr>
+					<th class="mark" aria-label={m.common.selected}></th>
+					<th class="caps">{m.playthroughs.player}</th>
+					<th class="caps">{m.playthroughs.saveId}</th>
+					<th class="caps">{m.playthroughs.lastWritten}</th>
+					<th class="caps n">{m.playthroughs.size}</th>
 				</tr>
-			{/each}
-		</tbody>
-	</table>
-	<aside class="pane" aria-label={m.playthroughs.pane} use:fitToViewport>
-		{#if selection.current}<Preview playthrough={selection.current} />{/if}
-	</aside>
-	</div>
+			</thead>
+			<tbody>
+				{#each playthroughs as p (p.id)}
+					<tr aria-selected={selection.is(p)} onclick={() => selection.select(p)} ondblclick={() => open(p)}>
+						<td class="mark">{#if selection.is(p)}<Diamond />{/if}</td>
+						<td><a href="/{encodeURIComponent(p.id)}">{p.player || m.overview.noPlayer}</a></td>
+						<td class="muted">{p.id}</td>
+						<td>{realTime(p.modified)}</td>
+						<td class="n muted">{m.playthroughs.kb({ size: count(Math.round(p.size / 1024)) })}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<aside class="pane" aria-label={m.playthroughs.pane} use:fitToViewport>
+			{#if selection.current}<Preview playthrough={selection.current} />{/if}
+		</aside>
+		</div>
+	{/if}
 {/if}
 
 <style>

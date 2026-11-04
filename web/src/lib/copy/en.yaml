@@ -2781,6 +2781,7 @@ overview:
 playthroughs:
   title: Playthroughs
   in: In {path}
+  changeFolder: Change folder
   modDirFound: SkyrimNet’s own files were found in {path}.
   modDirSet: SkyrimNet’s own files are in {path}.
   noDefaults: >-
@@ -3664,6 +3665,10 @@ folders:
     Hermaeus didn’t find SkyrimNet’s folder, the one containing {data},
     {config}, and {logs}. With Mod Organizer 2, it’s usually {overwrite} in
     your MO2 instance.
+  change: >-
+    Choose another SkyrimNet folder. Hermaeus remembers it, and uses it from
+    now on, even where it would find another on its own. Starting Hermaeus
+    with {flag} still overrides it.
   folder: SkyrimNet folder
   modFolder: SkyrimNet’s mod folder
   modPlaceholder: Only with Mod Organizer 2, and usually found on its own
