@@ -2,16 +2,19 @@
 
 What changed in each release of Hermaeus, newest first.
 
-## Unreleased
+## 0.1.0-beta.3 (2026-11-04)
 
 ### Added
 
-- Config, at the top of the sidebar, points Hermaeus at a different SkyrimNet folder, and remembers it, even when it found one on its own. "Change folder" on the Playthroughs page does the same.
-- "Browse…" beside each folder field picks a folder from a list of its folders and files, starting in the folder Hermaeus runs from. Folders that are SkyrimNet's folder, or lead to it, are marked, as is SkyrimNet's mod folder. Typing or pasting a path still works.
+- "Config", at the top of the sidebar. Lets you point Hermaeus at a different SkyrimNet folder, and remembers it, even when it auto-detected one. "Change folder" on the Playthroughs page does the same.
 
 ### Changed
 
-- "Playthrough" in the top bar links to the list of playthroughs, which was reachable only through the Hermaeus name.
+- "Playthrough" in the top bar links to the list of playthroughs, which was previously reachable only through the Hermaeus logo/wordmark in the upper-left.
+
+### Fixed
+
+- Quick Find closed when a text selection in its search field ended with the mouse button/trackpad being released with the cursor outside the modal.
 
 ## 0.1.0-beta.2 (2026-11-03)
 
