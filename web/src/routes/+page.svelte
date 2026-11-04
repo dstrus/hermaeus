@@ -21,7 +21,7 @@
 
 	// Changing the SkyrimNet folder has its own address, so Back ends it.
 	let changing = $derived(param('mode') === 'folder');
-	const closeFolder = () => leave('mode');
+	const closeFolder = () => leave('mode'); // saved or not
 
 	useShortcuts(() =>
 		changing

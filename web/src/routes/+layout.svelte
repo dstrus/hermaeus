@@ -8,6 +8,7 @@
 	import { live, watchGame } from '#lib/api/live.svelte.ts';
 	import { m } from '#lib/copy/messages.ts';
 	import FolderForm from '#lib/folders/FolderForm.svelte';
+	import Cog from '#lib/ui/Cog.svelte';
 	import Mark from '#lib/ui/Mark.svelte';
 	import ToggleBar from '#lib/settings/ToggleBar.svelte';
 	import HintBar from '#lib/ui/HintBar.svelte';
@@ -69,6 +70,7 @@
 		<main class="solo"><FolderForm /></main>
 	{:else if save}
 		<nav class="sections" aria-label={m.nav.sections} use:fitToViewport>
+			<a class="config caps" href="{base}/config" aria-current={here('config') ? 'page' : undefined}><Cog size="0.8em" />{m.nav.config}</a>
 			<ul aria-label={m.nav.thisPlaythrough}>
 				<li><a class="caps" href={base} aria-current={overviewActive ? 'page' : undefined}>{m.nav.overview}</a></li>
 				<li><a class="caps" href="{base}/characters" aria-current={charactersActive ? 'page' : undefined}>{m.nav.characters}</a></li>
@@ -189,6 +191,17 @@
 		color: var(--accent);
 		font-weight: 600;
 	}
+	/* Config sits apart, above the playthrough's sections, in full ink so
+	   it reads as always there rather than as one of them. */
+	.sections a.config {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-bottom: var(--space-4);
+	}
+	.sections a.config:not([aria-current]) {
+		color: var(--ink);
+	}
 	/* A group's label, never as bright as the current section. */
 	.group {
 		margin-top: var(--space-4);
@@ -235,6 +248,11 @@
 			display: flex;
 			gap: var(--space-5);
 			margin: 0;
+		}
+		.sections a.config {
+			align-self: flex-start;
+			flex: none;
+			margin-bottom: 0;
 		}
 	}
 </style>

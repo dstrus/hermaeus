@@ -2950,6 +2950,7 @@ shell:
 # The sidebar: a playthrough’s own pages, then each group of pages.
 nav:
   sections: Sections
+  config: Config
   thisPlaythrough: This playthrough
   overview: Overview
   characters: Characters

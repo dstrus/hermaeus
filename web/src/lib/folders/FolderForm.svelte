@@ -14,7 +14,7 @@
 		close
 	}: {
 		current?: { path: string; modPath: string }; // the folders in use, when changing them
-		close?: () => Promise<void>; // ends a change, saved or not
+		close?: (saved: boolean) => Promise<void>; // ends a change
 	} = $props();
 
 	const t = m.folders;
@@ -51,7 +51,7 @@
 			// emptying it means find it again. Asked afresh, it starts empty,
 			// so an empty one leaves a remembered mod folder alone.
 			await setFolder(path, current ? modPath.trim() : modPath.trim() || undefined);
-			await close?.(); // settles before the reload, which it would cancel
+			await close?.(true); // settles before the reload, which it would cancel
 			await invalidateAll(); // reload the status, which now has the folder
 		} catch (e) {
 			error = e instanceof ApiError ? e.message : String(e);
@@ -91,7 +91,7 @@
 	</p>
 	<div class="buttons">
 		<button class="button primary" disabled={saving}>{t.use}</button>
-		{#if close}<button type="button" class="button" onclick={close} disabled={saving}>{m.common.cancel}</button>{/if}
+		{#if close}<button type="button" class="button" onclick={() => close(false)} disabled={saving}>{m.common.cancel}</button>{/if}
 	</div>
 	{#if error}
 		<p class="notice error" role="alert">{error}</p>
