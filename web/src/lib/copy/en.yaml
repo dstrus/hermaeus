@@ -3678,6 +3678,19 @@ folders:
     Hermaeus looks for the mod folder next to {overwrite}; name it here if it
     isn’t found.
   use: Use this folder
+  # The folder picker, which opens under a field.
+  picker:
+    browse: Browse…
+    label: Choose a folder
+    drive: Drive
+    up: Up a folder
+    empty: No folders here.
+    choose: Choose this folder
+    skyrimNet: SkyrimNet folder
+    skyrimNetInside: SkyrimNet folder inside
+    mod: SkyrimNet’s mod folder
+    isSkyrimNet: This is a SkyrimNet folder.
+    isMod: This is SkyrimNet’s mod folder.
 
 # Controls many pages share.
 ui:

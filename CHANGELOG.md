@@ -2,6 +2,13 @@
 
 What changed in each release of Hermaeus, newest first.
 
+## Unreleased
+
+### Added
+
+- "Change folder" on the Playthroughs page points Hermaeus at a different SkyrimNet folder, and remembers it, even when it found one on its own.
+- "Browse…" beside each folder field picks a folder from a list, starting in the folder Hermaeus runs from. Folders that are SkyrimNet's folder, or lead to it, are marked, as is SkyrimNet's mod folder. Typing or pasting a path still works.
+
 ## 0.1.0-beta.2 (2026-11-03)
 
 ### Fixed

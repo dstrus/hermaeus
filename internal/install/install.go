@@ -26,18 +26,29 @@ func Find() string {
 	return findIn(roots)
 }
 
+// Target is a kind of folder the folder picker looks for (see Browse).
+type Target struct {
+	Is     func(dir string) bool // whether dir is one
+	Within []string              // where one usually sits below a folder that leads to it
+}
+
+// SkyrimNet is SkyrimNet's own folder: the one with its databases.
+var SkyrimNet = Target{Is: hasDatabases, Within: places[1:]}
+
+// places are where a SkyrimNet folder sits below the folders Hermaeus is
+// likely to be started from, the folder itself first.
+var places = []string{
+	"",
+	"SkyrimNet",
+	filepath.Join("SKSE", "Plugins", "SkyrimNet"),
+	filepath.Join("Data", "SKSE", "Plugins", "SkyrimNet"),
+	filepath.Join("overwrite", "SKSE", "Plugins", "SkyrimNet"),
+}
+
 func findIn(roots []string) string {
-	suffixes := []string{
-		"",
-		"SkyrimNet",
-		filepath.Join("SKSE", "Plugins", "SkyrimNet"),
-		filepath.Join("Data", "SKSE", "Plugins", "SkyrimNet"),
-		filepath.Join("overwrite", "SKSE", "Plugins", "SkyrimNet"),
-	}
 	for _, root := range roots {
-		for _, suffix := range suffixes {
-			dir := filepath.Join(root, suffix)
-			if len(FilesWithSuffix(filepath.Join(dir, "data"), ".db")) > 0 {
+		for _, place := range places {
+			if dir := filepath.Join(root, place); hasDatabases(dir) {
 				return dir
 			}
 		}

@@ -83,6 +83,11 @@ packages:
       import type * as layers from './layers.ts';
     type_mappings:
       layers.Layer: layers.Layer
+  - path: hermaeus/internal/install
+    include_files: [browse.go]
+    output_path: web/src/lib/api/types/install.ts
+    fallback_type: unknown
+    enum_style: union
   - path: hermaeus/internal/layers
     include_files: [layers.go]
     output_path: web/src/lib/api/types/layers.ts

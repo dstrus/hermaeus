@@ -19,6 +19,7 @@ import (
 	"hermaeus/internal/characters"
 	"hermaeus/internal/filters"
 	"hermaeus/internal/httpapi"
+	"hermaeus/internal/install"
 	"hermaeus/internal/layers"
 	"hermaeus/internal/memories"
 	"hermaeus/internal/plugins"
@@ -76,6 +77,16 @@ func (s *Server) routes() {
 		}
 		s.Prefs.Update(func(v *prefs.Values) { v.Theme = req.Theme })
 		return s.status(), nil
+	}))
+	m.Handle("GET /api/folders", httpapi.JSON(func(r *http.Request, _ httpapi.None) (install.Listing, error) {
+		q := r.URL.Query()
+		switch q.Get("for") {
+		case "skyrimnet":
+			return install.Browse(q.Get("path"), install.SkyrimNet)
+		case "mod":
+			return install.Browse(q.Get("path"), layers.ModFolder)
+		}
+		return install.Listing{}, apperr.New(apperr.Invalid, "Unknown folder kind %q", q.Get("for"))
 	}))
 	m.Handle("PUT /api/folder", httpapi.JSON(func(_ *http.Request, req FolderRequest) (Status, error) {
 		dir, err := s.Store.SetDir(req.Path)

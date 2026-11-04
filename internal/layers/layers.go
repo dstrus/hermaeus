@@ -54,6 +54,12 @@ func HasBase(dir string) bool {
 	return install.IsDir(filepath.Join(dir, "library", BasePlugin, "prompts"))
 }
 
+// ModFolder is SkyrimNet's mod folder, for the folder picker: the mod's top
+// folder or its SKSE/Plugins/SkyrimNet, as SetModDir takes either.
+var ModFolder = install.Target{Is: func(dir string) bool {
+	return HasBase(dir) || HasBase(filepath.Join(dir, "SKSE", "Plugins", "SkyrimNet"))
+}}
+
 // ModDir is SkyrimNet's mod folder: the one chosen, or one found next to an
 // MO2 overwrite folder, or "" when the SkyrimNet folder has the defaults
 // itself. detected says it was found rather than chosen.

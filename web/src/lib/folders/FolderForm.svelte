@@ -7,6 +7,7 @@
 	import { setFolder } from '#lib/api/status.ts';
 	import Fill from '#lib/copy/Fill.svelte';
 	import { m } from '#lib/copy/messages.ts';
+	import FolderPicker from './FolderPicker.svelte';
 
 	let {
 		current,
@@ -17,11 +18,29 @@
 	} = $props();
 
 	const t = m.folders;
+	const id = $props.id();
 
 	let path = $state(untrack(() => current?.path ?? ''));
 	let modPath = $state(untrack(() => current?.modPath ?? ''));
 	let error = $state('');
 	let saving = $state(false);
+
+	// Which field the picker is open under, if either.
+	let browsing = $state<'skyrimnet' | 'mod'>();
+	const inputs: Record<'skyrimnet' | 'mod', HTMLInputElement | undefined> = $state({ skyrimnet: undefined, mod: undefined });
+
+	// endBrowse closes the picker, filling its field with the folder picked,
+	// if one was, and goes back to that field.
+	function endBrowse(picked?: string) {
+		const kind = browsing;
+		if (!kind) return;
+		if (picked !== undefined) {
+			if (kind === 'skyrimnet') path = picked;
+			else modPath = picked;
+		}
+		browsing = undefined;
+		inputs[kind]?.focus();
+	}
 
 	async function submit(event: SubmitEvent) {
 		event.preventDefault();
@@ -51,14 +70,22 @@
 			<Fill text={t.notFound.text}>{#snippet data()}<code>data</code>{/snippet}{#snippet config()}<code>config</code>{/snippet}{#snippet logs()}<code>logs</code>{/snippet}{#snippet overwrite()}<code>overwrite\SKSE\Plugins\SkyrimNet</code>{/snippet}</Fill>
 		{/if}
 	</p>
-	<label>
-		<span class="caps">{t.folder}</span>
-		<input bind:value={path} required autocomplete="off" spellcheck="false" />
-	</label>
-	<label>
-		<span class="caps">{t.modFolder}</span>
-		<input bind:value={modPath} autocomplete="off" spellcheck="false" placeholder={t.modPlaceholder} />
-	</label>
+	<div class="field">
+		<label class="caps" for="{id}-folder">{t.folder}</label>
+		<div class="entry">
+			<input id="{id}-folder" bind:this={inputs.skyrimnet} bind:value={path} required autocomplete="off" spellcheck="false" />
+			<button type="button" class="button" aria-expanded={browsing === 'skyrimnet'} onclick={() => (browsing = 'skyrimnet')}>{t.picker.browse}</button>
+		</div>
+		{#if browsing === 'skyrimnet'}<FolderPicker kind="skyrimnet" onpick={endBrowse} oncancel={() => endBrowse()} />{/if}
+	</div>
+	<div class="field">
+		<label class="caps" for="{id}-mod">{t.modFolder}</label>
+		<div class="entry">
+			<input id="{id}-mod" bind:this={inputs.mod} bind:value={modPath} autocomplete="off" spellcheck="false" placeholder={t.modPlaceholder} />
+			<button type="button" class="button" aria-expanded={browsing === 'mod'} onclick={() => (browsing = 'mod')}>{t.picker.browse}</button>
+		</div>
+		{#if browsing === 'mod'}<FolderPicker kind="mod" onpick={endBrowse} oncancel={() => endBrowse()} />{/if}
+	</div>
 	<p class="muted small">
 		<Fill text={t.modHint.text}>{#snippet overwrite()}<code>overwrite</code>{/snippet}</Fill>
 	</p>
@@ -85,13 +112,21 @@
 	p {
 		max-width: 65ch;
 	}
-	label {
+	.field {
 		display: grid;
 		gap: var(--space-1);
 	}
-	label span {
+	label {
 		font-size: var(--step--1);
 		color: var(--muted);
+	}
+	.entry {
+		display: flex;
+		gap: var(--space-3);
+	}
+	.entry input {
+		flex: 1;
+		min-width: 0;
 	}
 	.small {
 		font-size: var(--step--1);
