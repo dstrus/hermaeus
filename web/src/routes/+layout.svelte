@@ -47,14 +47,14 @@
 		<a class="name caps" href="/"><Mark size="1.35em" /> {m.shell.name}</a>
 		<div class="state">
 			{#if save && data.status.playthroughs.length}
-				<label class="playthrough">
-					<span class="caps muted">{m.shell.playthrough}</span>
-					<select value={save} onchange={(e) => goto(`/${encodeURIComponent(e.currentTarget.value)}`)}>
+				<div class="playthrough">
+					<a class="caps" href="/" title={m.shell.allPlaythroughs}>{m.shell.playthrough}</a>
+					<select value={save} aria-label={m.shell.playthrough} onchange={(e) => goto(`/${encodeURIComponent(e.currentTarget.value)}`)}>
 						{#each data.status.playthroughs as p (p.id)}
 							<option value={p.id} title={p.id}>{playthroughLabel(p)}</option>
 						{/each}
 					</select>
-				</label>
+				</div>
 			{/if}
 			<span class="game caps" class:running={live.gameRunning} role="status">
 				{live.gameRunning ? m.shell.gameRunning : m.shell.gameClosed}
@@ -148,8 +148,13 @@
 		align-items: center;
 		gap: var(--space-2);
 	}
-	.playthrough span {
+	/* The label leads to the list of playthroughs. */
+	.playthrough a {
 		font-size: var(--step--1);
+		color: var(--muted);
+	}
+	.playthrough a:hover {
+		color: var(--ink);
 	}
 	.playthrough select {
 		padding: var(--space-1) var(--space-2);

@@ -211,7 +211,7 @@ A near-monochrome palette, off-white on near-black (or near-black on pale smoke)
 
 ## Layout
 
-The shell is a CSS grid: a full-width top bar, then a 13rem sections column beside the main area, with the hint strip fixed along the bottom. The top bar holds the name at left and the playthrough select, Skyrim's state, and the theme switch at right. Main content has 1.5rem top padding, 2rem side padding and 5rem bottom padding to clear the hint strip.
+The shell is a CSS grid: a full-width top bar, then a 13rem sections column beside the main area, with the hint strip fixed along the bottom. The top bar holds the name at left and the playthrough select, Skyrim's state, and the theme switch at right. The name and the select's "Playthrough" label both lead to the list of playthroughs; the label is a muted link. Main content has 1.5rem top padding, 2rem side padding and 5rem bottom padding to clear the hint strip.
 
 List screens split into the item table and a details pane of `clamp(18rem, 26vw, 24rem)` (the memory and diary tables use `minmax(20rem, 26rem)`, narrowing to `minmax(18rem, 22rem)` under 70rem). The pane sticks to the top and is sized by script to end exactly at the hint strip, so a form's Save stays in view. A filter bar above the table stops at the pane's edge. The Playthroughs list, outside any playthrough, has no sections column; its main area widens to 90rem so the table and its pane sit side by side. A playthrough's Overview splits the same way: the story column (the latest diary, then the newest events) beside a pane of what's stored.
 

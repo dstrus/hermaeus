@@ -9,6 +9,10 @@ What changed in each release of Hermaeus, newest first.
 - Config, at the top of the sidebar, points Hermaeus at a different SkyrimNet folder, and remembers it, even when it found one on its own. "Change folder" on the Playthroughs page does the same.
 - "Browse…" beside each folder field picks a folder from a list of its folders and files, starting in the folder Hermaeus runs from. Folders that are SkyrimNet's folder, or lead to it, are marked, as is SkyrimNet's mod folder. Typing or pasting a path still works.
 
+### Changed
+
+- "Playthrough" in the top bar links to the list of playthroughs, which was reachable only through the Hermaeus name.
+
 ## 0.1.0-beta.2 (2026-11-03)
 
 ### Fixed

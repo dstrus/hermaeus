@@ -2890,6 +2890,7 @@ screenshots:
 shell:
   name: Hermaeus
   playthrough: Playthrough
+  allPlaythroughs: All playthroughs
   sharedPlayer: "{name} · {id}"
   gameRunning: Skyrim running · read-only
   gameClosed: Skyrim closed
